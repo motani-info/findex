@@ -1,0 +1,1 @@
+/Users/motani/Develop/github/findex/.agents/skills/to-prd//SKILL.md

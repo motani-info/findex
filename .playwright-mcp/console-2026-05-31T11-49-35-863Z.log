@@ -1,0 +1,2 @@
+[    1378ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://www.moodys.com/asset/fonts/m-icons/m-icons.woff2:0
+[    2411ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://login.moodys.com/api/v1/sessions/me:0

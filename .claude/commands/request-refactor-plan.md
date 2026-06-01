@@ -1,0 +1,1 @@
+/Users/motani/Develop/github/findex/.agents/skills/request-refactor-plan//SKILL.md

@@ -1,0 +1,1384 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - generic:
+        - iframe [ref=e6]:
+          - link [ref=f13e2] [cursor=pointer]:
+            - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjst-2wEK7lzpk8pCCqOyIqZyWusjVkBIG6GKucj62T4W0dgKbxQ02VH1LJK9jUeZEV8I2sqgdtx_jthK9pwtiqwIBnF5cdZPAWWkP3P0iR3f3LXaaPTqmRukbcpOKpNsHftCqpX_5H-3wVXrJRv84UpwNGiX3COb8NGIPD4dPc361Y7KramI7S1EeiguGT6vCRX4l1B4XCYWxEUU9jgarEYbcjkZythv-38cvpfx5UxaK6KMCt95u8M6FiBxr9rOGQT8xSouDFWwrSt40sGxiuctVoSFHUViFrT1yy-M2gALlF0GZVH6iPmEvJ3hJrNrROjL9oA7hwxr4Pd6NWE6MsAE5pO2H34l4rNclBSjHy2kIyL0YHFqhd-Wv56auu-B5bOuUt4eTVZ1iuuynnmTofD5rDZceDhpD1blyWQ&sai=AMfl-YS3TgA3ciuhG-xUNZ70wWvq8C3GIrprncdGar0g8wV1mBbAyYwWpvoTnUS2OoLGEf-g5pgbiE7QBNvv9rAOn3GhBz6nfdOIPsVm4IVE0l_T6JuLs3oxTEOm5fe8Bd6rVo36KKwkJWt3w9C0XXiaP4Tgp2xKDwo12UXdYZVhFgbu1oBN_Yef2vcmyLF5yjaF2WipwQevcH6M3903NLaRTh6N2inv3PbECJfV-uzqNAZtzqaSOkbEJRgh2aKdD6uzebBHo80U-krri9xys3Cyu-2uIaH_8HS_fODc-0rrIrXCDKf3Z80F9LyGKCiOVIL5QZLcZBwaQsnitTc7xCla-joMEac0CCCCRxWiDxmw8jb2vvTbceURUDs&sig=Cg0ArKJSzAM5jMe8K6AK&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://kabu.com/company/lp/general/03%3Futm_source%3Dsec_exad%26utm_medium%3Dminkabu%26utm_campaign%3Dbanner_%26utm_content%3Dgeneral03%26argument%3DcbPUsig5%26dmai%3Da6a01516e489b2
+        - iframe [ref=e10]:
+          - link [ref=f14e2] [cursor=pointer]:
+            - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjsttbrjHRboX4jVftgSNRHOlw-3U6I-fMX0_PmFcj66AOgAeeQik4MqjWOb6QjDazz8YHEpLeIWyMs1eYN9h-gu7O9hEZJ8UqYOyfQv72OmgBMXFuBSrDuvLhupfIWcSwdNTiNYou2242JR6Qe4gYZI13pzdXGz1E1tDoeITZ0KjRmMRC-E79Suh3LYaqdinhCW4STqtjGX05PTUPWO9-QaCopnGEpEm4DZ7YAVzO66iDeye2b5hDUXvZbGSieo0Fs6yVzSjNhx8P95TQH7EqlOtLxyBs0bhIEQ4nDG87FuzMLRMCSOEolCcWqHv6N0kKQT4fKRVGYOLPXcoLjAXgXXJEVQBqNp9ZmeeOl840R2gBpptKFSFqeuuJoIjrPQerG4t7OgAP7zEVjYePYmlEIncqdIw1IsK9okzgcE_&sai=AMfl-YRcWj94jXr2xTCGSNvZ3OqSwQ2fI75PM0UkdGlrqlZb55ig5bKgYy00hfeJhCejxFF_IfAFNHKnc-FgJIoJdhCK6AYmAdYl6GBDzifkF0h_WMQwz5pUYiifdUyWMCocdBPGfbtCanN6fJHB1372H8LVqRgZQ1heEz-ebRMsSBeIsMSe8RKdGU1KyWu-NO3PSSOgGM12JQdKFlQ-RtmBTXxCcBIEkG557E75FVqHNZRRvdwSooelGy3OAKC_qnr0PS0swuIPCUshiWvI0nXCRZAmsuij3Loi8Y15ehNcRrJgeNPSuF2fsytDRn8WdueQEZXsC-VqMLMRc5whW6mot8qH2At4gr3kubH2s0-ux8Rdff6OQQ5eYPg&sig=Cg0ArKJSzHvyCPn6xLo-&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://kabu.com/company/lp/general/03%3Futm_source%3Dsec_exad%26utm_medium%3Dminkabu%26utm_campaign%3Dbanner_%26utm_content%3Dgeneral03%26argument%3DcbPUsig5%26dmai%3Da6a01516e138a1&nm=1
+    - generic [ref=e11]:
+      - heading "株探（かぶたん）" [level=1] [ref=e12]:
+        - link "株探（かぶたん）" [ref=e13] [cursor=pointer]:
+          - /url: /
+          - img "株探（かぶたん）" [ref=e14]
+      - generic [ref=e16]:
+        - link "米国株へ" [ref=e18] [cursor=pointer]:
+          - /url: https://us.kabutan.jp
+          - img [ref=e19]
+          - generic [ref=e20]: 米国株へ
+        - generic [ref=e23] [cursor=pointer]:
+          - img [ref=e24]
+          - generic [ref=e25]: ヘルプ
+          - img [ref=e26]
+        - link "お気に入り" [ref=e28] [cursor=pointer]:
+          - /url: https://account.kabutan.jp/favorite_stocks
+          - img [ref=e29]
+          - generic [ref=e30]: お気に入り
+        - link "株探プレミアムに登録" [ref=e32] [cursor=pointer]:
+          - /url: https://info.kabutan.jp/lp/?utm_source=kabutan&utm_medium=referral&utm_campaign=kabutan_pc&utm_content=hamburger
+          - generic [ref=e33]:
+            - generic [ref=e34]: 株探プレミアムに登録
+            - img [ref=e35]
+        - link "ログイン" [ref=e36] [cursor=pointer]:
+          - /url: https://account.kabutan.jp/login
+          - img [ref=e37]
+          - generic [ref=e38]: ログイン
+      - table [ref=e39]:
+        - rowgroup [ref=e40]:
+          - row "日経平均 (15:30) チャートアイコン 米ドル円 (06:59) チャートアイコン ＮＹダウ (終値) チャートアイコン 上海総合 (終値) チャートアイコン" [ref=e41]:
+            - columnheader "日経平均 (15:30) チャートアイコン" [ref=e42]:
+              - generic [ref=e43]:
+                - link "日経平均" [ref=e44] [cursor=pointer]:
+                  - /url: /stock/?code=0000
+                - time [ref=e45]: (15:30)
+              - link "チャートアイコン":
+                - /url: /stock/chart?code=0000
+                - img "チャートアイコン" [ref=e46] [cursor=pointer]
+            - columnheader "米ドル円 (06:59) チャートアイコン" [ref=e47]:
+              - generic [ref=e48]:
+                - link "米ドル円" [ref=e49] [cursor=pointer]:
+                  - /url: /stock/?code=0950
+                - time [ref=e50]: (06:59)
+              - link "チャートアイコン":
+                - /url: /stock/chart?code=0950
+                - img "チャートアイコン" [ref=e51] [cursor=pointer]
+            - columnheader "ＮＹダウ (終値) チャートアイコン" [ref=e52]:
+              - generic [ref=e53]:
+                - link "ＮＹダウ" [ref=e54] [cursor=pointer]:
+                  - /url: /stock/?code=0800
+                - time [ref=e55]: (終値)
+              - link "チャートアイコン":
+                - /url: /stock/chart?code=0800
+                - img "チャートアイコン" [ref=e56] [cursor=pointer]
+            - columnheader "上海総合 (終値) チャートアイコン" [ref=e57]:
+              - generic [ref=e58]:
+                - link "上海総合" [ref=e59] [cursor=pointer]:
+                  - /url: /stock/?code=0823
+                - time [ref=e60]: (終値)
+              - link "チャートアイコン":
+                - /url: /stock/chart?code=0823
+                - img "チャートアイコン" [ref=e61] [cursor=pointer]
+        - rowgroup [ref=e62]:
+          - row "66,329.50 +1,636.38 159.27 +0.01 51,032.46 +363.49 4,068.56 -30.06" [ref=e63]:
+            - cell "66,329.50" [ref=e64]
+            - cell "+1,636.38" [ref=e65]
+            - cell "159.27" [ref=e66]
+            - cell "+0.01" [ref=e67]
+            - cell "51,032.46" [ref=e68]
+            - cell "+363.49" [ref=e69]
+            - cell "4,068.56" [ref=e70]
+            - cell "-30.06" [ref=e71]
+          - row "2.53% 0.01% 0.71% -0.73%" [ref=e72]:
+            - cell "2.53%" [ref=e73]
+            - cell "0.01%" [ref=e74]
+            - cell "0.71%" [ref=e75]
+            - cell "-0.73%" [ref=e76]
+      - generic [ref=e77]:
+        - list:
+          - listitem [ref=e78]:
+            - link "トップ" [ref=e79] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e80]:
+            - link "市場ニュース" [ref=e81] [cursor=pointer]:
+              - /url: /news/marketnews/
+          - listitem [ref=e82]:
+            - link "決算速報" [ref=e83] [cursor=pointer]:
+              - /url: /news/
+          - listitem [ref=e84]:
+            - link "株価注意報" [ref=e85] [cursor=pointer]:
+              - /url: /warning/
+          - listitem [ref=e86]:
+            - link "会社開示情報" [ref=e87] [cursor=pointer]:
+              - /url: /disclosures/
+          - listitem [ref=e88]:
+            - link "銘柄探検" [ref=e89] [cursor=pointer]:
+              - /url: /tansaku/
+          - listitem [ref=e90]:
+            - link "日本の株主" [ref=e91] [cursor=pointer]:
+              - /url: /holder/
+          - listitem [ref=e92]:
+            - link "市場マップ" [ref=e93] [cursor=pointer]:
+              - /url: /distribution-map/
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - table [ref=e97]:
+            - rowgroup [ref=e98]:
+              - row "株探検隊 検索 Go テーマ" [ref=e99]:
+                - cell "株探検隊 検索" [ref=e100]:
+                  - img "株探検隊 検索" [ref=e102]
+                - cell "株探検隊 検索" [ref=e103]:
+                  - status [ref=e104]
+                  - searchbox "株探検隊 検索" [active] [ref=e105]
+                - cell "Go" [ref=e106]:
+                  - button "Go" [ref=e107]:
+                    - img "Go" [ref=e108]
+                - cell "テーマ" [ref=e109]:
+                  - button "テーマ" [ref=e110]:
+                    - img "テーマ" [ref=e111]
+                - cell [ref=e112]:
+                  - button [ref=e113]:
+                    - img [ref=e114]
+                - cell [ref=e115]:
+                  - link [ref=e116] [cursor=pointer]:
+                    - /url: /
+          - generic [ref=e117]:
+            - generic [ref=e118]: PR
+            - list [ref=e119]:
+              - listitem [ref=e120]:
+                - iframe [ref=e123]:
+                  - generic [ref=f19e3]:
+                    - generic [ref=f19e4]: ▶︎
+                    - link "AI厳選5銘柄" [ref=f19e5] [cursor=pointer]:
+                      - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjsu1G8T4P04x9Y_6tVnjqqJ9REGEdeOE2idTubZN5mC9SMxIbN7RuwhaH2tGr2PUQR0AdM_V_jlM9aj9mWJRKBFAhDMGAkyFOvw9gtzEkdE5F0aCYA419T-T07VNeZwFtDRREUgf5lrXG3O-IIAQbd33YFuQKwQGGL5dAODkocrkprK0QdW8THt-ydwnvydbWsZh8YA6QBol8y4z4ZtTdGi4vHNSAhzui1V1_uPq5qICc3ks9q216vgnuX4gD1QeS00DsrGyhZmvjYH9Kbj3IhjD7f5GZCW1HHLVdjm71UD-vIgrGrVsRpb7SxyPUEeyBq3Xt5DmNJvQn1w_7H4vlTQlI5apKfzPpMXaTiKuhrpbdnURvF7jeQtAE35eeJwVGkQrKi8FX4zllAlFygda&sai=AMfl-YSypdFHCAd2Ntrse81LQmaA2vxQ38yvDg1iR31XDjztl8NMSBEmJpZhW3nKQxutG7hLLM08LbIdcYDNF0uycXhXqcaS3dHK0gZdL6P8ah7BjFqHSouBH5XWpEGNbFywJjTyrA05I1Jt0D1VhowZR9nx1mT9K-h_THc01khvQ8MwVVFKo9ziVdJj0-XVvuioEpv9KKCP0DCw52HmjmtW2mbJ_r_uD9HOpBwq-riyc-8RdLgrRWv3gc93k46usRCsVjxR6sUrHdFRXZIf9qF8ubfnPuSuV2NHPhF5fT7fvyT8ZiYacmi-yiua3hCKcvV75V8qrQmJAzF_XzWs5tbuc4zxSqHUJ4wwfELT3o6xBn7tO_l4f0vAW6k&sig=Cg0ArKJSzGvOCrTB_mYVEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://ac.ebis.ne.jp/tr_set.php?argument=GFU4CUZu&ai=2618
+              - listitem [ref=e124]:
+                - iframe [ref=e127]:
+                  - generic [ref=f20e3]:
+                    - generic [ref=f20e4]: ▶︎
+                    - link "藤本茂限定動画" [ref=f20e5] [cursor=pointer]:
+                      - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjsvUcByhXBMh3N7H3uRK3dAkS3ZcGzA7IrryB4bcRHRDyLoOdf0-k8loMwE6H4qU8Ctf5NpoBY-VCLmpDNjaoSzsPA3d6KWTDx3P37Br2zUno7cGmI8CGe0i6JMgMrUWBht0CBZIMxdNRw12ded1uvlEcXEIkBtF4YCVmKB4Q-x0bRr5YBM1MxG1tFcd3w5x31kKrPG99Gv_ZihuI9vIt_PG1grsuqjl4eCdY4Zt0uuxCvH-YM8L8gl60Yg59BQyd7FdzVsL3EyJkw8NrobTfVePjZedF4IDB-s2jhNMzB2RTs0_jLJqvLdgPZUVUNcJzhjDCGW9ArD518Aq4DH65RRC3WAHBukiSjHyZMGSRyD2rexYCyq4RdlhraE_ZuZHp32CykCJDNKJWnOImUZj&sai=AMfl-YTt1bqY6Tpt_SCsblpE8l8KU8-XVeluqmGccJF0bPE2uGoaH4xeZg3OeS4IG1Ge3fM9Ogq4emSEI5IfqE-_9Sr1dlE7j_Q81rZP5RG5kiRtCpq-KmyZjXgUit2NymZILZWbtckLWSh9jUYmquME0K23qQbahINz5X7sMKkQfxURTpzhwaqqb7ifRFcl9QDXW2l-gTwFB3RzmEx1A09S7iSEaXiEfoUTytuB9D2F34suy6fjJNb6ukASHIdW7osxAxuOoVms9mfH0vma2Lad91kK16HdsEdC2Y0Oj_eTqr9vpYsDEGbz_--bvqxYNkefwgdPUJlN8CSNtXCaK1rSVjIPLeoPmg19HuGvH9h9bTZDtePNQxaNBjs&sig=Cg0ArKJSzDNLf5oYw-ZyEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://ac.ebis.ne.jp/tr_set.php?argument=GFU4CUZu&ai=2418
+              - listitem [ref=e128]:
+                - iframe [ref=e131]:
+                  - generic [ref=f21e3]:
+                    - generic [ref=f21e4]: ▶︎
+                    - link "爆益株検証" [ref=f21e5] [cursor=pointer]:
+                      - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjstXXek8h84wlXxveDxuWK0nZ_zgBLFh1Uuytkje2FCju9-IqArE4TYJNv-lTNJQFhgfPGO9Kij5AV9BhDyNjfYvFWXV3zmuqllqcSke4mFklBMTojWxenbnrzEn7EF8QYQ9nvSuoZWjzc-UkzZM6us2akpo2ARqtcNFby1dwkespZDhLoD1AHc97w5npZuqHV7Q7_447p6znGyZKSmK-4HC0w6uEUX9PHmbBvUEL1xGhZUkkqUlnlE4MCrV4tq3fAHD3y3G_HvJWczYlAvd7FwOvV_EXhh6Xh_-M7-Ny9jaEZ38o5l0VRkb8h6QXnOOwAnU_8MYxl2eHlQhfwSEPvT85Ca9lAacTmE91IsJJ7yDatsG0omdq3LOfQ5tox3OFVaFm6Jjc-P8VKjFxxLB&sai=AMfl-YSAyrrz-zHSj4fBIvbhgwojifW9f9_FYLwqkUOtG4jNcQ4feZN_tFsUxD9JmGDovbkzpG40KMssvIVwtWFc-10rMrtF1A2umwSrKwNyPDU4Uvou2SHUp495YMhv_heabmc1NGtmNP54BKsT1iV1XVWMMAvnszbXKKC6ha4oehsTKpR9vF4k-0ajyjCwZesg49ubtstJM5mR7qME7sGZpu4WEopQPi2nQ-eRf83XM6U84TfJ3wzLyDDGzSnmy-_jzbvqsOc8pHHwxkAkG2kRQoFJNv5x6vcN9FQ96vzmNW2pZ18zZOv6-CcAulUGuKuZewcKiAVNNq2xNbJmqt8RJLcZk4gDNSJ9D9z-pM6uwtUUoKqwsikedVM&sig=Cg0ArKJSzPCzvUqYTGRkEAE&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://ac.ebis.ne.jp/tr_set.php?argument=GFU4CUZu&ai=342
+        - iframe [ref=e135]:
+          - generic [active] [ref=f15e1]:
+            - generic [ref=f15e3]:
+              - link [ref=f15e4] [cursor=pointer]:
+                - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CkVgROCAcasnNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEswJP0AOKWPZ1_11JpgdK0MnOFrE53MWS6EcT2bvOnCt9Oc_fHrLnRfGkIDUMis1jRFc3cgRCRfZjJNdfgHOKRaHiVt-H400XTja8RYXZ7nk9qjrKw27yOxjYI6GBM04cxUmb5MVS_C6D6u58PyItAqf3Yb8yAZhR-Ee_U51TzM46hsHowaVb61KlP2qyVPEsHxzDfBqb9yMW0-YL4WDr18GAojk6xwR-zObUzOVlzdR7EJqwkjlqHbHoLMkAFCgf1zj63qwIDqxay6XdxNBmyuQGXWRYal1oLEOt5UF8yk67NglShTwjnz6T9v9-cyEEqUOPh1LTVHjNacA62SQTPcIaEs_yjbetczWdSynQ_Lc2ua1871zwXj1adRhZKn3hQJ4mJZ1m9_O_211U--x_JaSAL1MPwATP86Oc1AXgBAGIBZyu8bRYoAYugAeFqouJHqgHp8yxAqgH4tixAqgHpr4bqAfMzrECqAfz0RuoB5bYG6gHqpuxAqgHjs4bqAeT2BuoB_DgG6gH7paxAqgH_p6xAqgHr76xAqgH1ckbqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHANIIMwiAYRABGJ0BMgiKgoCAgICACDoPgECAwICAgICogAKog4AQSL39wTpYge2w1brjlANgAbEJ5E22oVpa-9yACgOYCwHICwGADAGiDA8qCgoIjt-xApXisQKQAQGqDQJKUMgNAeINEwjx4rHVuuOUAxXjYwAGHQMfHwXqDRMItJCz1brjlAMV42MABh0DHx8F8A0CiA7___________8BuBPkA9gTDIgUA9AVAZgWAcoWAgoA-BYBgBcBshcQGAEqCjMzNTkyNTY1NjVQBroXAjgBqhgXCQAAAABPuDVBEgozMzU5MjU2NTY1GAGyGAkSApNpGC4iAQDQGAHCGQIIAQ&ae=1&gclid=EAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_1O2M1CpDzW8jwCwZB7ltewBr5W6g&client=ca-pub-5685476838524096&rf=4&nb=9&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE
+                - img [ref=f15e5]
+              - generic [ref=f15e6]:
+                - link "Keizai News" [ref=f15e9] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CkVgROCAcasnNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEswJP0AOKWPZ1_11JpgdK0MnOFrE53MWS6EcT2bvOnCt9Oc_fHrLnRfGkIDUMis1jRFc3cgRCRfZjJNdfgHOKRaHiVt-H400XTja8RYXZ7nk9qjrKw27yOxjYI6GBM04cxUmb5MVS_C6D6u58PyItAqf3Yb8yAZhR-Ee_U51TzM46hsHowaVb61KlP2qyVPEsHxzDfBqb9yMW0-YL4WDr18GAojk6xwR-zObUzOVlzdR7EJqwkjlqHbHoLMkAFCgf1zj63qwIDqxay6XdxNBmyuQGXWRYal1oLEOt5UF8yk67NglShTwjnz6T9v9-cyEEqUOPh1LTVHjNacA62SQTPcIaEs_yjbetczWdSynQ_Lc2ua1871zwXj1adRhZKn3hQJ4mJZ1m9_O_211U--x_JaSAL1MPwATP86Oc1AXgBAGIBZyu8bRYoAYugAeFqouJHqgHp8yxAqgH4tixAqgHpr4bqAfMzrECqAfz0RuoB5bYG6gHqpuxAqgHjs4bqAeT2BuoB_DgG6gH7paxAqgH_p6xAqgHr76xAqgH1ckbqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHANIIMwiAYRABGJ0BMgiKgoCAgICACDoPgECAwICAgICogAKog4AQSL39wTpYge2w1brjlANgAbEJ5E22oVpa-9yACgOYCwHICwGADAGiDA8qCgoIjt-xApXisQKQAQGqDQJKUMgNAeINEwjx4rHVuuOUAxXjYwAGHQMfHwXqDRMItJCz1brjlAMV42MABh0DHx8F8A0CiA7___________8BuBPkA9gTDIgUA9AVAZgWAcoWAgoA-BYBgBcBshcQGAEqCjMzNTkyNTY1NjVQBroXAjgBqhgXCQAAAABPuDVBEgozMzU5MjU2NTY1GAGyGAkSApNpGC4iAQDQGAHCGQIIAQ&ae=1&gclid=EAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_1O2M1CpDzW8jwCwZB7ltewBr5W6g&client=ca-pub-5685476838524096&rf=4&nb=1&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE
+                - link "上昇余地のある注目銘柄" [ref=f15e11] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CkVgROCAcasnNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEswJP0AOKWPZ1_11JpgdK0MnOFrE53MWS6EcT2bvOnCt9Oc_fHrLnRfGkIDUMis1jRFc3cgRCRfZjJNdfgHOKRaHiVt-H400XTja8RYXZ7nk9qjrKw27yOxjYI6GBM04cxUmb5MVS_C6D6u58PyItAqf3Yb8yAZhR-Ee_U51TzM46hsHowaVb61KlP2qyVPEsHxzDfBqb9yMW0-YL4WDr18GAojk6xwR-zObUzOVlzdR7EJqwkjlqHbHoLMkAFCgf1zj63qwIDqxay6XdxNBmyuQGXWRYal1oLEOt5UF8yk67NglShTwjnz6T9v9-cyEEqUOPh1LTVHjNacA62SQTPcIaEs_yjbetczWdSynQ_Lc2ua1871zwXj1adRhZKn3hQJ4mJZ1m9_O_211U--x_JaSAL1MPwATP86Oc1AXgBAGIBZyu8bRYoAYugAeFqouJHqgHp8yxAqgH4tixAqgHpr4bqAfMzrECqAfz0RuoB5bYG6gHqpuxAqgHjs4bqAeT2BuoB_DgG6gH7paxAqgH_p6xAqgHr76xAqgH1ckbqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHANIIMwiAYRABGJ0BMgiKgoCAgICACDoPgECAwICAgICogAKog4AQSL39wTpYge2w1brjlANgAbEJ5E22oVpa-9yACgOYCwHICwGADAGiDA8qCgoIjt-xApXisQKQAQGqDQJKUMgNAeINEwjx4rHVuuOUAxXjYwAGHQMfHwXqDRMItJCz1brjlAMV42MABh0DHx8F8A0CiA7___________8BuBPkA9gTDIgUA9AVAZgWAcoWAgoA-BYBgBcBshcQGAEqCjMzNTkyNTY1NjVQBroXAjgBqhgXCQAAAABPuDVBEgozMzU5MjU2NTY1GAGyGAkSApNpGC4iAQDQGAHCGQIIAQ&ae=1&gclid=EAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_1O2M1CpDzW8jwCwZB7ltewBr5W6g&client=ca-pub-5685476838524096&rf=4&nb=0&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE
+              - link "開く" [ref=f15e14] [cursor=pointer]:
+                - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CkVgROCAcasnNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEswJP0AOKWPZ1_11JpgdK0MnOFrE53MWS6EcT2bvOnCt9Oc_fHrLnRfGkIDUMis1jRFc3cgRCRfZjJNdfgHOKRaHiVt-H400XTja8RYXZ7nk9qjrKw27yOxjYI6GBM04cxUmb5MVS_C6D6u58PyItAqf3Yb8yAZhR-Ee_U51TzM46hsHowaVb61KlP2qyVPEsHxzDfBqb9yMW0-YL4WDr18GAojk6xwR-zObUzOVlzdR7EJqwkjlqHbHoLMkAFCgf1zj63qwIDqxay6XdxNBmyuQGXWRYal1oLEOt5UF8yk67NglShTwjnz6T9v9-cyEEqUOPh1LTVHjNacA62SQTPcIaEs_yjbetczWdSynQ_Lc2ua1871zwXj1adRhZKn3hQJ4mJZ1m9_O_211U--x_JaSAL1MPwATP86Oc1AXgBAGIBZyu8bRYoAYugAeFqouJHqgHp8yxAqgH4tixAqgHpr4bqAfMzrECqAfz0RuoB5bYG6gHqpuxAqgHjs4bqAeT2BuoB_DgG6gH7paxAqgH_p6xAqgHr76xAqgH1ckbqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHANIIMwiAYRABGJ0BMgiKgoCAgICACDoPgECAwICAgICogAKog4AQSL39wTpYge2w1brjlANgAbEJ5E22oVpa-9yACgOYCwHICwGADAGiDA8qCgoIjt-xApXisQKQAQGqDQJKUMgNAeINEwjx4rHVuuOUAxXjYwAGHQMfHwXqDRMItJCz1brjlAMV42MABh0DHx8F8A0CiA7___________8BuBPkA9gTDIgUA9AVAZgWAcoWAgoA-BYBgBcBshcQGAEqCjMzNTkyNTY1NjVQBroXAjgBqhgXCQAAAABPuDVBEgozMzU5MjU2NTY1GAGyGAkSApNpGC4iAQDQGAHCGQIIAQ&ae=1&gclid=EAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_1O2M1CpDzW8jwCwZB7ltewBr5W6g&client=ca-pub-5685476838524096&rf=4&nb=8&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIycm01brjlAMV42MABh0DHx8FEAEYASAAEgKUoPD_BwE
+                - generic [ref=f15e16]: 開く
+            - generic [ref=f15e18]:
+              - link [ref=f15e20] [cursor=pointer]:
+                - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskUrLjXcHcJP-JbOQ-8o-FIL1UQNU-IeQBjGsTMoCodX2qaThUKdTd61zwYh5cfngFfnhPzaTo4C0sjgLRwSKKa39vYxM2_kROAga_ub_iEneg2Q9eAXqbCistkzC9Dji1O_G05OyhbecWp5eniLOkEsTm17kt1YEQk2MEnZqh8rEMyyUuv2zHhOV75pL9NgQjm30MIbLLjL9IIGyaubytlF-JuENTK-vLqNm-S9zksF2K1vR3BIPI0NnyPrJnfWC39U1uVkpNNWO-OhpXVgKLm-4eszDMLyYumXSjvIsanh0c7ku_c8Tby5X-IMMUth8Nn1J4FhPOzPJaNNETYpGRComGw4S8J0UkQLvLInNLHANp0kDXE2STx2UkTirxjmpSY-YJ1JKZCsXzGFyYp3-fyVKkuviVNW9Nj4Xvfcb41dmAkpBmcij4RzbiVPAdAc0BWCVGznKQJH2pjuoSc_L7bjmGgltLm-4twrpDmay6pN9rojWP347O70vklEeksTrVlno7FXKEVxyQqsfkp5lx28DNPUHJk6FPDOfMjW0O1oKk1HhgWBSVPJfKvLEMfVLKWT9Eo4f4eWRtdp-1JTtixP1jTbd4uX6YvvKOX0sjV-EhCHovMTTrd2pr3_ZGf8ubaGY6DX-cvi1xtaiPFtmEVM95rONbLmCSjfosYEz5mulbQRHu89rFsCyN10YPGjH32wGKmhGT-cC8__AEv1ZiKQbjXs6klZlcrGm3hmLlC9lkYT5APDdwZgNW5TeFmiioV-SSlNj7kv3d2d6_JCQVOFwz3d0HZRowjjjgEjJbNM2srMB2VCF3XSagA9mULSX4Ct2bnxmrRcnB4E6lftjfj4jRWmehjZqI1xBaemow358n8Tn1GT5InO9v69q0YvMK9p1ALJsMh3Xk4p_NgZmz5TwJOKovyykXuJbu8BM5rQ9DlqZ-5SHwwFUUTS45cTAsK9JU59f1C2FK_vyLRGaXOaKvi3pUuCI027Pc8z1xQ02Ydxv0a9vfWR-HNwC_TR2fTu77rpSOOKhVhKZ5xKH6a8RWomqpDa9yikurMhKzVRJFUhh648wzJzUiQsRGrWydUeF2CbHyUb3BzEDTvLgRlM-NU9TGhOG9g4Op6oM52DmMzjUI4PpvwC6DFWuoW-wkj8n5K4Wv9Ly4xXkkWdFFximQKWhNipYAZEpimmw9hI5sZIjqX9m4CI6CDqcZe7oe8s6LzeCpp4UIX7AvG0cM1uqioHRcUQ-pd5TRJKoVA9ecVvp2fFfRQb-zK6fcrayTRnb6fo4p8k0c3WHnvwfBmwWUBwXM5PUUErDBkXXssKVixF041kN-zd2gFPTLl7aNc_VFj1YTSfvGNoOeNwqyWzZ0g5hv5nSDfog_aoGg6sfWlLsuCAs8yz1Mmc1lGiNm0tSFaGlwSh_yJAdjX7VE0yUTMgTUkROrKmiQn0kPtlY9wTSJSS-T_6w6qmpTh1b1io1pmHERIW7Pc8WihkScnwypVsE1x5WRgmq7mN8i5IjNglQVauJG1-jBGnB3DZv8tTP1-Cozc-GwZMVDH_BZfPTYAUfYgeEX4QMNLLz82GfUXfkQxbZTR0p81I38Dk1d2cYMO8W3gpv9P1F5oxV4LZt_coX0iW1nVbnNYAdB6G5vtcpOn-8UEAFgjzk8e_goWhHR3q-C2kJ32KucpxrU4WAe__11sKRC9iNFHCdnOwFpCZITOBxAOEgL560tzim21JWVxfFsxtSQbnc6QUp1_oyom4V5WvKSg6hu185Rw47ty0g7SvA28xkKZAF4SKE0ZtTcswXaHuWaeBi4P_rUBjCt1PFLMWuAsWal15sDyJYHJDovWbEkuoNkR4TUnYqAiy9oVgpN7mEKJpsEzUTBomfsK6LmJ7zKtuiSGgxL8h_v26XmANvFhik4JNTFTRKnwDa7nEnQMPpxAfTcvmcCrO4ZCfcSAJf0rzBfvgfNyQRs9rC5IRa9VPlhG-GEXXuvSQ2oJ3GJQZ2iH-MVDwAsvtKnF-28QEOLVl2_fBX1GIbXi3UaqYthkVJPdCjjd5UiR01qhr5eEGhCZzGdMCKvboFTLW81NBUbtQHUxn5heNris-4WIYc-D2lMJEUc8xnkl0DS5izCIdsdKFA4eqFtIrepzyVWKgdlmvj0MO6G6Ts7N-bpiHAwVqdm3tEfNSBs8UIyqK6dGayyG7xotw4XLR4Lz716o7eETAj3wxDBHGyhWVpQ78DnSigmYxHWQ24GVydEkuehJ9JsNDAgi4NclYbpsY498s7vUYhp8Xa0FG2CqJe80YwsBOuijPfpPOgzjMm-wQyT0lAB-bUjhyEYgWTxGPyigllWkPJCewdhr8BBVUJV8v-GaglK_yL_4ChXdKCx2oXH1kRuVS_0bA5apA-jvCiKTCxR1ixpphfwiST4YyY8R_rh3fwUE-tovZrT_RpY_DOZMw3V8qTuxU60c-qQSfpCaH6ClCm1mlUXJ5KVNXlg0O1HI9-_6Y3Q5bt153HMT_O6ipl7pFxlFgfCbw280BtDla-zaVCem_eGOAayIirl8biagxrI5EVpgkWYiBMyvi4_MUAU9OIjHbBa3BxPvyea5a5W9IKPucbxBHHvwBkO75eMh9awBboTAOeUBxt2Wpf5dQUV0BOYpiU0_tdnkRoKaGWQZiKTh_FRX8yCVYAxJNhdAr6Sft3lEOZprB5gQslhyauD1BtRTzDqmQ4HZvvKGBlAQ3onyY8Fi1vzzWFok6VleeDjOL&opi=122715837
+                - img [ref=f15e22]
+              - link [ref=f15e24] [cursor=pointer]:
+                - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskUrLjXcHcJP-JbOQ-8o-FIL1UQNU-IeQBjGsTMoCodX2qaThUKdTd61zwYh5cfngFfnhPzaTo4C0sjgLRwSKKa39vYxM2_kROAga_ub_iEneg2Q9eAXqbCistkzC9Dji1O_G05OyhbecWp5eniLOkEsTm17kt1YEQk2MEnZqh8rEMyyUuv2zHhOV75pL9NgQjm30MIbLLjL9IIGyaubytlF-JuENTK-vLqNm-S9zksF2K1vR3BIPI0NnyPrJnfWC39U1uVkpNNWO-OhpXVgKLm-4eszDMLyYumXSjvIsanh0c7ku_c8Tby5X-IMMUth8Nn1J4FhPOzPJaNNETYpGRComGw4S8J0UkQLvLInNLHANp0kDXE2STx2UkTirxjmpSY-YJ1JKZCsXzGFyYp3-fyVKkuviVNW9Nj4Xvfcb41dmAkpBmcij4RzbiVPAdAc0BWCVGznKQJH2pjuoSc_L7bjmGgltLm-4twrpDmay6pN9rojWP347O70vklEeksTrVlno7FXKEVxyQqsfkp5lx28DNPUHJk6FPDOfMjW0O1oKk1HhgWBSVPJfKvLEMfVLKWT9Eo4f4eWRtdp-1JTtixP1jTbd4uX6YvvKOX0sjV-EhCHovMTTrd2pr3_ZGf8ubaGY6DX-cvi1xtaiPFtmEVM95rONbLmCSjfosYEz5mulbQRHu89rFsCyN10YPGjH32wGKmhGT-cC8__AEv1ZiKQbjXs6klZlcrGm3hmLlC9lkYT5APDdwZgNW5TeFmiioV-SSlNj7kv3d2d6_JCQVOFwz3d0HZRowjjjgEjJbNM2srMB2VCF3XSagA9mULSX4Ct2bnxmrRcnB4E6lftjfj4jRWmehjZqI1xBaemow358n8Tn1GT5InO9v69q0YvMK9p1ALJsMh3Xk4p_NgZmz5TwJOKovyykXuJbu8BM5rQ9DlqZ-5SHwwFUUTS45cTAsK9JU59f1C2FK_vyLRGaXOaKvi3pUuCI027Pc8z1xQ02Ydxv0a9vfWR-HNwC_TR2fTu77rpSOOKhVhKZ5xKH6a8RWomqpDa9yikurMhKzVRJFUhh648wzJzUiQsRGrWydUeF2CbHyUb3BzEDTvLgRlM-NU9TGhOG9g4Op6oM52DmMzjUI4PpvwC6DFWuoW-wkj8n5K4Wv9Ly4xXkkWdFFximQKWhNipYAZEpimmw9hI5sZIjqX9m4CI6CDqcZe7oe8s6LzeCpp4UIX7AvG0cM1uqioHRcUQ-pd5TRJKoVA9ecVvp2fFfRQb-zK6fcrayTRnb6fo4p8k0c3WHnvwfBmwWUBwXM5PUUErDBkXXssKVixF041kN-zd2gFPTLl7aNc_VFj1YTSfvGNoOeNwqyWzZ0g5hv5nSDfog_aoGg6sfWlLsuCAs8yz1Mmc1lGiNm0tSFaGlwSh_yJAdjX7VE0yUTMgTUkROrKmiQn0kPtlY9wTSJSS-T_6w6qmpTh1b1io1pmHERIW7Pc8WihkScnwypVsE1x5WRgmq7mN8i5IjNglQVauJG1-jBGnB3DZv8tTP1-Cozc-GwZMVDH_BZfPTYAUfYgeEX4QMNLLz82GfUXfkQxbZTR0p81I38Dk1d2cYMO8W3gpv9P1F5oxV4LZt_coX0iW1nVbnNYAdB6G5vtcpOn-8UEAFgjzk8e_goWhHR3q-C2kJ32KucpxrU4WAe__11sKRC9iNFHCdnOwFpCZITOBxAOEgL560tzim21JWVxfFsxtSQbnc6QUp1_oyom4V5WvKSg6hu185Rw47ty0g7SvA28xkKZAF4SKE0ZtTcswXaHuWaeBi4P_rUBjCt1PFLMWuAsWal15sDyJYHJDovWbEkuoNkR4TUnYqAiy9oVgpN7mEKJpsEzUTBomfsK6LmJ7zKtuiSGgxL8h_v26XmANvFhik4JNTFTRKnwDa7nEnQMPpxAfTcvmcCrO4ZCfcSAJf0rzBfvgfNyQRs9rC5IRa9VPlhG-GEXXuvSQ2oJ3GJQZ2iH-MVDwAsvtKnF-28QEOLVl2_fBX1GIbXi3UaqYthkVJPdCjjd5UiR01qhr5eEGhCZzGdMCKvboFTLW81NBUbtQHUxn5heNris-4WIYc-D2lMJEUc8xnkl0DS5izCIdsdKFA4eqFtIrepzyVWKgdlmvj0MO6G6Ts7N-bpiHAwVqdm3tEfNSBs8UIyqK6dGayyG7xotw4XLR4Lz716o7eETAj3wxDBHGyhWVpQ78DnSigmYxHWQ24GVydEkuehJ9JsNDAgi4NclYbpsY498s7vUYhp8Xa0FG2CqJe80YwsBOuijPfpPOgzjMm-wQyT0lAB-bUjhyEYgWTxGPyigllWkPJCewdhr8BBVUJV8v-GaglK_yL_4ChXdKCx2oXH1kRuVS_0bA5apA-jvCiKTCxR1ixpphfwiST4YyY8R_rh3fwUE-tovZrT_RpY_DOZMw3V8qTuxU60c-qQSfpCaH6ClCm1mlUXJ5KVNXlg0O1HI9-_6Y3Q5bt153HMT_O6ipl7pFxlFgfCbw280BtDla-zaVCem_eGOAayIirl8biagxrI5EVpgkWYiBMyvi4_MUAU9OIjHbBa3BxPvyea5a5W9IKPucbxBHHvwBkO75eMh9awBboTAOeUBxt2Wpf5dQUV0BOYpiU0_tdnkRoKaGWQZiKTh_FRX8yCVYAxJNhdAr6Sft3lEOZprB5gQslhyauD1BtRTzDqmQ4HZvvKGBlAQ3onyY8Fi1vzzWFok6VleeDjOL&opi=122715837
+                - img [ref=f15e26]
+            - img [ref=f15e29] [cursor=pointer]
+            - generic [ref=f15e40]:
+              - img [ref=f15e43]
+              - generic [ref=f15e46]:
+                - text: Ads by
+                - img [ref=f15e47]
+              - generic [ref=f15e50]:
+                - generic [ref=f15e53] [cursor=pointer]: フィードバックを送信
+                - link [ref=f15e55] [cursor=pointer]:
+                  - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskUrLjXcHcJP-JbOQ-8o-FIL1UQNU-IeQBjGsTMoCodX2qaThUKdTd61zwYh5cfngFfnhPzaTo4C0sjgLRwSKKa39vYxM2_kROAga_ub_iEneg2Q9eAXqbCistkzC9Dji1O_G05OyhbecWp5eniLOkEsTm17kt1YEQk2MEnZqh8rEMyyUuv2zHhOV75pL9NgQjm30MIbLLjL9IIGyaubytlF-JuENTK-vLqNm-S9zksF2K1vR3BIPI0NnyPrJnfWC39U1uVkpNNWO-OhpXVgKLm-4eszDMLyYumXSjvIsanh0c7ku_c8Tby5X-IMMUth8Nn1J4FhPOzPJaNNETYpGRComGw4S8J0UkQLvLInNLHANp0kDXE2STx2UkTirxjmpSY-YJ1JKZCsXzGFyYp3-fyVKkuviVNW9Nj4Xvfcb41dmAkpBmcij4RzbiVPAdAc0BWCVGznKQJH2pjuoSc_L7bjmGgltLm-4twrpDmay6pN9rojWP347O70vklEeksTrVlno7FXKEVxyQqsfkp5lx28DNPUHJk6FPDOfMjW0O1oKk1HhgWBSVPJfKvLEMfVLKWT9Eo4f4eWRtdp-1JTtixP1jTbd4uX6YvvKOX0sjV-EhCHovMTTrd2pr3_ZGf8ubaGY6DX-cvi1xtaiPFtmEVM95rONbLmCSjfosYEz5mulbQRHu89rFsCyN10YPGjH32wGKmhGT-cC8__AEv1ZiKQbjXs6klZlcrGm3hmLlC9lkYT5APDdwZgNW5TeFmiioV-SSlNj7kv3d2d6_JCQVOFwz3d0HZRowjjjgEjJbNM2srMB2VCF3XSagA9mULSX4Ct2bnxmrRcnB4E6lftjfj4jRWmehjZqI1xBaemow358n8Tn1GT5InO9v69q0YvMK9p1ALJsMh3Xk4p_NgZmz5TwJOKovyykXuJbu8BM5rQ9DlqZ-5SHwwFUUTS45cTAsK9JU59f1C2FK_vyLRGaXOaKvi3pUuCI027Pc8z1xQ02Ydxv0a9vfWR-HNwC_TR2fTu77rpSOOKhVhKZ5xKH6a8RWomqpDa9yikurMhKzVRJFUhh648wzJzUiQsRGrWydUeF2CbHyUb3BzEDTvLgRlM-NU9TGhOG9g4Op6oM52DmMzjUI4PpvwC6DFWuoW-wkj8n5K4Wv9Ly4xXkkWdFFximQKWhNipYAZEpimmw9hI5sZIjqX9m4CI6CDqcZe7oe8s6LzeCpp4UIX7AvG0cM1uqioHRcUQ-pd5TRJKoVA9ecVvp2fFfRQb-zK6fcrayTRnb6fo4p8k0c3WHnvwfBmwWUBwXM5PUUErDBkXXssKVixF041kN-zd2gFPTLl7aNc_VFj1YTSfvGNoOeNwqyWzZ0g5hv5nSDfog_aoGg6sfWlLsuCAs8yz1Mmc1lGiNm0tSFaGlwSh_yJAdjX7VE0yUTMgTUkROrKmiQn0kPtlY9wTSJSS-T_6w6qmpTh1b1io1pmHERIW7Pc8WihkScnwypVsE1x5WRgmq7mN8i5IjNglQVauJG1-jBGnB3DZv8tTP1-Cozc-GwZMVDH_BZfPTYAUfYgeEX4QMNLLz82GfUXfkQxbZTR0p81I38Dk1d2cYMO8W3gpv9P1F5oxV4LZt_coX0iW1nVbnNYAdB6G5vtcpOn-8UEAFgjzk8e_goWhHR3q-C2kJ32KucpxrU4WAe__11sKRC9iNFHCdnOwFpCZITOBxAOEgL560tzim21JWVxfFsxtSQbnc6QUp1_oyom4V5WvKSg6hu185Rw47ty0g7SvA28xkKZAF4SKE0ZtTcswXaHuWaeBi4P_rUBjCt1PFLMWuAsWal15sDyJYHJDovWbEkuoNkR4TUnYqAiy9oVgpN7mEKJpsEzUTBomfsK6LmJ7zKtuiSGgxL8h_v26XmANvFhik4JNTFTRKnwDa7nEnQMPpxAfTcvmcCrO4ZCfcSAJf0rzBfvgfNyQRs9rC5IRa9VPlhG-GEXXuvSQ2oJ3GJQZ2iH-MVDwAsvtKnF-28QEOLVl2_fBX1GIbXi3UaqYthkVJPdCjjd5UiR01qhr5eEGhCZzGdMCKvboFTLW81NBUbtQHUxn5heNris-4WIYc-D2lMJEUc8xnkl0DS5izCIdsdKFA4eqFtIrepzyVWKgdlmvj0MO6G6Ts7N-bpiHAwVqdm3tEfNSBs8UIyqK6dGayyG7xotw4XLR4Lz716o7eETAj3wxDBHGyhWVpQ78DnSigmYxHWQ24GVydEkuehJ9JsNDAgi4NclYbpsY498s7vUYhp8Xa0FG2CqJe80YwsBOuijPfpPOgzjMm-wQyT0lAB-bUjhyEYgWTxGPyigllWkPJCewdhr8BBVUJV8v-GaglK_yL_4ChXdKCx2oXH1kRuVS_0bA5apA-jvCiKTCxR1ixpphfwiST4YyY8R_rh3fwUE-tovZrT_RpY_DOZMw3V8qTuxU60c-qQSfpCaH6ClCm1mlUXJ5KVNXlg0O1HI9-_6Y3Q5bt153HMT_O6ipl7pFxlFgfCbw280BtDla-zaVCem_eGOAayIirl8biagxrI5EVpgkWYiBMyvi4_MUAU9OIjHbBa3BxPvyea5a5W9IKPucbxBHHvwBkO75eMh9awBboTAOeUBxt2Wpf5dQUV0BOYpiU0_tdnkRoKaGWQZiKTh_FRX8yCVYAxJNhdAr6Sft3lEOZprB5gQslhyauD1BtRTzDqmQ4HZvvKGBlAQ3onyY8Fi1vzzWFok6VleeDjOL&opi=122715837
+                  - generic [ref=f15e56]:
+                    - text: 広告表示設定
+                    - img [ref=f15e57]
+            - generic [ref=f15e59]:
+              - generic [ref=f15e62] [cursor=pointer]: 広告でコンテンツが隠れる
+              - generic [ref=f15e65] [cursor=pointer]: 広告のコンテンツが不適切
+              - generic [ref=f15e68] [cursor=pointer]: この広告に興味がない
+              - generic [ref=f15e71] [cursor=pointer]: この広告を何回も見た
+            - generic [ref=f15e77]: ご協力いただきありがとうございます。いただいたフィードバックは Google 広告の改善に役立てさせていただきます
+            - generic [ref=f15e83]:
+              - img [ref=f15e84]
+              - text: はこの広告の表示を停止しました
+    - generic [ref=e137]:
+      - generic [ref=e138]:
+        - generic [ref=e139]:
+          - list [ref=e141]:
+            - listitem [ref=e142]:
+              - paragraph [ref=e143]:
+                - img [ref=e144]
+                - text: 1位
+                - link "村田製" [ref=e145] [cursor=pointer]:
+                  - /url: /stock/?code=6981
+                - text: 2位
+                - link "フジクラ" [ref=e146] [cursor=pointer]:
+                  - /url: /stock/?code=5803
+                - text: 3位
+                - link "ＴＤＫ" [ref=e147] [cursor=pointer]:
+                  - /url: /stock/?code=6762
+                - text: 4位
+                - link "ＳＢＧ" [ref=e148] [cursor=pointer]:
+                  - /url: /stock/?code=9984
+                - text: 5位
+                - link "ＴＭＨ" [ref=e149] [cursor=pointer]:
+                  - /url: /stock/?code=280A
+            - listitem [ref=e150]:
+              - paragraph [ref=e151]:
+                - img [ref=e152]
+                - text: 1位
+                - link "ＳＢＧ" [ref=e153] [cursor=pointer]:
+                  - /url: /stock/?code=9984
+                - text: 2位
+                - link "村田製" [ref=e154] [cursor=pointer]:
+                  - /url: /stock/?code=6981
+                - text: 3位
+                - link "キオクシア" [ref=e155] [cursor=pointer]:
+                  - /url: /stock/?code=285A
+                - text: 4位
+                - link "フジクラ" [ref=e156] [cursor=pointer]:
+                  - /url: /stock/?code=5803
+                - text: 5位
+                - link "太陽誘電" [ref=e157] [cursor=pointer]:
+                  - /url: /stock/?code=6976
+          - generic:
+            - generic [ref=e158]:
+              - paragraph [ref=e159]:
+                - text: グリーンエナ<
+                - link "1436" [ref=e160] [cursor=pointer]:
+                  - /url: /stock/?code=1436
+                - text: ">"
+              - link [ref=e162] [cursor=pointer]:
+                - /url: /stock/chart?code=1436
+              - link [ref=e163] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605150612
+            - generic [ref=e164]:
+              - heading "Top News" [level=2] [ref=e165]:
+                - img "Top News" [ref=e166]
+              - list [ref=e167]:
+                - listitem [ref=e168]:
+                  - link "【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e170] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310044
+                - listitem [ref=e172]:
+                  - link "今期活躍期待の【連続最高益】銘柄リスト〔第3弾〕44社選出 ＜成長株特集＞" [ref=e174] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310059
+                  - img "new" [ref=e176]
+                - listitem [ref=e177]:
+                  - link "ノジマのM＆A戦略加速で地殻変動、「家電業界」関連株が本領発揮へ ＜株探トップ特集＞" [ref=e179] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605300186
+                - listitem [ref=e181]:
+                  - generic [ref=e182]:
+                    - img [ref=e183]
+                    - link "伊藤智洋が読むマーケット・シナリオ【週間展望】 5月31日版" [ref=e184] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310038
+                - listitem [ref=e186]:
+                  - link "【和島英樹のマーケット・フォーキャスト】─業績面で買い安心感、AI関連軸に堅調な展開へ" [ref=e188] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310048
+                - listitem [ref=e190]:
+                  - link "【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工作機械関連に照準！" [ref=e192] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310020
+                - listitem [ref=e194]:
+                  - link "【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選銘柄！（上）" [ref=e196] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310019
+                - listitem [ref=e198]:
+                  - link "【高配当利回り株】ベスト50 ＜割安株特集＞ (5月29日現在)" [ref=e200] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310029
+                - listitem [ref=e202]:
+                  - iframe [ref=e205]:
+                    - generic [ref=f23e3]:
+                      - text: 【PR】
+                      - link "\"爆益\"シグナル点灯！ 仕掛けチャンスが一目でわかる！" [ref=f23e4] [cursor=pointer]:
+                        - /url: https://adclick.g.doubleclick.net/pcs/click%253Fxai%253DAKAOjstGVgdH1BivEoHyIEKl8OB2b8l31xhvW8kMCG7RaeP1urFz02sY1AJRsyb0SLe-HhOhaN9aiOl7YLemsqJnhe-cvSvkEWdhaoCSF0s7jf5-isrvppMs9qcIF55rGMHyjQuOfsBr65mIKOV37CnD7zG8P5yiCOgU6fiMA41N33pO143aUSd_0Hfwi5Ca-89Yhh21auvdDwueRhOqSj3uHqKLOBmu0m4EHaO4RXmd7h3wwjGeUArR_JWIfHiFrBOgG-Igyr7muLHSDExGiPMpTskOA5ymJQj6nunsQn_iNBfOnk7pbTvVVs6tqAR85tqtipK2ZtJ6qCAbhl4ARuU8dSW-CWPy2nsN4WxookL9pm2L95uYhl3fgx2jND-OVT0I4pOrbFjaaw%2526sai%253DAMfl-YTPEZEl4t_uH-nLPyz4J8oXdBa83cKSi3A_BoXzWGtFxN4wMQ2GpvrvQoygWuZlqOlb2CXcivycpHUQRiA8cKykBg_X18DidOdCGYSc35SRsW_CwoDaDisGQUg5s_02sPB3DIuXQ_yqlnMxidsQAz-ogF2uwIR9Eq6ot5MUuDsnu6imIKqwwm--A-_oFuHtEwmSMwsN8N46h0Zg3tSbAyT5hPsiseRr0riiGBouGN8AInNa7NA8CA89jHfUmeLOUGF7dKeHByrhRW5j5IJBkLXJZap_18MsjLkgteEBq8FG8vvF8fLaqKJz9nxgaoFuYB_i-okK1a22FslkBxf634QYAu7mSPzpqzQuLO3_hd03CwWhigd42lo%2526sig%253DCg0ArKJSzAuabMX_kXV5EAE%2526fbs_aeid%253D%25255Bgw_fbsaeid%25255D%2526urlfix%253D1%2526adurl%253Dhttps://www.izanami.jp/gosystre/?utm_source=minkabu&utm_medium=minkabu&utm_campaign=kabutan_text1
+                      - img "chumoku" [ref=f23e5]
+                - listitem [ref=e206]:
+                  - link "【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e207] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605300090
+              - link "【総合ニュース】を見る" [ref=e210] [cursor=pointer]:
+                - /url: /news/marketnews/
+          - table [ref=e211]:
+            - rowgroup [ref=e212]:
+              - row "今週の株式市場見通し 来週の相場での注目3ポイント 今週の決算発表予定 new" [ref=e213]:
+                - cell "今週の株式市場見通し" [ref=e214]:
+                  - link "今週の株式市場見通し" [ref=e215] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605300157
+                - cell "来週の相場での注目3ポイント" [ref=e216]:
+                  - link "来週の相場での注目3ポイント" [ref=e217] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605300177
+                - cell "今週の決算発表予定 new" [ref=e218]:
+                  - link "今週の決算発表予定" [ref=e219] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310058
+                  - img "new" [ref=e220]
+          - generic [ref=e221]:
+            - iframe [ref=e224]:
+              - link [ref=f18e2] [cursor=pointer]:
+                - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjsvTTy3u5U4zYrOh5vZ_kkZjaRr6FFUfjNfoDGQatHCYYx9uHtF4EDh2zGgWSL1BllzwyPVadqT1I6_pxgMMJOJ7Ns4oNERAxif6HDjEwDv38bxArKNZKIiUOH7xqo-XNnIC4FBg__eOH2XfmH_Gb-Q6l7Flsur-amXIyxbw2MZAUU7OGsNmX2D5A-YBcH5_8K4Fito3kXZ-C0_5gMGuF4jXt0VnVDN7fbmkx_W4mlu1ruTAa_yLVzpPJFktRjK1POQUxPZ3jY3CH3B41ODqGk8ipBF2aHzuxtcHn8NxpFZa8PVVH4aEp6J_OubwGvW3sOcTQMl_xWV1Q5FZ5LqKw7fKyKGRSWNBbBawm6IS2cT049h6sKBxiD80-QExZjY549tU6vR_834FN6aXyhenNg&sai=AMfl-YRDdk7RA95OcsaETBM18gqxtVZNnKEBRPoRDa0Ylj_qM0UnPy2xj2s7k4XhEXhopSzVUQX9luiE41rp79w2drgTVeY5IAQdysIdgnEjd1Xh4TmL86o_NWBLo6uJu4ostNSPKxH7Fc2BSc5XPbQ9L8TUF9Rf_YTbAzb_T-5fjXbvS2vH575fCEfDcgyfrgGyET6yDcSbUXWXNrMhZ-AfZ7WAMdxnaTzUfCO3UWGs2-uAQyHxiB38lToUO-kZBwPmp8vhpLo6j_-SNS2TlLgA0R_QH-BwTmCfT-cYG_nWHFnzqyoI0Om4SelFST_OO-Nem1ZGt6J0OtGQoEfCSsFyxB5cVvu215vxwgvyw0IXT01oLRSBAKT5Y_E&sig=Cg0ArKJSzElWzSoJAPc4&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://selection.kabutan.jp/investor-article/
+            - list [ref=e226]:
+              - listitem [ref=e227]:
+                - img "new" [ref=e228]
+                - link "「イラン波乱」当初は半導体で損も、機械・電機・半導体でリベンジの技" [ref=e229] [cursor=pointer]:
+                  - /url: https://kabutan.jp/news/marketnews/?b=n202605150612
+              - listitem [ref=e230]:
+                - link "イラン大荒れの中で2300万円の勝ち、秘訣は「AI」×「ただでは転ばない」" [ref=e231] [cursor=pointer]:
+                  - /url: https://kabutan.jp/news/marketnews/?b=n202605140597
+        - generic [ref=e232]:
+          - generic:
+            - generic [ref=e233]:
+              - table [ref=e234]:
+                - rowgroup [ref=e235]:
+                  - row "決算速報 【リアルタイム配信中】 更新 5月29日 18:00" [ref=e236]:
+                    - cell "決算速報 【リアルタイム配信中】" [ref=e237]:
+                      - heading "決算速報 【リアルタイム配信中】" [level=2] [ref=e238]:
+                        - link "決算速報" [ref=e239] [cursor=pointer]:
+                          - /url: /news/
+                        - text: 【リアルタイム配信中】
+                    - cell "更新 5月29日 18:00" [ref=e240]
+              - list [ref=e241]:
+                - listitem [ref=e242]:
+                  - generic [ref=e243]:
+                    - text: 05/29 18:00
+                    - link "バリューＣ、今期最終は赤字縮小へ" [ref=e244] [cursor=pointer]:
+                      - /url: /news/?b=k202605290009
+                - listitem [ref=e246]:
+                  - generic [ref=e247]:
+                    - text: 05/29 15:30
+                    - link "ナトコ、上期経常は90％増益で上振れ着地" [ref=e248] [cursor=pointer]:
+                      - /url: /news/?b=k202605290008
+                - listitem [ref=e250]:
+                  - generic [ref=e251]:
+                    - text: 05/29 15:30
+                    - link "キタック、上期経常が13％増益で着地・2-4月期も43％増益" [ref=e252] [cursor=pointer]:
+                      - /url: /news/?b=k202605290007
+                - listitem [ref=e254]:
+                  - generic [ref=e255]:
+                    - text: 05/29 15:30
+                    - link "トリケミカル、2-4月期(1Q)経常は52％増益で着地" [ref=e256] [cursor=pointer]:
+                      - /url: /news/?b=k202605290006
+                - listitem [ref=e258]:
+                  - generic [ref=e259]:
+                    - text: 05/29 15:00
+                    - link "ヤガミ、今期経常は3％減益、前期配当増額も今期減配" [ref=e260] [cursor=pointer]:
+                      - /url: /news/?b=k202605290005
+            - generic [ref=e262]:
+              - paragraph [ref=e263]:
+                - text: バリューＣ<
+                - link "9238" [ref=e264] [cursor=pointer]:
+                  - /url: /stock/?code=9238
+                - text: ">"
+              - link [ref=e266] [cursor=pointer]:
+                - /url: /stock/chart?code=9238
+              - generic [ref=e267]:
+                - img [ref=e268]
+                - link "【決算速報】の一覧を見る" [ref=e269] [cursor=pointer]:
+                  - /url: /news/
+          - table [ref=e270]:
+            - rowgroup [ref=e271]:
+              - row "★本日の【サプライズ決算】速報 (05月29日)" [ref=e272]:
+                - cell "★本日の【サプライズ決算】速報 (05月29日)" [ref=e273]:
+                  - link "★本日の【サプライズ決算】速報 (05月29日)" [ref=e274] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605291115
+              - row "★本日の【イチオシ決算】 トリケミカル、キタック (5月29日)" [ref=e275]:
+                - cell "★本日の【イチオシ決算】 トリケミカル、キタック (5月29日)" [ref=e276]:
+                  - link "★本日の【イチオシ決算】 トリケミカル、キタック (5月29日)" [ref=e277] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605291217
+              - row "明日の決算発表一覧 (6/1) 今週の決算発表予定 積水ハウス、日本駐車場、伊藤園など (6月1日～6日) new" [ref=e278]:
+                - cell "明日の決算発表一覧 (6/1)" [ref=e279]:
+                  - link "明日の決算発表一覧 (6/1)" [ref=e280] [cursor=pointer]:
+                    - /url: /warning/?mode=5_1
+                - cell "今週の決算発表予定 積水ハウス、日本駐車場、伊藤園など (6月1日～6日) new" [ref=e281]:
+                  - link "今週の決算発表予定 積水ハウス、日本駐車場、伊藤園など (6月1日～6日)" [ref=e282] [cursor=pointer]:
+                    - /url: /news/marketnews/?b=n202605310058
+                  - img "new" [ref=e283]
+          - iframe [ref=e287]:
+            - generic [active] [ref=f7e1]:
+              - link "Keizai News 上昇余地のある注目銘柄 開く" [ref=f7e4] [cursor=pointer]:
+                - /url: https://googleads.g.doubleclick.net/aclk?sa=l&ai=CLPFvOCAcaqKeDqn_9NkPpJPVgArlsPjphgHTpcfC1hXa2R4QASC5nbwiYImbxYT0E6ABhfK6qUPIAQHgAgCoAwHIAwqqBLMCT9ANZBDXXBO9kEtE30YL9sQEcVcJcOkRow0pcrxbDMl6oehwOhw86qV_QfXwX_FDmp6aV_7WRb1zma5u3TaDkJ42elFt1qgeJ4CbCC9VIdMQ4j-FovkoL6Kcx6HyqDw3Ed35KhA03oPT6Pv4hj9z0wYJOketd6c1kFqzG7Aih72Z631iC5FkVGZhFJ5-KzxHVuw2pknZQDAsZTDt1-UmsFDj7Bxv7m9OyBduWQW1eUfTcyKRZ7ljFcjm0FK-D476WMplbbHqL_ZDvVgu0RUYFWDSoR2iE7BUwpdruNyiilSzAEx0p-6h-rxua6-HGjSu7ynjsCyC--YOEXykeAU1G2VHeA5ascAbcc5a4NoeRpu1irR8ZH_BOHFbQSgEzZBnv2IxPAuYCKGBgMUtOS-0cc6bIMAEz_OjnNQF4AQBiAWcrvG0WIAHhaqLiR6oB6fMsQKoB-LYsQKoB6a-G6gHzM6xAqgH89EbqAeW2BuoB6qbsQKoB47OG6gHk9gbqAfw4BuoB-6WsQKoB_6esQKoB6--sQKoB9XJG6gH2baxAqgHmgaoB_-esQKoB9-fsQKoB_jCsQKoB_vCsQLYBwHSCDMIgGEQARidAzIIioKAgICAgAg6D4BAgMCAgICAqIACqIOAEEi9_cE6WMDThtW645QDYAGxCeRNtqFaWvvcgAoBmAsByAsBogwDkAEBqg0CSlDIDQHiDRMIjoyH1brjlAMVqT89BR2kSRWg6g0TCIzTh9W645QDFak_PQUdpEkVoPANAogO____________AdgTDIgUA9AVAZgWAcoWAgoA-BYBgBcBshcQGAEqCjgwMTIzNzYyMTlQBroXAjgBqhgXCQAAAACwCvpAEgo4MDEyMzc2MjE5GAGyGAkSApNpGAEiAQDQGAHCGQIIAQ&ae=1&gclid=EAIaIQobChMIopqI1brjlAMVqT89BR2kSRWgEAEYASAAEgKOU_D_BwE&num=1&cid=CAQShwIABaugfRiZNiI5c7a_KCETPQWWgcMMwoGA-xPoDZpdSBCN68NdZ8pNt1iy08FQoOge3OQfTS1WtLr37ajTB6yO2g7ERKHM5TtcO463OL8TYezqQ3YNCqDOpZiwemnnarYJw_8rNfYh0FjdYEe_bk5UaLkMaOWllh0H_oTTvxFli4vFkq1jSyWBcyWdSysy1l4-eQ0CYllymEHhyg6Yp2VfmnO8nzFGNKNR09QhDMjyQUlEMfIeL6AP9-2NZu_dimXEt68mAFPCEYIvTybgWvAFCNJC1RRUVbB1PpzQF5w4gExRTzp0PtODFQa9WUfM-c_3kt4uVuDuV2z_NwjCRZynQpDeKXPtmBgB&sig=AOD64_2J98VaMAweGbz54HJzkMXtfeOMyQ&client=ca-pub-8487559571854493&rf=4&nb=2&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIopqI1brjlAMVqT89BR2kSRWgEAEYASAAEgKOU_D_BwE
+                - generic [ref=f7e5]:
+                  - generic [ref=f7e8]:
+                    - generic "Keizai News" [ref=f7e9]:
+                      - link "Keizai News" [ref=f7e10]
+                    - generic "Keizai News" [ref=f7e11]:
+                      - link "上昇余地のある注目銘柄" [ref=f7e13]
+                  - link "開く" [ref=f7e15]:
+                    - generic [ref=f7e17]:
+                      - generic [ref=f7e18]: 開く
+                      - img [ref=f7e19]
+              - generic [ref=f7e22]:
+                - link [ref=f7e24] [cursor=pointer]:
+                  - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskXZwkJIJ9CDuYClgAyYEb3xQWWAl3sAD0Du49mkWkvxwOGE_wcmzWg6jYMq_jL8z1cpcdo0Ntq2XL0uooVZqL0XxKgBVqevC7-KB5L1oWmFfHBKzy-UoE--lkQzl3ASgcSyNcedjrN7ZOGI6N76yDCmzJqVAqGyhRNB_JFqO8l0V1g2HV0dw6Gbs-xC-qqubBZ0Mhe5jXL15Yu-_l5lpqWQxTA_xqEoe_4Cqns0uUXQM6uJNLR1V9dJI7g0nKE5gVn4Kgp3JLuC-PMgC0HRUuIDmfgCOzxu6a61XEmZV333w8Zvg4QEKte_KGewJDpl_fomhkfAOkbKHpQZpvQ4rYWCmU-bK9-8Cd396QZDAEgBcwKFZ4HK5YjsvfNeFExXeAraU_7xYpOoM6uTNXFhK0oO8_CU1zCCIIbusyDqNsJH2Z71KZHArlw9b-hixFMDeWofYue9awxYrjpadTZR6H3l9WHpm3dswVJllLfHu93eHsK6SWXRwrvK600OeV1Ur_DkbagP_PRHHtuXUf9kf7nsoSoMCgTArILS4rtln05KpXDkls1gRGTbfrH5WjAJmpIS-aEAZxobGJ72T2BuRYhuDf9eQCu2z--c1AWSLgXmbTAp2KDbDIeFCaAWAj0708Tdz39XPv40yLtC4fc22gYKYcIG9hV1eyHm_o7ABayc6YExrVFHZka7bYICsrtt-TceaTDa6w-tNjKoz2hSZGRKawZUa5XaXs22BvSjfqecONQpFGmxhx6q5KgsL3rE-naz75-jixsuhHENhzbWFdKvjfJlJvu0qJoF6vVZ1lEtd0azS3Z9lu6rZQl0ODpi0-tVKFevoTHFthG8a2jsHUsodLm-gCMoiBBJiT2rltU1880NfV_gd2dGSnx5_Ao8YEeBMduTQETGamZ6013D1oO7EYn0E4RvfN-jEkwGr66ojDjMe2B3B0sv-F-d-1JUSJkcntybVOHWUUWNCHJC8sOfsCFHO0UEKXSX53fnBwgSXr_qJrNwCLOpAaMDeWH2P4fjkSWKUJACPbKlW6a2Sq38NqsWDngh8KzoqcHgoyqGWz92FALfthYBIpIf5__9ZRgoryn6GPrWrFpEQEiJ3_1g3ENa7j--gQwswOfIKmThPevF5ZBf2Qu00DG44sTybTlcPmE_6xQChqIZFkqLuhuV0-sfV-UDYGURkneHK7S6mxU_ih39q1MwoQUZUgPw7jt51sAzy9d5BCRjZPWqwYnEMdXQCXiSOLiP4jXDgLm8U5vXnIkgWGdLJWIFqnNo6SnBeTXYp9JEvvC7FUGIgx3YIZjTX6y7GgabxuYBhOcQVSU3TSEJjnZ7_weyXLZLCpPjDX9ZVHEGv6xWyT1_dPqNFTV1RakdREkgDqpzUtGAFRlhgA3aDyi9tbpA-myhWZ4Ie_Ophkl3tuvjwg5uEVdxfiqCmy4l1QT-T3K7mElbOv6420RSkfnaugYLQC68lAN0yNEfWXdkPLpKQmNVSSCxHBCrJtJY0eQif1Jm0tdeSFL7FJhOOUQVKUfmwGG20Rui__-ub2K64ylg_9a-Rrxg3xIDZoGV0UmW0-IdUQ56qL_GEq0Mb2hgf_TeSN6bua_DgseUCJjLSEX-AxbZco2-OBBI9dBdI3Ti1cRCmVcTLtsXWjRI6vg1DCV-GmpZxQs1ndJAS47hubN7SQvtoVh7D_L9MpFJDW2fdTQv5d_GLgGmWD-GKysIwkVQJ-HYTbwVNvgIb8TnkxRGYGEzv3Esvx1NzW605lsFm8IV6vazocODbwYM5q9vQusr84EYBOAIaLmD8t6xWBIuyEJs2jJPItpT0FsxgZ_Wm687wfNZUYoJVraqNa1g1bqTQijXUKNDhZ7PLlkZ8Ud2DiJdurEjpURkwdCUVWO2jGoaoKjncsA5NTVzlRUtMiQqYWdASSuClpn6VwtFHRd-SEp7iRds_tVXdMiiiBoJQCyLT_CRxqD3RApOGEun2z6NJclMjRepcN5yOUIP4xPMrVeHYEQeZMYPd1e5mHIr3x7i9ucgZy__yMam9e0SX8gljiA66Qtzr_KOef_CzjE0Y3T4GYvqZtEQhmrBwa4C8EqLSQwcNtVqhVZ4DnjKjlQKQA4ZVyyuGjSuksvF-DmzOEseGTs8GS4zpOf_Sh28scPSBg_Tetl-tBO97EoOOHmTDHBNazwXopTF9aGm_EdPCv1yXnOe5BD4wRa6ktWqEgy8jgfl1yjoBcmxYouekuPqjA5TKRlQcmpKdlI_wFPacVCaatIWPYufv7YMiGeAW5StwRpaetsG_vENMWFBPS4N3Bj4-G3Tr_vqCrAeeZJ1PVAmwIwnYrJfN7D8UmBd4qStHfIzC-2DarNpkOIRyQKO_Lmzx3CW9VavMTu3w38mRRwHfK-mDDjKJ-wQ-tIK3WKi0fvg6DfFLXLxEQioSgsY6F59knaZSgulZpBTvCzUztr-YU_nHrxsKQmrTOK5WNaTsrEEL_TC4-qKHm8P5fxF1CDB2cBkmcmgRVK8ts8-wyaZXVjRfdXu1AVWj8FtJ-xst3JQjxJ1hCPVGGdW9eIeiQBf6tu4SwP-sTYyQohgDkpF9-elIPD5ghuqhwv-f3zyRDLWfJvYDTEtBnBLj-9riH_v0M3p9l-oe1i9UkTPbZtMiBePy3gxsPqQbMXvx9BN_K132SgXh-l34M4HTFk5NycdJXQwV41j-WLsUsoT9glQjkcaxZAFh4_9hl3UTguuvcxV3XOSLZoGxSCNf0LEnF-X12DLefLTrHxEoVsmanXS2n4K2mVhlHJPEZx9xu3S3xgNmPL52aL5GRVuBywXw-EQcAoQ7PZNKe0Yaezh0sQ-Up4CcqcAx75WQg0GYqgPdIPs_1KgMLg3bdM-PjGjJAft0trEPop0fNdHFbkMtLmD9FFyeqYTzIHKerrIt9LyJ-_fxrcggs-oQCkmhodn-uVg28LDDSm_mBYnBiJoP1oj00D2CwVZtryZmYEM8lbSnreHPehOGX-LCMVqvHfVV-Ea6YSBapE1lZHb3fzvYeFzJINKEEGlaX8IM4w411kWmQk55Dg_IQ_ruAhKWT-U89Alc5UsuyNf2buPoRod2nq0Bx8_2_ablZnLOE0&opi=122715837
+                  - img [ref=f7e26]
+                - link [ref=f7e28] [cursor=pointer]:
+                  - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskXZwkJIJ9CDuYClgAyYEb3xQWWAl3sAD0Du49mkWkvxwOGE_wcmzWg6jYMq_jL8z1cpcdo0Ntq2XL0uooVZqL0XxKgBVqevC7-KB5L1oWmFfHBKzy-UoE--lkQzl3ASgcSyNcedjrN7ZOGI6N76yDCmzJqVAqGyhRNB_JFqO8l0V1g2HV0dw6Gbs-xC-qqubBZ0Mhe5jXL15Yu-_l5lpqWQxTA_xqEoe_4Cqns0uUXQM6uJNLR1V9dJI7g0nKE5gVn4Kgp3JLuC-PMgC0HRUuIDmfgCOzxu6a61XEmZV333w8Zvg4QEKte_KGewJDpl_fomhkfAOkbKHpQZpvQ4rYWCmU-bK9-8Cd396QZDAEgBcwKFZ4HK5YjsvfNeFExXeAraU_7xYpOoM6uTNXFhK0oO8_CU1zCCIIbusyDqNsJH2Z71KZHArlw9b-hixFMDeWofYue9awxYrjpadTZR6H3l9WHpm3dswVJllLfHu93eHsK6SWXRwrvK600OeV1Ur_DkbagP_PRHHtuXUf9kf7nsoSoMCgTArILS4rtln05KpXDkls1gRGTbfrH5WjAJmpIS-aEAZxobGJ72T2BuRYhuDf9eQCu2z--c1AWSLgXmbTAp2KDbDIeFCaAWAj0708Tdz39XPv40yLtC4fc22gYKYcIG9hV1eyHm_o7ABayc6YExrVFHZka7bYICsrtt-TceaTDa6w-tNjKoz2hSZGRKawZUa5XaXs22BvSjfqecONQpFGmxhx6q5KgsL3rE-naz75-jixsuhHENhzbWFdKvjfJlJvu0qJoF6vVZ1lEtd0azS3Z9lu6rZQl0ODpi0-tVKFevoTHFthG8a2jsHUsodLm-gCMoiBBJiT2rltU1880NfV_gd2dGSnx5_Ao8YEeBMduTQETGamZ6013D1oO7EYn0E4RvfN-jEkwGr66ojDjMe2B3B0sv-F-d-1JUSJkcntybVOHWUUWNCHJC8sOfsCFHO0UEKXSX53fnBwgSXr_qJrNwCLOpAaMDeWH2P4fjkSWKUJACPbKlW6a2Sq38NqsWDngh8KzoqcHgoyqGWz92FALfthYBIpIf5__9ZRgoryn6GPrWrFpEQEiJ3_1g3ENa7j--gQwswOfIKmThPevF5ZBf2Qu00DG44sTybTlcPmE_6xQChqIZFkqLuhuV0-sfV-UDYGURkneHK7S6mxU_ih39q1MwoQUZUgPw7jt51sAzy9d5BCRjZPWqwYnEMdXQCXiSOLiP4jXDgLm8U5vXnIkgWGdLJWIFqnNo6SnBeTXYp9JEvvC7FUGIgx3YIZjTX6y7GgabxuYBhOcQVSU3TSEJjnZ7_weyXLZLCpPjDX9ZVHEGv6xWyT1_dPqNFTV1RakdREkgDqpzUtGAFRlhgA3aDyi9tbpA-myhWZ4Ie_Ophkl3tuvjwg5uEVdxfiqCmy4l1QT-T3K7mElbOv6420RSkfnaugYLQC68lAN0yNEfWXdkPLpKQmNVSSCxHBCrJtJY0eQif1Jm0tdeSFL7FJhOOUQVKUfmwGG20Rui__-ub2K64ylg_9a-Rrxg3xIDZoGV0UmW0-IdUQ56qL_GEq0Mb2hgf_TeSN6bua_DgseUCJjLSEX-AxbZco2-OBBI9dBdI3Ti1cRCmVcTLtsXWjRI6vg1DCV-GmpZxQs1ndJAS47hubN7SQvtoVh7D_L9MpFJDW2fdTQv5d_GLgGmWD-GKysIwkVQJ-HYTbwVNvgIb8TnkxRGYGEzv3Esvx1NzW605lsFm8IV6vazocODbwYM5q9vQusr84EYBOAIaLmD8t6xWBIuyEJs2jJPItpT0FsxgZ_Wm687wfNZUYoJVraqNa1g1bqTQijXUKNDhZ7PLlkZ8Ud2DiJdurEjpURkwdCUVWO2jGoaoKjncsA5NTVzlRUtMiQqYWdASSuClpn6VwtFHRd-SEp7iRds_tVXdMiiiBoJQCyLT_CRxqD3RApOGEun2z6NJclMjRepcN5yOUIP4xPMrVeHYEQeZMYPd1e5mHIr3x7i9ucgZy__yMam9e0SX8gljiA66Qtzr_KOef_CzjE0Y3T4GYvqZtEQhmrBwa4C8EqLSQwcNtVqhVZ4DnjKjlQKQA4ZVyyuGjSuksvF-DmzOEseGTs8GS4zpOf_Sh28scPSBg_Tetl-tBO97EoOOHmTDHBNazwXopTF9aGm_EdPCv1yXnOe5BD4wRa6ktWqEgy8jgfl1yjoBcmxYouekuPqjA5TKRlQcmpKdlI_wFPacVCaatIWPYufv7YMiGeAW5StwRpaetsG_vENMWFBPS4N3Bj4-G3Tr_vqCrAeeZJ1PVAmwIwnYrJfN7D8UmBd4qStHfIzC-2DarNpkOIRyQKO_Lmzx3CW9VavMTu3w38mRRwHfK-mDDjKJ-wQ-tIK3WKi0fvg6DfFLXLxEQioSgsY6F59knaZSgulZpBTvCzUztr-YU_nHrxsKQmrTOK5WNaTsrEEL_TC4-qKHm8P5fxF1CDB2cBkmcmgRVK8ts8-wyaZXVjRfdXu1AVWj8FtJ-xst3JQjxJ1hCPVGGdW9eIeiQBf6tu4SwP-sTYyQohgDkpF9-elIPD5ghuqhwv-f3zyRDLWfJvYDTEtBnBLj-9riH_v0M3p9l-oe1i9UkTPbZtMiBePy3gxsPqQbMXvx9BN_K132SgXh-l34M4HTFk5NycdJXQwV41j-WLsUsoT9glQjkcaxZAFh4_9hl3UTguuvcxV3XOSLZoGxSCNf0LEnF-X12DLefLTrHxEoVsmanXS2n4K2mVhlHJPEZx9xu3S3xgNmPL52aL5GRVuBywXw-EQcAoQ7PZNKe0Yaezh0sQ-Up4CcqcAx75WQg0GYqgPdIPs_1KgMLg3bdM-PjGjJAft0trEPop0fNdHFbkMtLmD9FFyeqYTzIHKerrIt9LyJ-_fxrcggs-oQCkmhodn-uVg28LDDSm_mBYnBiJoP1oj00D2CwVZtryZmYEM8lbSnreHPehOGX-LCMVqvHfVV-Ea6YSBapE1lZHb3fzvYeFzJINKEEGlaX8IM4w411kWmQk55Dg_IQ_ruAhKWT-U89Alc5UsuyNf2buPoRod2nq0Bx8_2_ablZnLOE0&opi=122715837
+                  - img [ref=f7e30]
+              - img [ref=f7e33] [cursor=pointer]
+              - generic [ref=f7e44]:
+                - img [ref=f7e47]
+                - generic [ref=f7e50]:
+                  - text: Ads by
+                  - img [ref=f7e51]
+                - generic [ref=f7e54]:
+                  - generic [ref=f7e57] [cursor=pointer]: 広告オプション
+                  - generic [ref=f7e60] [cursor=pointer]: フィードバックを送信
+                  - link [ref=f7e62] [cursor=pointer]:
+                    - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskXZwkJIJ9CDuYClgAyYEb3xQWWAl3sAD0Du49mkWkvxwOGE_wcmzWg6jYMq_jL8z1cpcdo0Ntq2XL0uooVZqL0XxKgBVqevC7-KB5L1oWmFfHBKzy-UoE--lkQzl3ASgcSyNcedjrN7ZOGI6N76yDCmzJqVAqGyhRNB_JFqO8l0V1g2HV0dw6Gbs-xC-qqubBZ0Mhe5jXL15Yu-_l5lpqWQxTA_xqEoe_4Cqns0uUXQM6uJNLR1V9dJI7g0nKE5gVn4Kgp3JLuC-PMgC0HRUuIDmfgCOzxu6a61XEmZV333w8Zvg4QEKte_KGewJDpl_fomhkfAOkbKHpQZpvQ4rYWCmU-bK9-8Cd396QZDAEgBcwKFZ4HK5YjsvfNeFExXeAraU_7xYpOoM6uTNXFhK0oO8_CU1zCCIIbusyDqNsJH2Z71KZHArlw9b-hixFMDeWofYue9awxYrjpadTZR6H3l9WHpm3dswVJllLfHu93eHsK6SWXRwrvK600OeV1Ur_DkbagP_PRHHtuXUf9kf7nsoSoMCgTArILS4rtln05KpXDkls1gRGTbfrH5WjAJmpIS-aEAZxobGJ72T2BuRYhuDf9eQCu2z--c1AWSLgXmbTAp2KDbDIeFCaAWAj0708Tdz39XPv40yLtC4fc22gYKYcIG9hV1eyHm_o7ABayc6YExrVFHZka7bYICsrtt-TceaTDa6w-tNjKoz2hSZGRKawZUa5XaXs22BvSjfqecONQpFGmxhx6q5KgsL3rE-naz75-jixsuhHENhzbWFdKvjfJlJvu0qJoF6vVZ1lEtd0azS3Z9lu6rZQl0ODpi0-tVKFevoTHFthG8a2jsHUsodLm-gCMoiBBJiT2rltU1880NfV_gd2dGSnx5_Ao8YEeBMduTQETGamZ6013D1oO7EYn0E4RvfN-jEkwGr66ojDjMe2B3B0sv-F-d-1JUSJkcntybVOHWUUWNCHJC8sOfsCFHO0UEKXSX53fnBwgSXr_qJrNwCLOpAaMDeWH2P4fjkSWKUJACPbKlW6a2Sq38NqsWDngh8KzoqcHgoyqGWz92FALfthYBIpIf5__9ZRgoryn6GPrWrFpEQEiJ3_1g3ENa7j--gQwswOfIKmThPevF5ZBf2Qu00DG44sTybTlcPmE_6xQChqIZFkqLuhuV0-sfV-UDYGURkneHK7S6mxU_ih39q1MwoQUZUgPw7jt51sAzy9d5BCRjZPWqwYnEMdXQCXiSOLiP4jXDgLm8U5vXnIkgWGdLJWIFqnNo6SnBeTXYp9JEvvC7FUGIgx3YIZjTX6y7GgabxuYBhOcQVSU3TSEJjnZ7_weyXLZLCpPjDX9ZVHEGv6xWyT1_dPqNFTV1RakdREkgDqpzUtGAFRlhgA3aDyi9tbpA-myhWZ4Ie_Ophkl3tuvjwg5uEVdxfiqCmy4l1QT-T3K7mElbOv6420RSkfnaugYLQC68lAN0yNEfWXdkPLpKQmNVSSCxHBCrJtJY0eQif1Jm0tdeSFL7FJhOOUQVKUfmwGG20Rui__-ub2K64ylg_9a-Rrxg3xIDZoGV0UmW0-IdUQ56qL_GEq0Mb2hgf_TeSN6bua_DgseUCJjLSEX-AxbZco2-OBBI9dBdI3Ti1cRCmVcTLtsXWjRI6vg1DCV-GmpZxQs1ndJAS47hubN7SQvtoVh7D_L9MpFJDW2fdTQv5d_GLgGmWD-GKysIwkVQJ-HYTbwVNvgIb8TnkxRGYGEzv3Esvx1NzW605lsFm8IV6vazocODbwYM5q9vQusr84EYBOAIaLmD8t6xWBIuyEJs2jJPItpT0FsxgZ_Wm687wfNZUYoJVraqNa1g1bqTQijXUKNDhZ7PLlkZ8Ud2DiJdurEjpURkwdCUVWO2jGoaoKjncsA5NTVzlRUtMiQqYWdASSuClpn6VwtFHRd-SEp7iRds_tVXdMiiiBoJQCyLT_CRxqD3RApOGEun2z6NJclMjRepcN5yOUIP4xPMrVeHYEQeZMYPd1e5mHIr3x7i9ucgZy__yMam9e0SX8gljiA66Qtzr_KOef_CzjE0Y3T4GYvqZtEQhmrBwa4C8EqLSQwcNtVqhVZ4DnjKjlQKQA4ZVyyuGjSuksvF-DmzOEseGTs8GS4zpOf_Sh28scPSBg_Tetl-tBO97EoOOHmTDHBNazwXopTF9aGm_EdPCv1yXnOe5BD4wRa6ktWqEgy8jgfl1yjoBcmxYouekuPqjA5TKRlQcmpKdlI_wFPacVCaatIWPYufv7YMiGeAW5StwRpaetsG_vENMWFBPS4N3Bj4-G3Tr_vqCrAeeZJ1PVAmwIwnYrJfN7D8UmBd4qStHfIzC-2DarNpkOIRyQKO_Lmzx3CW9VavMTu3w38mRRwHfK-mDDjKJ-wQ-tIK3WKi0fvg6DfFLXLxEQioSgsY6F59knaZSgulZpBTvCzUztr-YU_nHrxsKQmrTOK5WNaTsrEEL_TC4-qKHm8P5fxF1CDB2cBkmcmgRVK8ts8-wyaZXVjRfdXu1AVWj8FtJ-xst3JQjxJ1hCPVGGdW9eIeiQBf6tu4SwP-sTYyQohgDkpF9-elIPD5ghuqhwv-f3zyRDLWfJvYDTEtBnBLj-9riH_v0M3p9l-oe1i9UkTPbZtMiBePy3gxsPqQbMXvx9BN_K132SgXh-l34M4HTFk5NycdJXQwV41j-WLsUsoT9glQjkcaxZAFh4_9hl3UTguuvcxV3XOSLZoGxSCNf0LEnF-X12DLefLTrHxEoVsmanXS2n4K2mVhlHJPEZx9xu3S3xgNmPL52aL5GRVuBywXw-EQcAoQ7PZNKe0Yaezh0sQ-Up4CcqcAx75WQg0GYqgPdIPs_1KgMLg3bdM-PjGjJAft0trEPop0fNdHFbkMtLmD9FFyeqYTzIHKerrIt9LyJ-_fxrcggs-oQCkmhodn-uVg28LDDSm_mBYnBiJoP1oj00D2CwVZtryZmYEM8lbSnreHPehOGX-LCMVqvHfVV-Ea6YSBapE1lZHb3fzvYeFzJINKEEGlaX8IM4w411kWmQk55Dg_IQ_ruAhKWT-U89Alc5UsuyNf2buPoRod2nq0Bx8_2_ablZnLOE0&opi=122715837
+                    - generic [ref=f7e63]:
+                      - text: 広告表示設定
+                      - img [ref=f7e64]
+              - generic [ref=f7e66]:
+                - generic [ref=f7e69] [cursor=pointer]: 広告でコンテンツが隠れる
+                - generic [ref=f7e72] [cursor=pointer]: この広告に興味がない
+                - generic [ref=f7e75] [cursor=pointer]: この広告を何回も見た
+                - generic [ref=f7e78] [cursor=pointer]: 広告のコンテンツが不適切
+              - generic [ref=f7e84]: ご協力いただきありがとうございます。いただいたフィードバックは Google 広告の改善に役立てさせていただきます
+              - generic [ref=f7e90]:
+                - img [ref=f7e91]
+                - text: はこの広告の表示を停止しました
+              - generic [ref=f7e98]:
+                - img [ref=f7e101]
+                - generic [ref=f7e103]:
+                  - generic [ref=f7e105]: このサイトに表示される広告をカスタマイズ
+                  - link [ref=f7e109] [cursor=pointer]:
+                    - /url: https://support.google.com/ads/answer/10923348
+                    - generic [ref=f7e110]:
+                      - text: 詳細
+                      - img [ref=f7e111]
+        - generic [ref=e288]:
+          - table [ref=e289]:
+            - rowgroup [ref=e290]:
+              - row "ランキング・活況銘柄 上昇銘柄（プライム） 更新 5月29日 16:00" [ref=e291]:
+                - cell "ランキング・活況銘柄 上昇銘柄（プライム）" [ref=e292]:
+                  - heading "ランキング・活況銘柄 上昇銘柄（プライム）" [level=2] [ref=e293]:
+                    - text: ランキング・活況銘柄
+                    - link "上昇銘柄（プライム）" [ref=e295] [cursor=pointer]:
+                      - /url: /warning/?mode=2_1&market=1
+                - cell "更新 5月29日 16:00" [ref=e296]
+          - list [ref=e297]:
+            - listitem [ref=e298]:
+              - link "上昇銘柄" [ref=e299] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e300]:
+              - link "下落銘柄" [ref=e301] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e302]:
+              - link "年初来高値" [ref=e303] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e304]:
+              - link "年初来安値" [ref=e305] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e306]:
+              - link "ストップ高" [ref=e307] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e308]:
+              - link "ストップ安" [ref=e309] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e310]:
+              - link "GC" [ref=e311] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e312]:
+              - link "DC" [ref=e313] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e314]:
+              - link "活況銘柄" [ref=e315] [cursor=pointer]:
+                - /url: /
+          - generic [ref=e316]:
+            - generic:
+              - generic [ref=e317]:
+                - link [ref=e319] [cursor=pointer]:
+                  - /url: /stock/chart?code=3687
+                - paragraph [ref=e320]: Ｆスターズ
+              - table [ref=e321]:
+                - rowgroup [ref=e322]:
+                  - row "順位 コード 銘柄名 株価 上げ幅 上昇率" [ref=e323]:
+                    - columnheader "順位" [ref=e324]
+                    - columnheader "コード" [ref=e325]
+                    - columnheader "銘柄名" [ref=e326]
+                    - columnheader "株価" [ref=e327]
+                    - columnheader "上げ幅" [ref=e328]
+                    - columnheader "上昇率" [ref=e329]
+                  - row "1 3687 Ｆスターズ 2,704 +487 +21.97%" [ref=e330]:
+                    - cell "1" [ref=e331]
+                    - cell "3687" [ref=e332]:
+                      - link "3687" [ref=e333] [cursor=pointer]:
+                        - /url: /stock/?code=3687
+                    - cell "Ｆスターズ" [ref=e334]
+                    - cell "2,704" [ref=e335]
+                    - cell "+487" [ref=e336]
+                    - cell "+21.97%" [ref=e337]
+                  - row "2 3436 ＳＵＭＣＯ 3,994.0 +646.0 +19.30%" [ref=e338]:
+                    - cell "2" [ref=e339]
+                    - cell "3436" [ref=e340]:
+                      - link "3436" [ref=e341] [cursor=pointer]:
+                        - /url: /stock/?code=3436
+                    - cell "ＳＵＭＣＯ" [ref=e342]
+                    - cell "3,994.0" [ref=e343]
+                    - cell "+646.0" [ref=e344]
+                    - cell "+19.30%" [ref=e345]
+                  - row "3 7220 武蔵精密 9,460 +1,500 +18.84%" [ref=e346]:
+                    - cell "3" [ref=e347]
+                    - cell "7220" [ref=e348]:
+                      - link "7220" [ref=e349] [cursor=pointer]:
+                        - /url: /stock/?code=7220
+                    - cell "武蔵精密" [ref=e350]
+                    - cell "9,460" [ref=e351]
+                    - cell "+1,500" [ref=e352]
+                    - cell "+18.84%" [ref=e353]
+                  - row "4 4062 イビデン 23,000 +3,260 +16.51%" [ref=e354]:
+                    - cell "4" [ref=e355]
+                    - cell "4062" [ref=e356]:
+                      - link "4062" [ref=e357] [cursor=pointer]:
+                        - /url: /stock/?code=4062
+                    - cell "イビデン" [ref=e358]
+                    - cell "23,000" [ref=e359]
+                    - cell "+3,260" [ref=e360]
+                    - cell "+16.51%" [ref=e361]
+                  - row "5 4078 堺化学 4,940 +700 +16.51%" [ref=e362]:
+                    - cell "5" [ref=e363]
+                    - cell "4078" [ref=e364]:
+                      - link "4078" [ref=e365] [cursor=pointer]:
+                        - /url: /stock/?code=4078
+                    - cell "堺化学" [ref=e366]
+                    - cell "4,940" [ref=e367]
+                    - cell "+700" [ref=e368]
+                    - cell "+16.51%" [ref=e369]
+            - generic [ref=e370]:
+              - img [ref=e371]
+              - link "一覧を見る" [ref=e373] [cursor=pointer]:
+                - /url: /warning/?mode=2_1&market=1
+          - table [ref=e375]:
+            - rowgroup [ref=e376]:
+              - row "信用残ランキング 売り残増加 買い残増加 売り残減少 買い残減少" [ref=e377]:
+                - cell "信用残ランキング" [ref=e378]
+                - cell "売り残増加" [ref=e379]:
+                  - link "売り残増加" [ref=e380] [cursor=pointer]:
+                    - /url: /warning/?mode=7_1
+                - cell "買い残増加" [ref=e381]:
+                  - link "買い残増加" [ref=e382] [cursor=pointer]:
+                    - /url: /warning/?mode=7_2
+                - cell "売り残減少" [ref=e383]:
+                  - link "売り残減少" [ref=e384] [cursor=pointer]:
+                    - /url: /warning/?mode=7_3
+                - cell "買い残減少" [ref=e385]:
+                  - link "買い残減少" [ref=e386] [cursor=pointer]:
+                    - /url: /warning/?mode=7_4
+        - generic [ref=e388]:
+          - generic [ref=e389]:
+            - generic [ref=e390]:
+              - heading "人気ニュース【ベスト10】" [level=2] [ref=e391]
+              - generic [ref=e392]: (アクセスランキング 直近8時間)
+            - table [ref=e393]:
+              - rowgroup [ref=e394]:
+                - row "1 【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e395]:
+                  - cell "1" [ref=e396]:
+                    - generic [ref=e397]: "1"
+                  - cell "【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e398]:
+                    - link "【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e399] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310044
+                - row "2 【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選銘柄！（上）" [ref=e400]:
+                  - cell "2" [ref=e401]:
+                    - generic [ref=e402]: "2"
+                  - cell "【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選銘柄！（上）" [ref=e403]:
+                    - link "【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選銘柄！（上）" [ref=e404] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310019
+                - row "3 【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工作機械関連に照準！" [ref=e405]:
+                  - cell "3" [ref=e406]:
+                    - generic [ref=e407]: "3"
+                  - cell "【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工作機械関連に照準！" [ref=e408]:
+                    - link "【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工作機械関連に照準！" [ref=e409] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310020
+                - row "4 【和島英樹のマーケット・フォーキャスト】─業績面で買い安心感、AI関連軸に堅調な展開へ" [ref=e410]:
+                  - cell "4" [ref=e411]:
+                    - generic [ref=e412]: "4"
+                  - cell "【和島英樹のマーケット・フォーキャスト】─業績面で買い安心感、AI関連軸に堅調な展開へ" [ref=e413]:
+                    - link "【和島英樹のマーケット・フォーキャスト】─業績面で買い安心感、AI関連軸に堅調な展開へ" [ref=e414] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310048
+                - row "5 【高配当利回り株】ベスト50 ＜割安株特集＞ (5月29日現在)" [ref=e415]:
+                  - cell "5" [ref=e416]:
+                    - generic [ref=e417]: "5"
+                  - cell "【高配当利回り株】ベスト50 ＜割安株特集＞ (5月29日現在)" [ref=e418]:
+                    - link "【高配当利回り株】ベスト50 ＜割安株特集＞ (5月29日現在)" [ref=e419] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310029
+                - row "PR 広告" [ref=e420]:
+                  - cell "PR" [ref=e421]
+                  - cell "広告" [ref=e422]:
+                    - iframe [ref=e424]:
+                      - link "格安の手数料の証券会社が見つかる手数料一覧表を発表" [ref=f6e4] [cursor=pointer]:
+                        - /url: https://adclick.g.doubleclick.net/pcs/click%253Fxai%253DAKAOjsuaOm7hFTX1m4bzUjd0atEhDeQd77supu_9EqJEUbrIVlSvdqdnwKQEff1cxsqPf_zBhA0fbSrSMF5miIaMUZhq0yIl9buewIjPdzSgBbPWOxjX4aB9rBi0wBCbhxKUh4E45mXqHHxfBcbSVFlNQB8xmze1RUS2aWRdeiIUTJTtLERIX7DV3boe3xjQGkXJztoCKPIsJ-ce_rn9b72C6msDWL11Kw_n3id9KyvHFu1DELnHxpFBSZabWhy_-GCvEok79UM3YnefwWdU9e0_J52LTpN7n9Ho-dqYyU9R47iyK_aB-lAfaqrcn_CSOMVId66hwIWkvtcWwxEoHX5-DhZ9ir6lymafvZMqh6l9vKwQY9jvW5_XeMCfxjq51UEefGKYNSQ8zEyL1lNmFeqtvn53C__54ZC2JyVYevNu%2526sai%253DAMfl-YSl0eu4xeX82GmWe1BTeO-x5DQ4hMFY7OeU7eLaS7R8mrPpaBbQ6o67WSM4TOJAgOucZWiSQqKxdn97PyeGyMyOx6aq_lxQdym_nBWr0-WKoyVxkdu6ASEvsxgmA3oa-L2TTQRivGrO-FCzZnpfF33uCJI7x4rlfcV6Mb8Mq0y-rcf9yqxn4x0OieIW8EX8TW83dPDi735RTYYzbY82ahNg8EI2C9VFp6xvL3xXT2HVw2fiFUOiHNknbvDGM31J7GZeC6wShTqaggbbc_Xz69Oo379MbQXNHWk9zfTq-ZbG_5WDaxV38mdZq_IcoC21s44NNfh--pk5NV1Pru6M7iPRWd3_Nm-DCM7jyDTY15cAwml0FHCVYRiis5GaNUfES8C-eAY84lZOVSIG%2526sig%253DCg0ArKJSzJwHHvjTnjSxEAE%2526fbs_aeid%253D%25255Bgw_fbsaeid%25255D%2526urlfix%253D1%2526adurl%253Dhttp://kabutan.jp/hikaku/fee.html?utm_source=kabutan&utm_medium=infeed_1803&utm_campaign=1_fee_20150713
+                - row "6 【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e425]:
+                  - cell "6" [ref=e426]:
+                    - generic [ref=e427]: "6"
+                  - cell "【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e428]:
+                    - link "【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e429] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605300090
+                - row "7 ノジマのM＆A戦略加速で地殻変動、「家電業界」関連株が本領発揮へ ＜株探トップ特集＞" [ref=e430]:
+                  - cell "7" [ref=e431]:
+                    - generic [ref=e432]: "7"
+                  - cell "ノジマのM＆A戦略加速で地殻変動、「家電業界」関連株が本領発揮へ ＜株探トップ特集＞" [ref=e433]:
+                    - link "ノジマのM＆A戦略加速で地殻変動、「家電業界」関連株が本領発揮へ ＜株探トップ特集＞" [ref=e434] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605300186
+                - row "8 明日注目すべき【好決算】銘柄 トリケミカル、キタック (29日引け後 発表分)" [ref=e435]:
+                  - cell "8" [ref=e436]:
+                    - generic [ref=e437]: "8"
+                  - cell "明日注目すべき【好決算】銘柄 トリケミカル、キタック (29日引け後 発表分)" [ref=e438]:
+                    - link "明日注目すべき【好決算】銘柄 トリケミカル、キタック (29日引け後 発表分)" [ref=e439] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310042
+                - row "9 伊藤智洋が読むマーケット・シナリオ【週間展望】 5月31日版" [ref=e440]:
+                  - cell "9" [ref=e441]:
+                    - generic [ref=e442]: "9"
+                  - cell "伊藤智洋が読むマーケット・シナリオ【週間展望】 5月31日版" [ref=e443]:
+                    - img [ref=e444]
+                    - link "伊藤智洋が読むマーケット・シナリオ【週間展望】 5月31日版" [ref=e445] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310038
+                - row "10 10万円以下で買える、大幅増益＆低PBR〔第2弾〕37社 ＜割安株特集＞" [ref=e446]:
+                  - cell "10" [ref=e447]:
+                    - generic [ref=e448]: "10"
+                  - cell "10万円以下で買える、大幅増益＆低PBR〔第2弾〕37社 ＜割安株特集＞" [ref=e449]:
+                    - link "10万円以下で買える、大幅増益＆低PBR〔第2弾〕37社 ＜割安株特集＞" [ref=e450] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310049
+            - generic [ref=e451]:
+              - img [ref=e452]
+              - link "ベスト30を見る" [ref=e453] [cursor=pointer]:
+                - /url: /info/accessranking/2_1
+          - generic [ref=e454]:
+            - generic [ref=e455]:
+              - heading "人気テーマ" [level=2] [ref=e456]
+              - generic [ref=e457]: (3日間のﾗﾝｷﾝｸﾞ)
+            - table [ref=e458]:
+              - rowgroup [ref=e459]:
+                - row "1 半導体" [ref=e460]:
+                  - cell "1" [ref=e461]:
+                    - generic [ref=e462]: "1"
+                  - cell "半導体" [ref=e463]:
+                    - link "半導体" [ref=e464] [cursor=pointer]:
+                      - /url: /themes/?theme=%E5%8D%8A%E5%B0%8E%E4%BD%93
+                - row "2 宇宙開発関連" [ref=e465]:
+                  - cell "2" [ref=e466]:
+                    - generic [ref=e467]: "2"
+                  - cell "宇宙開発関連" [ref=e468]:
+                    - link "宇宙開発関連" [ref=e469] [cursor=pointer]:
+                      - /url: /themes/?theme=%E5%AE%87%E5%AE%99%E9%96%8B%E7%99%BA%E9%96%A2%E9%80%A3
+                - row "3 量子コンピューター" [ref=e470]:
+                  - cell "3" [ref=e471]:
+                    - generic [ref=e472]: "3"
+                  - cell "量子コンピューター" [ref=e473]:
+                    - link "量子コンピューター" [ref=e474] [cursor=pointer]:
+                      - /url: /themes/?theme=%E9%87%8F%E5%AD%90%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E3%83%BC
+                - row "4 人工知能" [ref=e475]:
+                  - cell "4" [ref=e476]:
+                    - generic [ref=e477]: "4"
+                  - cell "人工知能" [ref=e478]:
+                    - link "人工知能" [ref=e479] [cursor=pointer]:
+                      - /url: /themes/?theme=%E4%BA%BA%E5%B7%A5%E7%9F%A5%E8%83%BD
+                - row "5 データセンター" [ref=e480]:
+                  - cell "5" [ref=e481]:
+                    - generic [ref=e482]: "5"
+                  - cell "データセンター" [ref=e483]:
+                    - link "データセンター" [ref=e484] [cursor=pointer]:
+                      - /url: /themes/?theme=%E3%83%87%E3%83%BC%E3%82%BF%E3%82%BB%E3%83%B3%E3%82%BF%E3%83%BC
+                - row "6 セラミックコンデンサー" [ref=e485]:
+                  - cell "6" [ref=e486]:
+                    - generic [ref=e487]: "6"
+                  - cell "セラミックコンデンサー" [ref=e488]:
+                    - link "セラミックコンデンサー" [ref=e489] [cursor=pointer]:
+                      - /url: /themes/?theme=%E3%82%BB%E3%83%A9%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B3%E3%83%B3%E3%83%87%E3%83%B3%E3%82%B5%E3%83%BC
+                - row "7 フィジカルAI" [ref=e490]:
+                  - cell "7" [ref=e491]:
+                    - generic [ref=e492]: "7"
+                  - cell "フィジカルAI" [ref=e493]:
+                    - link "フィジカルAI" [ref=e494] [cursor=pointer]:
+                      - /url: /themes/?theme=%E3%83%95%E3%82%A3%E3%82%B8%E3%82%AB%E3%83%ABAI
+                - row "8 半導体製造装置" [ref=e495]:
+                  - cell "8" [ref=e496]:
+                    - generic [ref=e497]: "8"
+                  - cell "半導体製造装置" [ref=e498]:
+                    - link "半導体製造装置" [ref=e499] [cursor=pointer]:
+                      - /url: /themes/?theme=%E5%8D%8A%E5%B0%8E%E4%BD%93%E8%A3%BD%E9%80%A0%E8%A3%85%E7%BD%AE
+                - row "9 電子部品" [ref=e500]:
+                  - cell "9" [ref=e501]:
+                    - generic [ref=e502]: "9"
+                  - cell "電子部品" [ref=e503]:
+                    - link "電子部品" [ref=e504] [cursor=pointer]:
+                      - /url: /themes/?theme=%E9%9B%BB%E5%AD%90%E9%83%A8%E5%93%81
+                - row "10 ドローン" [ref=e505]:
+                  - cell "10" [ref=e506]:
+                    - generic [ref=e507]: "10"
+                  - cell "ドローン" [ref=e508]:
+                    - link "ドローン" [ref=e509] [cursor=pointer]:
+                      - /url: /themes/?theme=%E3%83%89%E3%83%AD%E3%83%BC%E3%83%B3
+            - generic [ref=e510]:
+              - img [ref=e511]
+              - link "ベスト30を見る" [ref=e512] [cursor=pointer]:
+                - /url: /info/accessranking/3_2
+          - generic [ref=e513]:
+            - generic [ref=e514]:
+              - heading "人気ニュース" [level=2] [ref=e515]
+              - generic [ref=e516]: (3日間のﾗﾝｷﾝｸﾞ)
+            - table [ref=e517]:
+              - rowgroup [ref=e518]:
+                - row "1 ヤマザキは急落、上場維持基準に適合せず東証上場廃止へ" [ref=e519]:
+                  - cell "1" [ref=e520]:
+                    - generic [ref=e521]: "1"
+                  - cell "ヤマザキは急落、上場維持基準に適合せず東証上場廃止へ" [ref=e522]:
+                    - link "ヤマザキは急落、上場維持基準に適合せず東証上場廃止へ" [ref=e523] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605280301
+                - row "2 【明日の好悪材料】を開示情報でチェック！ (5月28日発表分)" [ref=e524]:
+                  - cell "2" [ref=e525]:
+                    - generic [ref=e526]: "2"
+                  - cell "【明日の好悪材料】を開示情報でチェック！ (5月28日発表分)" [ref=e527]:
+                    - link "【明日の好悪材料】を開示情報でチェック！ (5月28日発表分)" [ref=e528] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605281189
+                - row "3 イラン大荒れの中で2300万円の勝ち、秘訣は「AI」×「ただでは..." [ref=e529]:
+                  - cell "3" [ref=e530]:
+                    - generic [ref=e531]: "3"
+                  - cell "イラン大荒れの中で2300万円の勝ち、秘訣は「AI」×「ただでは..." [ref=e532]:
+                    - img [ref=e533]
+                    - link "イラン大荒れの中で2300万円の勝ち、秘訣は「AI」×「ただでは..." [ref=e534] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605140597
+                - row "4 【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e535]:
+                  - cell "4" [ref=e536]:
+                    - generic [ref=e537]: "4"
+                  - cell "【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e538]:
+                    - link "【植木靖男の相場展望】 ─AI・半導体関連の主役人気が続く" [ref=e539] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605300090
+                - row "5 【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選..." [ref=e540]:
+                  - cell "5" [ref=e541]:
+                    - generic [ref=e542]: "5"
+                  - cell "【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選..." [ref=e543]:
+                    - link "【杉村富生の短期相場観測】 ─“富を生む”投資戦術による特選..." [ref=e544] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310019
+                - row "6 今期活躍期待の【連続最高益】銘柄リスト〔第2弾〕41社選出 ..." [ref=e545]:
+                  - cell "6" [ref=e546]:
+                    - generic [ref=e547]: "6"
+                  - cell "今期活躍期待の【連続最高益】銘柄リスト〔第2弾〕41社選出 ..." [ref=e548]:
+                    - link "今期活躍期待の【連続最高益】銘柄リスト〔第2弾〕41社選出 ..." [ref=e549] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605281181
+                - row "7 レーティング週報【2段階格上げ↑】 (5月25日－29日)" [ref=e550]:
+                  - cell "7" [ref=e551]:
+                    - generic [ref=e552]: "7"
+                  - cell "レーティング週報【2段階格上げ↑】 (5月25日－29日)" [ref=e553]:
+                    - link "レーティング週報【2段階格上げ↑】 (5月25日－29日)" [ref=e554] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605300114
+                - row "8 【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e555]:
+                  - cell "8" [ref=e556]:
+                    - generic [ref=e557]: "8"
+                  - cell "【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e558]:
+                    - link "【明日の好悪材料】を開示情報でチェック！ (5月29日発表分)" [ref=e559] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310044
+                - row "9 レーティング日報【最上位を継続＋目標株価を増額】 (5月29日)" [ref=e560]:
+                  - cell "9" [ref=e561]:
+                    - generic [ref=e562]: "9"
+                  - cell "レーティング日報【最上位を継続＋目標株価を増額】 (5月29日)" [ref=e563]:
+                    - link "レーティング日報【最上位を継続＋目標株価を増額】 (5月29日)" [ref=e564] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605291095
+                - row "10 【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工..." [ref=e565]:
+                  - cell "10" [ref=e566]:
+                    - generic [ref=e567]: "10"
+                  - cell "【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工..." [ref=e568]:
+                    - link "【北浜流一郎のズバリ株先見！】 ─第3の選択肢、需要好調な工..." [ref=e569] [cursor=pointer]:
+                      - /url: /news/marketnews/?b=n202605310020
+            - generic [ref=e570]:
+              - img [ref=e571]
+              - link "ベスト30を見る" [ref=e572] [cursor=pointer]:
+                - /url: /info/accessranking/2_2
+        - generic [ref=e573]:
+          - table [ref=e574]:
+            - rowgroup [ref=e575]:
+              - row "開示情報（決算・業績修正を除く） ≫米株版 更新 5月31日 08:00" [ref=e576]:
+                - cell "開示情報（決算・業績修正を除く）" [ref=e577]:
+                  - heading "開示情報（決算・業績修正を除く）" [level=2] [ref=e578]:
+                    - link "開示情報" [ref=e579] [cursor=pointer]:
+                      - /url: /disclosures/
+                    - text: （決算・業績修正を除く）
+                - cell "≫米株版" [ref=e580]:
+                  - link "≫米株版" [ref=e581] [cursor=pointer]:
+                    - /url: https://us.kabutan.jp/disclosures
+                    - text: ≫
+                    - img [ref=e582]
+                    - text: 米株版
+                - cell "更新 5月31日 08:00" [ref=e583]
+          - list [ref=e584]:
+            - listitem [ref=e585]:
+              - text: 26/05/31 08:00
+              - link "三機工、Notice of Convocation Annual General Meeting 2026pdf" [ref=e586] [cursor=pointer]:
+                - /url: https://kabutan.jp/disclosures/pdf/20260531/140120260529555964/
+                - text: 三機工、Notice of Convocation Annual General Meeting 2026
+                - img "pdf" [ref=e587]
+            - listitem [ref=e588]:
+              - text: 26/05/31 08:00
+              - link "三機工、2026年定時株主総会その他の電子提供措置事項（交付書面省..pdf" [ref=e589] [cursor=pointer]:
+                - /url: https://kabutan.jp/disclosures/pdf/20260531/140120260529555963/
+                - text: 三機工、2026年定時株主総会その他の電子提供措置事項（交付書面省..
+                - img "pdf" [ref=e590]
+            - listitem [ref=e591]:
+              - text: 26/05/31 08:00
+              - link "三機工、2026年定時株主総会交付書面pdf" [ref=e592] [cursor=pointer]:
+                - /url: https://kabutan.jp/disclosures/pdf/20260531/140120260529555962/
+                - text: 三機工、2026年定時株主総会交付書面
+                - img "pdf" [ref=e593]
+            - listitem [ref=e594]:
+              - text: 26/05/31 08:00
+              - link "三機工、2026年定時株主総会招集通知pdf" [ref=e595] [cursor=pointer]:
+                - /url: https://kabutan.jp/disclosures/pdf/20260531/140120260529555961/
+                - text: 三機工、2026年定時株主総会招集通知
+                - img "pdf" [ref=e596]
+            - listitem [ref=e597]:
+              - text: 26/05/31 08:00
+              - link "和井田、第97回定時株主総会招集ご通知pdf" [ref=e598] [cursor=pointer]:
+                - /url: https://kabutan.jp/disclosures/pdf/20260531/140120260529555772/
+                - text: 和井田、第97回定時株主総会招集ご通知
+                - img "pdf" [ref=e599]
+          - generic [ref=e600]:
+            - img [ref=e601]
+            - link "【開示情報】の一覧を見る" [ref=e602] [cursor=pointer]:
+              - /url: /disclosures/
+        - generic [ref=e603]:
+          - table [ref=e604]:
+            - rowgroup [ref=e605]:
+              - row "ＩＲリポート" [ref=e606]:
+                - cell "ＩＲリポート" [ref=e607]:
+                  - heading "ＩＲリポート" [level=2] [ref=e608]
+          - list [ref=e609]:
+            - listitem [ref=e610]:
+              - link "26/05/29 タカミヤ Sessa Investment Researchpdf" [ref=e611] [cursor=pointer]:
+                - /url: /stock/ir_report?code=2445&file=sessa_2445260529.pdf
+                - text: 26/05/29 タカミヤ Sessa Investment Research
+                - img "pdf" [ref=e612]
+            - listitem [ref=e613]:
+              - link "26/05/29 ジェイファーマ ホリスティック企業レポート（証券リサーチセンター）pdf" [ref=e614] [cursor=pointer]:
+                - /url: /stock/ir_report?code=520A&file=holis_520A260529.pdf
+                - text: 26/05/29 ジェイファーマ ホリスティック企業レポート（証券リサーチセンター）
+                - img "pdf" [ref=e615]
+            - listitem [ref=e616]:
+              - link "26/05/29 ギミック ホリスティック企業レポート（証券リサーチセンター）pdf" [ref=e617] [cursor=pointer]:
+                - /url: /stock/ir_report?code=475A&file=holis_475A260529.pdf
+                - text: 26/05/29 ギミック ホリスティック企業レポート（証券リサーチセンター）
+                - img "pdf" [ref=e618]
+            - listitem [ref=e619]:
+              - link "26/05/29 ユキグニファクトリー Sessa Investment Researchpdf" [ref=e620] [cursor=pointer]:
+                - /url: /stock/ir_report?code=1375&file=sessa_1375260529.pdf
+                - text: 26/05/29 ユキグニファクトリー Sessa Investment Research
+                - img "pdf" [ref=e621]
+            - listitem [ref=e622]:
+              - link "26/05/28 アズワン アストリス・アドバイザリー・ジャパンpdf" [ref=e623] [cursor=pointer]:
+                - /url: /stock/ir_report?code=7476&file=astris_7476260528.pdf
+                - text: 26/05/28 アズワン アストリス・アドバイザリー・ジャパン
+                - img "pdf" [ref=e624]
+          - generic [ref=e625]:
+            - img [ref=e626]
+            - link "【ＩＲリポート】の一覧を見る" [ref=e627] [cursor=pointer]:
+              - /url: /info/ir_report/
+        - iframe [ref=e631]:
+          - link [ref=f24e2] [cursor=pointer]:
+            - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjsvkVKTkroI4ZgQtOimmrmEIoUa0JrZniiZmanClrHgdAAEXQLZ85t1e928SW1Shsw4u_bfgwXuj_5-VKrpBEJ4pzmH8YD0Ia2af-UgWFwI1FViwHKdw393OkLu0fAC3sp56HQgsWC-E4Qbzc3jZ9g9yGaHgxslxbUcV_R381McH2o83IiBVRznsp00yvLk0URQTPghl5ABwwvfnQzglPuRWJYCZI122sksvpiz7CncaB5tE_yDwi4bat1Pv5gM5Q-x3h1htZbDagyLBaW8xqfHqi6EhslIvjlHm6oRUVBeWmLXDQu5hM1x8ugosofCwN_JgCFK0obTo1hHco4yXOav6JCrubxdRMaAPWHZboa1YFx6F41jHuUyZAXG5lSPLyz97R9wcqTrlXODAAhx14-yBMsIunxLvn6-z&sai=AMfl-YSOL8s-LONtXs8oGE1Q1tzN-z4gZR3cZhL8kkTGcyXGvbcZHBAEZSj6S29LA_phMGTBQZCUgKnIJudX5lgVZrAu_BkXliTtwtiqnzWcI13HIisR6M1i5Ybdoy9BoCi5tzs7hJzeqBnmIJBO81TKdr0h3sLbh88rmvWgwdxIxsrIf9r0TNxqHLlA8KqGA4jrnIyvnjPe-bU-CSXRO4a119fnVg3pai4VIWHUM9PB9SzZyaUx6yQiwCm08cVdX9O5_5Cy4tWgTnwxiYZSJVD88MHOLXdDRE3ox277cW07QVTkdXFg4XFHoTJ7KWOQZALWd8ibIbuJ9kL9xVSLNKWuEgjYzjvoDxQIeaC-MTfMyMAliwfZkPZJ9aY&sig=Cg0ArKJSzEFRHpceTMV6&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://www.click-sec.com/corp/lp/kabu/shinyo/%3Faid%3Dldj13001%26cid%3Dsinyo%26utm_source%3Dldj13001%26utm_medium%3Ddisplay%26utm_campaign%3Dsec
+      - generic [ref=e632]:
+        - iframe [ref=e635]:
+          - generic [active] [ref=f16e1]:
+            - generic [ref=f16e3]:
+              - link [ref=f16e4] [cursor=pointer]:
+                - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C1X6pOCAcasrNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEtQJP0ANBGYX5loyEeLBT_VcMKvKPgSm4S1StPHCysB7yAVoQ5lTOtUET92Ls57VJWvUjvd40g-aaUzn3thsHFiuNlxpAFP-92Ho_gV_i-jUvh8ccB7_VViUjaqbAI99mqA7re3-5FuRQk2KgoyTNigNoNF59OAAhz63kWHeSS5AhVjXUIbCzIFn2c9KlGdSqbrdkOD5YCMh0JKWyVfsnZ6P-MJxKjJAR7yJUr04yacKqXw3VKbZvhpkFWrgN8UIPOk6bF-JMdRvHnf9YTcodBS1KDrue1qPp6UqA1sJrvwaIJhLyXEmxz98NPqhodwWFozVKK_acoCfNeQoAmrsHdKy9RQqSFRmEoh1of4DpvLCfdkRV6fzoLSphOqTe9BgDl9qSxNbXZW2GJwjbI7dG9vx6L9-C8zvABM_zo5zUBeAEAYgFnK7xtFigBi6AB4Wqi4keqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfVyRuoB9m2sQKoB5oGqAf_nrECqAffn7ECqAf4wrECqAf7wrEC2AcA0ggzCIBhEAEYnQEyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDgBBIvf3BOliB7bDVuuOUA2ABsQnkTbahWlr73IAKA5gLAcgLAYAMAaIMDyoKCgiO37ECleKxApABAaoNAkpQyA0B4g0TCPLisdW645QDFeNjAAYdAx8fBeoNEwi1kLPVuuOUAxXjYwAGHQMfHwXwDQKIDv___________wG4E-QD2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAAAwKJUESCjMzNTkyNTY1NjUYAbIYCRICk2kYLiIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_2zI_3O7qnMpCWGPsC02Fvj3EXBQA&client=ca-pub-5685476838524096&rf=4&nb=9&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE
+                - img [ref=f16e6]
+              - generic [ref=f16e9]:
+                - link "上昇余地のある 注目銘柄" [ref=f16e11] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C1X6pOCAcasrNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEtQJP0ANBGYX5loyEeLBT_VcMKvKPgSm4S1StPHCysB7yAVoQ5lTOtUET92Ls57VJWvUjvd40g-aaUzn3thsHFiuNlxpAFP-92Ho_gV_i-jUvh8ccB7_VViUjaqbAI99mqA7re3-5FuRQk2KgoyTNigNoNF59OAAhz63kWHeSS5AhVjXUIbCzIFn2c9KlGdSqbrdkOD5YCMh0JKWyVfsnZ6P-MJxKjJAR7yJUr04yacKqXw3VKbZvhpkFWrgN8UIPOk6bF-JMdRvHnf9YTcodBS1KDrue1qPp6UqA1sJrvwaIJhLyXEmxz98NPqhodwWFozVKK_acoCfNeQoAmrsHdKy9RQqSFRmEoh1of4DpvLCfdkRV6fzoLSphOqTe9BgDl9qSxNbXZW2GJwjbI7dG9vx6L9-C8zvABM_zo5zUBeAEAYgFnK7xtFigBi6AB4Wqi4keqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfVyRuoB9m2sQKoB5oGqAf_nrECqAffn7ECqAf4wrECqAf7wrEC2AcA0ggzCIBhEAEYnQEyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDgBBIvf3BOliB7bDVuuOUA2ABsQnkTbahWlr73IAKA5gLAcgLAYAMAaIMDyoKCgiO37ECleKxApABAaoNAkpQyA0B4g0TCPLisdW645QDFeNjAAYdAx8fBeoNEwi1kLPVuuOUAxXjYwAGHQMfHwXwDQKIDv___________wG4E-QD2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAAAwKJUESCjMzNTkyNTY1NjUYAbIYCRICk2kYLiIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_2zI_3O7qnMpCWGPsC02Fvj3EXBQA&client=ca-pub-5685476838524096&rf=4&nb=0&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE
+                  - text: 上昇余地のある
+                  - text: 注目銘柄
+                - link "Keizai News" [ref=f16e13] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C1X6pOCAcasrNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEtQJP0ANBGYX5loyEeLBT_VcMKvKPgSm4S1StPHCysB7yAVoQ5lTOtUET92Ls57VJWvUjvd40g-aaUzn3thsHFiuNlxpAFP-92Ho_gV_i-jUvh8ccB7_VViUjaqbAI99mqA7re3-5FuRQk2KgoyTNigNoNF59OAAhz63kWHeSS5AhVjXUIbCzIFn2c9KlGdSqbrdkOD5YCMh0JKWyVfsnZ6P-MJxKjJAR7yJUr04yacKqXw3VKbZvhpkFWrgN8UIPOk6bF-JMdRvHnf9YTcodBS1KDrue1qPp6UqA1sJrvwaIJhLyXEmxz98NPqhodwWFozVKK_acoCfNeQoAmrsHdKy9RQqSFRmEoh1of4DpvLCfdkRV6fzoLSphOqTe9BgDl9qSxNbXZW2GJwjbI7dG9vx6L9-C8zvABM_zo5zUBeAEAYgFnK7xtFigBi6AB4Wqi4keqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfVyRuoB9m2sQKoB5oGqAf_nrECqAffn7ECqAf4wrECqAf7wrEC2AcA0ggzCIBhEAEYnQEyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDgBBIvf3BOliB7bDVuuOUA2ABsQnkTbahWlr73IAKA5gLAcgLAYAMAaIMDyoKCgiO37ECleKxApABAaoNAkpQyA0B4g0TCPLisdW645QDFeNjAAYdAx8fBeoNEwi1kLPVuuOUAxXjYwAGHQMfHwXwDQKIDv___________wG4E-QD2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAAAwKJUESCjMzNTkyNTY1NjUYAbIYCRICk2kYLiIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_2zI_3O7qnMpCWGPsC02Fvj3EXBQA&client=ca-pub-5685476838524096&rf=4&nb=1&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE
+                - link "市場の潮流を掴み取れ。 日本の投資家が次なる 展開を狙う、厳選銘柄を 公開。" [ref=f16e15] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C1X6pOCAcasrNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEtQJP0ANBGYX5loyEeLBT_VcMKvKPgSm4S1StPHCysB7yAVoQ5lTOtUET92Ls57VJWvUjvd40g-aaUzn3thsHFiuNlxpAFP-92Ho_gV_i-jUvh8ccB7_VViUjaqbAI99mqA7re3-5FuRQk2KgoyTNigNoNF59OAAhz63kWHeSS5AhVjXUIbCzIFn2c9KlGdSqbrdkOD5YCMh0JKWyVfsnZ6P-MJxKjJAR7yJUr04yacKqXw3VKbZvhpkFWrgN8UIPOk6bF-JMdRvHnf9YTcodBS1KDrue1qPp6UqA1sJrvwaIJhLyXEmxz98NPqhodwWFozVKK_acoCfNeQoAmrsHdKy9RQqSFRmEoh1of4DpvLCfdkRV6fzoLSphOqTe9BgDl9qSxNbXZW2GJwjbI7dG9vx6L9-C8zvABM_zo5zUBeAEAYgFnK7xtFigBi6AB4Wqi4keqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfVyRuoB9m2sQKoB5oGqAf_nrECqAffn7ECqAf4wrECqAf7wrEC2AcA0ggzCIBhEAEYnQEyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDgBBIvf3BOliB7bDVuuOUA2ABsQnkTbahWlr73IAKA5gLAcgLAYAMAaIMDyoKCgiO37ECleKxApABAaoNAkpQyA0B4g0TCPLisdW645QDFeNjAAYdAx8fBeoNEwi1kLPVuuOUAxXjYwAGHQMfHwXwDQKIDv___________wG4E-QD2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAAAwKJUESCjMzNTkyNTY1NjUYAbIYCRICk2kYLiIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_2zI_3O7qnMpCWGPsC02Fvj3EXBQA&client=ca-pub-5685476838524096&rf=4&nb=7&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE
+                  - text: 市場の潮流を掴み取れ。
+                  - text: 日本の投資家が次なる
+                  - text: 展開を狙う、厳選銘柄を
+                  - text: 公開。
+                - link "開く" [ref=f16e16] [cursor=pointer]:
+                  - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C1X6pOCAcasrNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBCeACAKgDAcgDCqoEtQJP0ANBGYX5loyEeLBT_VcMKvKPgSm4S1StPHCysB7yAVoQ5lTOtUET92Ls57VJWvUjvd40g-aaUzn3thsHFiuNlxpAFP-92Ho_gV_i-jUvh8ccB7_VViUjaqbAI99mqA7re3-5FuRQk2KgoyTNigNoNF59OAAhz63kWHeSS5AhVjXUIbCzIFn2c9KlGdSqbrdkOD5YCMh0JKWyVfsnZ6P-MJxKjJAR7yJUr04yacKqXw3VKbZvhpkFWrgN8UIPOk6bF-JMdRvHnf9YTcodBS1KDrue1qPp6UqA1sJrvwaIJhLyXEmxz98NPqhodwWFozVKK_acoCfNeQoAmrsHdKy9RQqSFRmEoh1of4DpvLCfdkRV6fzoLSphOqTe9BgDl9qSxNbXZW2GJwjbI7dG9vx6L9-C8zvABM_zo5zUBeAEAYgFnK7xtFigBi6AB4Wqi4keqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfVyRuoB9m2sQKoB5oGqAf_nrECqAffn7ECqAf4wrECqAf7wrEC2AcA0ggzCIBhEAEYnQEyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDgBBIvf3BOliB7bDVuuOUA2ABsQnkTbahWlr73IAKA5gLAcgLAYAMAaIMDyoKCgiO37ECleKxApABAaoNAkpQyA0B4g0TCPLisdW645QDFeNjAAYdAx8fBeoNEwi1kLPVuuOUAxXjYwAGHQMfHwXwDQKIDv___________wG4E-QD2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAAAwKJUESCjMzNTkyNTY1NjUYAbIYCRICk2kYLiIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_2zI_3O7qnMpCWGPsC02Fvj3EXBQA&client=ca-pub-5685476838524096&rf=4&nb=8&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIysm01brjlAMV42MABh0DHx8FEAEYASAAEgKysPD_BwE
+                  - generic [ref=f16e18]: 開く
+            - generic [ref=f16e20]:
+              - link [ref=f16e22] [cursor=pointer]:
+                - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskW-lueAolpYj0YU10pazU1Gy7TgtjhrrC8PEATvif7dEhmPT2htmFmES-bSk_KNMobv0Gy0XFZtU-VXEo_VOQQm322VNGlTuY4CDDIGTCa3beA0EwMxwm1sk0yjbHCttYgaFPj1WsmF3EjyY8SddKjMEbpLiiv7Zeq4q9mMQsqC2WLbyTij__Il9ZhNEPVybDbv0Faer2--3QdRBZbP7PQhkpPkNjfcXuEHW3QKnE-JH8gkVsBtB_2Mc64CvgrErUrMx3sAG8TXU-MIyLqnpbL-8S6T08-yKL5wxA3SrmieTsQE-lJ9Nfojg-XgVl3xn4kFCpLc8Kqx6TxxdRCcW_qGxx8I5eqOZlMjiEUBJ8l55o0besM5phZuBOokS9I73ZNMrQr6pZVGTDzlL13VQfZBoLfOvdDZJSn63nJJ-SAQHNK949wUj6oAaIV9fpEvEs4a1N_8-PaEp14DPdlJusv4nxFu42_NtjBFkg9GJ1kwK17gzAvOe_ED_Yq-v7Yu0oR5Opo2M_fgZuqcyfPJVxlCOu8Q4VCcw0F8t84ixMsqT9-LUhP3tTjZTcVqWIkLWxd0mwinEDBl7zzU2pIRyv3VGHQoYbrZKXN1D20LqliZr6YtlBIQ7O_Dvs5iZMwBE7tNQwiwR-KbIbEbJ2W1rZIevtQ1q_z-FYWArXUkWabvH8_C-99Zi-4F9eFS8SFHVoT2jFkTZX1jIllw0zwgNgc_u7-u0mJrYj9I-BDC4yzYOqPxhG87YfbeessIJ4WHlKpunpAJ_GLQbLaPyP28O3TBZ6iAke51ab9lkc01QWbPJKTeuMhUaJZFCb233aIEdnDLlLD81EbfnTd9iM3psKWPVjUVQOjDV5yT3xIZ1n11H65O1gSrHQRD0xdQGf4CX-HEQYiBOuM3_PN-TcfYwRuN1T_hDwSEoAL7yOUXmYbUDb5f-K09G6YkPjUrKG6UqT-eZ8ZNmJFvkpdZGChmawM3xDkbYDMJ0343ifaPgE0sdXcm2t-pUrgxpGNd0cbwlw1YczoFjkIYvmi7IDbDLPbD7DD-oLUqV4FbWIojIiZ9H44I3mvb78PkewCSzNEnz7Axh0_oX4eiVaMrnvYBcjuuy-F-ghaQTN91OeP1o6tcOMqVmMmuBVClcimxxnwUMyL3DiCXDleFiV3yZu0MKiW0dGbMtc6x2aVQI4kipjkPMuPg3HG0bt-AO5g5WjViQ68R4zP7li8xn2sUlJYEbVwgV2RV3nsLcZnk_HU2XpyzPfJBF3-bcSp6-F5Iv3DvPMogrAccbpDvOhGjB8jLOiqRa5IYVAqxVdaqL_aqpfJiNpuFoulNiW_SYR21KQwz8x5NB0DJY_4h8kn66pPXuuKJjDDpOAxiV39eFbenfwI-Jr_qNY5ING01jqn5CA6Vtmt_kHU48WiaUTjUr9_kF6NAtgbDOLjM4JP0yUeheh8IZPAkbOBxBn9CxqPn7ZAsb3xmHEuwT7DORV0UdDvbCTe5h7jmhKDkJlKEZmCRuUKEFI0S1sM4VGCY5D7suUrHa24SAmyKTMfofqrj2_3njJM4WwbzstgiBpHiBoAsK9cUTPjUkMtOjktyCqiMadz2lPBbPjVObrAoqsCU1gICVgUV3TztNB-HewCn_Au2Ub_v9TWZxhmsv9SLtyCE7aBVTy0u0MMxsdZ5ZBn0ZR185CvuBz8qMNYM5Mr_DXjVltJk3DL0mHIGMP_9Qj_J1HyyV0ermTPqzL5bZxbdwRVYt1hghArEDxgkRE4_6ekAkStx8lHo7pN8o4IKpxWTr8-b2qPnhIhmClrXsL2H9ZCciWu2pAwrBaRtbduyl6JAuB0Qm7ND1Y0M7SXMpvjH3D_CAsPrG4TE8IXaltlPPW5OdABGD0wKi4aeyQUu53JoeE16CowjH2K4l0mkXtcyda__TBnwZPo-bbBVytvPamec1wUg21QhuY1UNby_1iDDZsOS3gpzTd5v7LBuKkTXV8cE2qqTsRhi2mWXK8Mn1ohhznS-4kLDG-foK6VlJliCSQ8MPu-aG3tcSieRcPf5fpk0TmvGxPVsBryD50iAkUQST7KaG36vRNOaVTfLYxPbNM6VK2hHie0eFyo7GwFIvJ-dgn5huS030m_tM61Pr9sugpcKHQCPXnpIcSeiWHrWcCft8PftHatrgXD3DMphdfl8Tcnk4JvwK49xUg3hQ1h5-3cFj8awZwuLbEWZJ4DwmgFq0pnOpHAoobxTOszE5SyvfaPyjcSU9kPK1qm7CPxMdOWPkzMqQFKGwbVLgZFvrAlKBkpQTxBBaTx6iIxhugC4LjX4Ep4gO1urPkB_Df2K90vFdVbhQLAv5f-opLnfO77zKWsQtELgKwTQ9sljR9-h103d7QMpQyEbKGypICjpPMhOFgrBxJ64IccpktpsWVPFUDWIiDWdToloUSxwyv6qZj1ixZSM9TnF2gJriVXYCYrc9ZkLtg7BsxDFu8kuNWtWo6LZw5BvCcqkrPXmf0z2Q-pwGNhATQnLJJNfL9pSWgePluQBc2bQLXIb0u-P7P93m8sspofMHCAcihn_0Vdg7BiSJb_pVKyeq0AffRtO2l8D8p6BwN6vzXAu-SqbR4EHWMy7zxoDM73vbrQpY8qtW3REO0PaTCkiuHauTIBvKIXl0OUhBBFDlr78tgjCgskpBlzytIgQgTzwlvSuQhxK-Nm54B-9cTRxAiOqHh3YkqCn4ahy4RtM7rVyVUFwSUVS-v4avsST1hWKVNPcQA&opi=122715837
+                - img [ref=f16e24]
+              - link [ref=f16e26] [cursor=pointer]:
+                - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskW-lueAolpYj0YU10pazU1Gy7TgtjhrrC8PEATvif7dEhmPT2htmFmES-bSk_KNMobv0Gy0XFZtU-VXEo_VOQQm322VNGlTuY4CDDIGTCa3beA0EwMxwm1sk0yjbHCttYgaFPj1WsmF3EjyY8SddKjMEbpLiiv7Zeq4q9mMQsqC2WLbyTij__Il9ZhNEPVybDbv0Faer2--3QdRBZbP7PQhkpPkNjfcXuEHW3QKnE-JH8gkVsBtB_2Mc64CvgrErUrMx3sAG8TXU-MIyLqnpbL-8S6T08-yKL5wxA3SrmieTsQE-lJ9Nfojg-XgVl3xn4kFCpLc8Kqx6TxxdRCcW_qGxx8I5eqOZlMjiEUBJ8l55o0besM5phZuBOokS9I73ZNMrQr6pZVGTDzlL13VQfZBoLfOvdDZJSn63nJJ-SAQHNK949wUj6oAaIV9fpEvEs4a1N_8-PaEp14DPdlJusv4nxFu42_NtjBFkg9GJ1kwK17gzAvOe_ED_Yq-v7Yu0oR5Opo2M_fgZuqcyfPJVxlCOu8Q4VCcw0F8t84ixMsqT9-LUhP3tTjZTcVqWIkLWxd0mwinEDBl7zzU2pIRyv3VGHQoYbrZKXN1D20LqliZr6YtlBIQ7O_Dvs5iZMwBE7tNQwiwR-KbIbEbJ2W1rZIevtQ1q_z-FYWArXUkWabvH8_C-99Zi-4F9eFS8SFHVoT2jFkTZX1jIllw0zwgNgc_u7-u0mJrYj9I-BDC4yzYOqPxhG87YfbeessIJ4WHlKpunpAJ_GLQbLaPyP28O3TBZ6iAke51ab9lkc01QWbPJKTeuMhUaJZFCb233aIEdnDLlLD81EbfnTd9iM3psKWPVjUVQOjDV5yT3xIZ1n11H65O1gSrHQRD0xdQGf4CX-HEQYiBOuM3_PN-TcfYwRuN1T_hDwSEoAL7yOUXmYbUDb5f-K09G6YkPjUrKG6UqT-eZ8ZNmJFvkpdZGChmawM3xDkbYDMJ0343ifaPgE0sdXcm2t-pUrgxpGNd0cbwlw1YczoFjkIYvmi7IDbDLPbD7DD-oLUqV4FbWIojIiZ9H44I3mvb78PkewCSzNEnz7Axh0_oX4eiVaMrnvYBcjuuy-F-ghaQTN91OeP1o6tcOMqVmMmuBVClcimxxnwUMyL3DiCXDleFiV3yZu0MKiW0dGbMtc6x2aVQI4kipjkPMuPg3HG0bt-AO5g5WjViQ68R4zP7li8xn2sUlJYEbVwgV2RV3nsLcZnk_HU2XpyzPfJBF3-bcSp6-F5Iv3DvPMogrAccbpDvOhGjB8jLOiqRa5IYVAqxVdaqL_aqpfJiNpuFoulNiW_SYR21KQwz8x5NB0DJY_4h8kn66pPXuuKJjDDpOAxiV39eFbenfwI-Jr_qNY5ING01jqn5CA6Vtmt_kHU48WiaUTjUr9_kF6NAtgbDOLjM4JP0yUeheh8IZPAkbOBxBn9CxqPn7ZAsb3xmHEuwT7DORV0UdDvbCTe5h7jmhKDkJlKEZmCRuUKEFI0S1sM4VGCY5D7suUrHa24SAmyKTMfofqrj2_3njJM4WwbzstgiBpHiBoAsK9cUTPjUkMtOjktyCqiMadz2lPBbPjVObrAoqsCU1gICVgUV3TztNB-HewCn_Au2Ub_v9TWZxhmsv9SLtyCE7aBVTy0u0MMxsdZ5ZBn0ZR185CvuBz8qMNYM5Mr_DXjVltJk3DL0mHIGMP_9Qj_J1HyyV0ermTPqzL5bZxbdwRVYt1hghArEDxgkRE4_6ekAkStx8lHo7pN8o4IKpxWTr8-b2qPnhIhmClrXsL2H9ZCciWu2pAwrBaRtbduyl6JAuB0Qm7ND1Y0M7SXMpvjH3D_CAsPrG4TE8IXaltlPPW5OdABGD0wKi4aeyQUu53JoeE16CowjH2K4l0mkXtcyda__TBnwZPo-bbBVytvPamec1wUg21QhuY1UNby_1iDDZsOS3gpzTd5v7LBuKkTXV8cE2qqTsRhi2mWXK8Mn1ohhznS-4kLDG-foK6VlJliCSQ8MPu-aG3tcSieRcPf5fpk0TmvGxPVsBryD50iAkUQST7KaG36vRNOaVTfLYxPbNM6VK2hHie0eFyo7GwFIvJ-dgn5huS030m_tM61Pr9sugpcKHQCPXnpIcSeiWHrWcCft8PftHatrgXD3DMphdfl8Tcnk4JvwK49xUg3hQ1h5-3cFj8awZwuLbEWZJ4DwmgFq0pnOpHAoobxTOszE5SyvfaPyjcSU9kPK1qm7CPxMdOWPkzMqQFKGwbVLgZFvrAlKBkpQTxBBaTx6iIxhugC4LjX4Ep4gO1urPkB_Df2K90vFdVbhQLAv5f-opLnfO77zKWsQtELgKwTQ9sljR9-h103d7QMpQyEbKGypICjpPMhOFgrBxJ64IccpktpsWVPFUDWIiDWdToloUSxwyv6qZj1ixZSM9TnF2gJriVXYCYrc9ZkLtg7BsxDFu8kuNWtWo6LZw5BvCcqkrPXmf0z2Q-pwGNhATQnLJJNfL9pSWgePluQBc2bQLXIb0u-P7P93m8sspofMHCAcihn_0Vdg7BiSJb_pVKyeq0AffRtO2l8D8p6BwN6vzXAu-SqbR4EHWMy7zxoDM73vbrQpY8qtW3REO0PaTCkiuHauTIBvKIXl0OUhBBFDlr78tgjCgskpBlzytIgQgTzwlvSuQhxK-Nm54B-9cTRxAiOqHh3YkqCn4ahy4RtM7rVyVUFwSUVS-v4avsST1hWKVNPcQA&opi=122715837
+                - img [ref=f16e28]
+            - img [ref=f16e31] [cursor=pointer]
+            - generic [ref=f16e42]:
+              - img [ref=f16e45]
+              - generic [ref=f16e48]:
+                - text: Ads by
+                - img [ref=f16e49]
+              - generic [ref=f16e52]:
+                - generic [ref=f16e55] [cursor=pointer]: フィードバックを送信
+                - link [ref=f16e57] [cursor=pointer]:
+                  - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskW-lueAolpYj0YU10pazU1Gy7TgtjhrrC8PEATvif7dEhmPT2htmFmES-bSk_KNMobv0Gy0XFZtU-VXEo_VOQQm322VNGlTuY4CDDIGTCa3beA0EwMxwm1sk0yjbHCttYgaFPj1WsmF3EjyY8SddKjMEbpLiiv7Zeq4q9mMQsqC2WLbyTij__Il9ZhNEPVybDbv0Faer2--3QdRBZbP7PQhkpPkNjfcXuEHW3QKnE-JH8gkVsBtB_2Mc64CvgrErUrMx3sAG8TXU-MIyLqnpbL-8S6T08-yKL5wxA3SrmieTsQE-lJ9Nfojg-XgVl3xn4kFCpLc8Kqx6TxxdRCcW_qGxx8I5eqOZlMjiEUBJ8l55o0besM5phZuBOokS9I73ZNMrQr6pZVGTDzlL13VQfZBoLfOvdDZJSn63nJJ-SAQHNK949wUj6oAaIV9fpEvEs4a1N_8-PaEp14DPdlJusv4nxFu42_NtjBFkg9GJ1kwK17gzAvOe_ED_Yq-v7Yu0oR5Opo2M_fgZuqcyfPJVxlCOu8Q4VCcw0F8t84ixMsqT9-LUhP3tTjZTcVqWIkLWxd0mwinEDBl7zzU2pIRyv3VGHQoYbrZKXN1D20LqliZr6YtlBIQ7O_Dvs5iZMwBE7tNQwiwR-KbIbEbJ2W1rZIevtQ1q_z-FYWArXUkWabvH8_C-99Zi-4F9eFS8SFHVoT2jFkTZX1jIllw0zwgNgc_u7-u0mJrYj9I-BDC4yzYOqPxhG87YfbeessIJ4WHlKpunpAJ_GLQbLaPyP28O3TBZ6iAke51ab9lkc01QWbPJKTeuMhUaJZFCb233aIEdnDLlLD81EbfnTd9iM3psKWPVjUVQOjDV5yT3xIZ1n11H65O1gSrHQRD0xdQGf4CX-HEQYiBOuM3_PN-TcfYwRuN1T_hDwSEoAL7yOUXmYbUDb5f-K09G6YkPjUrKG6UqT-eZ8ZNmJFvkpdZGChmawM3xDkbYDMJ0343ifaPgE0sdXcm2t-pUrgxpGNd0cbwlw1YczoFjkIYvmi7IDbDLPbD7DD-oLUqV4FbWIojIiZ9H44I3mvb78PkewCSzNEnz7Axh0_oX4eiVaMrnvYBcjuuy-F-ghaQTN91OeP1o6tcOMqVmMmuBVClcimxxnwUMyL3DiCXDleFiV3yZu0MKiW0dGbMtc6x2aVQI4kipjkPMuPg3HG0bt-AO5g5WjViQ68R4zP7li8xn2sUlJYEbVwgV2RV3nsLcZnk_HU2XpyzPfJBF3-bcSp6-F5Iv3DvPMogrAccbpDvOhGjB8jLOiqRa5IYVAqxVdaqL_aqpfJiNpuFoulNiW_SYR21KQwz8x5NB0DJY_4h8kn66pPXuuKJjDDpOAxiV39eFbenfwI-Jr_qNY5ING01jqn5CA6Vtmt_kHU48WiaUTjUr9_kF6NAtgbDOLjM4JP0yUeheh8IZPAkbOBxBn9CxqPn7ZAsb3xmHEuwT7DORV0UdDvbCTe5h7jmhKDkJlKEZmCRuUKEFI0S1sM4VGCY5D7suUrHa24SAmyKTMfofqrj2_3njJM4WwbzstgiBpHiBoAsK9cUTPjUkMtOjktyCqiMadz2lPBbPjVObrAoqsCU1gICVgUV3TztNB-HewCn_Au2Ub_v9TWZxhmsv9SLtyCE7aBVTy0u0MMxsdZ5ZBn0ZR185CvuBz8qMNYM5Mr_DXjVltJk3DL0mHIGMP_9Qj_J1HyyV0ermTPqzL5bZxbdwRVYt1hghArEDxgkRE4_6ekAkStx8lHo7pN8o4IKpxWTr8-b2qPnhIhmClrXsL2H9ZCciWu2pAwrBaRtbduyl6JAuB0Qm7ND1Y0M7SXMpvjH3D_CAsPrG4TE8IXaltlPPW5OdABGD0wKi4aeyQUu53JoeE16CowjH2K4l0mkXtcyda__TBnwZPo-bbBVytvPamec1wUg21QhuY1UNby_1iDDZsOS3gpzTd5v7LBuKkTXV8cE2qqTsRhi2mWXK8Mn1ohhznS-4kLDG-foK6VlJliCSQ8MPu-aG3tcSieRcPf5fpk0TmvGxPVsBryD50iAkUQST7KaG36vRNOaVTfLYxPbNM6VK2hHie0eFyo7GwFIvJ-dgn5huS030m_tM61Pr9sugpcKHQCPXnpIcSeiWHrWcCft8PftHatrgXD3DMphdfl8Tcnk4JvwK49xUg3hQ1h5-3cFj8awZwuLbEWZJ4DwmgFq0pnOpHAoobxTOszE5SyvfaPyjcSU9kPK1qm7CPxMdOWPkzMqQFKGwbVLgZFvrAlKBkpQTxBBaTx6iIxhugC4LjX4Ep4gO1urPkB_Df2K90vFdVbhQLAv5f-opLnfO77zKWsQtELgKwTQ9sljR9-h103d7QMpQyEbKGypICjpPMhOFgrBxJ64IccpktpsWVPFUDWIiDWdToloUSxwyv6qZj1ixZSM9TnF2gJriVXYCYrc9ZkLtg7BsxDFu8kuNWtWo6LZw5BvCcqkrPXmf0z2Q-pwGNhATQnLJJNfL9pSWgePluQBc2bQLXIb0u-P7P93m8sspofMHCAcihn_0Vdg7BiSJb_pVKyeq0AffRtO2l8D8p6BwN6vzXAu-SqbR4EHWMy7zxoDM73vbrQpY8qtW3REO0PaTCkiuHauTIBvKIXl0OUhBBFDlr78tgjCgskpBlzytIgQgTzwlvSuQhxK-Nm54B-9cTRxAiOqHh3YkqCn4ahy4RtM7rVyVUFwSUVS-v4avsST1hWKVNPcQA&opi=122715837
+                  - generic [ref=f16e58]:
+                    - text: 広告表示設定
+                    - img [ref=f16e59]
+            - generic [ref=f16e61]:
+              - generic [ref=f16e64] [cursor=pointer]: 広告でコンテンツが隠れる
+              - generic [ref=f16e67] [cursor=pointer]: 広告のコンテンツが不適切
+              - generic [ref=f16e70] [cursor=pointer]: この広告に興味がない
+              - generic [ref=f16e73] [cursor=pointer]: この広告を何回も見た
+            - generic [ref=f16e79]: ご協力いただきありがとうございます。いただいたフィードバックは Google 広告の改善に役立てさせていただきます
+            - generic [ref=f16e85]:
+              - img [ref=f16e86]
+              - text: はこの広告の表示を停止しました
+        - generic [ref=e636]:
+          - heading "株探からのお知らせ" [level=3] [ref=e637]
+          - list [ref=e638]:
+            - listitem [ref=e639]:
+              - link "「MINKABU」を騙る不審サイト、SNSでの勧誘等にご注意ください｜当社が投資勧誘や投資資金の入金を求めることはありません（注意喚起）" [ref=e640] [cursor=pointer]:
+                - /url: https://kabutan.jp/news/marketnews/?&b=n202508141299
+            - listitem [ref=e641]:
+              - img "new" [ref=e642]
+              - link "「【決算総括記者座談会①】26年3月期決算が映すAI相場の希望と“病巣”」を公開！" [ref=e643] [cursor=pointer]:
+                - /url: https://kabutan.jp/news/marketnews/?b=n202605290350
+            - listitem [ref=e644]:
+              - link "見逃し配信中！プレミアムセミナー5月号" [ref=e645] [cursor=pointer]:
+                - /url: https://kabutan.jp/news/marketnews/?&b=n202605150738
+            - listitem [ref=e646]:
+              - link "「株探プレミアム」リリース⇒無料体験実施中！" [ref=e647] [cursor=pointer]:
+                - /url: https://info.kabutan.jp/lp/
+        - generic [ref=e648]:
+          - generic [ref=e649]:
+            - heading "日経平均" [level=3] [ref=e650]
+            - table [ref=e651]:
+              - rowgroup [ref=e652]:
+                - row "日 中 足" [ref=e653]:
+                  - cell [ref=e654]:
+                    - link [ref=e656] [cursor=pointer]:
+                      - /url: /stock/chart?code=0000&ashi=1
+                  - cell "日 中 足" [ref=e657] [cursor=pointer]:
+                    - text: 日
+                    - text: 中
+                    - text: 足
+                - row "日 足" [ref=e658]:
+                  - cell "日 足" [ref=e659] [cursor=pointer]:
+                    - text: 日
+                    - text: 足
+          - generic [ref=e660]:
+            - heading "【国内】指標" [level=3] [ref=e661]
+            - paragraph [ref=e662]: 05月29日 15:30現在
+          - table [ref=e663]:
+            - rowgroup [ref=e664]:
+              - row "日経平均 66,329.50 +1,636.38" [ref=e665]:
+                - cell "日経平均" [ref=e666]:
+                  - link [ref=e667] [cursor=pointer]:
+                    - /url: /stock/chart?code=0000
+                    - img [ref=e668]
+                  - link "日経平均" [ref=e669] [cursor=pointer]:
+                    - /url: /stock/?code=0000
+                - cell "66,329.50" [ref=e670]
+                - cell "+1,636.38" [ref=e671]
+              - row "ドル建日経 416.38 +10.84" [ref=e672]:
+                - cell "ドル建日経" [ref=e673]:
+                  - link [ref=e674] [cursor=pointer]:
+                    - /url: /stock/chart?code=0001
+                    - img [ref=e675]
+                  - link "ドル建日経" [ref=e676] [cursor=pointer]:
+                    - /url: /stock/?code=0001
+                - cell "416.38" [ref=e677]
+                - cell "+10.84" [ref=e678]
+              - row "ＴＯＰＩＸ 3,957.17 +55.16" [ref=e679]:
+                - cell "ＴＯＰＩＸ" [ref=e680]:
+                  - link [ref=e681] [cursor=pointer]:
+                    - /url: /stock/chart?code=0010
+                    - img [ref=e682]
+                  - link "ＴＯＰＩＸ" [ref=e683] [cursor=pointer]:
+                    - /url: /stock/?code=0010
+                - cell "3,957.17" [ref=e684]
+                - cell "+55.16" [ref=e685]
+              - row "JPX日経400 36,007.99 +551.61" [ref=e686]:
+                - cell "JPX日経400" [ref=e687]:
+                  - link [ref=e688] [cursor=pointer]:
+                    - /url: /stock/chart?code=0040
+                    - img [ref=e689]
+                  - link "JPX日経400" [ref=e690] [cursor=pointer]:
+                    - /url: /stock/?code=0040
+                - cell "36,007.99" [ref=e691]
+                - cell "+551.61" [ref=e692]
+              - row "グロース250 818.37 -13.64" [ref=e693]:
+                - cell "グロース250" [ref=e694]:
+                  - link [ref=e695] [cursor=pointer]:
+                    - /url: /stock/chart?code=0012
+                    - img [ref=e696]
+                  - link "グロース250" [ref=e697] [cursor=pointer]:
+                    - /url: /stock/?code=0012
+                - cell "818.37" [ref=e698]
+                - cell "-13.64" [ref=e699]
+              - row "東証 大型株 3,896.08 +54.34" [ref=e700]:
+                - cell "東証 大型株" [ref=e701]:
+                  - link [ref=e702] [cursor=pointer]:
+                    - /url: /stock/chart?code=0018
+                    - img [ref=e703]
+                  - link "東証 大型株" [ref=e704] [cursor=pointer]:
+                    - /url: /stock/?code=0018
+                - cell "3,896.08" [ref=e705]
+                - cell "+54.34" [ref=e706]
+              - row "東証 中型株 4,227.15 +68.90" [ref=e707]:
+                - cell "東証 中型株" [ref=e708]:
+                  - link [ref=e709] [cursor=pointer]:
+                    - /url: /stock/chart?code=0019
+                    - img [ref=e710]
+                  - link "東証 中型株" [ref=e711] [cursor=pointer]:
+                    - /url: /stock/?code=0019
+                - cell "4,227.15" [ref=e712]
+                - cell "+68.90" [ref=e713]
+              - row "東証 小型株 6,583.14 +35.73" [ref=e714]:
+                - cell "東証 小型株" [ref=e715]:
+                  - link [ref=e716] [cursor=pointer]:
+                    - /url: /stock/chart?code=0020
+                    - img [ref=e717]
+                  - link "東証 小型株" [ref=e718] [cursor=pointer]:
+                    - /url: /stock/?code=0020
+                - cell "6,583.14" [ref=e719]
+                - cell "+35.73" [ref=e720]
+              - row "東証REIT指数 1,809.65 +11.37" [ref=e721]:
+                - cell "東証REIT指数" [ref=e722]:
+                  - link [ref=e723] [cursor=pointer]:
+                    - /url: /stock/chart?code=0105
+                    - img [ref=e724]
+                  - link "東証REIT指数" [ref=e725] [cursor=pointer]:
+                    - /url: /stock/?code=0105
+                - cell "1,809.65" [ref=e726]
+                - cell "+11.37" [ref=e727]
+          - generic [ref=e728]:
+            - heading "為替" [level=3] [ref=e729]
+            - paragraph [ref=e730]: 05月30日 06:59現在
+          - table [ref=e731]:
+            - rowgroup [ref=e732]:
+              - row "米ドル円 159.27 +0.01" [ref=e733]:
+                - cell "米ドル円" [ref=e734]:
+                  - link [ref=e735] [cursor=pointer]:
+                    - /url: /stock/chart?code=0950
+                    - img [ref=e736]
+                  - link "米ドル円" [ref=e737] [cursor=pointer]:
+                    - /url: /stock/?code=0950
+                - cell "159.27" [ref=e738]
+                - cell "+0.01" [ref=e739]
+              - row "ユーロ／円 185.71 +0.16" [ref=e740]:
+                - cell "ユーロ／円" [ref=e741]:
+                  - link [ref=e742] [cursor=pointer]:
+                    - /url: /stock/chart?code=0951
+                    - img [ref=e743]
+                  - link "ユーロ／円" [ref=e744] [cursor=pointer]:
+                    - /url: /stock/?code=0951
+                - cell "185.71" [ref=e745]
+                - cell "+0.16" [ref=e746]
+          - generic [ref=e747]:
+            - heading "堂島先物" [level=3] [ref=e748]
+            - paragraph [ref=e749]: 05月30日 06:00現在
+          - table [ref=e750]:
+            - rowgroup [ref=e751]:
+              - row "堂島コメ平均 32,890.00 +20.00" [ref=e752]:
+                - cell "堂島コメ平均" [ref=e753]:
+                  - link [ref=e754] [cursor=pointer]:
+                    - /url: /stock/chart?code=0301
+                    - img [ref=e755]
+                  - link "堂島コメ平均" [ref=e756] [cursor=pointer]:
+                    - /url: /stock/?code=0301
+                - cell "32,890.00" [ref=e757]
+                - cell "+20.00" [ref=e758]
+              - row "堂島金 23,950.00 +820.60" [ref=e759]:
+                - cell "堂島金" [ref=e760]:
+                  - link [ref=e761] [cursor=pointer]:
+                    - /url: /stock/chart?code=0302
+                    - img [ref=e762]
+                  - link "堂島金" [ref=e763] [cursor=pointer]:
+                    - /url: /stock/?code=0302
+                - cell "23,950.00" [ref=e764]
+                - cell "+820.60" [ref=e765]
+              - row "堂島銀 － －" [ref=e766]:
+                - cell "堂島銀" [ref=e767]:
+                  - link [ref=e768] [cursor=pointer]:
+                    - /url: /stock/chart?code=0303
+                    - img [ref=e769]
+                  - link "堂島銀" [ref=e770] [cursor=pointer]:
+                    - /url: /stock/?code=0303
+                - cell "－" [ref=e771]
+                - cell "－" [ref=e772]
+              - row "堂島白金 － －" [ref=e773]:
+                - cell "堂島白金" [ref=e774]:
+                  - link [ref=e775] [cursor=pointer]:
+                    - /url: /stock/chart?code=0304
+                    - img [ref=e776]
+                  - link "堂島白金" [ref=e777] [cursor=pointer]:
+                    - /url: /stock/?code=0304
+                - cell "－" [ref=e778]
+                - cell "－" [ref=e779]
+        - generic [ref=e780]:
+          - generic [ref=e781]:
+            - heading "【海外】指標" [level=3] [ref=e782]
+            - paragraph [ref=e783]: 05月29日 終値
+          - table [ref=e784]:
+            - rowgroup [ref=e785]:
+              - row "ＮＹダウ 51,032.46 +363.49" [ref=e786]:
+                - cell "ＮＹダウ" [ref=e787]:
+                  - link [ref=e788] [cursor=pointer]:
+                    - /url: /stock/chart?code=0800
+                    - img [ref=e789]
+                  - link "ＮＹダウ" [ref=e790] [cursor=pointer]:
+                    - /url: /stock/?code=0800
+                - cell "51,032.46" [ref=e791]
+                - cell "+363.49" [ref=e792]
+              - row "NASDAQ 26,972.62 +55.15" [ref=e793]:
+                - cell "NASDAQ" [ref=e794]:
+                  - link [ref=e795] [cursor=pointer]:
+                    - /url: /stock/chart?code=0802
+                    - img [ref=e796]
+                  - link "NASDAQ" [ref=e797] [cursor=pointer]:
+                    - /url: /stock/?code=0802
+                - cell "26,972.62" [ref=e798]
+                - cell "+55.15" [ref=e799]
+              - row "上海総合 4,068.56 -30.06" [ref=e800]:
+                - cell "上海総合" [ref=e801]:
+                  - link [ref=e802] [cursor=pointer]:
+                    - /url: /stock/chart?code=0823
+                    - img [ref=e803]
+                  - link "上海総合" [ref=e804] [cursor=pointer]:
+                    - /url: /stock/?code=0823
+                - cell "4,068.56" [ref=e805]
+                - cell "-30.06" [ref=e806]
+              - row "NY(WTI)原油 87.36 -1.54" [ref=e807]:
+                - cell "NY(WTI)原油" [ref=e808]:
+                  - link [ref=e809] [cursor=pointer]:
+                    - /url: https://fu.minkabu.jp/chart/wti
+                    - img [ref=e810]
+                  - link "NY(WTI)原油" [ref=e811] [cursor=pointer]:
+                    - /url: https://fu.minkabu.jp/chart/wti
+                - cell "87.36" [ref=e812]
+                - cell "-1.54" [ref=e813]
+              - row "NY金 4,593.00 +60.60" [ref=e814]:
+                - cell "NY金" [ref=e815]:
+                  - link [ref=e816] [cursor=pointer]:
+                    - /url: https://fu.minkabu.jp/chart/newyork-gold
+                    - img [ref=e817]
+                  - link "NY金" [ref=e818] [cursor=pointer]:
+                    - /url: https://fu.minkabu.jp/chart/newyork-gold
+                - cell "4,593.00" [ref=e819]
+                - cell "+60.60" [ref=e820]
+        - iframe [ref=e823]:
+          - link [ref=f25e2] [cursor=pointer]:
+            - /url: https://googleads.g.doubleclick.net/pcs/click?xai=AKAOjsvbNmXqVZuBTpTYhGoBrd9bAb26wLqjnYGnk3CcKzil0eXsW3of-LIFnbGalCJwtoogVPHk5OJNa1jFGIpeDLZ_dmGh3GEVmmijsiI-zEhdfQpnmZTQav5xD8f-0MtnfTtPX_5Um-QnAyZ3xd-MZWBXRKKVvZUpAEoZhQO6fS65VbwIj7Y9FQOa7TumeFNLYTWWV5F18KWE3OctSD25FQ-aMpwAU1xYTMYrpinAs1aTIFUw2o79fqU3egZBCXJhsX8XzXUS3mMFKvnhdxR8RJN9Ox6onc5y2xeaPZ8UPpLNpw1ehxd7fcETTWUJuy4oNoDW8nYI1xNYAOi-CvyO7tU_tBhXoeEuGjayDtZLSGUCYyw-Rc4BQO9mikgIgkRhzmDj-j5jZjl80NMYGLCJMJEgfDI1iUgJ0AV-hwjIyu_ZSJ7r&sai=AMfl-YTMptCRDSM3xtCDw9zngjvxgHc9WJZ4Gw0mTFhmQNAieVJjhU5Aqj60g8iS1JlH1VHyEWQnk6cumNQAsdVrOu-czTW-nO0koFTVu25aLTN0hUQi3OXSvOM8glZ8OBZX2-tyi16p3BxrmkU80I7UBK2GqTmQ_NeLVvJSqIMsS2a46r2EZ2mCpoSYhcxbcTdmqBxhwGzANOL_H_5T4BAp7R7U8Ec7VzQO5IU9EAbB0TjotkIiDdgPU-AThdihKOwq-zNBxyCToRkk6pS8pmYLx2fN99G5gULyRjzUucArCTFpC8AT-WtqN08rMXb66q9HTwaQvaphmoGXzdOP98TFivuNi8VjjR94LeXTMs0d-1Jw8XsYTLLawaY&sig=Cg0ArKJSzDmsboInLPM4&fbs_aeid=%5Bgw_fbsaeid%5D&adurl=https://kabu.com/company/lp/general/03%3Futm_source%3Dsec_exad%26utm_medium%3Dminkabu%26utm_campaign%3Dbanner_%26utm_content%3Dgeneral03%26argument%3DcbPUsig5%26dmai%3Da6a01516e5361e
+        - generic [ref=e824]:
+          - heading "東証33業種トレンド 上昇29 下降3" [level=3] [ref=e825]
+          - table [ref=e826]:
+            - rowgroup [ref=e827]:
+              - row "上 下 位 10" [ref=e828]:
+                - cell [ref=e829]
+                - cell "上 下 位 10" [ref=e843] [cursor=pointer]:
+                  - text: 上
+                  - text: 下
+                  - text: 位
+                  - text: "10"
+              - row "全 業 種" [ref=e844]:
+                - cell "全 業 種" [ref=e845] [cursor=pointer]:
+                  - text: 全
+                  - text: 業
+                  - text: 種
+        - generic [ref=e846]:
+          - heading "プレミアム会員限定コラム" [level=3] [ref=e847]
+          - link "キーワードで発掘！ 強い投資家・すごい技" [ref=e849] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/investor-article/
+            - img [ref=e850]
+            - generic [ref=e851]:
+              - text: キーワードで発掘！
+              - text: 強い投資家・すごい技
+          - link "すご腕投資家に聞く「銘柄選び」の技" [ref=e853] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/%E3%81%99%E3%81%94%E8%85%95%E6%8A%95%E8%B3%87%E5%AE%B6/
+            - img [ref=e854]
+            - generic [ref=e855]: すご腕投資家に聞く「銘柄選び」の技
+          - link "気になる会社を診断 成長・課題・そして…" [ref=e857] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/%E6%B0%97%E3%81%AB%E3%81%AA%E3%82%8B%E4%BC%9A%E7%A4%BE%E3%82%92%E8%A8%BA%E6%96%AD/
+            - img [ref=e858]
+            - generic [ref=e859]:
+              - text: 気になる会社を診断
+              - text: 成長・課題・そして…
+          - link "プロに聞く 気になる話題" [ref=e861] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/%E3%83%97%E3%83%AD%E3%81%AB%E8%81%9E%E3%81%8F%E6%B0%97%E3%81%AB%E3%81%AA%E3%82%8B%E8%A9%B1%E9%A1%8C/
+            - img [ref=e862]
+            - generic [ref=e863]: プロに聞く 気になる話題
+          - link "Buy&Hold STORIES 長期投資成功への道" [ref=e865] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/buy%EF%BC%86hold-stories/
+            - img [ref=e866]
+            - generic [ref=e867]: Buy&Hold STORIES 長期投資成功への道
+          - link "目指せ億トレ、頑張り投資家さんの稼ぎ技" [ref=e869] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/%E7%9B%AE%E6%8C%87%E3%81%9B%E5%84%84%E3%83%88%E3%83%AC%E3%80%81%E9%A0%91%E5%BC%B5%E3%82%8A%E6%8A%95%E8%B3%87%E5%AE%B6%E3%81%95%E3%82%93%E3%81%AE%E7%A8%BC%E3%81%8E%E6%8A%80/
+            - img [ref=e870]
+            - generic [ref=e871]: 目指せ億トレ、頑張り投資家さんの稼ぎ技
+          - link "決算動向集計速報" [ref=e873] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/quarterly-results-macro-stats/?membership=1
+            - img [ref=e874]
+            - generic [ref=e875]: 決算動向集計速報
+          - link "プレミアム会員限定コラムの一覧を見る" [ref=e877] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/%E4%BC%9A%E5%93%A1%E9%99%90%E5%AE%9A%E3%82%B3%E3%83%A9%E3%83%A0/
+            - img [ref=e878]
+            - generic [ref=e879]: プレミアム会員限定コラムの一覧を見る
+        - generic [ref=e880]:
+          - heading "お薦めコラム・特集" [level=3] [ref=e881]
+          - list [ref=e882]:
+            - listitem [ref=e883]:
+              - link "今期活躍期待の【連続最高益】銘柄リスト〔第3弾〕44社選出 ＜成長株特集＞" [ref=e884] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605310059
+            - listitem [ref=e885]:
+              - link "一目均衡表【買いシグナル】低PER 18社選出 ＜テクニカル特集＞ 5月29日版" [ref=e886] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605310052
+            - listitem [ref=e887]:
+              - link "10万円以下で買える、大幅増益＆低PBR〔第2弾〕37社 ＜割安株特集＞" [ref=e888] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605310049
+            - listitem [ref=e889]:
+              - link "【和島英樹のマーケット・フォーキャスト】─業績面で買い安心感、AI関連軸に堅調な展開へ" [ref=e890] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605310048
+            - listitem [ref=e891]:
+              - img [ref=e892]
+              - link "伊藤智洋が読むマーケット・シナリオ【週間展望】 5月31日版" [ref=e893] [cursor=pointer]:
+                - /url: /news/marketnews/?b=n202605310038
+          - paragraph [ref=e894]:
+            - img [ref=e895]
+            - link "一覧を見る" [ref=e896] [cursor=pointer]:
+              - /url: /news/marketnews/?category=-2
+        - list [ref=e898]:
+          - listitem [ref=e899]:
+            - link "初心者向け先物解説記事を公開中" [ref=e900] [cursor=pointer]:
+              - /url: https://fu.minkabu.jp/beginner/column/1
+        - generic [ref=e901]:
+          - link [ref=e903] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/kbtntop/
+            - img [ref=e904]
+          - link [ref=e906] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/columnists/
+            - img [ref=e907]
+          - link [ref=e909] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/marketview/
+            - img [ref=e910]
+          - link [ref=e912] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/usstocks/
+            - img [ref=e913]
+          - link [ref=e915] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/koaku/?membership=1
+            - img [ref=e916]
+          - link [ref=e918] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/commodity/
+            - img [ref=e919]
+          - link [ref=e921] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/topinterview/
+            - img [ref=e922]
+          - link [ref=e924] [cursor=pointer]:
+            - /url: https://selection.kabutan.jp/category/otegami/
+            - img [ref=e925]
+        - list [ref=e927]:
+          - listitem [ref=e928]:
+            - link "クラファン（株式投資）ニュース" [ref=e929] [cursor=pointer]:
+              - /url: https://selection.kabutan.jp/category/crowdfunding/
+        - generic [ref=e930]:
+          - heading "■関連サイト ※外部リンク" [level=3] [ref=e931]
+          - list [ref=e932]:
+            - listitem [ref=e933]:
+              - link "おすすめFX口座比較ランキング" [ref=e934] [cursor=pointer]:
+                - /url: https://fx.minkabu.jp/hikaku/?utm_source=kabutan&utm_medium=navi&utm_campaign=textlink
+            - listitem [ref=e935]:
+              - link "株主優待 | おすすめの優待情報" [ref=e936] [cursor=pointer]:
+                - /url: https://minkabu.jp/yutai
+            - listitem [ref=e937]:
+              - link "株探おすすめ証券会社比較" [ref=e938] [cursor=pointer]:
+                - /url: https://kabutan.jp/hikaku/
+            - listitem [ref=e939]:
+              - link "カードローンおすすめランキング" [ref=e940] [cursor=pointer]:
+                - /url: https://minkabu.jp/cardloan/
+    - generic [ref=e941]:
+      - paragraph [ref=e942]: 当サイト「株探（かぶたん）」で提供する情報は投資勧誘または投資に関する助言をすることを目的としておりません。投資の決定は、ご自身の判断でなされますようお願いいたします。 当サイトにおけるデータは、東京証券取引所、大阪取引所、名古屋証券取引所、JPX総研、ジャパンネクスト証券、堂島取引所、China Investment Information Services、CME Group Inc. 等からの情報の提供を受けております。日経平均株価の著作権は日本経済新聞社に帰属します。株探に掲載される株価チャートは、その銘柄の過去の株価推移を確認する用途で掲載しているものであり、その銘柄の将来の価値の動向を示唆あるいは保証するものではなく、また、売買を推奨するものではありません。決算を扱う記事における「サプライズ決算」とは、決算情報として注目に値するかという観点から、発表された決算のサプライズ度（当該会社の本決算か各四半期であるか、業績予想の修正か配当予想の修正であるか、及びそこで発表された決算結果ならびに当該会社が過去に公表した業績予想・配当予想との比較及び過去の決算との比較を数値化し判定）が高い銘柄であり、また「サプライズ順」はサプライズ度に基づいた順番で決算情報を掲載しているものであり、記事に掲載されている各銘柄の将来の価値の動向を示唆あるいは保証するものではなく、また、売買を推奨するものではありません。
+      - list [ref=e943]:
+        - listitem [ref=e944]:
+          - link "「株探」について" [ref=e945] [cursor=pointer]:
+            - /url: /info/thissite
+        - listitem [ref=e946]:
+          - link "利用規約" [ref=e947] [cursor=pointer]:
+            - /url: https://info.kabutan.jp/terms-all/
+        - listitem [ref=e948]:
+          - link "プライバシーポリシー" [ref=e949] [cursor=pointer]:
+            - /url: https://minkabu.co.jp/privacy-policy/
+        - listitem [ref=e950]:
+          - generic [ref=e951]: プライバシー設定
+        - listitem [ref=e952]:
+          - link "特定商取引表示" [ref=e953] [cursor=pointer]:
+            - /url: https://info.kabutan.jp/specified-commercial-transaction-act/
+        - listitem [ref=e954]:
+          - link "採用情報" [ref=e955] [cursor=pointer]:
+            - /url: https://hrmos.co/pages/minkabu
+        - listitem [ref=e956]:
+          - link "運営会社" [ref=e957] [cursor=pointer]:
+            - /url: https://info.kabutan.jp/company/
+        - listitem [ref=e958]:
+          - link "サイトマップ" [ref=e959] [cursor=pointer]:
+            - /url: /info/sitemap
+        - listitem [ref=e960]:
+          - link "ヘルプ" [ref=e961] [cursor=pointer]:
+            - /url: https://support.kabutan.jp/hc/ja
+      - list [ref=e963]:
+        - listitem [ref=e964]:
+          - link "トップ" [ref=e965] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e966]:
+          - link "市場ニュース" [ref=e967] [cursor=pointer]:
+            - /url: /news/marketnews/
+        - listitem [ref=e968]:
+          - link "決算速報" [ref=e969] [cursor=pointer]:
+            - /url: /news/
+        - listitem [ref=e970]:
+          - link "株価注意報" [ref=e971] [cursor=pointer]:
+            - /url: /warning/
+        - listitem [ref=e972]:
+          - link "会社開示情報" [ref=e973] [cursor=pointer]:
+            - /url: /disclosures/
+        - listitem [ref=e974]:
+          - link "銘柄探検" [ref=e975] [cursor=pointer]:
+            - /url: /tansaku/
+        - listitem [ref=e976]:
+          - link "日本の株主" [ref=e977] [cursor=pointer]:
+            - /url: /holder/
+        - listitem [ref=e978]:
+          - link "市場マップ" [ref=e979] [cursor=pointer]:
+            - /url: /distribution-map/
+        - listitem [ref=e980]:
+          - link "証券会社比較" [ref=e981] [cursor=pointer]:
+            - /url: /hikaku/
+  - contentinfo [ref=e982]:
+    - generic [ref=e985]:
+      - link [ref=e986] [cursor=pointer]:
+        - /url: https://minkabu.co.jp/
+        - img [ref=e987]
+      - generic [ref=e988]: (C) MINKABU THE INFONOID, Inc.
+  - iframe [ref=e991]:
+    - generic [active] [ref=f17e1]:
+      - link "Keizai News 上昇余地のある注目銘柄 開く" [ref=f17e4] [cursor=pointer]:
+        - /url: https://googleads.g.doubleclick.net/aclk?sa=l&ai=Cf5QoOCAcasvNOuPHgeAPg778KOWw-OmGAdOlx8LWFdrZHhABIMnPsStgiZvFhPQToAGF8rqpQ8gBAeACAKgDAcgDCqoEswJP0Cew42urHKGgZODKG_aZd3M4pYAiWzBWaY05v4ELBtWN5PSZzl_nKjOmukZ1GWzohcz8ZnXI3kv1QTC4iOF14Jds1_recD-r0qfLQr9yyuMA_mtmcEW6tFs1GjY0N6Lu7uei5yKI6Um5y7QFzIuKz31MpNZZPJejtejY8xmStqompWeLA4NSr_AmGkPfuC24Yj5qwJzFVuAYk1hgY9ostgQQJRzQti3eyzXh3dGqGzdA3lT-IxFJ3Po1t8GOhtMW2GaKyTRo9Mmg--kmSVZDnxrNgeNEwtV5J1bZj9HM7BhH-gDqsrwHxPkp2Q8ZsDNHg412FSvHZlUyhPCEkc9jlgnq8oCsFOnphZJ_ge3h_V4x_Iir_7xggjxgHmWiVssHlcWqVU9fy7JSm_ikqmNxsIi4wATP86Oc1AXgBAGIBZyu8bRYgAeFqouJHqgHp8yxAqgH4tixAqgHpr4bqAfMzrECqAfz0RuoB5bYG6gHqpuxAqgHjs4bqAeT2BuoB_DgG6gH7paxAqgH_p6xAqgHr76xAqgH1ckbqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH-8KxAtgHAdIIMwiAYRABGJ0BMgiKgoCAgICACDoPgECAwICAgICogAKog4AQSL39wTpYge2w1brjlANgAbEJ5E22oVpa-9yACgOYCwHICwGiDA8qCgoIjt-xApXisQKQAQGqDQJKUMgNAeINEwjz4rHVuuOUAxXjYwAGHQMfHwXqDRMItpCz1brjlAMV42MABh0DHx8F8A0CiA7___________8B2BMMiBQD0BUBmBYByhYCCgD4FgGAFwGyFxAYASoKMzM1OTI1NjU2NVAGuhcCOAGqGBcJAAAAANgJFkESCjMzNTkyNTY1NjUYAbIYCRICk2kYASIBANAYAcIZAggB&ae=1&gclid=EAIaIQobChMIy8m01brjlAMV42MABh0DHx8FEAEYASAAEgLFxfD_BwE&num=1&cid=CAQS9AEABaugfb_EgNyPXpF2FgPh7rhHB4TIEiDydA1krjWnNBGZksqAEIn8p-fxkQfqOrBCxqJ37rKBCA7UfIqqmMiUkgNOYw6K4sueTeXcM2a8A_XQcfetFGRylwh4l5vEE1cJsod4V7pPRb_TiCGAo26H1UqjwXcLk1GB1uZ0xLFFirOVKiES4HobCVR66aBPVJSUsRZFzYZ01ZThSSWh-vdXiNoQxv1x5PwBiKv4IfINIfvnrzSn0q732jCWn3sS_zv05NonDF7ym-evyusqg8rDheir4ajDofb3n-XoMkAgOx_XTfAqDIADMCdpbS3dGyZpfcl9GAE&sig=AOD64_1gyOdUiz_pMrWAWbieu6YziRuLRQ&client=ca-pub-5685476838524096&rf=4&nb=2&adurl=https://keizainews.com/6599%3Fgad_source%3D5%26gad_campaignid%3D23733229340%26gclid%3DEAIaIQobChMIy8m01brjlAMV42MABh0DHx8FEAEYASAAEgLFxfD_BwE
+        - generic [ref=f17e5]:
+          - generic [ref=f17e8]:
+            - generic "Keizai News" [ref=f17e9]:
+              - link "Keizai News" [ref=f17e10]
+            - generic "Keizai News" [ref=f17e11]:
+              - link "上昇余地のある注目銘柄" [ref=f17e13]
+          - link "開く" [ref=f17e15]:
+            - generic [ref=f17e18]: 開く
+      - generic [ref=f17e20]:
+        - link [ref=f17e22] [cursor=pointer]:
+          - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskVkR-TTTsTSWQsf5O0FAFfC34aI24FYMvHF_yOTaESPL3O9Of2Pa7szMEAZeKBpNXVVqRwqHPWdizBnNFY3D8ARVpY_ePIdUsM4S5ZgEtxTbSQ6t9lFbaEwyJSqICzeTL7Zs3nkH3POhlpzDWCXugx_F6z83vyG7xE6l3E8uExNDUrs-KTxA9BcMp24JKoKGbQwx_aVcB5zOsiF30W-8FtWpwC64xy7px6t7OU9JtxTM3FJwOf7wX3DZHWTVWwKKmKytWZcNyprrhGnlIOyaI8PVdRzhQqu2ZTseq0iY6mez2kby5Fu4i6Zbgf9p3rBqCKIG8inKvms_44OF0-6cUe7qdjqnz94Mc9cnwUv-IUh3xVbc0aCrhCf1TakCn78HdVBGO40TW1TcjKRzCeTbD1eISghtxcmigP_9oTTExzZZeJnA08CXbhnJcOH5hlRdRYi7l2Vvw9cWr9CwK432pKqPF6C_Abgu3vyeBVcPPBY1Lz3gbKsCmarYXphV5LBuRh0K2WZFa1wyS50J7qCvsK2q7J3eQA9YAueOZVY2-lXLv8BDhCMWJtewbAy_WMe1fXWA7Yy_G2bowxCEfMJjJiDHFsrD4mKM53q5zKaQb9ta1K9sXz0EJmKF0OVRYFIvt7aev5fiUcueHsTgKA_WP_HxokJBr6abrOwBiUG72jdClYrjh-YE13KLcTlceLzd_TqXX_GwTds9ISjLFsuTu6f9dBCMgxrKvEiHogkn8KwXeMzshQMgmu2n_tpvhUekfTykMqvHTBM5yFXAqQLY0UiqCVs7Vo5JrBTMsUIjcpx9GcJgnbwcDMuRN6Sd8jOXnuIH-c8HCEMqmXPGLERYzc-L_26JU2UwIBPZr5AZ9F3wO2yEeT5UUAP60AnRGyabCi-z2it62xqIHsmJKYHoDghJ0ROmcfB4HeBQkfwaE2kzFwqJ2WQ2zcQza68CpdM7tjJxoK_8ST8PIwFfxqAHcKOqDfXCwaX3QEOGICy8lPpu_bruaTk7AlN0UcwBqCPK4O9-0rtXC8QvE30o2KUZO-YLQXENpYsX-uERisyBjjaNuDvInwkeBas5miFXblAaaXxozAhYH-jlDC9fQayE2imYzG1Q0iS1BxSDqitcKNyc5bQ2tHjMULcEG1nswI6asyZVqyj0D2ybvHXbb1SBS_eNB4yo08T7P2HrwzNZtxDITZ6yi40rT1Wj8-uNYWTeggk46zbf_Z2ZgjtpbXozx0zZWQr8VKGk06MIZXwz157tKK5mMQN9sJeBdSy-NkLtLXQuHx70srcgOzpUeaB1aWvciE9Ho8TMDUb7sSQqBVLXGoPOX6Agcwip7VsivZKsik_4OTGe5BrZf2BeHRWNhVgYzw_5KCrjLfavxU2-6azy9wdeFcvDVjlzYDKxpECgkn50fnSGOyuEQeZ3knz7OJYRt6P7EW1_B6LjSAODMiGqcXaF599Cw6-zQOda2GJbQ1ZkdWI5xdoQkH5LVmOD8dAg9slS_80tum7yeJj-5KtXsNk2CaqALERoI81UqMChMqgxGx-DRjRiCBmeC3atZdBlzyosjZy3F_cSGqyVgETVfYFBmB7xcdH6LtSaamuquckcy8dLfA5LQ9C0XkosgD_qOfw2HLD68cggrV7L0nfNPSzIiAGmz_JSZ48FLpgA1PsF8sgrL20DxHu0YoJcoZ8WoWNp8Jez9zj84kHNr2uQXSlNAE_4SvTVLOJGywNXNqPioT6FBjrO0Xz_28CQp4Hy01I18rJGvq7XeOH-cCnYDQGGqK6pIkBgCdhJsz6etW4ucojuhqf_lSMLkNxzZR8BZgk8xXFTMgznfM4IUsQYGoKQCK3jM7tNClzBFbzrcuNVtqYPZTYTnbPFlQAK0S1Vmz2a9f3qf7Z3m-dgN25VYU1_FGTutQTAozFYCkwNQ7K47HpI13kf8vEJ96ZOg3k7q-LVLI5wIzyGyqNgGgH0UAHAB8Cy-U1Q4vnnNHnEvIydn1L8t3-RCGnchdpYCW26YswjGFCuXgmdHLfqb4Ks6QaYOaF9hxiFjs1NipLn5lZ4dRjx6MX1v81QbGP_rNVPIk8Sm8kIMsDFGb8VqcHlIp-p1ybycOPcQfQU3FzU6ye776NqBMT7LGQF-fdTfH6jGF0PFAhq7DGj9R61ZHD7Ju9fRQ7ZRAcnKCVd_vXU8YjRkTNuQz83R5fZjKXBFaz3L20ZRO1Iy4hxilhiEmWTVuMV498PATMAcUX2TxjJvq7ikZTitja8XcRM1DJn-GXl2tgWQ9rfUrM3W_tTDypFHdhz4QlSPRJdTx1ZOWYe0M1Do50dBjQSPFmqP3EIXlb1bKF3T5TVucjiae1wcaBgzmjD1NXztVOALKprZQskW4WC1H69esUZhEUl2bPo-8cCeHtsv51M3rgJWs-v_f4V7cPnba2PWUHgXYexy5m6bODFWhJMmDPrNPmblnjUxIQbJTlJsp2h6pDIg_W2kN-imDM46nbu230ra8F_169pSb4enimDyoupwpWJt7pvl61KYk2SwcMf4eGkgOlQx4A6qAXmK6c_SgxBGBpMlhWdwpeqeoJ7GppBvy1mD1_XEA8DqgBfS8g1yAk7AIKN50yNbE8K15tFYFzo5Kjaa-NA-WLxKxlSpY2WJfuVqESIH4r3fs-bRDt3D-1sh5S9a7R3_GJyfRgvQWLHAqmBFVdX7G95wzSBA6ct5PV2q83il3GWep4vodVdCkc&opi=122715837
+          - img [ref=f17e24]
+        - link [ref=f17e26] [cursor=pointer]:
+          - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskVkR-TTTsTSWQsf5O0FAFfC34aI24FYMvHF_yOTaESPL3O9Of2Pa7szMEAZeKBpNXVVqRwqHPWdizBnNFY3D8ARVpY_ePIdUsM4S5ZgEtxTbSQ6t9lFbaEwyJSqICzeTL7Zs3nkH3POhlpzDWCXugx_F6z83vyG7xE6l3E8uExNDUrs-KTxA9BcMp24JKoKGbQwx_aVcB5zOsiF30W-8FtWpwC64xy7px6t7OU9JtxTM3FJwOf7wX3DZHWTVWwKKmKytWZcNyprrhGnlIOyaI8PVdRzhQqu2ZTseq0iY6mez2kby5Fu4i6Zbgf9p3rBqCKIG8inKvms_44OF0-6cUe7qdjqnz94Mc9cnwUv-IUh3xVbc0aCrhCf1TakCn78HdVBGO40TW1TcjKRzCeTbD1eISghtxcmigP_9oTTExzZZeJnA08CXbhnJcOH5hlRdRYi7l2Vvw9cWr9CwK432pKqPF6C_Abgu3vyeBVcPPBY1Lz3gbKsCmarYXphV5LBuRh0K2WZFa1wyS50J7qCvsK2q7J3eQA9YAueOZVY2-lXLv8BDhCMWJtewbAy_WMe1fXWA7Yy_G2bowxCEfMJjJiDHFsrD4mKM53q5zKaQb9ta1K9sXz0EJmKF0OVRYFIvt7aev5fiUcueHsTgKA_WP_HxokJBr6abrOwBiUG72jdClYrjh-YE13KLcTlceLzd_TqXX_GwTds9ISjLFsuTu6f9dBCMgxrKvEiHogkn8KwXeMzshQMgmu2n_tpvhUekfTykMqvHTBM5yFXAqQLY0UiqCVs7Vo5JrBTMsUIjcpx9GcJgnbwcDMuRN6Sd8jOXnuIH-c8HCEMqmXPGLERYzc-L_26JU2UwIBPZr5AZ9F3wO2yEeT5UUAP60AnRGyabCi-z2it62xqIHsmJKYHoDghJ0ROmcfB4HeBQkfwaE2kzFwqJ2WQ2zcQza68CpdM7tjJxoK_8ST8PIwFfxqAHcKOqDfXCwaX3QEOGICy8lPpu_bruaTk7AlN0UcwBqCPK4O9-0rtXC8QvE30o2KUZO-YLQXENpYsX-uERisyBjjaNuDvInwkeBas5miFXblAaaXxozAhYH-jlDC9fQayE2imYzG1Q0iS1BxSDqitcKNyc5bQ2tHjMULcEG1nswI6asyZVqyj0D2ybvHXbb1SBS_eNB4yo08T7P2HrwzNZtxDITZ6yi40rT1Wj8-uNYWTeggk46zbf_Z2ZgjtpbXozx0zZWQr8VKGk06MIZXwz157tKK5mMQN9sJeBdSy-NkLtLXQuHx70srcgOzpUeaB1aWvciE9Ho8TMDUb7sSQqBVLXGoPOX6Agcwip7VsivZKsik_4OTGe5BrZf2BeHRWNhVgYzw_5KCrjLfavxU2-6azy9wdeFcvDVjlzYDKxpECgkn50fnSGOyuEQeZ3knz7OJYRt6P7EW1_B6LjSAODMiGqcXaF599Cw6-zQOda2GJbQ1ZkdWI5xdoQkH5LVmOD8dAg9slS_80tum7yeJj-5KtXsNk2CaqALERoI81UqMChMqgxGx-DRjRiCBmeC3atZdBlzyosjZy3F_cSGqyVgETVfYFBmB7xcdH6LtSaamuquckcy8dLfA5LQ9C0XkosgD_qOfw2HLD68cggrV7L0nfNPSzIiAGmz_JSZ48FLpgA1PsF8sgrL20DxHu0YoJcoZ8WoWNp8Jez9zj84kHNr2uQXSlNAE_4SvTVLOJGywNXNqPioT6FBjrO0Xz_28CQp4Hy01I18rJGvq7XeOH-cCnYDQGGqK6pIkBgCdhJsz6etW4ucojuhqf_lSMLkNxzZR8BZgk8xXFTMgznfM4IUsQYGoKQCK3jM7tNClzBFbzrcuNVtqYPZTYTnbPFlQAK0S1Vmz2a9f3qf7Z3m-dgN25VYU1_FGTutQTAozFYCkwNQ7K47HpI13kf8vEJ96ZOg3k7q-LVLI5wIzyGyqNgGgH0UAHAB8Cy-U1Q4vnnNHnEvIydn1L8t3-RCGnchdpYCW26YswjGFCuXgmdHLfqb4Ks6QaYOaF9hxiFjs1NipLn5lZ4dRjx6MX1v81QbGP_rNVPIk8Sm8kIMsDFGb8VqcHlIp-p1ybycOPcQfQU3FzU6ye776NqBMT7LGQF-fdTfH6jGF0PFAhq7DGj9R61ZHD7Ju9fRQ7ZRAcnKCVd_vXU8YjRkTNuQz83R5fZjKXBFaz3L20ZRO1Iy4hxilhiEmWTVuMV498PATMAcUX2TxjJvq7ikZTitja8XcRM1DJn-GXl2tgWQ9rfUrM3W_tTDypFHdhz4QlSPRJdTx1ZOWYe0M1Do50dBjQSPFmqP3EIXlb1bKF3T5TVucjiae1wcaBgzmjD1NXztVOALKprZQskW4WC1H69esUZhEUl2bPo-8cCeHtsv51M3rgJWs-v_f4V7cPnba2PWUHgXYexy5m6bODFWhJMmDPrNPmblnjUxIQbJTlJsp2h6pDIg_W2kN-imDM46nbu230ra8F_169pSb4enimDyoupwpWJt7pvl61KYk2SwcMf4eGkgOlQx4A6qAXmK6c_SgxBGBpMlhWdwpeqeoJ7GppBvy1mD1_XEA8DqgBfS8g1yAk7AIKN50yNbE8K15tFYFzo5Kjaa-NA-WLxKxlSpY2WJfuVqESIH4r3fs-bRDt3D-1sh5S9a7R3_GJyfRgvQWLHAqmBFVdX7G95wzSBA6ct5PV2q83il3GWep4vodVdCkc&opi=122715837
+          - img [ref=f17e28]
+      - img [ref=f17e31] [cursor=pointer]
+      - generic [ref=f17e42]:
+        - img [ref=f17e45]
+        - generic [ref=f17e48]:
+          - text: Ads by
+          - img [ref=f17e49]
+        - generic [ref=f17e52]:
+          - generic [ref=f17e55] [cursor=pointer]: フィードバックを送信
+          - link [ref=f17e57] [cursor=pointer]:
+            - /url: https://adssettings.google.com/whythisad?source=display&reasons=AZwrskVkR-TTTsTSWQsf5O0FAFfC34aI24FYMvHF_yOTaESPL3O9Of2Pa7szMEAZeKBpNXVVqRwqHPWdizBnNFY3D8ARVpY_ePIdUsM4S5ZgEtxTbSQ6t9lFbaEwyJSqICzeTL7Zs3nkH3POhlpzDWCXugx_F6z83vyG7xE6l3E8uExNDUrs-KTxA9BcMp24JKoKGbQwx_aVcB5zOsiF30W-8FtWpwC64xy7px6t7OU9JtxTM3FJwOf7wX3DZHWTVWwKKmKytWZcNyprrhGnlIOyaI8PVdRzhQqu2ZTseq0iY6mez2kby5Fu4i6Zbgf9p3rBqCKIG8inKvms_44OF0-6cUe7qdjqnz94Mc9cnwUv-IUh3xVbc0aCrhCf1TakCn78HdVBGO40TW1TcjKRzCeTbD1eISghtxcmigP_9oTTExzZZeJnA08CXbhnJcOH5hlRdRYi7l2Vvw9cWr9CwK432pKqPF6C_Abgu3vyeBVcPPBY1Lz3gbKsCmarYXphV5LBuRh0K2WZFa1wyS50J7qCvsK2q7J3eQA9YAueOZVY2-lXLv8BDhCMWJtewbAy_WMe1fXWA7Yy_G2bowxCEfMJjJiDHFsrD4mKM53q5zKaQb9ta1K9sXz0EJmKF0OVRYFIvt7aev5fiUcueHsTgKA_WP_HxokJBr6abrOwBiUG72jdClYrjh-YE13KLcTlceLzd_TqXX_GwTds9ISjLFsuTu6f9dBCMgxrKvEiHogkn8KwXeMzshQMgmu2n_tpvhUekfTykMqvHTBM5yFXAqQLY0UiqCVs7Vo5JrBTMsUIjcpx9GcJgnbwcDMuRN6Sd8jOXnuIH-c8HCEMqmXPGLERYzc-L_26JU2UwIBPZr5AZ9F3wO2yEeT5UUAP60AnRGyabCi-z2it62xqIHsmJKYHoDghJ0ROmcfB4HeBQkfwaE2kzFwqJ2WQ2zcQza68CpdM7tjJxoK_8ST8PIwFfxqAHcKOqDfXCwaX3QEOGICy8lPpu_bruaTk7AlN0UcwBqCPK4O9-0rtXC8QvE30o2KUZO-YLQXENpYsX-uERisyBjjaNuDvInwkeBas5miFXblAaaXxozAhYH-jlDC9fQayE2imYzG1Q0iS1BxSDqitcKNyc5bQ2tHjMULcEG1nswI6asyZVqyj0D2ybvHXbb1SBS_eNB4yo08T7P2HrwzNZtxDITZ6yi40rT1Wj8-uNYWTeggk46zbf_Z2ZgjtpbXozx0zZWQr8VKGk06MIZXwz157tKK5mMQN9sJeBdSy-NkLtLXQuHx70srcgOzpUeaB1aWvciE9Ho8TMDUb7sSQqBVLXGoPOX6Agcwip7VsivZKsik_4OTGe5BrZf2BeHRWNhVgYzw_5KCrjLfavxU2-6azy9wdeFcvDVjlzYDKxpECgkn50fnSGOyuEQeZ3knz7OJYRt6P7EW1_B6LjSAODMiGqcXaF599Cw6-zQOda2GJbQ1ZkdWI5xdoQkH5LVmOD8dAg9slS_80tum7yeJj-5KtXsNk2CaqALERoI81UqMChMqgxGx-DRjRiCBmeC3atZdBlzyosjZy3F_cSGqyVgETVfYFBmB7xcdH6LtSaamuquckcy8dLfA5LQ9C0XkosgD_qOfw2HLD68cggrV7L0nfNPSzIiAGmz_JSZ48FLpgA1PsF8sgrL20DxHu0YoJcoZ8WoWNp8Jez9zj84kHNr2uQXSlNAE_4SvTVLOJGywNXNqPioT6FBjrO0Xz_28CQp4Hy01I18rJGvq7XeOH-cCnYDQGGqK6pIkBgCdhJsz6etW4ucojuhqf_lSMLkNxzZR8BZgk8xXFTMgznfM4IUsQYGoKQCK3jM7tNClzBFbzrcuNVtqYPZTYTnbPFlQAK0S1Vmz2a9f3qf7Z3m-dgN25VYU1_FGTutQTAozFYCkwNQ7K47HpI13kf8vEJ96ZOg3k7q-LVLI5wIzyGyqNgGgH0UAHAB8Cy-U1Q4vnnNHnEvIydn1L8t3-RCGnchdpYCW26YswjGFCuXgmdHLfqb4Ks6QaYOaF9hxiFjs1NipLn5lZ4dRjx6MX1v81QbGP_rNVPIk8Sm8kIMsDFGb8VqcHlIp-p1ybycOPcQfQU3FzU6ye776NqBMT7LGQF-fdTfH6jGF0PFAhq7DGj9R61ZHD7Ju9fRQ7ZRAcnKCVd_vXU8YjRkTNuQz83R5fZjKXBFaz3L20ZRO1Iy4hxilhiEmWTVuMV498PATMAcUX2TxjJvq7ikZTitja8XcRM1DJn-GXl2tgWQ9rfUrM3W_tTDypFHdhz4QlSPRJdTx1ZOWYe0M1Do50dBjQSPFmqP3EIXlb1bKF3T5TVucjiae1wcaBgzmjD1NXztVOALKprZQskW4WC1H69esUZhEUl2bPo-8cCeHtsv51M3rgJWs-v_f4V7cPnba2PWUHgXYexy5m6bODFWhJMmDPrNPmblnjUxIQbJTlJsp2h6pDIg_W2kN-imDM46nbu230ra8F_169pSb4enimDyoupwpWJt7pvl61KYk2SwcMf4eGkgOlQx4A6qAXmK6c_SgxBGBpMlhWdwpeqeoJ7GppBvy1mD1_XEA8DqgBfS8g1yAk7AIKN50yNbE8K15tFYFzo5Kjaa-NA-WLxKxlSpY2WJfuVqESIH4r3fs-bRDt3D-1sh5S9a7R3_GJyfRgvQWLHAqmBFVdX7G95wzSBA6ct5PV2q83il3GWep4vodVdCkc&opi=122715837
+            - generic [ref=f17e58]:
+              - text: 広告表示設定
+              - img [ref=f17e59]
+      - generic [ref=f17e61]:
+        - generic [ref=f17e64] [cursor=pointer]: 広告でコンテンツが隠れる
+        - generic [ref=f17e67] [cursor=pointer]: 広告のコンテンツが不適切
+        - generic [ref=f17e70] [cursor=pointer]: この広告に興味がない
+        - generic [ref=f17e73] [cursor=pointer]: この広告を何回も見た
+      - generic [ref=f17e79]: ご協力いただきありがとうございます。いただいたフィードバックは Google 広告の改善に役立てさせていただきます
+      - generic [ref=f17e85]:
+        - img [ref=f17e86]
+        - text: はこの広告の表示を停止しました

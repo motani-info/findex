@@ -1,0 +1,654 @@
+- generic [active] [ref=e1]:
+  - link [ref=e2] [cursor=pointer]:
+    - /url: "#"
+    - text: ___
+  - generic:
+    - link [ref=e4] [cursor=pointer]:
+      - /url: "#skipToContent"
+    - link [ref=e5] [cursor=pointer]:
+      - /url: "#skipToMenu"
+    - link [ref=e6] [cursor=pointer]:
+      - /url: "#skipToFooter"
+  - banner "Header" [ref=e7]:
+    - generic [ref=e9]:
+      - navigation "Primary Navigation" [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - link "logo" [ref=e14] [cursor=pointer]:
+              - /url: https://www.spglobal.com/en
+              - img "logo" [ref=e16]
+            - button " Explore S&P Global" [ref=e17] [cursor=pointer]:
+              - generic [ref=e20]: 
+              - generic [ref=e21]: Explore S&P Global
+          - generic [ref=e22]:
+            - text: 
+            - generic [ref=e23]:
+              - button " Search" [ref=e24] [cursor=pointer]:
+                - generic [ref=e26]: 
+                - generic [ref=e27]: Search
+              - button "language selector" [ref=e29] [cursor=pointer]:
+                - generic [ref=e31]: 
+                - generic [ref=e32]: EN
+              - link " Support" [ref=e33] [cursor=pointer]:
+                - /url: https://www.spglobal.com/ratings/en/contact-us
+                - generic [ref=e35]: 
+                - generic [ref=e36]: Support
+              - button " Login" [ref=e38] [cursor=pointer]:
+                - generic [ref=e40]: 
+                - generic [ref=e41]: Login
+        - text:                                                                           
+      - navigation "Secondary Navigation" [ref=e43]:
+        - navigation "Main Navigation" [ref=e44]:
+          - list [ref=e45]:
+            - listitem [ref=e46]:
+              - link "Ratings" [ref=e47] [cursor=pointer]:
+                - /url: /ratings/en
+                - generic [ref=e48]: Ratings
+            - listitem [ref=e49]:
+              - button "Products " [ref=e50] [cursor=pointer]:
+                - generic [ref=e51]: Products
+                - generic [ref=e52]: 
+                - text: 
+            - listitem [ref=e53]:
+              - button "Research " [ref=e54] [cursor=pointer]:
+                - generic [ref=e55]: Research
+                - generic [ref=e56]: 
+                - text: 
+            - listitem [ref=e57]:
+              - button "Credit Ratings " [ref=e58] [cursor=pointer]:
+                - generic [ref=e59]: Credit Ratings
+                - generic [ref=e60]: 
+                - text: 
+            - listitem [ref=e61]:
+              - button "Events " [ref=e62] [cursor=pointer]:
+                - generic [ref=e63]: Events
+                - generic [ref=e64]: 
+                - text: 
+            - listitem [ref=e65]:
+              - button "Regulatory " [ref=e66] [cursor=pointer]:
+                - generic [ref=e67]: Regulatory
+                - generic [ref=e68]: 
+                - text: 
+          - link "Need a Rating?" [ref=e70] [cursor=pointer]:
+            - /url: https://www.spglobal.com/ratings/en/products/credit-ratings
+        - text:                                                                                                                      
+    - text:                                                                                                                                                                                                                 
+  - main [ref=e71]:
+    - text: 
+    - main [ref=e75]:
+      - generic [ref=e80]:
+        - banner "S&P Global Ratings" [ref=e88]:
+          - img "S&P Global Ratings" [ref=e90]
+          - generic [ref=e94]:
+            - paragraph
+            - heading "S&P Global Ratings" [level=1] [ref=e95]
+            - paragraph [ref=e97]: At S&P Global Ratings, our analyst-driven credit ratings, research, and sustainable finance opinions provide critical insights that are essential to translating complexity into clarity so market participants can unlock opportunities and make decisions with conviction.
+        - generic [ref=e101]:
+          - generic [ref=e109]:
+            - generic "Latest Insights" [ref=e119]:
+              - heading "Latest Insights" [level=4] [ref=e120]
+              - list [ref=e121]:
+                - listitem [ref=e122]:
+                  - 'link "29 May 2026 Second Party Opinion: SpareBank 1 Helgeland (SBH) Green Bond Framework " [ref=e125] [cursor=pointer]':
+                    - /url: https://www.spglobal.com/ratings/en/regulatory/article/second-party-opinion-sparebank-1-helgeland-sbh-green-bond-framework-s101688488
+                    - paragraph [ref=e126]: 29 May 2026
+                    - generic [ref=e127]:
+                      - 'heading "Second Party Opinion: SpareBank 1 Helgeland (SBH) Green Bond Framework" [level=4] [ref=e128]'
+                      - generic [ref=e130]: 
+                - listitem [ref=e131]:
+                  - 'link "29 May 2026 Second Party Opinion: Entra Green Financing Framework " [ref=e134] [cursor=pointer]':
+                    - /url: https://www.spglobal.com/ratings/en/regulatory/article/second-party-opinion-entra-green-financing-framework-s101688451
+                    - paragraph [ref=e135]: 29 May 2026
+                    - generic [ref=e136]:
+                      - 'heading "Second Party Opinion: Entra Green Financing Framework" [level=4] [ref=e137]'
+                      - generic [ref=e139]: 
+                - listitem [ref=e140]:
+                  - 'link "29 May 2026 Abridged Supranationals Interim Edition 2026: Comparative Data For Multilateral Lending Institutions " [ref=e143] [cursor=pointer]':
+                    - /url: https://www.spglobal.com/ratings/en/regulatory/article/abridged-supranationals-interim-edition-2026-comparative-data-for-multilateral-lending-institutions-s101686801
+                    - paragraph [ref=e144]: 29 May 2026
+                    - generic [ref=e145]:
+                      - 'heading "Abridged Supranationals Interim Edition 2026: Comparative Data For Multilateral Lending Institutions" [level=4] [ref=e146]'
+                      - generic [ref=e148]: 
+                - listitem [ref=e149]:
+                  - 'link "29 May 2026 Abridged Supranationals Interim Edition 2026: Multilateral Lending Institutions Sector Updates " [ref=e152] [cursor=pointer]':
+                    - /url: https://www.spglobal.com/ratings/en/regulatory/article/abridged-supranationals-interim-edition-2026-multilateral-lending-institutions-sector-updates-s101686791
+                    - paragraph [ref=e153]: 29 May 2026
+                    - generic [ref=e154]:
+                      - 'heading "Abridged Supranationals Interim Edition 2026: Multilateral Lending Institutions Sector Updates" [level=4] [ref=e155]'
+                      - generic [ref=e157]: 
+                - listitem [ref=e158]:
+                  - 'link "29 May 2026 APAC Structured Finance Chart Book: May 2026 " [ref=e161] [cursor=pointer]':
+                    - /url: https://www.spglobal.com/ratings/en/regulatory/article/apac-structured-finance-chart-book-may-2026-s101688347
+                    - paragraph [ref=e162]: 29 May 2026
+                    - generic [ref=e163]:
+                      - 'heading "APAC Structured Finance Chart Book: May 2026" [level=4] [ref=e164]'
+                      - generic [ref=e166]: 
+            - link "See All Insights " [ref=e179] [cursor=pointer]:
+              - /url: /ratings/en/research
+              - text: See All Insights
+              - generic [ref=e181]: 
+          - 'link "Private Markets Credit Conditions: Special Update Prolonged Hormuz Disruptions Hurtling Towards Lasting Credit Implications Our base case now assumes disruptions in the Strait of Hormuz will ease in the second half of the year, but with possible periodic interruptions and a slower, less complete recovery in flows than we previously expected." [ref=e187] [cursor=pointer]':
+            - /url: /ratings/en/regulatory/article/credit-conditions-special-update-prolonged-hormuz-disruptions-hurtling-towards-lasting-credit-implications-s101686995
+            - img "Private Markets" [ref=e190]
+            - generic [ref=e192]:
+              - generic [ref=e193]: "Credit Conditions: Special Update"
+              - heading "Prolonged Hormuz Disruptions Hurtling Towards Lasting Credit Implications" [level=2] [ref=e194]
+              - paragraph [ref=e195]:
+                - paragraph [ref=e196]: Our base case now assumes disruptions in the Strait of Hormuz will ease in the second half of the year, but with possible periodic interruptions and a slower, less complete recovery in flows than we previously expected.
+          - generic [ref=e198]:
+            - link "Products & Services Private Markets Solutions " [ref=e208] [cursor=pointer]:
+              - /url: https://www.spglobal.com/ratings/en/products/solutions/private-markets
+              - img [ref=e211]
+              - generic [ref=e212]:
+                - generic [ref=e213]:
+                  - generic [ref=e214]: Products & Services
+                  - heading "Private Markets Solutions" [level=4] [ref=e215]
+                - generic [ref=e217]: 
+            - separator [ref=e225]:
+              - separator [ref=e226]
+            - link "Featured Topic Fund Finance " [ref=e236] [cursor=pointer]:
+              - /url: https://www.spglobal.com/ratings/en/research/private-markets/fund-finance
+              - img [ref=e239]
+              - generic [ref=e240]:
+                - generic [ref=e241]:
+                  - generic [ref=e242]: Featured Topic
+                  - heading "Fund Finance" [level=4] [ref=e243]
+                - generic [ref=e245]: 
+        - generic [ref=e256]:
+          - search [ref=e258]:
+            - generic [ref=e260]: 
+            - textbox "On this page" [ref=e261]:
+              - /placeholder: Find a Rating or Search Insights...
+          - generic [ref=e262]:
+            - generic [ref=e263]:
+              - generic [ref=e265]:
+                - radio [checked] [ref=e267] [cursor=pointer]
+                - generic [ref=e268] [cursor=pointer]: Entity & Insights
+              - generic [ref=e270]:
+                - radio [ref=e272] [cursor=pointer]
+                - generic [ref=e273] [cursor=pointer]: CUSIP
+              - generic [ref=e275]:
+                - radio [ref=e277] [cursor=pointer]
+                - generic [ref=e278] [cursor=pointer]: CINS
+              - generic [ref=e280]:
+                - radio [ref=e282] [cursor=pointer]
+                - generic [ref=e283] [cursor=pointer]: ISIN
+            - link "Browse Ratings by Practice " [ref=e285] [cursor=pointer]:
+              - /url: /ratings/en/regulatory/entity-browse
+              - text: Browse Ratings by Practice
+              - generic [ref=e287]: 
+        - heading "Featured Insights" [level=2] [ref=e297]
+        - generic [ref=e302]:
+          - link "hyperscalers Corporates May 26, 2026 Hype Or Not, Mythos Signposts AI's Growing Importance In Cybersecurity This is the first time Anthropic has declined to release a model to the general public. " [ref=e308] [cursor=pointer]:
+            - /url: /ratings/en/regulatory/article/hype-or-not-mythos-signposts-ais-growing-importance-in-cybersecurity-s101687098
+            - img "hyperscalers" [ref=e311]
+            - generic [ref=e312]:
+              - generic [ref=e313]:
+                - generic [ref=e314]: Corporates
+                - generic [ref=e315]: May 26, 2026
+                - heading "Hype Or Not, Mythos Signposts AI's Growing Importance In Cybersecurity" [level=4] [ref=e316]
+                - paragraph [ref=e317]:
+                  - paragraph [ref=e318]: This is the first time Anthropic has declined to release a model to the general public.
+              - generic [ref=e320]: 
+          - 'link "Strait of Hormuz Digital Assets Primer May 25, 2026 Digital Assets Primer: How Vaults Can Shape The Capital Markets Of Tomorrow Vaults are the on-chain equivalent of managed funds. " [ref=e326] [cursor=pointer]':
+            - /url: /ratings/en/regulatory/article/digital-assets-primer-how-vaults-can-shape-the-capital-markets-of-tomorrow-s101684331
+            - img "Strait of Hormuz" [ref=e329]
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - generic [ref=e332]: Digital Assets Primer
+                - generic [ref=e333]: May 25, 2026
+                - 'heading "Digital Assets Primer: How Vaults Can Shape The Capital Markets Of Tomorrow" [level=4] [ref=e334]'
+                - paragraph [ref=e335]:
+                  - paragraph [ref=e336]: Vaults are the on-chain equivalent of managed funds.
+              - generic [ref=e338]: 
+          - link "Global_Economic_Outlook Private Markets May 21, 2026 Private Credit Fundamentals Remain Resilient Credit-estimated companies showed resilience over the first quarter, despite numerous challenges. " [ref=e344] [cursor=pointer]:
+            - /url: /ratings/en/regulatory/article/private-credit-fundamentals-remain-resilient-s101685515
+            - img "Global_Economic_Outlook" [ref=e347]
+            - generic [ref=e348]:
+              - generic [ref=e349]:
+                - generic [ref=e350]: Private Markets
+                - generic [ref=e351]: May 21, 2026
+                - heading "Private Credit Fundamentals Remain Resilient" [level=4] [ref=e352]
+                - paragraph [ref=e353]:
+                  - paragraph [ref=e354]: Credit-estimated companies showed resilience over the first quarter, despite numerous challenges.
+              - generic [ref=e356]: 
+          - 'link "Global_Economic_Outlook Corporates May 18, 2026 Corporate Earnings Themes: War Brings A Wave Of Worry Q1 results have given a first opportunity to assess nonfinancial corporate management comments about the impact of the Middle East war. " [ref=e362] [cursor=pointer]':
+            - /url: /ratings/en/regulatory/delegate/getPDF?articleId=3564358&type=COMMENTS&defaultFormat=PDF
+            - img "Global_Economic_Outlook" [ref=e365]
+            - generic [ref=e366]:
+              - generic [ref=e367]:
+                - generic [ref=e368]: Corporates
+                - generic [ref=e369]: May 18, 2026
+                - 'heading "Corporate Earnings Themes: War Brings A Wave Of Worry" [level=4] [ref=e370]'
+                - paragraph [ref=e371]:
+                  - paragraph [ref=e372]: Q1 results have given a first opportunity to assess nonfinancial corporate management comments about the impact of the Middle East war.
+              - generic [ref=e374]: 
+        - generic [ref=e383]:
+          - img [ref=e384]
+          - generic [ref=e386]:
+            - generic [ref=e387]:
+              - paragraph [ref=e388]: Featured Event
+              - heading "2026 Insurance Conference" [level=2] [ref=e389]
+              - generic [ref=e390]: Our highly anticipated 42nd Annual Insurance Event in New York City offers a unique opportunity to hear from S&P Global Ratings’ senior analysts and leading industry specialists, take part in interactive panel discussions, and connect with market participants.
+            - link "Register Now" [ref=e393] [cursor=pointer]:
+              - /url: /ratings/en/events/in-person/42nd-annual-insurance-conference
+        - generic "Featured Topics" [ref=e403]:
+          - generic [ref=e404]:
+            - heading "Featured Topics" [level=2] [ref=e405]
+            - link "View All " [ref=e407] [cursor=pointer]:
+              - /url: /ratings/en/research/topics
+              - generic [ref=e408]: View All
+              - generic [ref=e410]: 
+          - generic [ref=e411]:
+            - generic [ref=e414]:
+              - link "carousel image Cyber Risk in a New Era The shift to digital is accelerating at a faster pace than any time in the past. The increasing frequency of attacks and the potential for rapid deterioration in credit profiles after an attack are risk factors that are relevant for our rating assessments now; this tail risk is increasingly becoming more mainstream and credit relevant. " [ref=e418] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/cyber-risk-in-a-new-era
+                - img "carousel image" [ref=e420]
+                - generic [ref=e422]:
+                  - heading "Cyber Risk in a New Era" [level=3] [ref=e423]
+                  - generic [ref=e424]: The shift to digital is accelerating at a faster pace than any time in the past. The increasing frequency of attacks and the potential for rapid deterioration in credit profiles after an attack are risk factors that are relevant for our rating assessments now; this tail risk is increasingly becoming more mainstream and credit relevant.
+                  - generic [ref=e427]: 
+              - link "carousel image The Future of Banking Technological disruption leads to new customer expectations, new forms of competition, but also offers new opportunities for banks. All these trends may ultimately impact the credit profile of banking industries across the globe. " [ref=e431] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/the-future-of-banking
+                - img "carousel image" [ref=e433]
+                - generic [ref=e435]:
+                  - heading "The Future of Banking" [level=3] [ref=e436]
+                  - generic [ref=e437]: Technological disruption leads to new customer expectations, new forms of competition, but also offers new opportunities for banks. All these trends may ultimately impact the credit profile of banking industries across the globe.
+                  - generic [ref=e440]: 
+              - link "carousel image Energy & Climate Resilience Climate risks and the energy transition are influencing credit fundamentals, supply chains, and investment as affordability, security, and sustainability pressures rise. " [ref=e444] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/energy-climate-resilience
+                - img "carousel image" [ref=e446]
+                - generic [ref=e448]:
+                  - heading "Energy & Climate Resilience" [level=3] [ref=e449]
+                  - generic [ref=e450]: Climate risks and the energy transition are influencing credit fundamentals, supply chains, and investment as affordability, security, and sustainability pressures rise.
+                  - generic [ref=e453]: 
+              - link "carousel image Digital Infrastructure & Innovation Digital infrastructure growth and innovation are reshaping sectors and raising new risks across credit markets, including cyber and technology dependencies. " [ref=e457] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/digital-infrastructure-innovation
+                - img "carousel image" [ref=e459]
+                - generic [ref=e461]:
+                  - heading "Digital Infrastructure & Innovation" [level=3] [ref=e462]
+                  - generic [ref=e463]: Digital infrastructure growth and innovation are reshaping sectors and raising new risks across credit markets, including cyber and technology dependencies.
+                  - generic [ref=e466]: 
+              - link "carousel image Leveraged Finance & CLOs Uncovered The market is looking at the corporate credit risk with ever more scrutiny as the cycle turns. Here we offer a view on the whole corporate credit picture - including the pools of diversified leveraged loan names in the CLO market and the credits that underpin them. Using data and analytical insight this provides a transparent view of market trends and conditions. " [ref=e470] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/leveraged-finance-clos-uncovered
+                - img "carousel image" [ref=e472]
+                - generic [ref=e474]:
+                  - heading "Leveraged Finance & CLOs Uncovered" [level=3] [ref=e475]
+                  - generic [ref=e476]: The market is looking at the corporate credit risk with ever more scrutiny as the cycle turns. Here we offer a view on the whole corporate credit picture - including the pools of diversified leveraged loan names in the CLO market and the credits that underpin them. Using data and analytical insight this provides a transparent view of market trends and conditions.
+                  - generic [ref=e479]: 
+              - link "carousel image Geopolitical Risk S&P Global Ratings research on geopolitical uncertainty, analysing global political and economic risks and their implications for credit markets and ratings " [ref=e483] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/geopolitical-uncertainty
+                - img "carousel image" [ref=e485]
+                - generic [ref=e487]:
+                  - heading "Geopolitical Risk" [level=3] [ref=e488]
+                  - generic [ref=e489]: S&P Global Ratings research on geopolitical uncertainty, analysing global political and economic risks and their implications for credit markets and ratings
+                  - generic [ref=e492]: 
+              - link "carousel image Debt Markets In Transition Market participants' need for transparency on the full scope of credit risk will expand as the financial system evolves, with increasing interplay and interconnection between public and private markets. " [ref=e496] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/debt-markets-in-transition
+                - img "carousel image" [ref=e498]
+                - generic [ref=e500]:
+                  - heading "Debt Markets In Transition" [level=3] [ref=e501]
+                  - generic [ref=e502]: Market participants' need for transparency on the full scope of credit risk will expand as the financial system evolves, with increasing interplay and interconnection between public and private markets.
+                  - generic [ref=e505]: 
+              - link "carousel image Islamic Finance Islamic finance continues to expand across its core markets while attracting growing global interest. Our research provides forward-looking insights into this evolving industry. " [ref=e509] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/islamic-finance
+                - img "carousel image" [ref=e511]
+                - generic [ref=e513]:
+                  - heading "Islamic Finance" [level=3] [ref=e514]
+                  - generic [ref=e515]: Islamic finance continues to expand across its core markets while attracting growing global interest. Our research provides forward-looking insights into this evolving industry.
+                  - generic [ref=e518]: 
+              - link "carousel image Digital Assets The digital assets landscape is evolving at an unprecedented pace, shaped by innovation, regulation, and shifting market dynamics. As these market changes continue to redefine the ecosystem, we provide clear, informed perspectives and foundational insights. " [ref=e522] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/digital-assets
+                - img "carousel image" [ref=e524]
+                - generic [ref=e526]:
+                  - heading "Digital Assets" [level=3] [ref=e527]
+                  - generic [ref=e528]: The digital assets landscape is evolving at an unprecedented pace, shaped by innovation, regulation, and shifting market dynamics. As these market changes continue to redefine the ecosystem, we provide clear, informed perspectives and foundational insights.
+                  - generic [ref=e531]: 
+              - link "carousel image AI As the AI transformation advances, accompanied by enormous investment in datacenter expansion, the potential rewards come with notable risks. " [ref=e535] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/ai
+                - img "carousel image" [ref=e537]
+                - generic [ref=e539]:
+                  - heading "AI" [level=3] [ref=e540]
+                  - generic [ref=e541]: As the AI transformation advances, accompanied by enormous investment in datacenter expansion, the potential rewards come with notable risks.
+                  - generic [ref=e544]: 
+              - link "carousel image Outlooks S&P Global Ratings’ Global Credit Outlook presents forward‑looking views on credit trends, risks, and macroeconomic conditions across regions and sectors. " [ref=e548] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/outlooks
+                - img "carousel image" [ref=e550]
+                - generic [ref=e552]:
+                  - heading "Outlooks" [level=3] [ref=e553]
+                  - generic [ref=e554]: S&P Global Ratings’ Global Credit Outlook presents forward‑looking views on credit trends, risks, and macroeconomic conditions across regions and sectors.
+                  - generic [ref=e557]: 
+              - link "carousel image Changing Capital Flows Market volatility is shifting capital toward safer assets, affecting liquidity, funding access, and emerging‑market investment. " [ref=e561] [cursor=pointer]:
+                - /url: /ratings/en/research/topics/changing-capital-flows
+                - img "carousel image" [ref=e563]
+                - generic [ref=e565]:
+                  - heading "Changing Capital Flows" [level=3] [ref=e566]
+                  - generic [ref=e567]: Market volatility is shifting capital toward safer assets, affecting liquidity, funding access, and emerging‑market investment.
+                  - generic [ref=e570]: 
+            - generic [ref=e571]:
+              - button "Previous" [disabled] [ref=e572]:
+                - generic [ref=e573]: 
+              - button "Next" [ref=e574] [cursor=pointer]:
+                - generic [ref=e575]: 
+        - heading "Browse by Sector" [level=2] [ref=e585]
+        - slider "Carousel" [ref=e595]:
+          - generic [ref=e597]:
+            - tabpanel "Slide 1 of 9" [ref=e598]:
+              - generic "Corporates" [ref=e600]:
+                - link "Corporates Corporates " [ref=e603] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/corporates.html
+                  - img "Corporates" [ref=e605]
+                  - generic [ref=e607]:
+                    - heading "Corporates" [level=4] [ref=e608]
+                    - generic [ref=e611]: 
+            - tabpanel "Slide 2 of 9" [ref=e612]:
+              - generic "Structured Finance" [ref=e614]:
+                - link "Structured Finance " [ref=e617] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/structured-finance.html
+                  - img [ref=e619]
+                  - generic [ref=e621]:
+                    - heading "Structured Finance" [level=4] [ref=e622]
+                    - generic [ref=e625]: 
+            - tabpanel "Slide 3 of 9" [ref=e626]:
+              - generic "Insurance" [ref=e628]:
+                - link "Insurance " [ref=e631] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/insurance.html
+                  - img [ref=e633]
+                  - generic [ref=e635]:
+                    - heading "Insurance" [level=4] [ref=e636]
+                    - generic [ref=e639]: 
+            - tabpanel "Slide 4 of 9" [ref=e640]:
+              - generic "Fund Ratings" [ref=e642]:
+                - link "Fund Ratings " [ref=e645] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/funds.html
+                  - img [ref=e647]
+                  - generic [ref=e649]:
+                    - heading "Fund Ratings" [level=4] [ref=e650]
+                    - generic [ref=e653]: 
+            - tabpanel "Slide 5 of 9" [ref=e654]:
+              - generic "Governments" [ref=e656]:
+                - link "Governments " [ref=e659] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/governments.html
+                  - img [ref=e661]
+                  - generic [ref=e663]:
+                    - heading "Governments" [level=4] [ref=e664]
+                    - generic [ref=e667]: 
+            - tabpanel "Slide 6 of 9" [ref=e668]:
+              - generic "Infrastructure & Utilities" [ref=e670]:
+                - link "Infrastructure & Utilities " [ref=e673] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/infrastructure.html
+                  - img [ref=e675]
+                  - generic [ref=e677]:
+                    - heading "Infrastructure & Utilities" [level=4] [ref=e678]
+                    - generic [ref=e681]: 
+            - tabpanel "Slide 7 of 9" [ref=e682]:
+              - generic "U.S. Public Finance" [ref=e684]:
+                - link "U.S. Public Finance " [ref=e687] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/us-public-finance.html
+                  - img [ref=e689]
+                  - generic [ref=e691]:
+                    - heading "U.S. Public Finance" [level=4] [ref=e692]
+                    - generic [ref=e695]: 
+            - tabpanel "Slide 8 of 9" [ref=e696]:
+              - generic "Financial Institutions" [ref=e698]:
+                - link "Financial Institutions " [ref=e701] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/financial-institutions.html
+                  - img [ref=e703]
+                  - generic [ref=e705]:
+                    - heading "Financial Institutions" [level=4] [ref=e706]
+                    - generic [ref=e709]: 
+            - tabpanel "Slide 9 of 9" [ref=e710]:
+              - generic "Project Finance" [ref=e712]:
+                - link "Project Finance " [ref=e715] [cursor=pointer]:
+                  - /url: /content/spglobal/ratings/us/en/research/sectors/project-finance.html
+                  - img [ref=e717]
+                  - generic [ref=e719]:
+                    - heading "Project Finance" [level=4] [ref=e720]
+                    - generic [ref=e723]: 
+          - generic [ref=e725]:
+            - button "pause" [ref=e726] [cursor=pointer]:
+              - generic [ref=e727]: 
+            - text: 
+            - button "previous" [ref=e728]:
+              - generic [ref=e729]: 
+            - button "next" [ref=e735] [cursor=pointer]:
+              - generic [ref=e736]: 
+        - separator [ref=e744]:
+          - separator [ref=e745]
+        - generic [ref=e749]:
+          - heading "Products" [level=2] [ref=e755]
+          - link "See All Products & Services " [ref=e764] [cursor=pointer]:
+            - /url: /ratings/en/products/index
+            - text: See All Products & Services
+            - generic [ref=e766]: 
+        - generic [ref=e770]:
+          - link "Products & Services Credit Ratings We empower people to make informed, confident decisions. " [ref=e776] [cursor=pointer]:
+            - /url: https://www.spglobal.com/ratings/en/products/credit-ratings
+            - img [ref=e779]
+            - generic [ref=e780]:
+              - generic [ref=e781]:
+                - generic [ref=e782]: Products & Services
+                - heading "Credit Ratings" [level=4] [ref=e783]
+                - paragraph [ref=e784]:
+                  - paragraph [ref=e785]: We empower people to make informed, confident decisions.
+              - generic [ref=e787]: 
+          - link "Products & Services Rating Evaluation Service Our Rating Evaluation Service (RES), a tool for rated or unrated entities, provides a forward-looking, confidential assessment of the potential credit impact of your proposed strategic initiatives before you implement them. " [ref=e793] [cursor=pointer]:
+            - /url: https://www.spglobal.com/ratings/en/products/rating-evaluation-service
+            - img [ref=e796]
+            - generic [ref=e797]:
+              - generic [ref=e798]:
+                - generic [ref=e799]: Products & Services
+                - heading "Rating Evaluation Service" [level=4] [ref=e800]
+                - paragraph [ref=e801]:
+                  - paragraph [ref=e802]: Our Rating Evaluation Service (RES), a tool for rated or unrated entities, provides a forward-looking, confidential assessment of the potential credit impact of your proposed strategic initiatives before you implement them.
+              - generic [ref=e804]: 
+          - link "Products & Services Second Party Opinions Provide transparency on sustainable finance with S&P Global Ratings’ Second Party Opinions (SPOs), offering independent opinions on green, social and sustainability financing. " [ref=e810] [cursor=pointer]:
+            - /url: https://www.spglobal.com/ratings/en/products/second-party-opinions
+            - img [ref=e813]
+            - generic [ref=e814]:
+              - generic [ref=e815]:
+                - generic [ref=e816]: Products & Services
+                - heading "Second Party Opinions" [level=4] [ref=e817]
+                - paragraph [ref=e818]:
+                  - paragraph [ref=e819]: Provide transparency on sustainable finance with S&P Global Ratings’ Second Party Opinions (SPOs), offering independent opinions on green, social and sustainability financing.
+              - generic [ref=e821]: 
+        - generic [ref=e832]:
+          - generic [ref=e833]:
+            - paragraph [ref=e835]: Intelligence You Can Act On.
+            - heading "Ratings360®" [level=2] [ref=e836]
+            - generic [ref=e837]: Ratings360® provides rated issuers with a holistic picture of their organization’s credit story – ratings, risk research and critical insights on one personalized dashboard.
+          - link "Learn More" [ref=e839] [cursor=pointer]:
+            - /url: /ratings/en/products/ratings360
+        - generic [ref=e846]:
+          - generic [ref=e851]:
+            - heading "Learn more about Ratings" [level=2] [ref=e852]
+            - generic [ref=e853]:
+              - paragraph [ref=e855]: Our integrated offering of credit ratings, risk research and critical insights is essential to translating complexity into clarity so that market participants can make decisions with conviction.
+              - link "About Ratings " [ref=e858] [cursor=pointer]:
+                - /url: /ratings/en/about
+                - text: About Ratings
+                - generic [ref=e860]: 
+          - generic [ref=e862]:
+            - generic [ref=e866]:
+              - generic [ref=e871]:
+                - generic [ref=e873]: 
+                - generic [ref=e874]:
+                  - heading "Understanding Credit Ratings" [level=4] [ref=e875]
+                  - paragraph [ref=e877]: The mission of S&P Global Ratings is to provide high-quality, objective, independent, and rigorous analytical information to the marketplace. The quality, integrity, and transparency of our ratings are at the heart of what we do.
+                  - link "Learn More " [ref=e879] [cursor=pointer]:
+                    - /url: /ratings/en/credit-ratings/about/understanding-credit-ratings
+                    - text: Learn More
+                    - generic [ref=e881]: 
+              - generic [ref=e886]:
+                - generic [ref=e888]: 
+                - generic [ref=e889]:
+                  - heading "How We Rate Emerging And Frontier Markets" [level=4] [ref=e890]
+                  - paragraph [ref=e892]: Emerging and frontier markets will play a crucial role in shaping the global economy and driving growth, contributing approximately 65% of global economic growth by 2035.
+                  - link "Learn More " [ref=e894] [cursor=pointer]:
+                    - /url: /ratings/en/credit-ratings/about/how-we-rate-emerging-frontier-markets
+                    - text: Learn More
+                    - generic [ref=e896]: 
+            - generic [ref=e900]:
+              - generic [ref=e905]:
+                - generic [ref=e907]: 
+                - generic [ref=e908]:
+                  - heading "Credit Market Research" [level=4] [ref=e909]
+                  - paragraph [ref=e911]: We deliver forward-looking, actionable insights on market-moving trends and their effects on credit—leveraging our proprietary data, analytical expertise, and cross-discipline approach.
+                  - link "Learn More " [ref=e913] [cursor=pointer]:
+                    - /url: /ratings/en/research/credit-market-research
+                    - text: Learn More
+                    - generic [ref=e915]: 
+              - generic [ref=e920]:
+                - generic [ref=e922]: 
+                - generic [ref=e923]:
+                  - heading "Climate Finance In Lower-Income Countries" [level=4] [ref=e924]
+                  - paragraph [ref=e926]: Low- and lower-middle-income countries are most vulnerable and least ready to adapt to climate change—yet receive the least amount of investment to transition their economies and build resilience to physical climate risks.
+                  - link "Learn More " [ref=e928] [cursor=pointer]:
+                    - /url: /ratings/en/research-insights/special-reports/climate-finance
+                    - text: Learn More
+                    - generic [ref=e930]: 
+  - contentinfo "Footer" [ref=e940]:
+    - generic [ref=e944]:
+      - generic "Footer Social Share" [ref=e945]:
+        - list [ref=e948]:
+          - listitem [ref=e949]:
+            - paragraph [ref=e950]: Follow Us
+          - listitem [ref=e951]:
+            - link "x" [ref=e952] [cursor=pointer]:
+              - /url: https://twitter.com/SPGlobalRatings
+              - generic [ref=e953]: 
+          - listitem [ref=e954]:
+            - link "LinkedIn" [ref=e955] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/spglobalratings
+              - generic [ref=e956]: 
+          - listitem [ref=e957]:
+            - link "Youtube" [ref=e958] [cursor=pointer]:
+              - /url: https://www.youtube.com/user/SPTVbroadcast
+              - generic [ref=e959]: 
+      - contentinfo "Footer Primary Nav" [ref=e960]:
+        - generic [ref=e961]:
+          - generic [ref=e962]:
+            - generic [ref=e963]:
+              - text: S&P Global Ratings
+              - separator [ref=e965]
+            - generic [ref=e966]:
+              - list [ref=e969]:
+                - listitem
+                - listitem [ref=e970]:
+                  - link "About S&P Global Ratings" [ref=e971] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/ratings/en/about
+              - list [ref=e974]:
+                - listitem
+                - listitem [ref=e975]:
+                  - link "Media Center" [ref=e976] [cursor=pointer]:
+                    - /url: https://press.spglobal.com/index.php?s=2429&category=782
+              - list [ref=e979]:
+                - listitem
+                - listitem [ref=e980]:
+                  - link "CRISIL" [ref=e981] [cursor=pointer]:
+                    - /url: https://www.crisil.com/
+              - list [ref=e984]:
+                - listitem
+                - listitem [ref=e985]:
+                  - link "Contact Us" [ref=e986] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/ratings/en/contact-us
+          - generic [ref=e987]:
+            - generic [ref=e988]:
+              - text: S&P Global Inc.
+              - separator [ref=e990]
+            - generic [ref=e991]:
+              - list [ref=e994]:
+                - listitem
+                - listitem [ref=e995]:
+                  - link "Our Values" [ref=e996] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/who-we-are
+                - listitem [ref=e997]:
+                  - link "Our History" [ref=e998] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/our-history
+                - listitem [ref=e999]:
+                  - link "Ventures" [ref=e1000] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/venture
+                - listitem [ref=e1001]:
+                  - link "Press Center" [ref=e1002] [cursor=pointer]:
+                    - /url: https://press.spglobal.com/index.php?s=2429&category=783
+              - list [ref=e1005]:
+                - listitem
+                - listitem [ref=e1006]:
+                  - link "Investor Relations" [ref=e1007] [cursor=pointer]:
+                    - /url: https://investor.spglobal.com/
+                - listitem [ref=e1008]:
+                  - link "News Releases" [ref=e1009] [cursor=pointer]:
+                    - /url: https://investor.spglobal.com/news-releases/default.aspx
+                - listitem [ref=e1010]:
+                  - link "Quarterly Earnings" [ref=e1011] [cursor=pointer]:
+                    - /url: https://investor.spglobal.com/quarterly-earnings/
+                - listitem [ref=e1012]:
+                  - link "SEC Filings & Reports" [ref=e1013] [cursor=pointer]:
+                    - /url: https://investor.spglobal.com/sec-filings-reports/overview/
+              - list [ref=e1016]:
+                - listitem
+                - listitem [ref=e1017]:
+                  - link "Contact Customer Care & Sales" [ref=e1018] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/contact-us
+                - listitem [ref=e1019]:
+                  - link "Support by Division" [ref=e1020] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/contact-us
+                - listitem [ref=e1021]:
+                  - link "Report an Ethics Concern" [ref=e1022] [cursor=pointer]:
+                    - /url: https://secure.ethicspoint.com/domain/media/en/gui/7615/index.html
+                - listitem [ref=e1023]:
+                  - link "Office Locations" [ref=e1024] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/contact-us/office-locations
+              - list [ref=e1027]:
+                - listitem
+                - listitem [ref=e1028]:
+                  - link "Careers" [ref=e1029] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/explore-s-p-global/careers
+                - listitem [ref=e1030]:
+                  - link "Corporate Responsibility" [ref=e1031] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/who-we-are/corporate-responsibility
+                - listitem [ref=e1032]:
+                  - link "Leadership" [ref=e1033] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/who-we-are/about-sp-global/our-people/our-leadership
+                - listitem [ref=e1034]:
+                  - link "IOSCO ESG Rating & Data Product Statements" [ref=e1035] [cursor=pointer]:
+                    - /url: https://www.spglobal.com/en/esg-statements
+      - separator [ref=e1037]
+      - contentinfo "Footer Secondary Nav" [ref=e1038]:
+        - generic [ref=e1041]:
+          - button "Customize Cookies" [ref=e1043] [cursor=pointer]
+          - list [ref=e1045]:
+            - listitem [ref=e1046]:
+              - link "Legal Disclaimers" [ref=e1047] [cursor=pointer]:
+                - /url: /ratings/en/regulatory/content/legal-disclaimer
+            - listitem [ref=e1048]:
+              - link "Terms of Use" [ref=e1049] [cursor=pointer]:
+                - /url: https://www.spglobal.com/en/terms-of-use
+            - listitem [ref=e1050]:
+              - link "Cookie Notice" [ref=e1051] [cursor=pointer]:
+                - /url: https://www.spglobal.com/en/cookie-notice
+            - listitem [ref=e1052]:
+              - link "Privacy Policy" [ref=e1053] [cursor=pointer]:
+                - /url: https://www.spglobal.com/en/privacy/privacy-policy-english
+            - listitem [ref=e1054]:
+              - link "Client Privacy Portal" [ref=e1055] [cursor=pointer]:
+                - /url: https://www.spglobal.com/en/legal/privacy
+            - listitem [ref=e1056]:
+              - link "Do Not Sell or Share My Personal Information" [ref=e1057] [cursor=pointer]:
+                - /url: https://privacyportal.onetrust.com/webform/5cb57702-8ef7-437e-a62b-408fe78cd310/draft/78fa28ce-6010-42fa-96b5-28d8837492e3
+            - listitem [ref=e1058]:
+              - paragraph [ref=e1059]: © 2026 S&P Global
+  - region "Cookie banner" [ref=e1060]:
+    - dialog "Your Cookie Controls:" [ref=e1061]:
+      - generic [ref=e1063]:
+        - generic [ref=e1065]:
+          - heading "Your Cookie Controls:" [level=2] [ref=e1066]
+          - generic [ref=e1067]:
+            - text: S&P Global uses cookies to improve user experience and site performance, offer tailored advertising and enable social media sharing. By clicking "Accept All", you agree to our use of cookies. By clicking “Reject All”, we will not place cookies on your device unless strictly necessary for website functionality. For details, please refer to our
+            - link "More information about your privacy, opens in a new tab" [ref=e1068] [cursor=pointer]:
+              - /url: https://www.spglobal.com/en/cookie-notice
+              - text: Cookie Notice
+        - generic [ref=e1070]:
+          - button "Customize Cookies" [ref=e1071] [cursor=pointer]
+          - button "Reject All" [ref=e1072] [cursor=pointer]
+          - button "Accept All" [ref=e1073] [cursor=pointer]

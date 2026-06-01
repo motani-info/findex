@@ -1,0 +1,1 @@
+/Users/motani/Develop/github/findex/.agents/skills/zoom-out//SKILL.md

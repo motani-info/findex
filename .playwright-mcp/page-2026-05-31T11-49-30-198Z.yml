@@ -1,0 +1,511 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - list [ref=e4]:
+        - listitem [ref=e5]:
+          - link "会社情報" [ref=e6] [cursor=pointer]:
+            - /url: /docs/company/index.html
+        - listitem [ref=e7]:
+          - link "採用情報" [ref=e8] [cursor=pointer]:
+            - /url: https://recruit.r-i.co.jp/
+        - listitem [ref=e9]:
+          - link "ご利用方法" [ref=e10] [cursor=pointer]:
+            - /url: /docs/manual/rating.html
+        - listitem [ref=e11]:
+          - link "お問い合わせ" [ref=e12] [cursor=pointer]:
+            - /url: /docs/form/contact_rating.do
+        - listitem [ref=e13]:
+          - link "English" [ref=e14] [cursor=pointer]:
+            - /url: /en/index.html
+      - generic [ref=e15]:
+        - link "格付投資情報センター" [ref=e16] [cursor=pointer]:
+          - /url: /index.html
+          - img "格付投資情報センター" [ref=e17]
+        - link "信用格付関連" [ref=e18] [cursor=pointer]:
+          - /url: /rating/index.html
+          - img "信用格付関連" [ref=e19]
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - textbox "発行体名、証券コード他を入力" [ref=e22]
+          - combobox [ref=e23] [cursor=pointer]:
+            - option "発行体" [selected]
+            - option "リポート"
+          - button "検索" [ref=e24] [cursor=pointer]
+        - link "詳細検索" [ref=e26] [cursor=pointer]:
+          - /url: /rating/search/issuers.html
+      - generic [ref=e27]:
+        - link "ESG投資" [ref=e29] [cursor=pointer]:
+          - /url: /rating/esg/index.html
+          - img "ESG投資" [ref=e30]
+        - link "Credit Expressログイン" [ref=e32] [cursor=pointer]:
+          - /url: /rating/creditexpress/login.do
+          - img "Credit Expressログイン" [ref=e33]
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - heading "格付アクション・コメント" [level=1]:
+          - generic [ref=e38]: 格付アクション・コメント
+      - generic [ref=e39]:
+        - img "事業法人、金融・保険、政府系機関、地方自治体、ソブリン等" [ref=e40]
+        - generic [ref=e41]: 2026/05/29 15:30更新
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 日付
+          - generic [ref=e45]: カテゴリー
+          - generic [ref=e46]: タイトル
+        - generic [ref=e47]:
+          - generic [ref=e48]: 2026/05/29
+          - generic [ref=e49]: 事業法人
+          - generic [ref=e50]:
+            - link "R&I格付アウトルック【半導体製造装置】拡大するAI用半導体で優位性確立なら信用力にプラス" [ref=e51] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25160_jpn.pdf
+            - img "pdf" [ref=e52]
+        - generic [ref=e53]:
+          - generic [ref=e54]: 2026/05/29
+          - generic [ref=e55]: ソブリン等
+          - generic [ref=e56]:
+            - link "メキシコ合衆国 外貨建発行体格付BBB+[安定的]維持" [ref=e57] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25091_jpn.pdf
+            - img "pdf" [ref=e58]
+        - generic [ref=e59]:
+          - generic [ref=e60]: 2026/05/29
+          - generic [ref=e61]: 非居住者
+          - generic [ref=e62]:
+            - link "Petroleos Mexicanos 発行体格付BBB+[安定的]維持" [ref=e63] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25088_jpn.pdf
+            - img "pdf" [ref=e64]
+        - generic [ref=e65]:
+          - generic [ref=e66]: 2026/05/29
+          - generic [ref=e67]: 事業法人
+          - generic [ref=e68]:
+            - link "西部ガスホールディングス 発行体格付A+[安定的]維持 / CP格付a-1維持" [ref=e69] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25146_jpn.pdf
+            - img "pdf" [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]: 2026/05/29
+          - generic [ref=e73]: 事業法人
+          - generic [ref=e74]:
+            - link "北海道瓦斯 発行体格付A+[安定的]維持 / CP格付a-1維持" [ref=e75] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25147_jpn.pdf
+            - img "pdf" [ref=e76]
+        - generic [ref=e77]:
+          - generic [ref=e78]: 2026/05/29
+          - generic [ref=e79]: 事業法人
+          - generic [ref=e80]:
+            - link "広島ガス 発行体格付A[安定的]維持 / CP格付a-1維持" [ref=e81] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25148_jpn.pdf
+            - img "pdf" [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: 2026/05/29
+          - generic [ref=e85]: 事業法人
+          - generic [ref=e86]:
+            - link "マツキヨココカラ＆カンパニー 発行体格付A+[安定的]維持 / CP格付a-1維持" [ref=e87] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25139_jpn.pdf
+            - img "pdf" [ref=e88]
+        - generic [ref=e89]:
+          - generic [ref=e90]: 2026/05/29
+          - generic [ref=e91]: 事業法人
+          - generic [ref=e92]:
+            - link "フジクラ CP格付a-1維持" [ref=e93] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25061_jpn.pdf
+            - img "pdf" [ref=e94]
+        - generic [ref=e95]:
+          - generic [ref=e96]: 2026/05/29
+          - generic [ref=e97]: 事業法人
+          - generic [ref=e98]:
+            - link "ＤＭＧ森精機 永久劣後債格付BBB新規" [ref=e99] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25124_jpn.pdf
+            - img "pdf" [ref=e100]
+        - generic [ref=e101]:
+          - generic [ref=e102]: 2026/05/29
+          - generic [ref=e103]: 事業法人
+          - generic [ref=e104]:
+            - link "東京瓦斯 債券格付AA+新規" [ref=e105] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25143_jpn.pdf
+            - img "pdf" [ref=e106]
+        - generic [ref=e107]:
+          - generic [ref=e108]: 2026/05/29
+          - generic [ref=e109]: 事業法人
+          - generic [ref=e110]:
+            - link "沖縄電力 債券格付AA新規" [ref=e111] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25161_jpn.pdf
+            - img "pdf" [ref=e112]
+        - generic [ref=e113]:
+          - generic [ref=e114]: 2026/05/29
+          - generic [ref=e115]: 金融・保険
+          - generic [ref=e116]:
+            - link "三井住友フィナンシャルグループ 永久劣後債格付A新規" [ref=e117] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25104_jpn.pdf
+            - img "pdf" [ref=e118]
+        - generic [ref=e119]:
+          - generic [ref=e120]: 2026/05/29
+          - generic [ref=e121]: 事業法人
+          - generic [ref=e122]:
+            - link "三井不動産 債券格付AA-新規" [ref=e123] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25157_jpn.pdf
+            - img "pdf" [ref=e124]
+        - generic [ref=e125]:
+          - generic [ref=e126]: 2026/05/29
+          - generic [ref=e127]: 事業法人
+          - generic [ref=e128]:
+            - link "九州旅客鉄道 債券格付AA-新規" [ref=e129] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25135_jpn.pdf
+            - img "pdf" [ref=e130]
+        - generic [ref=e131]:
+          - generic [ref=e132]: 2026/05/29
+          - generic [ref=e133]: 事業法人
+          - generic [ref=e134]:
+            - link "ニチレイ 債券格付A+新規" [ref=e135] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25129_jpn.pdf
+            - img "pdf" [ref=e136]
+        - generic [ref=e137]:
+          - generic [ref=e138]: 2026/05/29
+          - generic [ref=e139]: 事業法人
+          - generic [ref=e140]:
+            - link "東北電力 債券格付A+新規" [ref=e141] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25151_jpn.pdf
+            - img "pdf" [ref=e142]
+        - generic [ref=e143]:
+          - generic [ref=e144]: 2026/05/29
+          - generic [ref=e145]: 事業法人
+          - generic [ref=e146]:
+            - link "住友化学 発行登録予備格付A新規" [ref=e147] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25126_jpn.pdf
+            - img "pdf" [ref=e148]
+        - generic [ref=e149]:
+          - generic [ref=e150]: 2026/05/29
+          - generic [ref=e151]: 事業法人
+          - generic [ref=e152]:
+            - link "京阪ホールディングス 債券格付A新規" [ref=e153] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25089_jpn.pdf
+            - img "pdf" [ref=e154]
+        - generic [ref=e155]:
+          - generic [ref=e156]: 2026/05/29
+          - generic [ref=e157]: 事業法人
+          - generic [ref=e158]:
+            - link "テクノプロ・ホールディングス 発行体格付 取り下げ" [ref=e159] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25099_jpn.pdf
+            - img "pdf" [ref=e160]
+        - generic [ref=e161]:
+          - generic [ref=e162]: 2026/05/29
+          - generic [ref=e163]: 事業法人
+          - generic [ref=e164]:
+            - link "ＮＯＫ 発行体格付 取り下げ" [ref=e165] [cursor=pointer]:
+              - /url: /news_release_cfp/2026/05/news_release_cfp_20260529_25112_jpn.pdf
+            - img "pdf" [ref=e166]
+        - generic [ref=e167]:
+          - generic [ref=e168]:
+            - text: ">"
+            - link "発行体ファイル一覧はこちら" [ref=e169] [cursor=pointer]:
+              - /url: /rating/search/report.html?reportType=ISSUER_FILE
+          - generic [ref=e170]:
+            - text: ">"
+            - link "一覧はこちら" [ref=e171] [cursor=pointer]:
+              - /url: /rating/search/report.html?reportType=NEWS_RELEASE
+      - generic [ref=e172]:
+        - img "ストラクチャードファイナンス、投資法人、ファンド信用格付" [ref=e173]
+        - generic [ref=e174]: 2026/05/29 15:30更新
+      - generic [ref=e175]:
+        - generic [ref=e176]:
+          - generic [ref=e177]: 日付
+          - generic [ref=e178]: カテゴリー
+          - generic [ref=e179]: タイトル
+        - generic [ref=e180]:
+          - generic [ref=e181]: 2026/05/29
+          - generic [ref=e182]: 投資法人
+          - generic [ref=e183]:
+            - link "阪急阪神リート投資法人 発行体格付A+[安定的]維持" [ref=e184] [cursor=pointer]:
+              - /url: /news_release_jreit/2026/05/news_release_jreit_20260529_25034_jpn.pdf
+            - img "pdf" [ref=e185]
+        - generic [ref=e186]:
+          - generic [ref=e187]: 2026/05/29
+          - generic [ref=e188]: 投資法人
+          - generic [ref=e189]:
+            - link "三井不動産アコモデーションファンド投資法人 発行体格付AA-[安定的]維持" [ref=e190] [cursor=pointer]:
+              - /url: /news_release_jreit/2026/05/news_release_jreit_20260529_25097_jpn.pdf
+            - img "pdf" [ref=e191]
+        - generic [ref=e192]:
+          - generic [ref=e193]: 2026/05/29
+          - generic [ref=e194]: ABS
+          - generic [ref=e195]:
+            - link "J-affiliated Autoloan Master Trust Repackaged ABL 202606に予備格付 ［委託者非公表銘柄］" [ref=e196] [cursor=pointer]:
+              - /url: /news_release_sf/2026/05/news_release_sf_20260529_4072_17634_1_P_jpn.pdf
+            - img "pdf" [ref=e197]
+        - generic [ref=e198]:
+          - generic [ref=e199]: 2026/05/29
+          - generic [ref=e200]: RMBS
+          - generic [ref=e201]:
+            - link "住宅金融支援機構のグリーン第2回債に格付 ［独立行政法人住宅金融支援機構］" [ref=e202] [cursor=pointer]:
+              - /url: /news_release_sf/2026/05/news_release_sf_20260529_15081_17628_1_F_jpn.pdf
+            - img "pdf" [ref=e203]
+        - generic [ref=e204]:
+          - generic [ref=e205]:
+            - text: ">"
+            - link "発行体ファイル一覧はこちら" [ref=e206] [cursor=pointer]:
+              - /url: /rating/search/report.html?reportType=ISSUER_FILE
+          - generic [ref=e207]:
+            - text: ">"
+            - link "一覧はこちら" [ref=e208] [cursor=pointer]:
+              - /url: /rating/search/report.html?reportType=NEWS_RELEASE
+    - generic [ref=e209]:
+      - generic [ref=e211]: 最新リポート
+      - generic [ref=e212]:
+        - generic [ref=e213]: 日付
+        - generic [ref=e214]: タイトル
+      - generic [ref=e215]:
+        - generic [ref=e216]: 2026/05/29
+        - generic [ref=e217]:
+          - link "ストラクチャードファイナンス -欧州プロジェクトファイナンスの動向" [ref=e218] [cursor=pointer]:
+            - /url: /news_report_sf-report/2026/05/news_report_sf-report_20260529_jpn.pdf
+          - img "pdf" [ref=e219]
+          - img "key" [ref=e220]
+      - generic [ref=e221]:
+        - generic [ref=e222]: 2026/05/29
+        - generic [ref=e223]:
+          - link "ストラクチャードファイナンス - SFクレジットリポート - 合同会社クローバー2025_パフォーマンス（202605）" [ref=e224] [cursor=pointer]:
+            - /url: /news_report_sf-report-credit/2026/05/news_report_sf-report-credit_20260529_jpn_3.pdf
+          - img "pdf" [ref=e225]
+          - img "key" [ref=e226]
+      - generic [ref=e227]:
+        - generic [ref=e228]: 2026/05/29
+        - generic [ref=e229]:
+          - link "ストラクチャードファイナンス - SFクレジットリポート - 合同会社クローバー2024_パフォーマンス（202605）" [ref=e230] [cursor=pointer]:
+            - /url: /news_report_sf-report-credit/2026/05/news_report_sf-report-credit_20260529_jpn_2.pdf
+          - img "pdf" [ref=e231]
+          - img "key" [ref=e232]
+      - generic [ref=e233]:
+        - generic [ref=e234]: 2026/05/29
+        - generic [ref=e235]:
+          - link "ストラクチャードファイナンス - SFクレジットリポート - 合同会社クローバー2023_パフォーマンス（202605）" [ref=e236] [cursor=pointer]:
+            - /url: /news_report_sf-report-credit/2026/05/news_report_sf-report-credit_20260529_jpn_1.pdf
+          - img "pdf" [ref=e237]
+          - img "key" [ref=e238]
+      - generic [ref=e239]:
+        - generic [ref=e240]: 2026/05/29
+        - generic [ref=e241]:
+          - link "ストラクチャードファイナンス - SFクレジットリポート - 合同会社クローバー2022_パフォーマンス（202605）" [ref=e242] [cursor=pointer]:
+            - /url: /news_report_sf-report-credit/2026/05/news_report_sf-report-credit_20260529_jpn.pdf
+          - img "pdf" [ref=e243]
+          - img "key" [ref=e244]
+      - generic [ref=e245]:
+        - text: ">"
+        - link "一覧はこちら" [ref=e246] [cursor=pointer]:
+          - /url: /rating/search/report.html
+    - generic [ref=e247]:
+      - generic [ref=e249]: お知らせ／ESGファイナンス評価リポート
+      - generic [ref=e250]:
+        - generic [ref=e251]: 日付
+        - generic [ref=e252]: タイトル
+      - generic [ref=e253]:
+        - generic [ref=e254]: 2026/05/29
+        - link "【サステナビリティ】南陽吉久株式会社 ポジティブインパクトファイナンス セカンドオピニオン" [ref=e256] [cursor=pointer]:
+          - /url: https://www.r-i.co.jp/news_release_suf/2026/05/news_release_suf_20260529_jpn_3.pdf
+      - generic [ref=e257]:
+        - generic [ref=e258]: 2026/05/29
+        - link "【サステナビリティ】太陽生命保険 太陽生命サステナビリティ・ローン フレームワーク（GL/SL/SLL/TL/TLL） セカンドオピニオン" [ref=e260] [cursor=pointer]:
+          - /url: https://www.r-i.co.jp/news_release_suf/2026/05/news_release_suf_20260529_jpn_2.pdf
+      - generic [ref=e261]:
+        - generic [ref=e262]: 2026/05/29
+        - link "【サステナビリティ】大同生命保険 大同生命サステナビリティ・ローン フレームワーク（GL/SL/SLL/TL/TLL） セカンドオピニオン" [ref=e264] [cursor=pointer]:
+          - /url: https://www.r-i.co.jp/news_release_suf/2026/05/news_release_suf_20260529_jpn_1.pdf
+      - generic [ref=e265]:
+        - generic [ref=e266]: 2026/05/29
+        - link "【ソーシャル】大阪府住宅供給公社 ソーシャルボンド・フレームワーク セカンドオピニオン" [ref=e268] [cursor=pointer]:
+          - /url: https://www.r-i.co.jp/news_release_sof/2026/05/news_release_sof_20260529_jpn.pdf
+      - generic [ref=e269]:
+        - generic [ref=e270]: 2026/05/29
+        - link "【サステナビリティ】東京都 東京サステナブル・レジリエントファイナンス・フレームワーク（国内市場向け） セカンドオピニオン" [ref=e272] [cursor=pointer]:
+          - /url: https://www.r-i.co.jp/news_release_suf/2026/05/news_release_suf_20260529_jpn.pdf
+      - generic [ref=e273]:
+        - text: ">"
+        - link "一覧はこちら" [ref=e274] [cursor=pointer]:
+          - /url: /rating/info.html
+    - generic [ref=e275]:
+      - heading "R&Iの信用格付" [level=2] [ref=e276]
+      - list [ref=e277]:
+        - listitem [ref=e278]:
+          - link "格付符号と定義" [ref=e279] [cursor=pointer]:
+            - /url: /rating/about/definition.html
+        - listitem [ref=e280]:
+          - link "格付付与方針" [ref=e281] [cursor=pointer]:
+            - /url: /rating/about/rating_grant.html
+        - listitem [ref=e282]:
+          - link "格付方法" [ref=e283] [cursor=pointer]:
+            - /url: /rating/about/rating_method.html
+        - listitem [ref=e284]:
+          - link "格付提供方針等" [ref=e285] [cursor=pointer]:
+            - /url: /rating/about/rating_provision.html
+        - listitem [ref=e286]:
+          - link "格付プロセス" [ref=e287] [cursor=pointer]:
+            - /url: /rating/about/process.html
+        - listitem [ref=e288]:
+          - link "資産証券化商品の信用格付について" [ref=e289] [cursor=pointer]:
+            - /url: /rating/about/sf_rating.html
+        - listitem [ref=e290]:
+          - link "信用格付の妥当性を評価するために重要と認められる情報の項目" [ref=e291] [cursor=pointer]:
+            - /url: /rating/about/appropriateness/index.html
+    - generic [ref=e292]:
+      - heading "格付関連情報・データ" [level=2] [ref=e293]
+      - list [ref=e294]:
+        - listitem [ref=e295]:
+          - link "格付一覧" [ref=e296] [cursor=pointer]:
+            - /url: /rating/data/rating.html
+        - listitem [ref=e297]:
+          - link "デフォルト率・格付推移行列" [ref=e298] [cursor=pointer]:
+            - /url: /rating/data/defaults.html
+        - listitem [ref=e299]:
+          - link "格付実績" [ref=e300] [cursor=pointer]:
+            - /url: /rating/data/history.html
+        - listitem [ref=e301]:
+          - link "格付別財務指標" [ref=e302] [cursor=pointer]:
+            - /url: /rating/data/financial.html
+        - listitem [ref=e303]:
+          - link "格付に関するリポート" [ref=e304] [cursor=pointer]:
+            - /url: /rating/data/reports.html
+        - listitem [ref=e305]:
+          - link "格付別スプレッドデータ *(株)QUICK作成" [ref=e306] [cursor=pointer]:
+            - /url: /rating/data/spread.html
+            - text: 格付別スプレッドデータ
+            - text: "*(株)QUICK作成"
+    - generic [ref=e307]:
+      - heading "信用格付の利用方法" [level=2] [ref=e308]
+      - list [ref=e309]:
+        - listitem [ref=e310]:
+          - link "投資判断" [ref=e311] [cursor=pointer]:
+            - /url: /rating/how/decision.html
+        - listitem [ref=e312]:
+          - link "資金調達" [ref=e313] [cursor=pointer]:
+            - /url: /rating/products/ratings/index.html
+        - listitem [ref=e314]:
+          - link "信用リスク管理" [ref=e315] [cursor=pointer]:
+            - /url: /rating/how/risk.html
+    - generic [ref=e316]:
+      - heading "発行体/委託者の格付やニュースリリース・リポートを探す" [level=2] [ref=e317]
+      - generic [ref=e318]:
+        - list:
+          - listitem [ref=e319]:
+            - link "発行体/委託者を探す" [ref=e320] [cursor=pointer]:
+              - /url: javascript:void(0);
+              - img "発行体/委託者を探す" [ref=e321]
+          - listitem [ref=e322]:
+            - link "ストラクチャードファイナンス、投資法人、ファンド信用格付" [ref=e323] [cursor=pointer]:
+              - /url: javascript:void(0);
+              - img "ストラクチャードファイナンス、投資法人、ファンド信用格付" [ref=e324]
+        - generic [ref=e325]:
+          - generic [ref=e326]:
+            - heading "発行体名/証券コード/委託者名他" [level=2] [ref=e327]
+            - generic [ref=e329]:
+              - textbox "発行体名、証券コード、委託者名他を入力" [ref=e330]
+              - button "検索" [ref=e331] [cursor=pointer]
+            - heading "50音" [level=2] [ref=e332]
+            - generic [ref=e333]:
+              - link "あ行" [ref=e335] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=a
+              - link "か行" [ref=e337] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ka
+              - link "さ行" [ref=e339] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=sa
+              - link "た行" [ref=e341] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ta
+              - link "な行" [ref=e343] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=na
+              - link "は行" [ref=e345] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ha
+              - link "ま行" [ref=e347] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ma
+              - link "や行" [ref=e349] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ya
+              - link "ら行" [ref=e351] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=ra
+              - link "わ・を・ん" [ref=e353] [cursor=pointer]:
+                - /url: /rating/search/issuers.html?japaneseSyllabaryOrder=wa
+          - generic [ref=e354]:
+            - heading "カテゴリー" [level=2] [ref=e355]
+            - list [ref=e356]:
+              - listitem [ref=e357]:
+                - link "事業法人" [ref=e358] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=0010
+              - listitem [ref=e359]:
+                - link "金融・保険" [ref=e360] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=0070
+              - listitem [ref=e361]:
+                - link "政府系機関等" [ref=e362] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9901
+              - listitem [ref=e363]:
+                - link "地方自治体" [ref=e364] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9902
+              - listitem [ref=e365]:
+                - link "国公立大学" [ref=e366] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9903
+              - listitem [ref=e367]:
+                - link "学校法人" [ref=e368] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9904
+              - listitem [ref=e369]:
+                - link "医療法人" [ref=e370] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9905
+              - listitem [ref=e371]:
+                - link "ソブリン等" [ref=e372] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9907
+              - listitem [ref=e373]:
+                - link "非居住者" [ref=e374] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9999
+            - list [ref=e375]:
+              - listitem [ref=e376]:
+                - link "投資法人" [ref=e377] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9906
+              - listitem [ref=e378]:
+                - link "ストラクチャードファイナンス" [ref=e379] [cursor=pointer]:
+                  - /url: /rating/search/issuers.html?sector=9950
+  - generic [ref=e380]:
+    - generic [ref=e382]: サービス紹介
+    - generic [ref=e383]:
+      - list:
+        - listitem [ref=e384]:
+          - link "信用格付" [ref=e385] [cursor=pointer]:
+            - /url: /rating/products/ratings/index.html
+            - img "信用格付" [ref=e386]
+        - listitem [ref=e387]:
+          - link "Credit Express" [ref=e388] [cursor=pointer]:
+            - /url: /rating/products/creditexpress/index.html
+            - img "Credit Express" [ref=e389]
+        - listitem [ref=e390]:
+          - link "ESG関連サービス" [ref=e391] [cursor=pointer]:
+            - /url: /rating/products/esg/index.html
+            - img "ESG関連サービス" [ref=e392]
+        - listitem [ref=e393]:
+          - link "想定格付" [ref=e394] [cursor=pointer]:
+            - /url: /rating/products/estimate_rating/index.html
+            - img "想定格付" [ref=e395]
+        - listitem [ref=e396]:
+          - link "債券格付データベース" [ref=e397] [cursor=pointer]:
+            - /url: /rating/products/data_service/index.html
+            - img "債券格付データベース" [ref=e398]
+        - listitem [ref=e399]:
+          - link "Credit Express地方自治体財務データ" [ref=e400] [cursor=pointer]:
+            - /url: /rating/products/local_government/index.html
+            - img "Credit Express地方自治体財務データ" [ref=e401]
+        - listitem [ref=e402]:
+          - link "SFクレジットレポート" [ref=e403] [cursor=pointer]:
+            - /url: /rating/products/sf_credit/index.html
+            - img "SFクレジットレポート" [ref=e404]
+        - listitem [ref=e405]:
+          - link "R&I中堅企業格付" [ref=e406] [cursor=pointer]:
+            - /url: /rating/products/sme_rating/index.html
+            - img "R&I中堅企業格付" [ref=e407]
+        - listitem [ref=e408]:
+          - link "R&Iカントリーリスク調査" [ref=e409] [cursor=pointer]:
+            - /url: /rating/products/country_risk/index.html
+            - img "R&Iカントリーリスク調査" [ref=e410]
+        - listitem [ref=e411]:
+          - link "格付速報" [ref=e412] [cursor=pointer]:
+            - /url: /rating/products/rating_report/index.html
+            - img "格付速報" [ref=e413]
+        - listitem [ref=e414]:
+          - link "R&I Rating Transition Statistics" [ref=e415] [cursor=pointer]:
+            - /url: /rating/products/rating_transition/index.html
+            - img "R&I Rating Transition Statistics" [ref=e416]
+    - paragraph [ref=e417]: 「信用格付」以外の各種サービスは、信用格付業ではなく、金融商品取引業等に関する内閣府令第２９９条第１項第２８号に規定される関連業務（信用格付業以外の業務であって、信用格付行為に関連する業務)です。当該業務に関しては、信用格付行為に不当な影響を及ぼさないための措置と、信用格付と誤認されることを防止するための措置が法令上要請されています。
+  - link [ref=e419] [cursor=pointer]:
+    - /url: "#header"
+  - contentinfo
+  - generic [ref=e420]: © 2026 Rating and Investment Information, Inc. All Rights Reserved.

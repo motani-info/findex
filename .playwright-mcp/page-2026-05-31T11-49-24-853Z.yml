@@ -1,0 +1,12 @@
+- generic [ref=e2]:
+  - article [ref=e3]:
+    - generic [ref=e4]:
+      - paragraph [ref=e5]:
+        - img "株式会社 日本格付研究所" [ref=e6]
+        - generic [ref=e7]: "ERROR : 404 エラー"
+      - paragraph [ref=e8]:
+        - text: ページが見つかりません。
+        - link "TOPへ" [ref=e9] [cursor=pointer]:
+          - /url: /
+  - contentinfo [ref=e10]:
+    - paragraph [ref=e11]: Copyright © 2016 Japan Credit Rating Agency.Ltd All Rights Reserved.

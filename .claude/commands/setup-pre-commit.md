@@ -1,0 +1,1 @@
+/Users/motani/Develop/github/findex/.agents/skills/setup-pre-commit//SKILL.md

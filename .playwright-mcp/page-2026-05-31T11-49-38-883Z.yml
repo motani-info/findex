@@ -1,0 +1,797 @@
+- generic [ref=e1]:
+  - generic [ref=e9]:
+    - banner [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - button "open menu" [ref=e20] [cursor=pointer]
+          - link "Moody's" [ref=e25] [cursor=pointer]:
+            - /url: /
+            - img "Moody's logo" [ref=e26]
+          - generic [ref=e27]:
+            - dialog [ref=e28]:
+              - generic [ref=e32]:
+                - generic [ref=e33]:
+                  - img
+                  - generic:
+                    - strong: Search
+                    - text: ratings, research and more...
+                - textbox "Search ratings, research and more..." [ref=e35]
+            - button "Open Moody's GenAI" [ref=e37] [cursor=pointer]:
+              - img [ref=e39]
+              - text: Moody's GenAI
+        - button "Sign In" [ref=e42] [cursor=pointer]
+    - list [ref=e47]:
+      - listitem [ref=e48] [cursor=pointer]:
+        - menuitem "Who We Serve expand_more" [ref=e49]:
+          - text: Who We Serve
+          - generic: expand_more
+      - listitem [ref=e50] [cursor=pointer]:
+        - menuitem "Solutions expand_more" [ref=e51]:
+          - text: Solutions
+          - generic: expand_more
+      - listitem [ref=e52] [cursor=pointer]:
+        - menuitem "Capabilities expand_more" [ref=e53]:
+          - text: Capabilities
+          - generic: expand_more
+      - listitem [ref=e54] [cursor=pointer]:
+        - menuitem "Insights expand_more" [ref=e55]:
+          - text: Insights
+          - generic: expand_more
+      - listitem [ref=e56] [cursor=pointer]:
+        - menuitem "About Us expand_more" [ref=e57]:
+          - text: About Us
+          - generic: expand_more
+      - listitem [ref=e58] [cursor=pointer]:
+        - menuitem "Support expand_more" [ref=e59]:
+          - text: Support
+          - generic: expand_more
+  - generic [ref=e65]:
+    - group [ref=e67]:
+      - generic [ref=e68]:
+        - tabpanel "Slide 1" [ref=e69]:
+          - generic [ref=e72]:
+            - heading "The move toward a lower carbon economy faces complex trade-offs" [level=6] [ref=e73]
+            - paragraph [ref=e74]: "The drivers behind the energy transition have pivoted towards a pragmatic approach: energy security, sovereignty and critical supply-chain resilience."
+            - generic [ref=e75]:
+              - button "Watch video" [ref=e76] [cursor=pointer]
+              - link "Learn more" [ref=e77] [cursor=pointer]:
+                - /url: /web/en/us/insights/credit-risk/sustainable-finance-and-credit.html
+        - generic [ref=e79]:
+          - tablist "Choose a slide to display" [ref=e80]:
+            - listitem [ref=e81]:
+              - tab "Slide 1" [selected] [ref=e82] [cursor=pointer]: "1"
+            - listitem [ref=e83]:
+              - tab "Slide 2" [ref=e84] [cursor=pointer]: "2"
+            - listitem [ref=e85]:
+              - tab "Slide 3" [ref=e86] [cursor=pointer]: "3"
+            - listitem [ref=e87]:
+              - tab "Slide 4" [ref=e88] [cursor=pointer]: "4"
+            - listitem [ref=e89]:
+              - tab "Slide 5" [ref=e90] [cursor=pointer]: "5"
+          - button "Next" [ref=e91] [cursor=pointer]:
+            - generic [ref=e92]: Next
+    - generic [ref=e96]:
+      - heading "Featured insights" [level=5] [ref=e99]
+      - link "See all insights" [ref=e105] [cursor=pointer]:
+        - /url: /web/en/us/insights.html
+      - generic [ref=e108]:
+        - generic [ref=e112]:
+          - img "Aerial View of a Crossing in Mexico City" [ref=e116]
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: May 28, 2026
+              - generic [ref=e120]: Moody's Ratings
+            - heading "Latin America faces limited direct credit stress from Strait of Hormuz disruption" [level=3] [ref=e121]:
+              - link "Latin America faces limited direct credit stress from Strait of Hormuz disruption" [ref=e122] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Geopolitical-Risk-Latin-America-and-Caribbean-Despite-insulation-region-still-Sector-In-Depth--PBC_1479959
+            - list [ref=e123]:
+              - listitem [ref=e124]: Research
+        - generic [ref=e126]:
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - generic [ref=e134]: May 27, 2026
+              - generic [ref=e135]: Moody's Ratings
+            - heading "Chemicals, airlines, building products at greatest risk from long Strait of Hormuz closure" [level=3] [ref=e136]:
+              - link "Chemicals, airlines, building products at greatest risk from long Strait of Hormuz closure" [ref=e137] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Corporates-Global-Prolonged-Strait-of-Hormuz-disruption-poses-greatest-risk-Sector-In-Depth--PBC_1482668
+            - list [ref=e138]:
+              - listitem [ref=e139]: Research
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]: May 27, 2026
+              - generic [ref=e146]: Moody's Ratings
+            - heading "Global homebuilding conditions weaken on affordability, geopolitical and economic risks" [level=3] [ref=e147]:
+              - link "Global homebuilding conditions weaken on affordability, geopolitical and economic risks" [ref=e148] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/resources/en/us/insights/data-stories/cfg-homebuilding-trends-2026.html
+            - list [ref=e149]:
+              - listitem [ref=e150]: Flipbook
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]: May 25, 2026
+              - generic [ref=e159]: Moody's Ratings
+            - heading "Power and execution risks intensify for data centers in South and Southeast Asia" [level=3] [ref=e160]:
+              - link "Power and execution risks intensify for data centers in South and Southeast Asia" [ref=e161] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Data-Centers-South-Southeast-Asia-Power-and-execution-risks-Sector-In-Depth--PBC_1479700
+            - list [ref=e162]:
+              - listitem [ref=e163]: Research
+    - generic [ref=e166]:
+      - heading "Explore the latest thought leadership from Moody's Ratings" [level=4] [ref=e170]
+      - link "Read more" [ref=e172] [cursor=pointer]:
+        - /url: https://www.moodys.com/web/en/us/insights/ratings.html
+        - generic [ref=e173]: Read more
+    - generic [ref=e177]:
+      - iframe [ref=e188]:
+        - generic [ref=f1e4]:
+          - generic:
+            - generic:
+              - img
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - img
+            - generic:
+              - img
+              - generic: ピクチャ・イン・ピクチャで再生中
+          - generic:
+            - generic:
+              - button "再生" [ref=f1e12] [cursor=pointer]:
+                - img [ref=f1e13]
+                - generic:
+                  - generic: 再生
+              - generic [ref=f1e16]:
+                - generic [ref=f1e17]:
+                  - slider "プログレスバー" [ref=f1e18] [cursor=pointer]
+                  - generic:
+                    - generic:
+                      - generic: 00:00
+                  - generic [ref=f1e23]: 11:49
+                - generic:
+                  - generic:
+                    - generic [ref=f1e24]:
+                      - button "ミュート" [ref=f1e26] [cursor=pointer]:
+                        - img [ref=f1e27]
+                      - slider "音量（上下の矢印キーで調整）"
+                    - button "CC/字幕" [ref=f1e29] [cursor=pointer]:
+                      - img [ref=f1e30]
+                      - generic:
+                        - generic: CC/字幕
+                    - button "設定" [ref=f1e32] [cursor=pointer]:
+                      - img [ref=f1e33]
+                      - generic:
+                        - generic: 設定
+                    - button "トランスクリプト" [ref=f1e35] [cursor=pointer]:
+                      - img [ref=f1e36]
+                      - generic:
+                        - generic: トランスクリプト
+                    - button "ピクチャ・イン・ピクチャ" [ref=f1e38] [cursor=pointer]:
+                      - img [ref=f1e39]
+                      - generic:
+                        - generic: ピクチャ・イン・ピクチャ
+                    - button "全画面" [ref=f1e41] [cursor=pointer]:
+                      - img [ref=f1e42]
+                      - generic:
+                        - generic: 全画面
+      - generic [ref=e192]:
+        - heading "US-Iran ceasefire is temporary, but conflict’s credit risks linger" [level=3] [ref=e195]
+        - paragraph [ref=e198]: A two-week US-Iran ceasefire is contingent on the Strait of Hormuz reopening, but disruptions to supply chains, energy markets, oil prices and various sectors remain risks to credit quality.
+        - link "Learn more" [ref=e201] [cursor=pointer]:
+          - /url: /web/en/us/insights/podcasts.html
+          - generic [ref=e202]: Learn more
+    - group [ref=e206]:
+      - generic [ref=e207]:
+        - tabpanel "Slide 1" [ref=e208]:
+          - generic [ref=e211]:
+            - img "Moody's" [ref=e214]
+            - generic [ref=e216]:
+              - generic [ref=e217]:
+                - heading "Credit risk" [level=6] [ref=e218]
+                - paragraph [ref=e219]: Get insights into current events and trends affecting global credit markets.
+              - link "Learn more" [ref=e220] [cursor=pointer]:
+                - /url: /web/en/us/insights/credit-risk.html
+        - tabpanel "Slide 2" [ref=e221]:
+          - generic [ref=e224]:
+            - img "Moody's" [ref=e227]
+            - generic [ref=e229]:
+              - generic [ref=e230]:
+                - heading "Compliance" [level=6] [ref=e231]
+                - paragraph [ref=e232]: Learn how Moody’s compliance and third-party risk tools automate entity verification, onboarding, monitoring, and more.
+              - link "Learn more" [ref=e233] [cursor=pointer]:
+                - /url: /web/en/us/kyc.html
+        - tabpanel "Slide 3" [ref=e234]:
+          - generic [ref=e237]:
+            - img "Moody's" [ref=e240]
+            - generic [ref=e242]:
+              - generic [ref=e243]:
+                - heading "Private credit" [level=6] [ref=e244]
+                - paragraph [ref=e245]: Elevate your understanding of the risks and opportunities in private markets.
+              - link "Learn more" [ref=e246] [cursor=pointer]:
+                - /url: /web/en/us/private-credit.html
+        - tabpanel "Slide 4" [ref=e247]:
+          - generic [ref=e250]:
+            - img "Moody's" [ref=e253]
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - heading "Data" [level=6] [ref=e257]
+                - paragraph [ref=e258]: Tap into our perspectives on the power of data to support your risk management processes and propel your growth.
+              - link "Learn more" [ref=e259] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/capabilities/company-reference-data/data-applications.html
+        - tabpanel "Slide 5" [ref=e260]:
+          - generic [ref=e263]:
+            - img "Moody's" [ref=e266]
+            - generic [ref=e268]:
+              - generic [ref=e269]:
+                - heading "Sustainable finance" [level=6] [ref=e270]
+                - paragraph [ref=e271]: Browse Moody’s insights into how sustainable and transition finance can mitigate or amplify credit impacts.
+              - link "Learn more" [ref=e272] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/insights/credit-risk/sustainable-finance-and-credit.html
+      - generic [ref=e273] [cursor=pointer]:
+        - button "Previous carousel slide" [disabled] [ref=e274]
+        - button "Next carousel slide" [ref=e275]
+    - generic [ref=e278]:
+      - heading "Discover more" [level=2] [ref=e282]
+      - generic [ref=e285]:
+        - generic [ref=e286]:
+          - generic [ref=e289]:
+            - img "News and views" [ref=e292]
+            - heading "Moody's RMS™ Global Event Response" [level=6] [ref=e295]
+            - generic [ref=e296]:
+              - paragraph [ref=e298]: Deep insights for real-time event preparation and response, parametric insurance contracts triggers, validation against experience, and research.
+              - link "Read more" [ref=e299] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/insights/catastrophe-risk-insights/event-response.html
+          - generic [ref=e301]:
+            - generic [ref=e302]:
+              - img "europe" [ref=e306]
+              - generic [ref=e309]: research
+            - generic [ref=e310]:
+              - generic [ref=e311]:
+                - paragraph [ref=e313]: May 14, 2026
+                - generic [ref=e315]: Moody's Ratings
+              - heading "Monthly defaults in Europe surpassed those in the US for the first time since 2022" [level=5] [ref=e316]
+              - paragraph [ref=e317]: Ten rated corporate issuers defaulted last month, eight of which were from Europe. The number of defaults in April was down from March, but the global speculative grade default rate edged higher.
+              - link "Read more" [ref=e319] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Default-Trends-Global-April-2026-Default-Report-Default-Report--PBC_1482529
+          - generic [ref=e321]:
+            - generic [ref=e322]:
+              - img "Moody's" [ref=e326]
+              - generic [ref=e329]: research
+            - generic [ref=e330]:
+              - generic [ref=e331]:
+                - paragraph [ref=e333]: May 12, 2026
+                - generic [ref=e335]: Moody's Ratings
+              - heading "US financial markets envision inevitable shift to tokenized assets and digital money" [level=5] [ref=e336]
+              - paragraph [ref=e337]: Most institutions we surveyed say the benefits of asset tokenization will accelerate the move to a digitalized financial system, even with numerous technical, regulatory and legal hurdles ahead.
+              - link "Read more" [ref=e339] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/doc--PBC_1477157?cid=web-ntrnlbnnr-20020
+        - generic [ref=e340]:
+          - generic [ref=e342]:
+            - generic [ref=e343]:
+              - img "Moody's" [ref=e347]
+              - generic [ref=e350]: flipbook
+            - generic [ref=e351]:
+              - generic [ref=e352]:
+                - paragraph [ref=e354]: May 20, 2026
+                - generic [ref=e356]: Moody's Ratings
+              - heading "Defaults fell in April, but Middle East conflict, other shocks risk increasing rate" [level=5] [ref=e357]
+              - paragraph [ref=e358]: Ten speculative‑grade corporate issuers defaulted in April, down from 16 in March. In pessimistic scenarios, geopolitics, AI disruptions and private credit stress heighten the risk of a reversal.
+              - link "Read more" [ref=e360] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/resources/en/us/insights/data-stories/default-trends-april-2026.html
+          - generic [ref=e362]:
+            - generic [ref=e363]:
+              - img "Moody's" [ref=e367]
+              - generic [ref=e370]: whitepaper
+            - generic [ref=e371]:
+              - generic [ref=e372]:
+                - paragraph [ref=e374]: May 14, 2026
+                - generic [ref=e376]: Moody's
+              - 'heading "The intelligence edge: Banking’s new decision advantage" [level=5] [ref=e377]'
+              - paragraph [ref=e378]: This report, which is based on primary research with 348 senior banking leaders in the US, Europe and Asia-Pacific, outlines the thinking across sector. As the banking industry becomes increasingly competitive, discover what strategies will position banks to build a competitive advantage.
+              - link "Read more" [ref=e380] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/site-assets/the-intelligence-edge-moodys.pdf
+          - generic [ref=e383]:
+            - generic [ref=e384]:
+              - heading "GlobalCapital Bond Awards 2026" [level=4] [ref=e385]
+              - paragraph [ref=e386]: "Cast your vote for the Best Rating Agency and Best Second Party Opinion Provider in categories for:"
+              - list [ref=e387]:
+                - listitem [ref=e388]: SSA Bonds
+                - listitem [ref=e389]: Financial Institution Bonds
+                - listitem [ref=e390]: Corporate Bonds
+                - listitem [ref=e391]: Emerging Market Bonds
+              - paragraph [ref=e392]
+            - link "Cast vote" [ref=e393] [cursor=pointer]:
+              - /url: https://survey.alchemer.eu/s3/91071775/GlobalCapital-Bond-Awards-2026
+        - generic [ref=e394]:
+          - generic [ref=e396]:
+            - generic [ref=e397]:
+              - img "conflict" [ref=e401]
+              - generic [ref=e404]: research
+            - generic [ref=e405]:
+              - generic [ref=e406]:
+                - paragraph [ref=e408]: May 18, 2026
+                - generic [ref=e410]: Moody's Ratings
+              - heading "Extended Middle East conflict would raise emerging-market company defaults" [level=5] [ref=e411]
+              - paragraph [ref=e412]: We forecast a default rate of 1.4% among nonfinancial companies by April 2027, down from 3.1% last month. But further delays in energy-supply normalization would raise the rate as high as 5.0%.
+              - link "Read more" [ref=e414] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Corporates-Emerging-Markets-Extended-Middle-East-conflict-would-lead-default-Default-Report--PBC_1477725
+          - generic [ref=e416]:
+            - generic [ref=e417]:
+              - img "Moody's" [ref=e421]
+              - generic [ref=e424]: research
+            - generic [ref=e425]:
+              - generic [ref=e426]:
+                - paragraph [ref=e428]: May 13, 2026
+                - generic [ref=e430]: Moody's Ratings
+              - heading "Stablecoin’s growing use reveals policy, liquidity and price vulnerabilities" [level=5] [ref=e431]
+              - paragraph [ref=e432]: Monetary and fiscal policy risks are rising as dollar-based stablecoins become more widespread worldwide. Stablecoins can deviate from par value and bring additional risks tied to their collateral.
+              - link "Read more" [ref=e434] [cursor=pointer]:
+                - /url: https://www.moodys.com/research/Digital-Economy-Global-Growing-stablecoin-use-highlights-policy-liquidity-and-Sector-In-Depth--PBC_1464483?cid=web-ntrnlbnnr-20020
+          - generic [ref=e437]:
+            - generic [ref=e438]:
+              - heading "Maxsight™ for unified risk management" [level=4] [ref=e439]
+              - paragraph [ref=e440]: Moody’s Maxsight™ unified risk platform brings together thousands of data points to deliver a holistic picture of risk that can be viewed through different lenses.
+            - link "Learn more" [ref=e441] [cursor=pointer]:
+              - /url: https://www.moodys.com/web/en/us/solutions/compliance-third-party-risk/maxsight.html?cid=web-ntrnlbnnr-18478
+    - generic [ref=e448]:
+      - generic [ref=e450]:
+        - generic:
+          - generic:
+            - img "Moody's makes it possible"
+        - generic [ref=e454]:
+          - generic [ref=e456]:
+            - heading "Moody's makes it possible" [level=3] [ref=e457]
+            - paragraph [ref=e458]: See how we enable our customers to unlock opportunity, advance their business, and act decisively.
+          - link "Learn more" [ref=e460] [cursor=pointer]:
+            - /url: https://www.moodys.com/web/en/us/about-us.html
+            - generic [ref=e461]: Learn more
+      - generic [ref=e464]:
+        - generic:
+          - generic:
+            - img "Innovating with purpose"
+        - generic [ref=e468]:
+          - generic [ref=e470]:
+            - heading "Innovating with purpose" [level=3] [ref=e471]
+            - paragraph [ref=e472]: Discover how Moody’s combines cutting-edge technology and world-class talent to drive innovation.
+          - link "Learn more" [ref=e474] [cursor=pointer]:
+            - /url: /web/en/us/about-us/innovation-technology.html
+            - generic [ref=e475]: Learn more
+      - generic [ref=e478]:
+        - generic:
+          - generic:
+            - img "Work with brilliant minds"
+        - generic [ref=e482]:
+          - generic [ref=e484]:
+            - heading "Work with brilliant minds" [level=3] [ref=e485]
+            - paragraph [ref=e486]: Explore career opportunities at Moody’s.
+          - link "Join us" [ref=e488] [cursor=pointer]:
+            - /url: https://careers.moodys.com/
+            - generic [ref=e489]: Join us
+    - generic [ref=e493]:
+      - heading "GET IN TOUCH" [level=2] [ref=e497]
+      - heading "Speak to our team" [level=3] [ref=e500]
+      - paragraph [ref=e503]: Interested in learning more about our offerings? Our solutions specialists are ready to help.
+      - generic [ref=e505]:
+        - button "Get in touch" [ref=e506] [cursor=pointer]:
+          - generic [ref=e507]: Get in touch
+        - option "Country*" [selected]
+        - option "United States"
+        - option "United Kingdom"
+        - option "Afghanistan"
+        - option "Aland Islands"
+        - option "Albania"
+        - option "Algeria"
+        - option "American Samoa"
+        - option "Andorra"
+        - option "Angola"
+        - option "Anguilla"
+        - option "Antarctica"
+        - option "Antigua and Barbuda"
+        - option "Argentina"
+        - option "Armenia"
+        - option "Aruba"
+        - option "Australia"
+        - option "Austria"
+        - option "Azerbaijan"
+        - option "Bahamas"
+        - option "Bahrain"
+        - option "Bangladesh"
+        - option "Barbados"
+        - option "Belarus"
+        - option "Belgium"
+        - option "Belize"
+        - option "Benin"
+        - option "Bermuda"
+        - option "Bhutan"
+        - option "Bolivia"
+        - option "Bosnia and Herzegovina"
+        - option "Botswana"
+        - option "Bouvet Island"
+        - option "Brazil"
+        - option "British Indian Ocean Territory"
+        - option "Brunei Darussalam"
+        - option "Bulgaria"
+        - option "Burkina Faso"
+        - option "Burundi"
+        - option "Cambodia"
+        - option "Cameroon"
+        - option "Canada"
+        - option "Canary Islands"
+        - option "Cape Verde"
+        - option "Cayman Islands"
+        - option "Central African Republic"
+        - option "Chad"
+        - option "Channel Islands"
+        - option "Chile"
+        - option "China"
+        - option "Christmas Island"
+        - option "Cocos (Keeling) Islands"
+        - option "Colombia"
+        - option "Comoros"
+        - option "Congo, The Democratic Republic"
+        - option "Congo"
+        - option "Cook Islands"
+        - option "Costa Rica"
+        - option "Cote d'Ivoire"
+        - option "Croatia"
+        - option "Cuba"
+        - option "Curacao"
+        - option "Cyprus"
+        - option "Czech Republic"
+        - option "Denmark"
+        - option "Djibouti"
+        - option "Dominica"
+        - option "Dominican Republic"
+        - option "Ecuador"
+        - option "Egypt"
+        - option "El Salvador"
+        - option "Equatorial Guinea"
+        - option "Eritrea"
+        - option "Estonia"
+        - option "Ethiopia"
+        - option "Falkland Islands (Malvinas)"
+        - option "Faroe Islands"
+        - option "Fiji"
+        - option "Finland"
+        - option "France"
+        - option "French Guiana"
+        - option "French Polynesia"
+        - option "French Southern Territories"
+        - option "Gabon"
+        - option "Gambia"
+        - option "Georgia"
+        - option "Germany"
+        - option "Ghana"
+        - option "Gibraltar"
+        - option "Greece"
+        - option "Greenland"
+        - option "Grenada"
+        - option "Guadeloupe"
+        - option "Guam"
+        - option "Guatemala"
+        - option "Guernsey"
+        - option "Guinea"
+        - option "Guinea-Bissau"
+        - option "Guyana"
+        - option "Haiti"
+        - option "Heard and McDonald Islands"
+        - option "Holy See (Vatican City State)"
+        - option "Honduras"
+        - option "Hong Kong"
+        - option "Hungary"
+        - option "Iceland"
+        - option "India"
+        - option "Indonesia"
+        - option "Iran, Islamic Republic of"
+        - option "Iraq"
+        - option "Ireland"
+        - option "Isle of Man"
+        - option "Israel"
+        - option "Italy"
+        - option "Jamaica"
+        - option "Japan"
+        - option "Jersey"
+        - option "Jordan"
+        - option "Kazakhstan"
+        - option "Kenya"
+        - option "Kiribati"
+        - option "Korea, Democratic People's Republic of"
+        - option "Korea, Republic of"
+        - option "Kosovo"
+        - option "Kuwait"
+        - option "Kyrgyzstan"
+        - option "Lao People's Democratic Rep"
+        - option "Latvia"
+        - option "Lebanon"
+        - option "Lesotho"
+        - option "Liberia"
+        - option "Libya"
+        - option "Liechtenstein"
+        - option "Lithuania"
+        - option "Luxembourg"
+        - option "Macau"
+        - option "Madagascar"
+        - option "Malawi"
+        - option "Malaysia"
+        - option "Maldives"
+        - option "Mali"
+        - option "Malta"
+        - option "Marshall Islands"
+        - option "Martinique"
+        - option "Mauritania"
+        - option "Mauritius"
+        - option "Mayotte"
+        - option "Mexico"
+        - option "Micronesia, Federated States of"
+        - option "Moldova, Republic of"
+        - option "Monaco"
+        - option "Mongolia"
+        - option "Montenegro"
+        - option "Montserrat"
+        - option "Morocco"
+        - option "Mozambique"
+        - option "Myanmar"
+        - option "Namibia"
+        - option "Nauru"
+        - option "Nepal"
+        - option "Netherlands Antilles"
+        - option "Netherlands"
+        - option "New Caledonia"
+        - option "New Zealand"
+        - option "Nicaragua"
+        - option "Niger"
+        - option "Nigeria"
+        - option "Niue"
+        - option "Norfolk Island"
+        - option "North Macedonia"
+        - option "North Mariana Islands"
+        - option "Norway"
+        - option "Oman"
+        - option "Pakistan"
+        - option "Palau"
+        - option "Palestinian Territory"
+        - option "Panama"
+        - option "Papua New Guinea"
+        - option "Paraguay"
+        - option "Peru"
+        - option "Philippines"
+        - option "Pitcairn Islands"
+        - option "Poland"
+        - option "Portugal"
+        - option "Puerto Rico"
+        - option "Qatar"
+        - option "Reunion"
+        - option "Romania"
+        - option "Russian Federation"
+        - option "Rwanda"
+        - option "Saint Helena"
+        - option "Saint Kitts and Nevis"
+        - option "Saint Lucia"
+        - option "Saint Pierre and Miquelon"
+        - option "Saint Vincent and the Grenadines"
+        - option "Samoa"
+        - option "San Marino"
+        - option "Sao Tome and Principe"
+        - option "Saudi Arabia"
+        - option "Senegal"
+        - option "Serbia"
+        - option "Seychelles"
+        - option "Sierra Leone"
+        - option "Singapore"
+        - option "Sint Maarten"
+        - option "Slovakia"
+        - option "Slovenia"
+        - option "Solomon Islands"
+        - option "Somalia"
+        - option "South Africa"
+        - option "South Georgia and the Southern Sandwich Islands"
+        - option "Spain"
+        - option "Sri Lanka"
+        - option "Sudan"
+        - option "Suriname"
+        - option "Svalbard and Jan Mayen"
+        - option "Swaziland"
+        - option "Sweden"
+        - option "Switzerland"
+        - option "Syrian Arab Republic"
+        - option "Taiwan"
+        - option "Tajikistan"
+        - option "Tanzania, United Republic of"
+        - option "Thailand"
+        - option "Timor-Leste"
+        - option "Togo"
+        - option "Tokelau Islands"
+        - option "Tonga"
+        - option "Trinidad and Tobago"
+        - option "Tunisia"
+        - option "Turkey"
+        - option "Turkmenistan"
+        - option "Turks and Caicos Islands"
+        - option "Tuvalu"
+        - option "Uganda"
+        - option "Ukraine"
+        - option "United Arab Emirates"
+        - option "United States Minor Outlying Islands"
+        - option "United States Virgin Islands"
+        - option "Uruguay"
+        - option "Uzbekistan"
+        - option "Vanuatu"
+        - option "Venezuela"
+        - option "Vietnam"
+        - option "Virgin Islands (British)"
+        - option "Wallis and Futuna Islands"
+        - option "Western Sahara"
+        - option "Yemen"
+        - option "Zaire"
+        - option "Zambia"
+        - option "Zimbabwe"
+      - separator [ref=e511]
+  - contentinfo [ref=e513]:
+    - generic [ref=e523]:
+      - paragraph [ref=e528]:
+        - superscript [ref=e529]:
+          - text: "Note: Moody’s Corporation is comprised of separate divisions. Moody's Ratings publishes credit ratings and provides assessment services on a wide range of debt obligations, programs and facilities, and the entities that issue such obligations in markets worldwide, including various corporate, financial institution and governmental obligations, and structured finance securities. Moody's Ratings products are set out"
+          - link "here" [ref=e530] [cursor=pointer]:
+            - /url: https://www.moodys.com/web/en/us/solutions/ratings.html
+          - text: . All other products and solutions described on this site are provided by Moody's, a global provider of data and information, research and insights, and decision solutions.
+      - generic [ref=e534]:
+        - generic [ref=e536]:
+          - heading "Who We Serve" [level=6] [ref=e539]
+          - paragraph [ref=e542]:
+            - generic [ref=e543]:
+              - link "Banking" [ref=e544] [cursor=pointer]:
+                - /url: /web/en/us/who-we-serve/banking.html
+              - link "Buy-side" [ref=e545] [cursor=pointer]:
+                - /url: /web/en/us/who-we-serve/asset-management/buy-side.html
+              - link "Insurance" [ref=e546] [cursor=pointer]:
+                - /url: /web/en/us/who-we-serve/insurance.html
+              - link "Corporations" [ref=e547] [cursor=pointer]:
+                - /url: /web/en/us/who-we-serve/corporations.html
+              - link "Public Sector" [ref=e548] [cursor=pointer]:
+                - /url: /web/en/us/who-we-serve/public-sector.html
+        - generic [ref=e551]:
+          - heading "Solutions" [level=6] [ref=e554]
+          - paragraph [ref=e557]:
+            - generic [ref=e558]:
+              - link "Ratings" [ref=e559] [cursor=pointer]:
+                - /url: /web/en/us/solutions/ratings.html
+              - link "Investment Research" [ref=e560] [cursor=pointer]:
+                - /url: /web/en/us/solutions/investment-research.html
+              - link "Third-Party Risk" [ref=e561] [cursor=pointer]:
+                - /url: /web/en/us/solutions/compliance-third-party-risk.html
+              - link "Lending" [ref=e562] [cursor=pointer]:
+                - /url: /web/en/us/solutions/lending.html
+              - link "Financial and Regulatory Reporting" [ref=e563] [cursor=pointer]:
+                - /url: /web/en/us/solutions/regulatory-calculation-reporting.html
+              - link "Balance Sheet Management" [ref=e564] [cursor=pointer]:
+                - /url: /web/en/us/solutions/balance-sheet-management.html
+              - link "Insurance Underwriting" [ref=e565] [cursor=pointer]:
+                - /url: /web/en/us/solutions/underwriting.html
+              - link "Portfolio Management" [ref=e566] [cursor=pointer]:
+                - /url: /web/en/us/solutions/portfolio-management.html
+              - link "Model Risk and Governance" [ref=e567] [cursor=pointer]:
+                - /url: /web/en/us/solutions/model-risk-governance.html
+              - link "Casualty Insurance" [ref=e568] [cursor=pointer]:
+                - /url: /web/en/us/solutions/casualty-insurance.html
+        - generic [ref=e571]:
+          - heading "Capabilities" [level=6] [ref=e574]
+          - paragraph [ref=e577]:
+            - generic [ref=e578]:
+              - link "Catastrophe Modeling" [ref=e579] [cursor=pointer]:
+                - /url: /web/en/us/capabilities/catastrophe-modeling.html
+              - link "Credit Risk" [ref=e580] [cursor=pointer]:
+                - /url: /web/en/us/capabilities/credit-risk.html
+              - link "Physical and Transition Risk" [ref=e581] [cursor=pointer]:
+                - /url: /web/en/us/capabilities/physical-transition-risk.html
+            - link "Cyber Risk" [ref=e582] [cursor=pointer]:
+              - /url: /web/en/us/capabilities/cyber-risk.html
+            - link "Company Reference Data" [ref=e583] [cursor=pointer]:
+              - /url: /web/en/us/capabilities/company-reference-data.html
+            - link "Economic Data" [ref=e584] [cursor=pointer]:
+              - /url: /web/en/us/capabilities/economic-data.html
+            - link "Commercial Properties" [ref=e585] [cursor=pointer]:
+              - /url: /web/en/us/capabilities/commercial-properties.html
+            - generic [ref=e586]:
+              - link "Structured Finance" [ref=e587] [cursor=pointer]:
+                - /url: /web/en/us/capabilities/structured-finance.html
+              - link "AI and GenAI" [ref=e588] [cursor=pointer]:
+                - /url: /web/en/us/capabilities/gen-ai.html
+        - generic [ref=e591]:
+          - heading "Contact Us" [level=6] [ref=e594]
+          - paragraph [ref=e597]:
+            - generic [ref=e598]:
+              - link "Careers" [ref=e599] [cursor=pointer]:
+                - /url: https://careers.moodys.com/
+              - link "Moodys.com Support" [ref=e600] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/help-support.html
+              - link "Insurance Solutions Support" [ref=e601] [cursor=pointer]:
+                - /url: https://support.rms.com/web/guest/home?p_p_state=maximized&p_p_mode=view&refererPlid=12011&saveLastPath=false&_com_liferay_login_web_portlet_LoginPortlet_mvcRenderCommandName=%2Flogin%2Flogin&p_p_id=com_liferay_login_web_portlet_LoginPortlet&p_p_lifecycle=0&_com_liferay_login_web_portlet_LoginPortlet_redirect=%2F
+              - link "Contact Us" [ref=e602] [cursor=pointer]:
+                - /url: https://www.moodys.com/contact-us
+              - link "FAQs" [ref=e603] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/help-support/faq.html
+              - link "Submit a Complaint" [ref=e604] [cursor=pointer]:
+                - /url: https://ratings.moodys.com/complaint
+      - generic [ref=e608]:
+        - generic [ref=e610]:
+          - heading "Moody's Integrity Hotline" [level=6] [ref=e614]
+          - generic [ref=e616]:
+            - paragraph [ref=e617]:
+              - generic [ref=e618]:
+                - generic [ref=e619]: "Via the Internet:"
+                - link "moodys.ethicspoint.com" [ref=e620] [cursor=pointer]:
+                  - /url: https://moodys.ethicspoint.com/
+            - paragraph [ref=e621]:
+              - generic [ref=e622]:
+                - generic [ref=e623]: "By telephone from the United States:"
+                - link "Dial 1-866-330-MDYS (1-866-330-6397)" [ref=e624] [cursor=pointer]:
+                  - /url: tel:1-866-330-6397
+            - paragraph [ref=e625]:
+              - generic [ref=e626]:
+                - generic [ref=e627]: "By telephone from outside the United States:"
+                - link "Dial the AT&T Direct Dial Access* code for your location. Then at the prompt, dial 866-330-MDYS (866-330-6397)" [ref=e628] [cursor=pointer]:
+                  - /url: tel:866-330-6397
+        - generic [ref=e630]:
+          - heading "Company Information" [level=6] [ref=e634]
+          - paragraph [ref=e637]:
+            - generic [ref=e638]:
+              - link "About Moody's" [ref=e639] [cursor=pointer]:
+                - /url: /web/en/us/about-us.html
+              - link "Trust Center" [ref=e640] [cursor=pointer]:
+                - /url: /web/en/us/about-us/trust-center.html
+              - link "Legal" [ref=e641] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/legal.html
+              - link "Moody's Code of Business Conduct" [ref=e642] [cursor=pointer]:
+                - /url: https://ir.moodys.com/corporate-governance/translated-code-of-business-conduct/default.aspx
+              - link "Modern Slavery and Human Trafficking Statement" [ref=e643] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/legal/modern-slavery.html
+              - link "Gender Pay Gap Reports" [ref=e644] [cursor=pointer]:
+                - /url: https://www.moodys.com/web/en/us/legal/gender-pay-gap-reports.html
+        - generic [ref=e646]:
+          - heading "Regulatory" [level=6] [ref=e650]
+          - paragraph [ref=e653]:
+            - link "ratings.moodys.com" [ref=e654] [cursor=pointer]:
+              - /url: https://ratings.moodys.com/ratings-news
+      - separator [ref=e657]
+      - paragraph [ref=e660]: Moody’s delivers credit ratings, research, and a wide suite of data, analytics, and workflow solutions that help organizations understand risk and act with confidence. Agentic AI capabilities are embedded into our data ecosystem, deploying intelligent agents designed to uncover insights faster for smarter, more informed decisions.
+      - separator [ref=e663]
+      - generic [ref=e665]:
+        - generic [ref=e666]:
+          - generic [ref=e667]:
+            - link "Terms of Use" [ref=e668] [cursor=pointer]:
+              - /url: https://www.moodys.com/termsofuseinfo.aspx?lang=en&cy=global
+            - link "Privacy Policy" [ref=e669] [cursor=pointer]:
+              - /url: https://www.moodys.com/privatepolicy.aspx?lang=en&cy=global
+            - link "Do Not Sell My Personal Information" [ref=e670] [cursor=pointer]:
+              - /url: https://survey.alchemer.com/s3/8249180/Do-Not-Sell-Request
+            - link "Cookie 設定" [ref=e671] [cursor=pointer]:
+              - /url: "#"
+          - paragraph [ref=e672]:
+            - text: © 2026 Moody’s Corporation, Moody’s Investors Service, Inc., Moody’s Analytics, Inc. and/or their licensors and affiliates (collectively, “MOODY’S”). All rights reserved; see MOODY'S
+            - link "Copyright Notice and Legal Disclaimer" [ref=e673] [cursor=pointer]:
+              - /url: https://www.moodys.com/web/en/us/legal/global-disclaimer.html
+            - text: for further details. All content is for informational purposes only and does not constitute legal, financial, compliance or other professional advice; please consult with a qualified professional.
+        - generic [ref=e674]:
+          - generic [ref=e675]:
+            - link "linkedin" [ref=e676] [cursor=pointer]:
+              - /url: https://www.linkedin.com/authwall?trk=bf&trkInfo=AQHc-LTGcWiTdAAAAYttrRqYfSpoajOEkOn-gKmZJ9fo5x9k6KDxhp1mpOTfEOJhvdYzVjG2qd7qnFjw5AUeiO1-26ESGv6ZQZZOGDJtDYvuiPYVmiwvlPgUiqZkrr0PdPc6E4c=&original_referer=&sessionRedirect=https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fmoodys-corporation
+              - img "linkedin"
+            - link "youtube" [ref=e677] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UCyWqT8lrGbRqWa30c_l5iSw
+              - img "youtube"
+            - link "twitter" [ref=e678] [cursor=pointer]:
+              - /url: https://x.com/Moodys
+              - img "twitter"
+            - link "instagram" [ref=e679] [cursor=pointer]:
+              - /url: https://www.instagram.com/moodyscorporation/?hl=en
+              - img "instagram"
+          - paragraph [ref=e680]: "Note: Moody's does not post ratings to its social media accounts"
+  - region "Cookie banner" [ref=e682]:
+    - dialog "プライバシー" [ref=e683]:
+      - generic [ref=e684]:
+        - button "閉じる" [ref=e686] [cursor=pointer]
+        - generic [ref=e688]:
+          - img "企業ロゴ" [ref=e689]
+          - generic [ref=e691]:
+            - text: 当社は、ユーザーエクスペリエンスとサイトのパフォーマンスを向上させ、お客様の興味に合わせた広告を提供し、ソーシャルメディアの共有を可能にする目的でクッキーを使用しています。
+            - link "あなたのプライバシーを守るための詳細設定, 新しいタブで開く" [active] [ref=e692] [cursor=pointer]:
+              - /url: xxx
+              - text: 詳細を見る

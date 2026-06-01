@@ -1,0 +1,489 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Japan Credit Rating Agency, Ltd." [level=1] [ref=e5]:
+        - link "Japan Credit Rating Agency, Ltd." [ref=e6] [cursor=pointer]:
+          - /url: /en/
+          - img "Japan Credit Rating Agency, Ltd." [ref=e7]
+      - generic [ref=e8]:
+        - list [ref=e9]:
+          - listitem [ref=e10]: Font Size
+          - listitem [ref=e11]:
+            - img "M" [ref=e12] [cursor=pointer]
+          - listitem [ref=e13]:
+            - img "L" [ref=e14] [cursor=pointer]
+        - list [ref=e15]:
+          - listitem [ref=e16]:
+            - link "Site Map" [ref=e17] [cursor=pointer]:
+              - /url: /en/sitemap/
+              - img "Site Map" [ref=e18]
+          - listitem [ref=e19]:
+            - link "Log In" [ref=e20] [cursor=pointer]:
+              - /url: "#login"
+              - img "Log In" [ref=e21]
+          - listitem [ref=e22]:
+            - link "日本語" [ref=e23] [cursor=pointer]:
+              - /url: /
+              - img "日本語" [ref=e24]
+      - generic [ref=e25]:
+        - generic [ref=e27]:
+          - generic:
+            - generic [ref=e29]:
+              - term [ref=e30]: May. 01, 2026
+              - definition [ref=e31]:
+                - link [ref=e32] [cursor=pointer]:
+                  - /url: /download/4e37d1101054412297e7704b4183721015293e011724250713/26d0149_en.pdf
+                  - text: Rating / Outlook Change in April 2026
+            - generic [ref=e34]:
+              - term [ref=e35]: May. 01, 2026
+              - definition [ref=e36]:
+                - link "The financial results reports (FY 2025) have been posted in the \" Reports relating to Issuer \" section." [ref=e37] [cursor=pointer]:
+                  - /url: /download/8d954a688fb4473416571b6cb79f84c44fa141481b5d134440/掲載開始のお知らせ_260501 en.pdf
+            - generic [ref=e39]:
+              - term [ref=e40]: May. 01, 2026
+              - definition [ref=e41]:
+                - link [ref=e42] [cursor=pointer]:
+                  - /url: /download/4e37d1101054412297e7704b4183721015293e011724250713/26d0149_en.pdf
+                  - text: Rating / Outlook Change in April 2026
+            - generic [ref=e44]:
+              - term [ref=e45]: May. 01, 2026
+              - definition [ref=e46]:
+                - link [ref=e47] [cursor=pointer]:
+                  - /url: /download/8d954a688fb4473416571b6cb79f84c44fa141481b5d134440/掲載開始のお知らせ_260501 en.pdf
+                  - text: The financial results reports (FY 2025) have been posted in the " Reports relating to Issuer " section.
+        - link [ref=e48] [cursor=pointer]:
+          - /url: ""
+        - link [ref=e49] [cursor=pointer]:
+          - /url: ""
+      - generic:
+        - generic:
+          - textbox [ref=e50]
+          - button "Search" [ref=e51] [cursor=pointer]
+      - list [ref=e53]:
+        - listitem [ref=e54]:
+          - link [ref=e55] [cursor=pointer]:
+            - /url: /en/acquisition/
+        - listitem [ref=e56]:
+          - link [ref=e57] [cursor=pointer]:
+            - /url: /en/greenfinance/
+        - listitem [ref=e58]:
+          - link [ref=e59] [cursor=pointer]:
+            - /url: /en/creditoutlook/
+        - listitem [ref=e60]:
+          - link [ref=e61] [cursor=pointer]:
+            - /url: /en/service/provision/
+        - listitem [ref=e62]:
+          - link [ref=e63] [cursor=pointer]:
+            - /url: /en/service/seminar/
+    - generic [ref=e64]: "Last Updated : May. 29, 2026"
+  - navigation [ref=e65]:
+    - list [ref=e67]:
+      - listitem [ref=e68]:
+        - link "Home" [ref=e69] [cursor=pointer]:
+          - /url: /en/
+      - listitem [ref=e70]:
+        - link "Rating Lists" [ref=e71] [cursor=pointer]:
+          - /url: /en/ratinglist/
+      - listitem [ref=e72]:
+        - link "Information about JCR Ratings" [ref=e73] [cursor=pointer]:
+          - /url: /en/rrinfo/
+          - text: Information about
+          - text: JCR Ratings
+      - listitem [ref=e74]:
+        - link "Intelligence & Solution" [ref=e75] [cursor=pointer]:
+          - /url: /en/service/
+          - text: Intelligence
+          - text: "& Solution"
+      - listitem [ref=e76]:
+        - link "Global Activities" [ref=e77] [cursor=pointer]:
+          - /url: /en/service/international/
+      - listitem [ref=e78]:
+        - link "About JCR" [ref=e79] [cursor=pointer]:
+          - /url: /en/service/company/
+      - listitem [ref=e80]:
+        - link "Contact Us" [ref=e81] [cursor=pointer]:
+          - /url: /en/contact/
+  - article [ref=e82]:
+    - generic [ref=e83]:
+      - generic [ref=e85]:
+        - heading "News Release More" [level=2] [ref=e86]:
+          - text: News Release
+          - link "More" [ref=e87] [cursor=pointer]:
+            - /url: /en/release/
+        - generic [ref=e88]:
+          - term [ref=e89]: May. 29, 2026
+          - definition [ref=e90]:
+            - img [ref=e92]
+            - link "JCR Assigned A+/Stable Long-term Issuer Rating to Yamaha Motor" [ref=e94] [cursor=pointer]:
+              - /url: /download/1ebe57befe380319ca3c191bbbe22dde6106bf8fd55bd922bb/26d0169_f.pdf
+              - generic [ref=e95]:
+                - text: JCR Assigned A+/Stable Long-term Issuer Rating to Yamaha Motor
+                - img [ref=e96]
+          - definition [ref=e97]:
+            - img [ref=e99]
+            - link "JCR's Rating Review of City Gas Companies" [ref=e101] [cursor=pointer]:
+              - /url: /download/e209c59c20e692042ce25ca4b0d00cbbfd06cf0debcdff15ed/26d0253_s.pdf
+              - generic [ref=e102]:
+                - text: JCR's Rating Review of City Gas Companies
+                - img [ref=e103]
+          - definition [ref=e104]:
+            - img [ref=e106]
+            - link "JCR Affirmed A-/Stable Long-term Issuer Rating on TOMY" [ref=e108] [cursor=pointer]:
+              - /url: /download/b0a777b5904a5767be5ffb77e733905e37935a909fd5589b35/26d0256_f.pdf
+              - generic [ref=e109]:
+                - text: JCR Affirmed A-/Stable Long-term Issuer Rating on TOMY
+                - img [ref=e110]
+          - definition [ref=e111]:
+            - img [ref=e113]
+            - link "JCR Affirmed AA-/Stable Long-term Issuer Rating on Nitori HD" [ref=e115] [cursor=pointer]:
+              - /url: /download/0e233b3bb20d3853443bf578b33bb7ff783508991a1e937ef8/26d0240_f.pdf
+              - generic [ref=e116]:
+                - text: JCR Affirmed AA-/Stable Long-term Issuer Rating on Nitori HD
+                - img [ref=e117]
+          - definition [ref=e118]:
+            - img [ref=e120]
+            - link "JCR Affirmed A+/Stable (FC/LC) on BPPA (EXAU) Master HD and Australia Core Property" [ref=e122] [cursor=pointer]:
+              - /url: /download/7c463ece381530e4eebc310bf80be7e3acaace0e0c6fc26cec/26d0153_f.pdf
+              - generic [ref=e123]:
+                - text: JCR Affirmed A+/Stable (FC/LC) on BPPA (EXAU) Master HD and Australia Core Property
+                - img [ref=e124]
+          - definition [ref=e125]:
+            - img [ref=e127]
+            - link "JCR Assigned A- Rating to Bonds of GMO internet group" [ref=e129] [cursor=pointer]:
+              - /url: /download/53e0df0a774e474c3545baf7fdc3544a5b444031b54400fd2e/26d0260_f.pdf
+              - generic [ref=e130]:
+                - text: JCR Assigned A- Rating to Bonds of GMO internet group
+                - img [ref=e131]
+          - definition [ref=e132]:
+            - img [ref=e134]
+            - link "JCR Assigned AA Rating to Bonds of Tohoku Electric Power" [ref=e136] [cursor=pointer]:
+              - /url: /download/90b10a9cd040d49d5c2409925b7979fd24f1c3412db7dd6796/26d0223_f.pdf
+              - generic [ref=e137]:
+                - text: JCR Assigned AA Rating to Bonds of Tohoku Electric Power
+                - img [ref=e138]
+          - definition [ref=e139]:
+            - img [ref=e141]
+            - link "JCR Assigned A+ Rating to Bonds of NICHIREI" [ref=e143] [cursor=pointer]:
+              - /url: /download/80ec418f9daa1a42ca7c479f0e7015eea55a98e5e78aeecea7/26d0258_f.pdf
+              - generic [ref=e144]:
+                - text: JCR Assigned A+ Rating to Bonds of NICHIREI
+                - img [ref=e145]
+          - definition [ref=e146]:
+            - img [ref=e148]
+            - link "JCR Assigned AA Rating to Bonds of Mitsui Fudosan" [ref=e150] [cursor=pointer]:
+              - /url: /download/97e8f344f75b446b780ba592260885453d738373f77f849982/26d0261_f.pdf
+              - generic [ref=e151]:
+                - text: JCR Assigned AA Rating to Bonds of Mitsui Fudosan
+                - img [ref=e152]
+          - definition [ref=e153]:
+            - img [ref=e155]
+            - link "JCR Assigned A Rating to Bonds (Tier 1 with loss absorption clause) of Sumitomo Mitsui Financial Group" [ref=e157] [cursor=pointer]:
+              - /url: /download/ff27055558517b2b0fbb17a022524d62dc615f650520722dd6/26d0229_f.pdf
+              - generic [ref=e158]:
+                - text: JCR Assigned A Rating to Bonds (Tier 1 with loss absorption clause) of Sumitomo Mitsui Financial Group
+                - img [ref=e159]
+          - definition [ref=e160]:
+            - img [ref=e162]
+            - link "JCR Assigned Preliminary A+ Rating to Shelf Registration of SUMITOMO CHEMICAL" [ref=e164] [cursor=pointer]:
+              - /url: /download/53b885a24b7325cb72fc7240e5239c287395fc030552a88702/26d0231_f.pdf
+              - generic [ref=e165]:
+                - text: JCR Assigned Preliminary A+ Rating to Shelf Registration of SUMITOMO CHEMICAL
+                - img [ref=e166]
+          - definition [ref=e167]:
+            - img [ref=e169]
+            - link "JCR Assigned Preliminary A- Rating to Shelf Registration of Premium Group" [ref=e171] [cursor=pointer]:
+              - /url: /download/68bafe24afed69fbb822f5a3d29f1e88d292966bb2bf649f03/26d0188_f.pdf
+              - generic [ref=e172]:
+                - text: JCR Assigned Preliminary A- Rating to Shelf Registration of Premium Group
+                - img [ref=e173]
+          - definition [ref=e174]:
+            - img [ref=e176]
+            - link "JCR Withdraws A+ (FC/LC) on Abacus Group" [ref=e178] [cursor=pointer]:
+              - /url: /download/9a8484ef7099929b8dfe90492b07f17a9022083a83a98d837a/26i0024_f.pdf
+              - generic [ref=e179]:
+                - text: JCR Withdraws A+ (FC/LC) on Abacus Group
+                - img [ref=e180]
+          - definition [ref=e181]:
+            - img [ref=e183]
+            - link "JCR Assigned AA- to SPIRE SA Series 2026-340" [ref=e185] [cursor=pointer]:
+              - /url: /download/d631626755dd75a524a36065013540d17d2e25d2d7576a3750/22018/26s0045_f.pdf
+              - generic [ref=e186]:
+                - text: JCR Assigned AA- to SPIRE SA Series 2026-340
+                - img [ref=e187]
+          - definition [ref=e188]:
+            - img [ref=e190]
+            - link "[ Asset Securitization Products ] JCR Assigned J-1+ to Hokuriku Bank A Corporation Bills & Electronically Recorded Receivables ABL 26-05" [ref=e192] [cursor=pointer]:
+              - /url: /download/5318324604f82d161187115665d75673e818171a9760211538/891079/26s0043_f.pdf
+              - generic [ref=e193]:
+                - text: "[ Asset Securitization Products ] JCR Assigned J-1+ to Hokuriku Bank A Corporation Bills & Electronically Recorded Receivables ABL 26-05"
+                - img [ref=e194]
+          - definition [ref=e195]:
+            - img [ref=e197]
+            - generic [ref=e199]: "OHMAGARI FAMILY CLINIC : Assigned Social Loan Framework Evaluation: Social 1(F)"
+          - definition [ref=e200]:
+            - img [ref=e202]
+            - generic [ref=e204]: "TOKYU: Reviewed Sustainable Finance Framework Evaluation: SU 1(F)"
+          - definition [ref=e205]:
+            - img [ref=e207]
+            - generic [ref=e209]: "Yoshikawa Kenzai Sangyo, The Joyo Bank: Second Party Opinion on Sustainability Linked Loan"
+          - definition [ref=e210]:
+            - img [ref=e212]
+            - generic [ref=e214]: "The Nanto Bank: Second Opinion on Sustainable Deposit Framework"
+          - definition [ref=e215]:
+            - img [ref=e217]
+            - generic [ref=e219]: "Kasai Sangyo, The Shoko Chukin Bank: Second Opinion on Positive Impact Finance"
+          - definition [ref=e220]:
+            - img [ref=e222]
+            - generic [ref=e224]: "Kawase Seiko, The Shoko Chukin Bank: Second Opinion on Positive Impact Finance"
+          - definition [ref=e225]:
+            - img [ref=e227]
+            - generic [ref=e229]: "Nakazawa Group Holdings, The Shoko Chukin Bank: Second Opinion on Positive Impact Finance"
+          - definition [ref=e230]:
+            - img [ref=e232]
+            - generic [ref=e234]: "BIG WAVE KAWASAKI, The Shoko Chukin Bank: Second Opinion on Positive Impact Finance"
+          - definition [ref=e235]:
+            - img [ref=e237]
+            - generic [ref=e239]: "FUJIPRECON, The Shoko Chukin Bank: Second Opinion on Positive Impact Finance"
+        - generic [ref=e240]:
+          - term [ref=e241]: May. 28, 2026
+          - definition [ref=e242]:
+            - img [ref=e244]
+            - link "JCR Upgraded Long-term Issuer Rating on CTP to A/Stable" [ref=e246] [cursor=pointer]:
+              - /url: /download/0cc9fd027b9c4ba744ad454404bc66f2045dc019c015595d7d/26i0016_f.pdf
+              - generic [ref=e247]:
+                - text: JCR Upgraded Long-term Issuer Rating on CTP to A/Stable
+                - img [ref=e248]
+          - definition [ref=e249]:
+            - img [ref=e251]
+            - link "JCR Affirmed A-/Stable Long-term Issuer Rating on ARATA" [ref=e253] [cursor=pointer]:
+              - /url: /download/78e7abb8a59ce08b85ba5c62dffb7368aeeb3391fe1da7a01a/26d0237_f.pdf
+              - generic [ref=e254]:
+                - text: JCR Affirmed A-/Stable Long-term Issuer Rating on ARATA
+                - img [ref=e255]
+          - definition [ref=e256]:
+            - img [ref=e258]
+            - link "Change in CP Maximum Amount of ISUZU MOTORS ; Affirmed J-1" [ref=e260] [cursor=pointer]:
+              - /url: /download/5de5bbfd01a97d35860f172fe4ad2e5eecf0e37838e4d6702f/26d0139_f.pdf
+              - generic [ref=e261]:
+                - text: Change in CP Maximum Amount of ISUZU MOTORS ; Affirmed J-1
+                - img [ref=e262]
+          - definition [ref=e263]:
+            - img [ref=e265]
+            - link "JCR Affirmed AA-/Stable (FC) and AA/Stable (LC) on Czech Republic" [ref=e267] [cursor=pointer]:
+              - /url: /download/6d2869677669c3d8458db6034c1075030cb560310db947b006/26i0015_f.pdf
+              - generic [ref=e268]:
+                - text: JCR Affirmed AA-/Stable (FC) and AA/Stable (LC) on Czech Republic
+                - img [ref=e269]
+          - definition [ref=e270]:
+            - img [ref=e272]
+            - link "JCR Assigned AA Rating to Bonds of ASAHI KASEI" [ref=e274] [cursor=pointer]:
+              - /url: /download/7fd3c9bed91705016e64cf70fe5d7e41cb401c0dbb40f6e01b/26d0226_f.pdf
+              - generic [ref=e275]:
+                - text: JCR Assigned AA Rating to Bonds of ASAHI KASEI
+                - img [ref=e276]
+          - definition [ref=e277]:
+            - img [ref=e279]
+            - link "JCR Assigned A+ Rating to Bonds of LIXIL" [ref=e281] [cursor=pointer]:
+              - /url: /download/720259124f2b7241913cc576757f7ca5ce56f912728ef455c1/26d0257_f.pdf
+              - generic [ref=e282]:
+                - text: JCR Assigned A+ Rating to Bonds of LIXIL
+                - img [ref=e283]
+      - generic [ref=e284]:
+        - generic [ref=e285]:
+          - heading "Issuer Reports More" [level=2] [ref=e286]:
+            - text: Issuer Reports
+            - link "More" [ref=e287] [cursor=pointer]:
+              - /url: /en/issue_report/
+          - table [ref=e288]:
+            - rowgroup [ref=e289]:
+              - row "Issuer" [ref=e290]:
+                - columnheader "Issuer" [ref=e291]
+                - columnheader [ref=e292]
+              - row "Apr. 03, 2026" [ref=e293]:
+                - cell "Apr. 03, 2026" [ref=e294]
+              - row "OBAYASHI PDF file Member Only" [ref=e295]:
+                - cell "OBAYASHI" [ref=e296]:
+                  - link "OBAYASHI" [ref=e297] [cursor=pointer]:
+                    - /url: /en/ratinglist/corp/1802
+                - cell "PDF file Member Only" [ref=e298]:
+                  - link "PDF file" [ref=e299] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e300]
+                  - img "Member Only" [ref=e301]
+              - row "Mar. 04, 2026" [ref=e302]:
+                - cell "Mar. 04, 2026" [ref=e303]
+              - row "Far East Horizon PDF file Member Only" [ref=e304]:
+                - cell "Far East Horizon" [ref=e305]:
+                  - link "Far East Horizon" [ref=e306] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/13132
+                - cell "PDF file Member Only" [ref=e307]:
+                  - link "PDF file" [ref=e308] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e309]
+                  - img "Member Only" [ref=e310]
+              - row "Feb. 27, 2026" [ref=e311]:
+                - cell "Feb. 27, 2026" [ref=e312]
+              - row "Yixin Group PDF file Member Only" [ref=e313]:
+                - cell "Yixin Group" [ref=e314]:
+                  - link "Yixin Group" [ref=e315] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/13177
+                - cell "PDF file Member Only" [ref=e316]:
+                  - link "PDF file" [ref=e317] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e318]
+                  - img "Member Only" [ref=e319]
+              - row "Feb. 04, 2026" [ref=e320]:
+                - cell "Feb. 04, 2026" [ref=e321]
+              - row "Slovenia, Republic of PDF file" [ref=e322]:
+                - cell "Slovenia, Republic of" [ref=e323]:
+                  - link "Slovenia, Republic of" [ref=e324] [cursor=pointer]:
+                    - /url: /en/ratinglist/sovereign/12064
+                - cell "PDF file" [ref=e325]:
+                  - link "PDF file" [ref=e326] [cursor=pointer]:
+                    - /url: /download/6ac83bc3556c5ba9c0886e5933a3adb6a7e57d387d59a3a7aa/12064_en_Slovenia_★1.01.pdf
+                    - img "PDF file" [ref=e327]
+              - row "Dec. 12, 2025" [ref=e328]:
+                - cell "Dec. 12, 2025" [ref=e329]
+              - row "Mexico PDF file" [ref=e330]:
+                - cell "Mexico" [ref=e331]:
+                  - link "Mexico" [ref=e332] [cursor=pointer]:
+                    - /url: /en/ratinglist/sovereign/12049
+                - cell "PDF file" [ref=e333]:
+                  - link "PDF file" [ref=e334] [cursor=pointer]:
+                    - /url: /download/fb2cf4bcb8c9dc9b77cbbc85f3c03fcf14b2c11a7450dad788/12049_en_Mexico_1.04.pdf
+                    - img "PDF file" [ref=e335]
+              - row "Dec. 10, 2025" [ref=e336]:
+                - cell "Dec. 10, 2025" [ref=e337]
+              - row "Bank of East Asia (The) PDF file Member Only" [ref=e338]:
+                - cell "Bank of East Asia (The)" [ref=e339]:
+                  - link "Bank of East Asia (The)" [ref=e340] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/13141
+                - cell "PDF file Member Only" [ref=e341]:
+                  - link "PDF file" [ref=e342] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e343]
+                  - img "Member Only" [ref=e344]
+              - row "Dec. 04, 2025" [ref=e345]:
+                - cell "Dec. 04, 2025" [ref=e346]
+              - row "Aflac Incorporated PDF file Member Only" [ref=e347]:
+                - cell "Aflac Incorporated" [ref=e348]:
+                  - link "Aflac Incorporated" [ref=e349] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/8686
+                - cell "PDF file Member Only" [ref=e350]:
+                  - link "PDF file" [ref=e351] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e352]
+                  - img "Member Only" [ref=e353]
+              - row "American Family Life Assurance Company of Columbus PDF file Member Only" [ref=e354]:
+                - cell "American Family Life Assurance Company of Columbus" [ref=e355]:
+                  - link "American Family Life Assurance Company of Columbus" [ref=e356] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/13103
+                - cell "PDF file Member Only" [ref=e357]:
+                  - link "PDF file" [ref=e358] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e359]
+                  - img "Member Only" [ref=e360]
+              - row "Aflac Life Insurance Japan PDF file Member Only" [ref=e361]:
+                - cell "Aflac Life Insurance Japan" [ref=e362]:
+                  - link "Aflac Life Insurance Japan" [ref=e363] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/850674
+                - cell "PDF file Member Only" [ref=e364]:
+                  - link "PDF file" [ref=e365] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e366]
+                  - img "Member Only" [ref=e367]
+              - row "Aflac Re Bermuda PDF file Member Only" [ref=e368]:
+                - cell "Aflac Re Bermuda" [ref=e369]:
+                  - link "Aflac Re Bermuda" [ref=e370] [cursor=pointer]:
+                    - /url: /en/ratinglist/finance/13131
+                - cell "PDF file Member Only" [ref=e371]:
+                  - link "PDF file" [ref=e372] [cursor=pointer]:
+                    - /url: "#login"
+                    - img "PDF file" [ref=e373]
+                  - img "Member Only" [ref=e374]
+        - generic [ref=e375]:
+          - heading "Reports relating to Issuer More" [level=2] [ref=e376]:
+            - text: Reports relating to Issuer
+            - link "More" [ref=e377] [cursor=pointer]:
+              - /url: /en/related_report/
+          - generic [ref=e378]:
+            - term [ref=e379]:
+              - generic [ref=e380]: May. 28, 2026
+            - definition [ref=e381]:
+              - link "Highlights of Major Automakers’ Financial Results for Fiscal Year Ended March 2026" [ref=e382] [cursor=pointer]:
+                - /url: /download/b4c5c75b7142a6d5e57b9e2455c4eec364433ac7b140c57274/2605_KR_Automakers.pdf
+            - term [ref=e383]:
+              - generic [ref=e384]: May. 26, 2026
+            - definition [ref=e385]:
+              - link "Highlights of Semiconductor Production Equipment Manufacturers’ Financial Results for Fiscal Year Ended March 2026" [ref=e386] [cursor=pointer]:
+                - /url: /download/7079ce95370b7854c0be7c7e47546770b7ecc766fbe6eecccb/2605_KR_SemiconEquipManufacturers.pdf
+            - term [ref=e387]:
+              - generic [ref=e388]: May. 22, 2026
+            - definition [ref=e389]:
+              - link "Highlights of Blast Furnace Steelmakers’ Financial Results for Fiscal Year Ended March 2026" [ref=e390] [cursor=pointer]:
+                - /url: /download/6fb69dbec96e830a3cafd92ae555424f4328199f4291cc9053/2605_KR_Steelmakers.pdf
+            - term [ref=e391]:
+              - generic [ref=e392]: May. 15, 2026
+            - definition [ref=e393]:
+              - link "Highlights of Electric Power Companies’ Financial Results for Fiscal Year Ended March 2026" [ref=e394] [cursor=pointer]:
+                - /url: /download/c9301192b9dfb91d92e579573b9d5b51d08b30853a9a13080b/2605_KR_ElectricPower.pdf
+            - term [ref=e395]:
+              - generic [ref=e396]: May. 14, 2026
+            - definition [ref=e397]:
+              - link "Highlights of Major Shipping Companies’ Financial Results for Fiscal Year Ended March 2026" [ref=e398] [cursor=pointer]:
+                - /url: /download/91a171c8e5803589583a98838e8ebf158307599e78e0380fa5/2605_KR_ShippingCompanies.pdf
+            - term [ref=e399]:
+              - generic [ref=e400]: May. 01, 2026
+            - definition [ref=e401]:
+              - link "Highlights of Major Retail Groups’ Financial Results for Fiscal Year Ended February 2026" [ref=e402] [cursor=pointer]:
+                - /url: /download/f2fdab1f39f2b0fc44ceef428921c7f408c8fcca89f9072ff5/2605_KR_RetailGroups_en.pdf
+        - generic [ref=e403]:
+          - heading "JCR News More" [level=2] [ref=e404]:
+            - text: JCR News
+            - link "More" [ref=e405] [cursor=pointer]:
+              - /url: /en/information/
+          - generic [ref=e406]:
+            - term [ref=e407]: May. 01, 2026
+            - definition [ref=e408]:
+              - link "The financial results reports (FY 2025) have been posted in the \" Reports relating to Issuer \" section." [ref=e409] [cursor=pointer]:
+                - /url: /download/8d954a688fb4473416571b6cb79f84c44fa141481b5d134440/掲載開始のお知らせ_260501 en.pdf
+            - term [ref=e410]: May. 01, 2026
+            - definition [ref=e411]:
+              - link "Rating / Outlook Change in April 2026" [ref=e412] [cursor=pointer]:
+                - /url: /download/4e37d1101054412297e7704b4183721015293e011724250713/26d0149_en.pdf
+            - term [ref=e413]: Apr. 01, 2026
+            - definition [ref=e414]:
+              - link "Rating / Outlook Change in March 2026" [ref=e415] [cursor=pointer]:
+                - /url: /download/a37f5765234a71555c24a2ec2ccc7cc6c3397c97361769dcc4/26d0043_en.pdf
+            - term [ref=e416]: Apr. 01, 2026
+            - definition [ref=e417]:
+              - link "Notice Regarding Personnel Transfers of Executive Officers and Others" [ref=e418] [cursor=pointer]:
+                - /url: /download/ff3da623d111f2f1df26a6dd2213f32bb2d12b2bdf1d68bbda/26d0017_en.pdf
+            - term [ref=e419]: Mar. 25, 2026
+            - definition [ref=e420]:
+              - link "JCR Rating Transition Matrices and Cumulative Default Rates" [ref=e421] [cursor=pointer]:
+                - /url: /download/4046bce9270782865fcf2bb3ccc32b9ce8496dc211f68be776/25d1735_f.pdf
+            - term [ref=e422]: Mar. 02, 2026
+            - definition [ref=e423]:
+              - link "Rating / Outlook Change in February 2026" [ref=e424] [cursor=pointer]:
+                - /url: /download/237027ec8dd2dcf4264102cbfc77314bbfdef200c018efdc72/25d1631_en.pdf
+            - term [ref=e425]: Feb. 17, 2026
+            - definition [ref=e426]:
+              - link "Notice of Temporary Website Suspension Due to Maintenance (Feb. 25)" [ref=e427] [cursor=pointer]:
+                - /url: /en/information/781
+  - contentinfo [ref=e428]:
+    - generic [ref=e429]:
+      - list [ref=e430]:
+        - listitem [ref=e431]:
+          - link "JCR Code of Conduct" [ref=e432] [cursor=pointer]:
+            - /url: /en/criterion/
+        - listitem [ref=e433]:
+          - link "Conflicts of Interest Management Policy" [ref=e434] [cursor=pointer]:
+            - /url: /en/pdf/dm66/conflicts-of-interest-management-policy_en_20191216.pdf
+        - listitem [ref=e435]:
+          - link "Disclaimer" [ref=e436] [cursor=pointer]:
+            - /url: /en/immunity/
+      - link "PAGE TOP" [ref=e438] [cursor=pointer]:
+        - /url: "#header"
+        - img "PAGE TOP" [ref=e439]
+      - paragraph [ref=e440]: Copyright © 2016 Japan Credit Rating Agency, Ltd. All Rights Reserved.

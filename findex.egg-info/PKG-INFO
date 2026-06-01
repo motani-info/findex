@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: findex
+Version: 0.1.0
+Summary: 日本株スコアリング・ランキングツール
+Requires-Python: >=3.13
+Requires-Dist: click>=8.4.1
+Requires-Dist: openpyxl>=3.1.5
+Requires-Dist: pandas>=3.0.3
+Requires-Dist: pyyaml>=6.0.3
+Requires-Dist: requests>=2.34.2
+Requires-Dist: rich>=15.0.0
+Requires-Dist: yfinance>=1.4.1

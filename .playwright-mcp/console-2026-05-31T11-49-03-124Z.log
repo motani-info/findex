@@ -1,0 +1,5 @@
+[     209ms] [ERROR] Unrecognized Content-Security-Policy directive 'prefetch-src'. @ https://disclosure2.edinet-fsa.go.jp/:0
+[     489ms] [ERROR] Unrecognized Content-Security-Policy directive 'prefetch-src'. @ https://disclosure2.edinet-fsa.go.jp/WEEK0010.aspx:0
+[     623ms] [LOG] Using jquery from GX distr. @ https://disclosure2.edinet-fsa.go.jp/gxgral.js?2136580:65
+[     624ms] [LOG] global $ is jquery3.5.1 @ https://disclosure2.edinet-fsa.go.jp/gxgral.js?2136580:65
+[     783ms] [WARNING] <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes"> @ https://disclosure2.edinet-fsa.go.jp/WEEK0010.aspx:0

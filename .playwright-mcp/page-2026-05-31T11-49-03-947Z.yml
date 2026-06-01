@@ -1,0 +1,348 @@
+- generic [ref=e5]:
+  - generic [ref=e9]:
+    - link:
+      - /url: "#LAYOUTMAINTABLE"
+  - generic [ref=e12]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - img "EDINET（閲覧）" [ref=e20] [cursor=pointer]
+        - table [ref=e24]:
+          - rowgroup [ref=e25]:
+            - row "文字の大きさ 標準 大 English" [ref=e26]:
+              - cell "文字の大きさ 標準 大 English" [ref=e27]:
+                - table [ref=e28]:
+                  - rowgroup [ref=e29]:
+                    - row "文字の大きさ 標準 大 English" [ref=e30]:
+                      - cell [ref=e31]
+                      - cell [ref=e32]
+                      - cell "文字の大きさ 標準 大" [ref=e33]:
+                        - table [ref=e34]:
+                          - rowgroup [ref=e35]:
+                            - row "文字の大きさ 標準 大" [ref=e36]:
+                              - cell "文字の大きさ" [ref=e37]
+                              - cell "標準 大" [ref=e38]:
+                                - table [ref=e39]:
+                                  - rowgroup [ref=e40]:
+                                    - row "標準 大" [ref=e41]:
+                                      - cell "標準" [ref=e42]:
+                                        - button "標準" [disabled] [ref=e43]
+                                      - cell "大" [ref=e44]:
+                                        - button "大" [ref=e45] [cursor=pointer]
+                      - cell "English" [ref=e46]:
+                        - button "English" [ref=e47] [cursor=pointer]
+      - list [ref=e54]:
+        - listitem [ref=e55]:
+          - link "トップページ" [ref=e56] [cursor=pointer]:
+            - /url: week0010.aspx
+        - listitem [ref=e57]:
+          - link "書類詳細検索" [ref=e58] [cursor=pointer]:
+            - /url: weee0050.aspx
+        - listitem [ref=e59]:
+          - link "書類全文検索" [ref=e60] [cursor=pointer]:
+            - /url: weee0070.aspx
+        - listitem [ref=e61]:
+          - link "公告一覧" [ref=e62] [cursor=pointer]:
+            - /url: weee0080.aspx
+        - listitem [ref=e63]:
+          - link "EDINETタクソノミ及び コードリスト ダウンロード" [ref=e64] [cursor=pointer]:
+            - /url: weee0010.aspx
+            - text: EDINETタクソノミ及び
+            - text: コードリスト ダウンロード
+    - generic [ref=e71]:
+      - generic [ref=e73]:
+        - generic [ref=e76]:
+          - generic [ref=e80]: EDINET APIの
+          - generic [ref=e84]: 利用登録はこちらから
+          - button "ログイン" [ref=e89] [cursor=pointer]
+        - generic [ref=e98]:
+          - generic [ref=e102]: トップメニュー
+          - table [ref=e105]:
+            - rowgroup [ref=e106]:
+              - row "お知らせ一覧 よくある質問 /便利な使い方 (2025年04月11日更新) 利用環境 操作ガイド等" [ref=e107]:
+                - cell "お知らせ一覧 よくある質問 /便利な使い方 (2025年04月11日更新) 利用環境 操作ガイド等" [ref=e108]:
+                  - generic [ref=e113]:
+                    - paragraph [ref=e117]
+                    - table [ref=e127]:
+                      - rowgroup [ref=e128]:
+                        - row "お知らせ一覧 よくある質問 /便利な使い方 (2025年04月11日更新) 利用環境 操作ガイド等" [ref=e129]:
+                          - cell "お知らせ一覧 よくある質問 /便利な使い方 (2025年04月11日更新) 利用環境 操作ガイド等" [ref=e130]:
+                            - table [ref=e132]:
+                              - rowgroup
+                              - rowgroup [ref=e133]:
+                                - row "お知らせ一覧" [ref=e134]:
+                                  - cell "お知らせ一覧" [ref=e135]:
+                                    - paragraph [ref=e136]:
+                                      - link "お知らせ一覧" [ref=e138] [cursor=pointer]:
+                                        - /url: "#"
+                                - row "よくある質問 /便利な使い方 (2025年04月11日更新)" [ref=e139]:
+                                  - cell "よくある質問 /便利な使い方 (2025年04月11日更新)" [ref=e140]:
+                                    - paragraph [ref=e141]:
+                                      - link "よくある質問 /便利な使い方 (2025年04月11日更新)" [ref=e143] [cursor=pointer]:
+                                        - /url: "#"
+                                        - text: よくある質問
+                                        - text: /便利な使い方
+                                        - text: (2025年04月11日更新)
+                                - row "利用環境" [ref=e144]:
+                                  - cell "利用環境" [ref=e145]:
+                                    - paragraph [ref=e146]:
+                                      - link "利用環境" [ref=e148] [cursor=pointer]:
+                                        - /url: "#"
+                                - row "操作ガイド等" [ref=e149]:
+                                  - cell "操作ガイド等" [ref=e150]:
+                                    - paragraph [ref=e151]:
+                                      - link "操作ガイド等" [ref=e153] [cursor=pointer]:
+                                        - /url: "#"
+                              - rowgroup
+                        - row [ref=e154]:
+                          - cell [ref=e155]
+        - generic [ref=e158]:
+          - generic [ref=e162]: システムメンテナンス情報
+          - generic [ref=e166]:
+            - text: 以下の日時、つながりにくい場合があります。
+            - text: しばらく時間をおいて、再度接続してください。
+            - text: 2026年06月06日(土曜)
+            - text: ８:00
+            - text: ～
+            - text: 2026年06月06日(土曜)
+            - text: 11:00
+            - text: 2026年07月04日(土曜)
+            - text: ８:00
+            - text: ～
+            - text: 2026年07月05日(日曜)
+            - text: ８:00
+            - text: 利用者の皆様には御協力のほどよろしくお願いいたします。
+        - link "金融商品取引法等に基づき有価証券報告書等の提出期限の延長が承認されている会社一覧" [ref=e173] [cursor=pointer]:
+          - /url: javascript:LBLCOMPANYLIST_MPAGE_Click();
+        - link "取下済発行登録書一覧" [ref=e180] [cursor=pointer]:
+          - /url: "#"
+        - link "開示義務違反等に係る情報をお持ちの方はこちらへ （ディスクロジャー・ホットライン）" [ref=e187] [cursor=pointer]:
+          - /url: https://www.fsa.go.jp/receipt/d_hotline/index.html
+          - text: 開示義務違反等に係る情報をお持ちの方はこちらへ
+          - text: （ディスクロジャー・ホットライン）
+      - generic [ref=e197]:
+        - generic [ref=e202]: 書類簡易検索
+        - generic [ref=e214]:
+          - table [ref=e222]:
+            - rowgroup [ref=e223]:
+              - row "提出者／発行者／ファンド／証券コード 検索" [ref=e224]:
+                - cell "提出者／発行者／ファンド／証券コード" [ref=e225]
+                - cell [ref=e226]
+                - cell [ref=e228]:
+                  - textbox "D_Keyword" [ref=e229]
+                - cell "検索" [ref=e230]:
+                  - button "検索" [ref=e231] [cursor=pointer]
+              - row "ファンドを含む" [ref=e232]:
+                - cell [ref=e233]
+                - cell [ref=e235]
+                - cell "ファンドを含む" [ref=e237]:
+                  - generic [ref=e239]:
+                    - checkbox "chk Fund ファンドを含む": 
+                    - generic [ref=e240]: ファンドを含む
+          - table [ref=e246]:
+            - rowgroup [ref=e247]:
+              - row "書類種別 有価証券報告書 ／ 半期報告書 ／ 四半期報告書" [ref=e248]:
+                - cell "書類種別" [ref=e249]:
+                  - table [ref=e250]:
+                    - rowgroup [ref=e251]:
+                      - row "書類種別" [ref=e252]:
+                        - cell "書類種別" [ref=e253]:
+                          - generic [ref=e254]: 書類種別
+                        - cell [ref=e255]
+                - cell "有価証券報告書 ／ 半期報告書 ／ 四半期報告書" [ref=e257]:
+                  - generic [ref=e259]:
+                    - checkbox "chk Syorui1 有価証券報告書 ／ 半期報告書 ／ 四半期報告書" [checked]: 
+                    - generic [ref=e260]: 有価証券報告書 ／ 半期報告書 ／ 四半期報告書
+              - row "大量保有報告書 臨時報告書 その他の書類種別 （各訂正報告書を含みます。）" [ref=e261]:
+                - cell [ref=e262]
+                - cell "大量保有報告書 臨時報告書 その他の書類種別 （各訂正報告書を含みます。）" [ref=e264]:
+                  - table [ref=e265]:
+                    - rowgroup [ref=e266]:
+                      - row "大量保有報告書 臨時報告書 その他の書類種別" [ref=e267]:
+                        - cell "大量保有報告書" [ref=e268]:
+                          - generic [ref=e270]:
+                            - checkbox "chk Syorui2 大量保有報告書": 
+                            - generic [ref=e271]: 大量保有報告書
+                        - cell "臨時報告書" [ref=e272]:
+                          - generic [ref=e274]:
+                            - checkbox "chk Syorui4 臨時報告書": 
+                            - generic [ref=e275]: 臨時報告書
+                        - cell "その他の書類種別" [ref=e276]:
+                          - generic [ref=e278]:
+                            - checkbox "chk Syorui3 その他の書類種別": 
+                            - generic [ref=e279]: その他の書類種別
+                      - row "（各訂正報告書を含みます。）" [ref=e280]:
+                        - cell "（各訂正報告書を含みます。）" [ref=e281]:
+                          - generic [ref=e282]: （各訂正報告書を含みます。）
+          - table [ref=e288]:
+            - rowgroup [ref=e289]:
+              - row "提出期間 過去１年" [ref=e290]:
+                - cell "提出期間" [ref=e291]
+                - cell [ref=e292]
+                - cell "過去１年" [ref=e294]:
+                  - table [ref=e295]:
+                    - rowgroup [ref=e296]:
+                      - row "過去１年" [ref=e297]:
+                        - cell "過去１年" [ref=e298]:
+                          - combobox "D_KIKAN" [ref=e299]:
+                            - option "当日"
+                            - option "過去３日"
+                            - option "過去１週間"
+                            - option "過去１か月"
+                            - option "過去６か月"
+                            - option "過去１年" [selected]
+                            - option "全期間"
+        - generic [ref=e308]: 重要なお知らせ
+        - table [ref=e316]:
+          - rowgroup [ref=e317]:
+            - row [ref=e318]:
+              - cell [ref=e319]:
+                - table [ref=e320]:
+                  - rowgroup [ref=e321]:
+                    - row [ref=e322]:
+                      - cell [ref=e323]:
+                        - generic [ref=e324]:
+                          - generic [ref=e326] [cursor=pointer]:
+                            - paragraph [ref=e327]: 有価証券報告書レビュー及び大量保有報告書等のレビューについて（2026年度）
+                            - link [ref=e328]:
+                              - /url: "#"
+                          - generic [ref=e329]:
+                            - text: 2026年４月28日に、金融庁は、2026年度における有価証券報告書レビュー及び大量保有報告書等のレビューに関する公表を行いました。詳細は、以下の金融庁のページをご参照ください。
+                            - text: https://www.fsa.go.jp/news/r7/sonota/20260327.html
+                            - text: なお、有価証券報告書レビューについては、所管の財務局等から原則として提出者用 EDINET に登録されている事務連絡者情報の E-mail アドレス宛に連絡する予定ですが、スケジュール等の詳細については上記のリンク先の「別紙３」をご確認ください。
+                            - list
+                        - generic [ref=e330]:
+                          - generic [ref=e332] [cursor=pointer]:
+                            - paragraph [ref=e333]: EDINETウェブサイトで公開している情報の利用について
+                            - link [ref=e334]:
+                              - /url: "#"
+                          - generic [ref=e335]:
+                            - text: EDINETウェブサイトをご利用の際は、名称等が類似するウェブサイトとの混同にご注意ください。
+                            - text: EDINETウェブサイトで公開している情報（以下「本コンテンツ」といいます。）については、利用規約をご確認の上、ご利用ください。
+                            - text: 金融庁は、本コンテンツについて、EDINETウェブサイト以外で有償・無償を問わず情報提供を行っていません。
+                            - text: 本コンテンツをご利用の際は、情報の取得元をご確認いただく等、十分ご留意ください。
+                            - list
+                        - generic [ref=e336]:
+                          - generic [ref=e338] [cursor=pointer]:
+                            - paragraph [ref=e339]: 閲覧サイトおよびEDINET APIの利用環境について
+                            - link [ref=e340]:
+                              - /url: "#"
+                          - generic [ref=e341]:
+                            - text: 閲覧サイトおよびEDINET APIをご利用する際は、製品サポートが継続しているOSやブラウザ等をご利用ください。
+                            - text: 製品サポートのないOSやブラウザ等では、閲覧サイトおよびEDINET APIをご利用できない場合があります。
+                            - text: 詳細は、利用環境およびEDINET API仕様書（Version2）をご確認ください。
+                            - list
+                        - generic [ref=e342]:
+                          - generic [ref=e344] [cursor=pointer]:
+                            - paragraph [ref=e345]: 書類の目次範囲を指定した全文検索における留意点（目次項目の変更及び削除）
+                            - link [ref=e346]:
+                              - /url: "#"
+                          - generic [ref=e347]:
+                            - text: 書類の目次範囲を指定した全文検索を利用する際に指定することとなる目次項目は、通常、最新の書類の目次項目となっています。
+                            - text: そのため、提出された書類について、法令改正等により書類の目次項目の変更及び削除が行われた場合は変更前や削除前の目次項目がなく、当該目次項目を指定できないため、当該目次項目に記載された内容を検索する際は、「書類閲覧操作ガイド」の「2 章 有価証券報告書等の検索の4-1 全文検索条件指定時の留意点」をご参照のうえ検索してください。
+                            - list
+                        - generic [ref=e348]:
+                          - generic [ref=e350] [cursor=pointer]:
+                            - paragraph [ref=e351]: EDINET APIの利用にかかるご案内
+                            - link [ref=e352]:
+                              - /url: "#"
+                          - generic [ref=e353]:
+                            - text: EDINET APIのご利用には、以下のURLから登録及びAPIキーの発行が必要です。
+                            - text: https://api.edinet-fsa.go.jp/api/auth/index.aspx?mode=1
+                            - text: また、登録画面の表示には、「https://api.edinet-fsa.go.jp/」のポップアップブロック許可の設定が必要です。
+                            - text: 詳しくはトップメニューの「操作ガイド等」に掲載している「EDINET API仕様書 (Version 2)」の「2-2ポップアップ許可サイトへの追加」をご覧ください。
+                            - list
+                        - generic [ref=e354]:
+                          - generic [ref=e356] [cursor=pointer]:
+                            - paragraph [ref=e357]: 「記述情報の開示の好事例集2025」の最終版公表
+                            - link [ref=e358]:
+                              - /url: "#"
+                          - generic [ref=e359]:
+                            - text: 金融庁では、有価証券報告書の開示の充実に向けた実務の積上げ・浸透を図る取組として、2018年から毎年度、「記述情報の開示の好事例に関する勉強会」（以下「勉強会」）を実施した上で、「記述情報の開示の好事例集」（以下「好事例集」）を公表しています。
+                            - text: 先般、第１回勉強会（テーマ：全般的要求事項、気候変動関連）、第２回勉強会（テーマ：人的資本、従業員の状況、その他個別テーマ）でご議論いただいた内容を踏まえて、「記述情報の開示の好事例集2025（サステナビリティ情報の開示）」を取りまとめ、2025年12月25日に公表いたしました。
+                            - text: 今般、第３回勉強会（テーマ：MD＆A、事業等のリスク）、第４回勉強会（テーマ：重要な契約等、コーポレート・ガバナンスの状況等）でご議論いただいた内容を踏まえて、「各テーマの開示例」及び「投資家・アナリスト・有識者が期待する主な開示のポイント」を追加・更新し、「記述情報の開示の好事例集2025」の最終版として取りまとめましたので、公表いたします。
+                            - text: 〇「記述情報の開示の好事例集2025」（2026年３月27日）
+                            - text: https://www.fsa.go.jp/news/r7/singi/20260327.html
+                            - text: また、以下のページでは、「解説動画」や過去の「記述情報の開示の好事例集」等も掲載していますので、併せてご参照ください。
+                            - text: 〇「企業情報の開示に関する情報（記述情報の充実）」
+                            - text: https://www.fsa.go.jp/policy/kaiji/kaiji.html
+                            - list
+                        - generic [ref=e360]:
+                          - generic [ref=e362] [cursor=pointer]:
+                            - paragraph [ref=e363]: 有価証券報告書の作成・提出に際しての留意すべき事項について
+                            - link [ref=e364]:
+                              - /url: "#"
+                          - generic [ref=e365]:
+                            - text: 2026年３月27日に、金融庁は、2025年度の有価証券報告書レビューの結果等を踏まえて、有価証券報告書の作成・提出に際しての留意すべき事項等（識別された課題への対応にあたって参考となる開示例集を含む。）を公表しました。詳細は、以下の金融庁のページをご参照ください。
+                            - text: https://www.fsa.go.jp/news/r7/sonota/20260327.html
+                            - list
+                        - generic [ref=e366]:
+                          - generic [ref=e368] [cursor=pointer]:
+                            - paragraph [ref=e369]: 注意（未公開株、ファンド等の取引について）
+                            - link [ref=e370]:
+                              - /url: "#"
+                          - generic [ref=e371]:
+                            - text: ●「未公開株」「私募債」「ファンド（組合など）」の証券の取引に関してトラブルが発生しており、また、「EDINETに証券の情報を開示しているので安心である。」、「財務局受理印が押されているので安心である。」といった違法的な勧誘が行われているとの情報が寄せられています。
+                            - text: ●金融庁・財務局はEDINETに開示している情報について、
+                            - text: ①開示内容について真実・正確と認定すること
+                            - text: ②開示内容に投資判断上の重要な事項の記載が欠けていないと認定すること
+                            - text: ③開示している有価証券の価値を保証・承認すること
+                            - text: は一切ありませんので、くれぐれも御注意ください。
+                            - text: ●なお、有価証券の取引に関し、上記①～③のような表示を行うことは、法により禁止されておりますので、御注意ください。
+                            - list
+                        - generic [ref=e372]:
+                          - generic [ref=e374] [cursor=pointer]:
+                            - paragraph [ref=e375]: お知らせ一覧について
+                            - link [ref=e376]:
+                              - /url: "#"
+                          - generic [ref=e377]:
+                            - text: トップページに掲載したお知らせは、一定期間経過後、引き続きトップページで周知が必要なものを除いてトップメニューのお知らせ一覧に移動しています。
+                            - list
+                        - generic [ref=e378]:
+                          - generic [ref=e380] [cursor=pointer]:
+                            - paragraph [ref=e381]: 更新情報
+                            - link [ref=e382]:
+                              - /url: "#"
+                          - generic [ref=e383]:
+                            - text: 2025年11月11日
+                            - link "2026年版EDINETタクソノミ別ウィンドウで開きます" [ref=e384] [cursor=pointer]:
+                              - /url: https://www.fsa.go.jp/search/20251111.html
+                              - text: 2026年版EDINETタクソノミ
+                              - img "別ウィンドウで開きます" [ref=e385]
+                            - text: が公表されました。
+                            - text: 2024年11月12日
+                            - link "2025年版EDINETタクソノミ別ウィンドウで開きます" [ref=e386] [cursor=pointer]:
+                              - /url: https://www.fsa.go.jp/search/20241112.html
+                              - text: 2025年版EDINETタクソノミ
+                              - img "別ウィンドウで開きます" [ref=e387]
+                            - text: が公表されました。
+                            - text: 2023年12月11日
+                            - link "2024年版EDINETタクソノミ別ウィンドウで開きます" [ref=e388] [cursor=pointer]:
+                              - /url: https://www.fsa.go.jp/search/20231211.html
+                              - text: 2024年版EDINETタクソノミ
+                              - img "別ウィンドウで開きます" [ref=e389]
+                            - text: が公表されました。
+                            - list
+    - generic [ref=e395]:
+      - link "プライバシーポリシー" [ref=e400] [cursor=pointer]:
+        - /url: "#"
+      - link "ウェブアクセシビリティ" [ref=e405] [cursor=pointer]:
+        - /url: "#"
+      - link "利用規約" [ref=e410] [cursor=pointer]:
+        - /url: "#"
+      - link "御意見・御要望" [ref=e415] [cursor=pointer]:
+        - /url: "#"
+      - link "▲ページトップへ" [ref=e420] [cursor=pointer]:
+        - /url: "#"
+    - table [ref=e425]:
+      - rowgroup [ref=e426]:
+        - row "金融庁/Financial Services Agency. The Japanese Government (法人番号6000012010023) Copyright(C) 金融庁 All Rights Reserved." [ref=e427]:
+          - cell "金融庁/Financial Services Agency. The Japanese Government (法人番号6000012010023) Copyright(C) 金融庁 All Rights Reserved." [ref=e428]:
+            - generic [ref=e429]:
+              - generic [ref=e430]: 金融庁/Financial Services Agency. The Japanese Government
+              - generic [ref=e431]: (法人番号6000012010023)
+              - generic [ref=e432]: Copyright(C) 金融庁 All Rights Reserved.
+        - row "〒100-8967 東京都千代田区霞が関3－2－1 中央合同庁舎第７号館" [ref=e433]:
+          - cell "〒100-8967 東京都千代田区霞が関3－2－1 中央合同庁舎第７号館" [ref=e434]:
+            - generic [ref=e436]: 〒100-8967 東京都千代田区霞が関3－2－1 中央合同庁舎第７号館
+        - row [ref=e437]:
+          - cell [ref=e438]

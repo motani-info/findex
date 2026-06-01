@@ -1,0 +1,16 @@
+pyproject.toml
+findex/__init__.py
+findex/cli.py
+findex.egg-info/PKG-INFO
+findex.egg-info/SOURCES.txt
+findex.egg-info/dependency_links.txt
+findex.egg-info/entry_points.txt
+findex.egg-info/requires.txt
+findex.egg-info/top_level.txt
+findex/fetcher/__init__.py
+findex/fetcher/fundamentals.py
+findex/fetcher/master.py
+findex/output/__init__.py
+findex/output/display.py
+findex/scorer/__init__.py
+findex/scorer/engine.py

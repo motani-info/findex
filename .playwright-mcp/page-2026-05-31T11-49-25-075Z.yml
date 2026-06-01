@@ -1,0 +1,259 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - heading "Japan Credit Rating Agency, Ltd." [level=1] [ref=e5]:
+        - link "Japan Credit Rating Agency, Ltd." [ref=e6] [cursor=pointer]:
+          - /url: /en/
+          - img "Japan Credit Rating Agency, Ltd." [ref=e7]
+      - generic [ref=e8]:
+        - list [ref=e9]:
+          - listitem [ref=e10]: Font Size
+          - listitem [ref=e11]:
+            - img "M" [ref=e12] [cursor=pointer]
+          - listitem [ref=e13]:
+            - img "L" [ref=e14] [cursor=pointer]
+        - list [ref=e15]:
+          - listitem [ref=e16]:
+            - link "Site Map" [ref=e17] [cursor=pointer]:
+              - /url: /en/sitemap/
+              - img "Site Map" [ref=e18]
+          - listitem [ref=e19]:
+            - link "Log In" [ref=e20] [cursor=pointer]:
+              - /url: "#login"
+              - img "Log In" [ref=e21]
+          - listitem [ref=e22]:
+            - link "日本語" [ref=e23] [cursor=pointer]:
+              - /url: /
+              - img "日本語" [ref=e24]
+      - generic:
+        - generic:
+          - textbox [ref=e25]
+          - button "Search" [ref=e26] [cursor=pointer]
+  - navigation [ref=e27]:
+    - list [ref=e29]:
+      - listitem [ref=e30]:
+        - link "Home" [ref=e31] [cursor=pointer]:
+          - /url: /en/
+      - listitem [ref=e32]:
+        - link "Rating Lists" [ref=e33] [cursor=pointer]:
+          - /url: /en/ratinglist/
+      - listitem [ref=e34]:
+        - link "Information about JCR Ratings" [ref=e35] [cursor=pointer]:
+          - /url: /en/rrinfo/
+          - text: Information about
+          - text: JCR Ratings
+      - listitem [ref=e36]:
+        - link "Intelligence & Solution" [ref=e37] [cursor=pointer]:
+          - /url: /en/service/
+          - text: Intelligence
+          - text: "& Solution"
+      - listitem [ref=e38]:
+        - link "Global Activities" [ref=e39] [cursor=pointer]:
+          - /url: /en/service/international/
+      - listitem [ref=e40]:
+        - link "About JCR" [ref=e41] [cursor=pointer]:
+          - /url: /en/service/company/
+      - listitem [ref=e42]:
+        - link "Contact Us" [ref=e43] [cursor=pointer]:
+          - /url: /en/contact/
+  - article [ref=e44]:
+    - generic [ref=e45]:
+      - generic [ref=e46]:
+        - list [ref=e48]:
+          - listitem [ref=e49]:
+            - link "Home" [ref=e50] [cursor=pointer]:
+              - /url: /en/
+          - listitem [ref=e51]: ＞ Intelligence & Solution
+        - generic [ref=e52]:
+          - heading "Intelligence & Solution" [level=2] [ref=e53]
+          - generic [ref=e54]:
+            - paragraph [ref=e55]: Aspiring to be the hub of financial intelligence in Japan, we, JCR, are accumulating and providing economic, industrial and corporate information and analysis on Japan and the world. We, by applying such expertise, also offer suitable solutions for our clients’ varying needs .
+            - list [ref=e56]:
+              - listitem [ref=e57]:
+                - link "Rating Information" [ref=e58] [cursor=pointer]:
+                  - /url: /en/ratinglist/
+                  - generic [ref=e59]:
+                    - text: Rating
+                    - text: Information
+              - listitem [ref=e60]:
+                - link "Green & Social Finance Evaluation" [ref=e61] [cursor=pointer]:
+                  - /url: /en/greenfinance/
+                  - generic [ref=e62]:
+                    - text: Green & Social
+                    - text: Finance
+                    - text: Evaluation
+              - listitem [ref=e63]:
+                - link "Rating Database “J-CRIS”" [ref=e64] [cursor=pointer]:
+                  - /url: /en/service/provision/
+                  - generic [ref=e65]:
+                    - text: Rating Database
+                    - text: “J-CRIS”
+              - listitem [ref=e66]:
+                - link "Credit Risk Estimation Model" [ref=e67] [cursor=pointer]:
+                  - /url: /en/service/jcrest/
+                  - generic [ref=e68]:
+                    - text: Credit Risk
+                    - text: Estimation Model
+              - listitem [ref=e69]:
+                - link "Issuer Information" [ref=e70] [cursor=pointer]:
+                  - /url: /en/issue_report/
+                  - generic [ref=e71]:
+                    - text: Issuer
+                    - text: Information
+              - listitem [ref=e72]:
+                - link "Private Credit Assessment" [ref=e73] [cursor=pointer]:
+                  - /url: /en/service/local/
+                  - generic [ref=e74]:
+                    - text: Private Credit
+                    - text: Assessment
+              - listitem [ref=e75]:
+                - link "Subscribed Info Service ”RatingEye”" [ref=e76] [cursor=pointer]:
+                  - /url: /en/service/provision/#RatingEye
+                  - generic [ref=e77]:
+                    - text: Subscribed
+                    - text: Info Service
+                    - text: ”RatingEye”
+              - listitem [ref=e78]:
+                - link "Seminar & Training Service" [ref=e79] [cursor=pointer]:
+                  - /url: /en/service/seminar/
+                  - generic [ref=e80]:
+                    - text: Seminar &
+                    - text: Training Service
+              - listitem [ref=e81]:
+                - link "Economy & Industry Information" [ref=e82] [cursor=pointer]:
+                  - /url: /en/related_report/
+                  - generic [ref=e83]:
+                    - text: Economy &
+                    - text: Industry
+                    - text: Information
+              - listitem [ref=e84]:
+                - link "SME Rating" [ref=e85] [cursor=pointer]:
+                  - /url: /en/service/sme/
+                  - generic [ref=e86]: SME Rating
+              - listitem [ref=e87]:
+                - link "Financial Assessment" [ref=e88] [cursor=pointer]:
+                  - /url: /en/service/fine/
+                  - generic [ref=e89]:
+                    - text: Financial
+                    - text: Assessment
+              - listitem [ref=e90]:
+                - link "ESG Information" [ref=e91] [cursor=pointer]:
+                  - /url: /en/greenfinance/esg
+                  - generic [ref=e92]:
+                    - text: ESG
+                    - text: Information
+              - listitem [ref=e93]:
+                - link "Servicer Rating" [ref=e94] [cursor=pointer]:
+                  - /url: /en/service/servicer/
+                  - generic [ref=e95]: Servicer Rating
+              - listitem [ref=e96]:
+                - link "Research & Knowledge Sharing" [ref=e97] [cursor=pointer]:
+                  - /url: /en/service/knowledge/
+                  - generic [ref=e98]:
+                    - text: Research &
+                    - text: Knowledge
+                    - text: Sharing
+              - listitem [ref=e99]:
+                - link "Fund Portfolio Rating" [ref=e100] [cursor=pointer]:
+                  - /url: /en/service/fund/
+                  - generic [ref=e101]:
+                    - text: Fund Portfolio
+                    - text: Rating
+              - listitem [ref=e102]:
+                - link "Networking" [ref=e103] [cursor=pointer]:
+                  - /url: /en/service/network/
+                  - generic [ref=e104]: Networking
+      - generic [ref=e105]:
+        - list [ref=e107]:
+          - listitem [ref=e108]:
+            - link [ref=e109] [cursor=pointer]:
+              - /url: /en/acquisition/
+          - listitem [ref=e110]:
+            - link [ref=e111] [cursor=pointer]:
+              - /url: /en/greenfinance/
+          - listitem [ref=e112]:
+            - link [ref=e113] [cursor=pointer]:
+              - /url: /en/creditoutlook/
+          - listitem [ref=e114]:
+            - link [ref=e115] [cursor=pointer]:
+              - /url: /en/service/provision/
+          - listitem [ref=e116]:
+            - link [ref=e117] [cursor=pointer]:
+              - /url: /en/service/seminar/
+        - generic [ref=e119]:
+          - term [ref=e120]:
+            - text: Intelligence
+            - text: "& Solution"
+          - definition [ref=e121]:
+            - link "Rating Information" [ref=e122] [cursor=pointer]:
+              - /url: /en/ratinglist/
+          - definition [ref=e123]:
+            - link "Issuer Information" [ref=e124] [cursor=pointer]:
+              - /url: /en/issue_report/
+          - definition [ref=e125]:
+            - link "Economy & Industry Information" [ref=e126] [cursor=pointer]:
+              - /url: /en/related_report/
+              - generic [ref=e127]:
+                - text: Economy & Industry
+                - text: Information
+          - definition [ref=e128]:
+            - link "ESG Information" [ref=e129] [cursor=pointer]:
+              - /url: /en/greenfinance/esg
+          - definition [ref=e130]:
+            - link "Green & Social Finance Evaluation" [ref=e131] [cursor=pointer]:
+              - /url: /en/greenfinance/
+              - generic [ref=e132]:
+                - text: Green & Social Finance
+                - text: Evaluation
+          - definition [ref=e133]:
+            - link "Private Credit Assessment" [ref=e134] [cursor=pointer]:
+              - /url: /en/service/local/
+          - definition [ref=e135]:
+            - link "SME Rating" [ref=e136] [cursor=pointer]:
+              - /url: /en/service/sme/
+          - definition [ref=e137]:
+            - link "Servicer Rating" [ref=e138] [cursor=pointer]:
+              - /url: /en/service/servicer/
+          - definition [ref=e139]:
+            - link "Fund Portfolio Rating" [ref=e140] [cursor=pointer]:
+              - /url: /en/service/fund/
+          - definition [ref=e141]:
+            - link "Rating Database “J-CRIS”" [ref=e142] [cursor=pointer]:
+              - /url: /en/service/provision/
+          - definition [ref=e143]:
+            - link "Subscribed Info Service ”RatingEye”" [ref=e144] [cursor=pointer]:
+              - /url: /en/service/provision/#RatingEye
+              - generic [ref=e145]:
+                - text: Subscribed Info Service
+                - text: ”RatingEye”
+          - definition [ref=e146]:
+            - link "Financial Assessment" [ref=e147] [cursor=pointer]:
+              - /url: /en/service/fine/
+          - definition [ref=e148]:
+            - link "Research & Knowledge Sharing" [ref=e149] [cursor=pointer]:
+              - /url: /en/service/knowledge/
+          - definition [ref=e150]:
+            - link "Credit Risk Estimation Model" [ref=e151] [cursor=pointer]:
+              - /url: /en/service/jcrest/
+          - definition [ref=e152]:
+            - link "Seminar & Training Service" [ref=e153] [cursor=pointer]:
+              - /url: /en/service/seminar/
+          - definition [ref=e154]:
+            - link "Networking" [ref=e155] [cursor=pointer]:
+              - /url: /en/service/network/
+  - contentinfo [ref=e156]:
+    - generic [ref=e157]:
+      - list [ref=e158]:
+        - listitem [ref=e159]:
+          - link "JCR Code of Conduct" [ref=e160] [cursor=pointer]:
+            - /url: /en/criterion/
+        - listitem [ref=e161]:
+          - link "Conflicts of Interest Management Policy" [ref=e162] [cursor=pointer]:
+            - /url: /en/pdf/dm66/conflicts-of-interest-management-policy_en_20191216.pdf
+        - listitem [ref=e163]:
+          - link "Disclaimer" [ref=e164] [cursor=pointer]:
+            - /url: /en/immunity/
+      - link "PAGE TOP" [ref=e166] [cursor=pointer]:
+        - /url: "#header"
+        - img "PAGE TOP" [ref=e167]
+      - paragraph [ref=e168]: Copyright © 2016 Japan Credit Rating Agency, Ltd. All Rights Reserved.

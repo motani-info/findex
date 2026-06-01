@@ -1,0 +1,225 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - heading "株式会社 日本格付研究所 金融庁長官（格付） 第1号" [level=1] [ref=e5]:
+        - link "株式会社 日本格付研究所" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "株式会社 日本格付研究所" [ref=e7]
+        - generic [ref=e8]: 金融庁長官（格付） 第1号
+      - generic [ref=e9]:
+        - list [ref=e10]:
+          - listitem [ref=e11]: 文字サイズ
+          - listitem [ref=e12]:
+            - img "標準" [ref=e13] [cursor=pointer]
+          - listitem [ref=e14]:
+            - img "拡大" [ref=e15] [cursor=pointer]
+        - list [ref=e16]:
+          - listitem [ref=e17]:
+            - link "サイトマップ" [ref=e18] [cursor=pointer]:
+              - /url: /sitemap/
+              - img "サイトマップ" [ref=e19]
+          - listitem [ref=e20]:
+            - link "ログイン" [ref=e21] [cursor=pointer]:
+              - /url: "#login"
+              - img "ログイン" [ref=e22]
+          - listitem [ref=e23]:
+            - link "English" [ref=e24] [cursor=pointer]:
+              - /url: /en/
+              - img "English" [ref=e25]
+      - generic:
+        - generic:
+          - textbox [ref=e26]
+          - button "検索" [ref=e27] [cursor=pointer]
+  - navigation [ref=e28]:
+    - list [ref=e30]:
+      - listitem [ref=e31]:
+        - link "ホーム" [ref=e32] [cursor=pointer]:
+          - /url: /
+      - listitem [ref=e33]:
+        - link "格付一覧" [ref=e34] [cursor=pointer]:
+          - /url: /ratinglist/
+      - listitem [ref=e35]:
+        - link "格付関連情報" [ref=e36] [cursor=pointer]:
+          - /url: /rrinfo/
+      - listitem [ref=e37]:
+        - link "インテリジェンス＆ ソリューション" [ref=e38] [cursor=pointer]:
+          - /url: /service/
+          - text: インテリジェンス＆
+          - text: ソリューション
+      - listitem [ref=e39]:
+        - link "グローバルな 取り組み" [ref=e40] [cursor=pointer]:
+          - /url: /service/international/
+          - text: グローバルな
+          - text: 取り組み
+      - listitem [ref=e41]:
+        - link "会社案内" [ref=e42] [cursor=pointer]:
+          - /url: /service/company/
+      - listitem [ref=e43]:
+        - link "採用情報" [ref=e44] [cursor=pointer]:
+          - /url: /service/company/recruit.html
+      - listitem [ref=e45]:
+        - link "お問い合わせ" [ref=e46] [cursor=pointer]:
+          - /url: /contact/
+  - article [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - list [ref=e51]:
+          - listitem [ref=e52]:
+            - link "ホーム" [ref=e53] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e54]:
+            - text: ＞
+            - link "インテリジェンス＆ソリューション" [ref=e55] [cursor=pointer]:
+              - /url: /service/
+          - listitem [ref=e56]: ＞ 情報提供サービス
+        - generic [ref=e57]:
+          - heading "情報提供サービス" [level=2] [ref=e58]
+          - generic [ref=e59]:
+            - paragraph [ref=e60]:
+              - text: 信用リスク分析のエキスパート ―JCR（日本格付研究所）―。
+              - text: JCRが有する信用格付に関する豊富かつ多彩な情報を最大限活用していただくため、JCRではWebや情報ベンダーなど様々なソースを通じて投資家に情報提供しています。
+            - generic [ref=e61]:
+              - term [ref=e62]:
+                - img "格付情報データベースサービス" [ref=e63]
+                - text: 格付情報データベースサービス
+              - definition [ref=e64]:
+                - paragraph [ref=e65]: 格付は、債券の価格、投資利回りに影響を与えるなど、その保有や売買など投資戦略を決定するための情報として極めて重要な役割を果たしています。一方、発行体や個別債券、およびそれぞれが持つ格付をはじめとした属性情報は膨大です。JCRの格付情報データベースサービス「J-CRIS」は、こうした膨大な情報をお客様のデータベースにタイムリーに提供することで、お客様のポートフォリオ管理や迅速な意思決定をサポートします。
+                - paragraph [ref=e66]: J-CRISで提供する情報は、発行体、JCRの格付対象金融商品（債券、CP、ストラクチャード・ファイナンス商品、ローンなど）、格付や見通しおよびその変更区分、発行・償還日、利率、担保・保証区分、劣後性などです。J-CRISでは、JCRの持つこれらの情報を一つのCSVファイルに集約しています。サービス提供開始時にそれまで蓄積された情報を一括提供するとともに、格付アクション（格付付与、格付変更・見直し、撤回など）があった場合は、その全アクションに関する属性情報をCSVファイルで配信します。配信は、VAN業者や情報ベンダーを経由して行っています。
+                - paragraph [ref=e67]: また、株式会社格付投資情報センター（R＆I）と同一のデータ・フォーマットを使用しているため、両社のサービスを併用した場合でも、お客様のデータ管理や分析の負担は限定的なものとなります。
+              - definition [ref=e68]:
+                - text: サービス料金：年間240万円（税別）など
+                - link "詳細はこちら" [ref=e69] [cursor=pointer]:
+                  - /url: /pdf/jcris_20250331_jp.pdf
+              - term [ref=e70]:
+                - img "会員制有料Webサービス" [ref=e71]
+                - text: 会員制有料Webサービス
+              - definition [ref=e72]:
+                - paragraph [ref=e73]: 信用力評価を主目的に、より高付加価値な投資情報を、当Webサイトを通じて提供する会員制の格付情報サービスです。高度で広範なRatingEyeの情報は、クレジットのみならずエクイティ分野や法人営業でも十分にご活用いただけます。
+                - paragraph [ref=e74]: RatingEyeは、JCRが高いカバレッジを誇る国内発行体の詳細クレジット分析レポート「発行体レポート」を中心としています。さらに、個別業界の動向や見通しを深堀りした「業界分析レポート」、ESG要素が信用格付に与える影響を説明した「ESGクレジットアウトルック」、高いカバレッジを生かしニッチな分野にまで踏み込んだ「格付展望」のほか、ストラクチャード・ファイナンス商品の解説やソブリンに関する定期レビューなど、プロ向け情報を満載しています。日々公表される「ニュースリリース」も、会員は期間の制限なしにそのオリジナル版を閲覧可能であるなど、RatingEyeはクレジット分析や産業・企業調査には必須の情報ツールといえるでしょう。
+                - paragraph [ref=e75]: また、会員向けの特典として、「RatingEyeセミナー」へのご招待と、担当アナリストが直接対応する「アナリストコンタクト」があります。
+                - paragraph [ref=e76]: 「RatingEyeセミナー」では、業界動向と格付の視点や、クレジットに関する時節の話題をテーマにアナリストが丁寧に解説いたします。「アナリストコンタクト」は、会員の皆様の様々な疑問に、担当アナリストが電話や面談などで直接かつわかりやすくお答えします。担当アナリストの“生の声”情報を得ることで、JCRの格付情報に対する理解がより深まります。
+                - paragraph [ref=e77]: RatingEyeのご利用に際しては、利用規約へのご同意と、所定の方法による会員登録が必要です。
+              - definition [ref=e78]:
+                - link "詳細はこちら" [ref=e79] [cursor=pointer]:
+                  - /url: /pdf/RatingEye_Info_250415_JP.pdf
+            - generic [ref=e80]:
+              - term [ref=e81]: 【FAXサービス】
+              - definition [ref=e82]:
+                - paragraph [ref=e83]: 東京証券取引所記者クラブ（兜クラブ）にて公表するニュースリリース（邦文）を、公表と同時にご指定のFAX宛に送信いたします。紙媒体ゆえに情報の伝達性、回覧性が高く、主にJCRのニュースリリースをプリントアウトして利用される方に便利なサービスです。
+                - paragraph [ref=e84]:
+                  - text: サービス料金：年間95,000円（税別）
+                  - text: 一社複数ヵ所送信の場合：１ヵ所あたり年間70,000円（税別）
+              - term [ref=e85]: 【マスメディアを通じた情報提供】
+              - definition [ref=e86]:
+                - paragraph [ref=e87]: JCRの格付情報は当Webサイトにて公表するとともに、世界的なネットワークを持つ下記の電子メディアに提供しています。
+            - heading "情報提供電子メディア" [level=4] [ref=e88]
+            - list [ref=e89]:
+              - listitem [ref=e90]: BLOOMBERG（検索コード：（和文）RESP JCRA, （英文）RESP JCR）
+              - listitem [ref=e91]: QUICK（検索コード：（和文）QR, （英文）QQ）
+              - listitem [ref=e92]: REUTERS
+              - listitem [ref=e93]: JIJI PRESS
+            - heading "情報提供サービスに関するお申し込み・お問い合わせは情報サービス部まで" [level=5] [ref=e94]
+            - paragraph [ref=e95]:
+              - text: "TEL : 03-3544-7013"
+              - text: "FAX : 03-3544-7026"
+      - generic [ref=e96]:
+        - list [ref=e98]:
+          - listitem [ref=e99]:
+            - link [ref=e100] [cursor=pointer]:
+              - /url: /acquisition/
+          - listitem [ref=e101]:
+            - link [ref=e102] [cursor=pointer]:
+              - /url: /greenfinance/
+          - listitem [ref=e103]:
+            - link [ref=e104] [cursor=pointer]:
+              - /url: /creditoutlook/
+          - listitem [ref=e105]:
+            - link [ref=e106] [cursor=pointer]:
+              - /url: /service/provision/
+          - listitem [ref=e107]:
+            - link [ref=e108] [cursor=pointer]:
+              - /url: /service/seminar/
+        - generic [ref=e110]:
+          - term [ref=e111]:
+            - text: インテリジェンス＆
+            - text: ソリューション
+          - definition [ref=e112]:
+            - link "格付情報（格付一覧）" [ref=e113] [cursor=pointer]:
+              - /url: /ratinglist/
+          - definition [ref=e114]:
+            - link "個別発行体情報（発行体レポート）" [ref=e115] [cursor=pointer]:
+              - /url: /issue_report/
+          - definition [ref=e116]:
+            - link "経済・産業情報 （格付関連レポート）" [ref=e117] [cursor=pointer]:
+              - /url: /related_report/
+              - text: 経済・産業情報
+              - text: （格付関連レポート）
+          - definition [ref=e118]:
+            - link "ESG情報" [ref=e119] [cursor=pointer]:
+              - /url: /greenfinance/esg
+          - definition [ref=e120]:
+            - link "Green & Social Finance 評価サービス" [ref=e121] [cursor=pointer]:
+              - /url: /greenfinance/
+              - text: Green & Social Finance
+              - text: 評価サービス
+          - definition [ref=e122]:
+            - link "信用力評価サービス （私的格付・シナリオ格付）" [ref=e123] [cursor=pointer]:
+              - /url: /service/local/
+              - text: 信用力評価サービス
+              - text: （私的格付・シナリオ格付）
+          - definition [ref=e124]:
+            - link "中堅中小企業格付" [ref=e125] [cursor=pointer]:
+              - /url: /service/sme/
+          - definition [ref=e126]:
+            - link "サービサー格付" [ref=e127] [cursor=pointer]:
+              - /url: /service/servicer/
+          - definition [ref=e128]:
+            - link "ファンド・ポートフォリオ格付" [ref=e129] [cursor=pointer]:
+              - /url: /service/fund/
+          - definition [ref=e130]:
+            - link "格付情報Database （J-CRIS）" [ref=e131] [cursor=pointer]:
+              - /url: /service/provision/
+              - text: 格付情報Database
+              - text: （J-CRIS）
+          - definition [ref=e132]:
+            - link "会員制有料情報サービス （RatingEye）" [ref=e133] [cursor=pointer]:
+              - /url: /service/provision/#RatingEye
+              - text: 会員制有料情報サービス
+              - text: （RatingEye）
+          - definition [ref=e134]:
+            - link "財務力評価サービス" [ref=e135] [cursor=pointer]:
+              - /url: /service/fine/
+          - definition [ref=e136]:
+            - link "格付に関連した調査・知見提供" [ref=e137] [cursor=pointer]:
+              - /url: /service/knowledge/
+          - definition [ref=e138]:
+            - link "信用リスク推定モデル提供・支援" [ref=e139] [cursor=pointer]:
+              - /url: /service/jcrest/
+          - definition [ref=e140]:
+            - link "セミナー・研修サービス" [ref=e141] [cursor=pointer]:
+              - /url: /service/seminar/
+          - definition [ref=e142]:
+            - link "研究会" [ref=e143] [cursor=pointer]:
+              - /url: /service/network/
+  - contentinfo [ref=e144]:
+    - generic [ref=e145]:
+      - list [ref=e146]:
+        - listitem [ref=e147]:
+          - link "JCR行動規範" [ref=e148] [cursor=pointer]:
+            - /url: /criterion/
+        - listitem [ref=e149]:
+          - link "個人情報保護方針" [ref=e150] [cursor=pointer]:
+            - /url: /pdf/dm65/privacypolicy20260227.pdf
+        - listitem [ref=e151]:
+          - link "利益相反管理方針" [ref=e152] [cursor=pointer]:
+            - /url: /pdf/dm66/conflicts-of-interest-management-policy_jp_20191216.pdf
+        - listitem [ref=e153]:
+          - link "反社会的勢力に対する基本方針" [ref=e154] [cursor=pointer]:
+            - /url: /pdf/dm67/antisocial.pdf
+        - listitem [ref=e155]:
+          - link "免責事項" [ref=e156] [cursor=pointer]:
+            - /url: /immunity/
+      - link "PAGE TOP" [ref=e158] [cursor=pointer]:
+        - /url: "#header"
+        - img "PAGE TOP" [ref=e159]
+      - paragraph [ref=e160]: Copyright © 2016 日本格付研究所 All Rights Reserved.
