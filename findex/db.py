@@ -12,6 +12,181 @@ DB_PATH = Path.home() / ".findex" / "db" / "findex.db"
 
 # ── マイグレーション定義 ─────────────────────────────────────────
 MIGRATIONS: dict[int, list[str]] = {
+    7: [
+        "ALTER TABLE computed_metrics ADD COLUMN roe REAL",
+        "ALTER TABLE computed_metrics ADD COLUMN operating_margin REAL",
+        "ALTER TABLE computed_metrics ADD COLUMN payout_ratio REAL",
+    ],
+    6: [
+        """
+        CREATE TABLE IF NOT EXISTS momentum_scores (
+            code              TEXT NOT NULL,
+            scored_at         TEXT NOT NULL,
+            total_score       REAL NOT NULL,
+            s_rel_ret_3m      REAL,
+            s_rel_ret_12m     REAL,
+            s_hi52_ratio      REAL,
+            s_rev_growth      REAL,
+            s_eps_growth      REAL,
+            s_roe             REAL,
+            s_operating_margin REAL,
+            s_vol_ratio       REAL,
+            PRIMARY KEY (code, scored_at)
+        )
+        """,
+    ],
+    5: [
+        """
+        CREATE TABLE IF NOT EXISTS dividend_scores (
+            code              TEXT NOT NULL,
+            scored_at         TEXT NOT NULL,
+            rule_version_id   INTEGER NOT NULL,
+            total_score       REAL NOT NULL,
+            s_consecutive_no_cut_years          REAL,
+            s_consecutive_dividend_growth_years REAL,
+            s_dividend_reliability              REAL,
+            s_dividend_growth_10y_cagr          REAL,
+            s_payout_ratio                      REAL,
+            s_fcf_payout_coverage               REAL,
+            s_eps_growth_5y                     REAL,
+            s_revenue_growth_5y_cagr            REAL,
+            s_roe                               REAL,
+            s_operating_margin                  REAL,
+            s_div_yield                         REAL,
+            s_mix_coefficient                   REAL,
+            s_net_cash_per                      REAL,
+            s_roic_minus_wacc                   REAL,
+            s_retained_earnings_div_ratio       REAL,
+            PRIMARY KEY (code, scored_at)
+        )
+        """,
+    ],
+    4: [
+        """
+        CREATE TABLE IF NOT EXISTS raw_financials (
+            code                 TEXT PRIMARY KEY,
+            eps                  REAL,
+            bps                  REAL,
+            shares_outstanding   REAL,
+            roe                  REAL,
+            operating_margins    REAL,
+            payout_ratio         REAL,
+            free_cashflow        REAL,
+            operating_cashflow   REAL,
+            capital_expenditures REAL,
+            dividend_rate        REAL,
+            market_cap           REAL,
+            beta                 REAL,
+            total_assets         REAL,
+            stockholders_equity  REAL,
+            current_assets       REAL,
+            total_liabilities    REAL,
+            long_term_debt       REAL,
+            short_term_debt      REAL,
+            retained_earnings    REAL,
+            diluted_eps_latest   REAL,
+            total_revenue_latest REAL,
+            diluted_eps_5y_ago   REAL,
+            total_revenue_5y_ago REAL,
+            diluted_eps_periods  INTEGER,
+            total_revenue_periods INTEGER,
+            fetched_at           TEXT NOT NULL
+        )
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS computed_metrics (
+            code                              TEXT PRIMARY KEY,
+            per                               REAL,
+            pbr                               REAL,
+            current_market_cap                REAL,
+            div_yield                         REAL,
+            mix_coefficient                   REAL,
+            net_cash_per                      REAL,
+            equity_ratio                      REAL,
+            debt_to_equity                    REAL,
+            eps_growth_5y                     REAL,
+            revenue_growth_5y_cagr            REAL,
+            roic_minus_wacc                   REAL,
+            fcf_payout_coverage               REAL,
+            retained_earnings_div_ratio       REAL,
+            annual_div                        REAL,
+            consecutive_no_cut_years          INTEGER,
+            consecutive_dividend_growth_years INTEGER,
+            dividend_growth_5y_cagr           REAL,
+            dividend_growth_10y_cagr          REAL,
+            dividend_reliability              REAL,
+            dividend_cut_count_20y            INTEGER,
+            ret_3m                            REAL,
+            ret_12m                           REAL,
+            rel_ret_3m                        REAL,
+            rel_ret_12m                       REAL,
+            hi52_ratio                        REAL,
+            price_computed_at                 TEXT,
+            fin_computed_at                   TEXT,
+            div_computed_at                   TEXT
+        )
+        """,
+    ],
+    3: [
+        # 株価履歴テーブル（モメンタム計算用）
+        """
+        CREATE TABLE IF NOT EXISTS price_history (
+            code   TEXT NOT NULL,
+            date   TEXT NOT NULL,
+            close  REAL NOT NULL,
+            volume INTEGER,
+            PRIMARY KEY (code, date)
+        )
+        """,
+        # 配当履歴テーブル（生データ蓄積用）
+        """
+        CREATE TABLE IF NOT EXISTS dividend_history (
+            code    TEXT NOT NULL,
+            ex_date TEXT NOT NULL,
+            amount  REAL NOT NULL,
+            PRIMARY KEY (code, ex_date)
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_price_history_code ON price_history (code, date DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_div_history_code   ON dividend_history (code, ex_date DESC)",
+    ],
+    2: [
+        # scores に更新タイムスタンプ列を追加（ALTER TABLE は既存列があればエラーを無視）
+        "ALTER TABLE scores ADD COLUMN price_updated_at TEXT",
+        "ALTER TABLE scores ADD COLUMN fin_updated_at   TEXT",
+        "ALTER TABLE scores ADD COLUMN div_updated_at   TEXT",
+        # Category B/C の安定値テーブル
+        # daily update はここから EPS/BPS/shares/annual_div を読んでCategory A を計算
+        """
+        CREATE TABLE IF NOT EXISTS stock_fundamentals (
+            code                              TEXT PRIMARY KEY,
+            eps                               REAL,
+            bps                               REAL,
+            shares                            REAL,
+            net_cash                          REAL,
+            equity_ratio                      REAL,
+            debt_to_equity                    REAL,
+            roe                               REAL,
+            operating_margin                  REAL,
+            eps_growth_5y                     REAL,
+            revenue_growth_5y_cagr            REAL,
+            roic_minus_wacc                   REAL,
+            fcf_payout_coverage               REAL,
+            retained_earnings_div_ratio       REAL,
+            payout_ratio                      REAL,
+            annual_div                        REAL,
+            consecutive_no_cut_years          INTEGER,
+            consecutive_dividend_growth_years INTEGER,
+            dividend_growth_5y_cagr           REAL,
+            dividend_growth_10y_cagr          REAL,
+            dividend_reliability              REAL,
+            dividend_cut_count_20y            INTEGER,
+            fin_updated_at                    TEXT,
+            div_updated_at                    TEXT
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_fund_code ON stock_fundamentals (code)",
+    ],
     1: [
         """
         CREATE TABLE IF NOT EXISTS stocks (
@@ -78,8 +253,9 @@ MIGRATIONS: dict[int, list[str]] = {
 def get_db() -> sqlite3.Connection:
     """DB接続を返す。初回はディレクトリ作成 + migrate() を実行。"""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA busy_timeout = 30000")
     conn.execute("PRAGMA foreign_keys = ON")
     migrate(conn)
     return conn
@@ -96,7 +272,14 @@ def migrate(conn: sqlite3.Connection) -> None:
     for version, stmts in sorted(MIGRATIONS.items()):
         if version > current:
             for stmt in stmts:
-                conn.execute(stmt)
+                try:
+                    conn.execute(stmt)
+                except sqlite3.OperationalError as e:
+                    # ALTER TABLE で既存列がある場合は無視
+                    if "duplicate column" in str(e).lower():
+                        pass
+                    else:
+                        raise
             conn.execute(
                 "INSERT OR IGNORE INTO schema_version VALUES (?, datetime('now'))",
                 (version,),
@@ -252,6 +435,139 @@ def update_score(conn: sqlite3.Connection,
 
 # ── run_log ──────────────────────────────────────────────────────
 
+# ── stock_fundamentals ──────────────────────────────────────────
+
+FUNDAMENTALS_COLS = [
+    "eps", "bps", "shares", "net_cash",
+    "equity_ratio", "debt_to_equity", "roe", "operating_margin",
+    "eps_growth_5y", "revenue_growth_5y_cagr",
+    "roic_minus_wacc", "fcf_payout_coverage",
+    "retained_earnings_div_ratio", "payout_ratio",
+    "annual_div",
+    "consecutive_no_cut_years", "consecutive_dividend_growth_years",
+    "dividend_growth_5y_cagr", "dividend_growth_10y_cagr",
+    "dividend_reliability", "dividend_cut_count_20y",
+    "fin_updated_at", "div_updated_at",
+    "market_cap",
+]
+
+
+def upsert_fundamentals(conn: sqlite3.Connection, code: str, data: dict) -> None:
+    """stock_fundamentals を UPSERT する。"""
+    cols   = [c for c in FUNDAMENTALS_COLS if c in data]
+    vals   = [data[c] for c in cols]
+    cols_s = ", ".join(cols)
+    plc    = ", ".join("?" * len(cols))
+    upd    = ", ".join(f"{c}=excluded.{c}" for c in cols)
+    conn.execute(
+        f"INSERT INTO stock_fundamentals (code, {cols_s}) VALUES (?, {plc}) "
+        f"ON CONFLICT(code) DO UPDATE SET {upd}",
+        [code, *vals],
+    )
+
+
+def get_fundamentals(conn: sqlite3.Connection,
+                     codes: list[str] | None = None) -> pd.DataFrame:
+    """stock_fundamentals を DataFrame で返す。"""
+    sql = "SELECT * FROM stock_fundamentals"
+    params: list = []
+    if codes:
+        sql += f" WHERE code IN ({','.join('?'*len(codes))})"
+        params = codes
+    rows = conn.execute(sql, params).fetchall()
+    cols = ["code"] + FUNDAMENTALS_COLS
+    return pd.DataFrame(rows, columns=cols)
+
+
+def get_latest_raw_json(conn: sqlite3.Connection,
+                        codes: list[str] | None = None) -> dict[str, dict]:
+    """各銘柄の最新 raw_json を {code: raw_dict} で返す。"""
+    sql = (
+        "SELECT code, raw_json FROM scores "
+        "WHERE (code, scored_at) IN ("
+        "  SELECT code, MAX(scored_at) FROM scores GROUP BY code"
+        ")"
+    )
+    params: list = []
+    if codes:
+        sql += f" AND code IN ({','.join('?'*len(codes))})"
+        params = codes
+    rows = conn.execute(sql, params).fetchall()
+    return {
+        r[0]: json.loads(r[1]) if r[1] else {}
+        for r in rows
+    }
+
+
+def upsert_score_with_raw(conn: sqlite3.Connection,
+                           code: str, scored_at: str,
+                           rule_version_id: int,
+                           score_json: dict,
+                           raw_json: dict,
+                           price_updated_at: str | None = None,
+                           fin_updated_at:   str | None = None,
+                           div_updated_at:   str | None = None) -> None:
+    """スコアを UPSERT（INSERT or REPLACE）する。日次更新用。
+
+    同日に rule_version_id が変わっても重複行を作らないよう、
+    まず (code, scored_at) で既存行を UPDATE し、なければ INSERT する。
+    """
+    updated = conn.execute(
+        "UPDATE scores SET "
+        "  rule_version_id=?, total_score=?, score_json=?, raw_json=?, "
+        "  price_updated_at=? "
+        "WHERE code=? AND scored_at=?",
+        (
+            rule_version_id,
+            score_json.get("total", 0.0),
+            json.dumps(score_json, ensure_ascii=False),
+            json.dumps(raw_json, ensure_ascii=False, default=str),
+            price_updated_at,
+            code, scored_at,
+        ),
+    ).rowcount
+    if updated == 0:
+        conn.execute(
+            "INSERT OR IGNORE INTO scores "
+            "(code, scored_at, rule_version_id, total_score, score_json, raw_json, "
+            " price_updated_at, fin_updated_at, div_updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                code, scored_at, rule_version_id,
+                score_json.get("total", 0.0),
+                json.dumps(score_json, ensure_ascii=False),
+                json.dumps(raw_json, ensure_ascii=False, default=str),
+                price_updated_at, fin_updated_at, div_updated_at,
+            ),
+        )
+
+
+def bulk_insert_price_history(conn: sqlite3.Connection,
+                               records: list[tuple[str, str, float, int | None]]) -> int:
+    """price_history に一括 INSERT OR REPLACE する。
+    既存レコードがあれば close・volume を上書き（volumeの後付け補完に対応）。
+    records: [(code, date, close, volume), ...]
+    戻り値: 挿入件数
+    """
+    conn.executemany(
+        "INSERT OR REPLACE INTO price_history (code, date, close, volume) VALUES (?, ?, ?, ?)",
+        records,
+    )
+    return len(records)
+
+
+def bulk_insert_dividend_history(conn: sqlite3.Connection,
+                                  records: list[tuple[str, str, float]]) -> int:
+    """dividend_history に一括 INSERT OR IGNORE する。
+    records: [(code, ex_date, amount), ...]
+    """
+    conn.executemany(
+        "INSERT OR IGNORE INTO dividend_history (code, ex_date, amount) VALUES (?, ?, ?)",
+        records,
+    )
+    return len(records)
+
+
 def start_run(conn: sqlite3.Connection, mode: str, subset: str | None = None) -> int:
     """run_log に INSERT し、run_id を返す。"""
     cur = conn.execute(
@@ -273,3 +589,212 @@ def finish_run(conn: sqlite3.Connection, run_id: int,
         (total, succeeded, failed, skipped, exit_code, run_id),
     )
     conn.commit()
+
+
+# ── raw_financials ───────────────────────────────────────────────
+
+RAW_FINANCIALS_COLS = [
+    "eps", "bps", "shares_outstanding", "roe", "operating_margins",
+    "payout_ratio", "free_cashflow", "operating_cashflow", "capital_expenditures",
+    "dividend_rate", "market_cap", "beta",
+    "total_assets", "stockholders_equity", "current_assets", "total_liabilities",
+    "long_term_debt", "short_term_debt", "retained_earnings",
+    "diluted_eps_latest", "total_revenue_latest",
+    "diluted_eps_5y_ago", "total_revenue_5y_ago",
+    "diluted_eps_periods", "total_revenue_periods",
+    "fetched_at",
+]
+
+
+def upsert_raw_financials(conn: sqlite3.Connection, code: str, data: dict) -> None:
+    """raw_financials を UPSERT する。"""
+    cols = [c for c in RAW_FINANCIALS_COLS if c in data]
+    vals = [data[c] for c in cols]
+    cols_s = ", ".join(cols)
+    plc = ", ".join("?" * len(cols))
+    upd = ", ".join(f"{c}=excluded.{c}" for c in cols)
+    conn.execute(
+        f"INSERT INTO raw_financials (code, {cols_s}) VALUES (?, {plc}) "
+        f"ON CONFLICT(code) DO UPDATE SET {upd}",
+        [code, *vals],
+    )
+
+
+def get_raw_financials(conn: sqlite3.Connection,
+                       codes: list[str] | None = None) -> pd.DataFrame:
+    """raw_financials を DataFrame で返す。"""
+    sql = "SELECT * FROM raw_financials"
+    params: list = []
+    if codes:
+        sql += f" WHERE code IN ({','.join('?'*len(codes))})"
+        params = codes
+    rows = conn.execute(sql, params).fetchall()
+    cols = ["code"] + RAW_FINANCIALS_COLS
+    return pd.DataFrame(rows, columns=cols)
+
+
+# ── computed_metrics ─────────────────────────────────────────────
+
+COMPUTED_METRICS_COLS = [
+    "per", "pbr", "current_market_cap", "div_yield", "mix_coefficient", "net_cash_per",
+    "equity_ratio", "debt_to_equity", "eps_growth_5y", "revenue_growth_5y_cagr",
+    "roic_minus_wacc", "fcf_payout_coverage", "retained_earnings_div_ratio",
+    "annual_div", "consecutive_no_cut_years", "consecutive_dividend_growth_years",
+    "dividend_growth_5y_cagr", "dividend_growth_10y_cagr",
+    "dividend_reliability", "dividend_cut_count_20y",
+    "roe", "operating_margin", "payout_ratio",
+    "ret_3m", "ret_12m", "rel_ret_3m", "rel_ret_12m", "hi52_ratio",
+    "price_computed_at", "fin_computed_at", "div_computed_at",
+]
+
+
+def upsert_computed_metrics(conn: sqlite3.Connection, code: str, data: dict) -> None:
+    """computed_metrics を UPSERT する。"""
+    cols = [c for c in COMPUTED_METRICS_COLS if c in data]
+    vals = [data[c] for c in cols]
+    cols_s = ", ".join(cols)
+    plc = ", ".join("?" * len(cols))
+    upd = ", ".join(f"{c}=excluded.{c}" for c in cols)
+    conn.execute(
+        f"INSERT INTO computed_metrics (code, {cols_s}) VALUES (?, {plc}) "
+        f"ON CONFLICT(code) DO UPDATE SET {upd}",
+        [code, *vals],
+    )
+
+
+def get_computed_metrics(conn: sqlite3.Connection,
+                         codes: list[str] | None = None) -> pd.DataFrame:
+    """computed_metrics を DataFrame で返す。"""
+    all_cols = ["code"] + COMPUTED_METRICS_COLS
+    cols_s = ", ".join(all_cols)
+    sql = f"SELECT {cols_s} FROM computed_metrics"
+    params: list = []
+    if codes:
+        sql += f" WHERE code IN ({','.join('?'*len(codes))})"
+        params = codes
+    rows = conn.execute(sql, params).fetchall()
+    return pd.DataFrame(rows, columns=all_cols)
+
+
+# ── dividend_scores ──────────────────────────────────────────────
+
+DIVIDEND_SCORE_COLS = [
+    "rule_version_id", "total_score",
+    "s_consecutive_no_cut_years", "s_consecutive_dividend_growth_years",
+    "s_dividend_reliability", "s_dividend_growth_10y_cagr",
+    "s_payout_ratio", "s_fcf_payout_coverage",
+    "s_eps_growth_5y", "s_revenue_growth_5y_cagr",
+    "s_roe", "s_operating_margin",
+    "s_div_yield", "s_mix_coefficient", "s_net_cash_per",
+    "s_roic_minus_wacc", "s_retained_earnings_div_ratio",
+]
+
+
+def upsert_dividend_score(conn: sqlite3.Connection, code: str, scored_at: str,
+                          rule_version_id: int, total_score: float,
+                          breakdown: dict) -> None:
+    """dividend_scores を UPSERT する。"""
+    data = {
+        "rule_version_id": rule_version_id,
+        "total_score": total_score,
+    }
+    for k, v in breakdown.items():
+        col = f"s_{k}" if not k.startswith("s_") else k
+        if col in DIVIDEND_SCORE_COLS:
+            data[col] = v
+    cols = [c for c in DIVIDEND_SCORE_COLS if c in data]
+    vals = [data[c] for c in cols]
+    cols_s = ", ".join(cols)
+    plc = ", ".join("?" * len(cols))
+    upd = ", ".join(f"{c}=excluded.{c}" for c in cols)
+    conn.execute(
+        f"INSERT INTO dividend_scores (code, scored_at, {cols_s}) VALUES (?, ?, {plc}) "
+        f"ON CONFLICT(code, scored_at) DO UPDATE SET {upd}",
+        [code, scored_at, *vals],
+    )
+
+
+def get_dividend_scores(conn: sqlite3.Connection, top_n: int = 30,
+                        filters: dict | None = None) -> list[dict]:
+    """dividend_scores の最新スコアを取得する。"""
+    sql = (
+        "SELECT ds.*, st.name, st.market, st.sector "
+        "FROM dividend_scores ds "
+        "JOIN stocks st ON ds.code = st.code "
+        "WHERE ds.scored_at = (SELECT MAX(scored_at) FROM dividend_scores) "
+    )
+    params: list = []
+    if filters:
+        if filters.get("market"):
+            sql += " AND st.market = ?"
+            params.append(filters["market"])
+        if filters.get("sector"):
+            sql += " AND st.sector LIKE ?"
+            params.append(f"%{filters['sector']}%")
+    sql += " ORDER BY ds.total_score DESC"
+    if top_n:
+        sql += f" LIMIT {top_n}"
+    rows = conn.execute(sql, params).fetchall()
+    cols = [d[0] for d in conn.execute(
+        "SELECT ds.*, st.name, st.market, st.sector "
+        "FROM dividend_scores ds JOIN stocks st ON ds.code = st.code LIMIT 0"
+    ).description] if rows else []
+    return [dict(zip(cols, r)) for r in rows] if cols else []
+
+
+# ── momentum_scores ──────────────────────────────────────────────
+
+MOMENTUM_SCORE_COLS = [
+    "total_score",
+    "s_rel_ret_3m", "s_rel_ret_12m", "s_hi52_ratio",
+    "s_rev_growth", "s_eps_growth",
+    "s_roe", "s_operating_margin", "s_vol_ratio",
+]
+
+
+def upsert_momentum_score(conn: sqlite3.Connection, code: str, scored_at: str,
+                          total_score: float, breakdown: dict) -> None:
+    """momentum_scores を UPSERT する。"""
+    data = {"total_score": total_score}
+    for k, v in breakdown.items():
+        col = f"s_{k}" if not k.startswith("s_") else k
+        if col in MOMENTUM_SCORE_COLS:
+            data[col] = v
+    cols = [c for c in MOMENTUM_SCORE_COLS if c in data]
+    vals = [data[c] for c in cols]
+    cols_s = ", ".join(cols)
+    plc = ", ".join("?" * len(cols))
+    upd = ", ".join(f"{c}=excluded.{c}" for c in cols)
+    conn.execute(
+        f"INSERT INTO momentum_scores (code, scored_at, {cols_s}) VALUES (?, ?, {plc}) "
+        f"ON CONFLICT(code, scored_at) DO UPDATE SET {upd}",
+        [code, scored_at, *vals],
+    )
+
+
+def get_momentum_scores(conn: sqlite3.Connection, top_n: int = 30,
+                        filters: dict | None = None) -> list[dict]:
+    """momentum_scores の最新スコアを取得する。"""
+    sql = (
+        "SELECT ms.*, st.name, st.market, st.sector "
+        "FROM momentum_scores ms "
+        "JOIN stocks st ON ms.code = st.code "
+        "WHERE ms.scored_at = (SELECT MAX(scored_at) FROM momentum_scores) "
+    )
+    params: list = []
+    if filters:
+        if filters.get("market"):
+            sql += " AND st.market = ?"
+            params.append(filters["market"])
+        if filters.get("sector"):
+            sql += " AND st.sector LIKE ?"
+            params.append(f"%{filters['sector']}%")
+    sql += " ORDER BY ms.total_score DESC"
+    if top_n:
+        sql += f" LIMIT {top_n}"
+    rows = conn.execute(sql, params).fetchall()
+    cols = [d[0] for d in conn.execute(
+        "SELECT ms.*, st.name, st.market, st.sector "
+        "FROM momentum_scores ms JOIN stocks st ON ms.code = st.code LIMIT 0"
+    ).description] if rows else []
+    return [dict(zip(cols, r)) for r in rows] if cols else []

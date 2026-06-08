@@ -78,6 +78,70 @@ def _mix_coefficient(info: dict) -> float | None:
     return None
 
 
+def _fcf_payout_coverage(info: dict) -> float | None:
+    """FCF配当カバレッジ = フリーキャッシュフロー / 年間配当総額
+    純利益ベースの配当性向④を補完する。FCFで配当を何倍賄えるかを示す。
+    2.0倍以上 = 利益半減でも増配維持可能な水準。
+    """
+    fcf = _safe(info, "freeCashflow")
+    if not fcf:
+        op_cf = _safe(info, "operatingCashflow")
+        capex = _safe(info, "capitalExpenditures")  # yfinanceでは負値で返る
+        if op_cf is not None and capex is not None:
+            fcf = op_cf + capex  # capexは負値なので加算でFCFになる
+    if not fcf or fcf <= 0:
+        return None
+    div_rate = info.get("dividendRate")
+    shares   = info.get("sharesOutstanding")
+    if not div_rate or not shares or div_rate <= 0:
+        return None
+    annual_div = div_rate * shares
+    if annual_div <= 0:
+        return None
+    result = fcf / annual_div
+    return round(result, 4) if 0 < result < 100 else None
+
+
+def _calc_revenue_cagr(financials: pd.DataFrame) -> float | None:
+    """売上高5年CAGR。有機的成長の有無を確認する指標。
+    EPS成長（自社株買いで水増し可能）と異なり、トップライン成長を測る。
+    """
+    try:
+        rev = financials.loc["Total Revenue"].dropna()
+        if len(rev) < 2:
+            return None
+        n = min(len(rev), 5)  # 最大5年
+        v_now = float(rev.iloc[0])   # 最新（左端が最新）
+        v_old = float(rev.iloc[n - 1])
+        if v_old <= 0 or v_now <= 0:
+            return None
+        cagr = (v_now / v_old) ** (1 / (n - 1)) - 1
+        return round(cagr, 6) if -0.5 < cagr < 0.5 else None
+    except Exception:
+        return None
+
+
+def _calc_eps_cagr(financials: pd.DataFrame) -> float | None:
+    """EPS 3〜5年CAGR。yfinanceの1年値（earningsGrowth）は
+    一時損益・為替で激しくブレるため、複数年平均に変更。
+    """
+    for key in ("Diluted EPS", "Basic EPS"):
+        try:
+            eps = financials.loc[key].dropna()
+            if len(eps) < 2:
+                continue
+            n = min(len(eps), 5)
+            v_now = float(eps.iloc[0])
+            v_old = float(eps.iloc[n - 1])
+            if v_old <= 0 or v_now <= 0:
+                return None
+            cagr = (v_now / v_old) ** (1 / (n - 1)) - 1
+            return round(cagr, 6) if -0.5 < cagr < 0.5 else None
+        except Exception:
+            continue
+    return None
+
+
 def _fetch_one(code: str) -> dict:
     """1銘柄の財務データを取得して辞書で返す"""
     symbol = f"{code}.T"

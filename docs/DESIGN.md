@@ -1,7 +1,7 @@
 # Findex 設計書
 
 > 日本株スコアリング・ランキングツール  
-> 最終更新: 2026-05-31（実装アーキテクチャ追記）
+> 最終更新: 2026-06-06（3層リファクタリング完了、コマンド体系更新）
 
 ---
 
@@ -456,22 +456,42 @@ findex/
 │   ├── fetcher/
 │   │   ├── master.py          ✅ JPX銘柄マスター
 │   │   ├── fundamentals.py    ✅ yfinance財務指標（④⑤⑥⑧⑩⑪）
-│   │   ├── dividends.py       ❌ yfinance配当履歴（①②③）
-│   │   └── edinet.py          ❌ EDINET財務データ（⑦⑫）
+│   │   ├── dividends.py       ✅ yfinance配当履歴（①②③）
+│   │   └── roic.py            ✅ ROIC-WACC計算（⑨）
+│   ├── updater/                ✅ 新パイプライン（3層分離）
+│   │   ├── fetch_raw.py       ✅ yfinance → raw_financials
+│   │   ├── compute.py         ✅ raw_financials → computed_metrics
+│   │   ├── score_dividend.py  ✅ computed_metrics → dividend_scores
+│   │   └── score_momentum.py  ✅ computed_metrics → momentum_scores
 │   ├── scorer/
 │   │   ├── engine.py          ✅ スコアリングエンジン
-│   │   └── roic.py            ❌ ROIC-WACC計算（⑨）
+│   │   ├── dividend_batch.py  ⚠️ 暫定バッチ（stock_fundamentals直接参照、統合予定）
+│   │   └── momentum_batch.py  ⚠️ 暫定バッチ（同上）
+│   ├── api/
+│   │   ├── main.py            ✅ FastAPI エントリーポイント
+│   │   ├── db.py              ✅ DB接続（timeout=10）
+│   │   └── routers/
+│   │       ├── dividend.py    ✅ 配当API（dividend_scores参照）
+│   │       ├── momentum.py    ✅ モメンタムAPI（momentum_scores + computed_metrics参照）
+│   │       └── stock.py       ✅ 検索API（レガシーscores参照、要移行）
 │   ├── output/
 │   │   └── display.py         ✅ Rich表示・CSV出力
-│   ├── cache.py               ❌ キャッシュ読み書きヘルパー（§4-2）
-│   ├── settings.py            ❌ 設定管理 Settings.load()（§4-5）
-│   ├── runner.py              ❌ RunResult dataclass + バッチ実行ロジック（§4-4）
-│   └── cli.py                 ✅ CLIエントリーポイント（→ runner.py統合後に更新）
+│   ├── momentum.py            ✅ モメンタム計算ロジック
+│   ├── db.py                  ✅ SQLite管理（v1〜v6マイグレーション）
+│   ├── settings.py            ✅ 設定管理
+│   └── cli.py                 ✅ CLIエントリーポイント（fetch/compute/score/pipeline）
+├── web/                       ✅ React SPA（Vite + TypeScript）
+├── scripts/
+│   └── daily.sh               ✅ 日次パイプライン（launchd経由）
 ├── rules.yaml                 ✅ スコアリングルール定義
 ├── .env                       ✅ APIキー（gitignore済み）
 ├── pyproject.toml             ✅
 └── docs/
     ├── DESIGN.md              ✅ 本設計書
+    ├── data-architecture.md   ✅ データアーキテクチャ（現状）
+    ├── refactoring-data-layer.md ✅ リファクタリング設計（目標状態）
+    ├── refactoring-tasks.md   ✅ タスク管理
+    ├── data-lifecycle.md      ✅ データライフサイクル
     └── NFR.md                 ✅ 非機能要件設計書
 ```
 
@@ -909,26 +929,50 @@ def detect_change_type(old_yaml: str, new_yaml: str) -> str:
 
 ---
 
-## 10. CLIの使い方（実装完了後）
+## 10. CLIの使い方
+
+### 日常運用（新パイプライン）
+
+```bash
+# 全自動パイプライン（fetch → compute → score）
+findex pipeline                          # 全銘柄
+findex pipeline --codes 7203 4452        # テスト用（指定銘柄のみ）
+findex pipeline --skip-fetch             # raw_financials再取得をスキップ（compute→score のみ）
+
+# 個別ステップ実行
+findex fetch quarterly                   # yfinance → raw_financials（四半期に1回）
+findex compute                           # raw_financials → computed_metrics
+findex score dividend                    # computed_metrics → dividend_scores
+findex score momentum                    # computed_metrics → momentum_scores
+
+# 日次の株価更新（旧コマンド、daily.sh から呼ばれる）
+findex update                            # price_history 更新 + 配当スコア
+findex update --backfill --period 2y --codes 1306  # 特定銘柄のバックフィル
+findex update --dividends --force-all    # 配当履歴の全更新（半年に1回）
+```
+
+### 日次自動実行（launchd）
+
+```bash
+# 平日18:00に自動実行（scripts/daily.sh）
+# 内容: findex update → findex compute → findex score dividend → findex score momentum
+launchctl list | grep findex             # 登録状況確認
+```
+
+### 確認・閲覧
 
 ```bash
 # プライム市場の高配当株ランキング（上位50社）
-uv run findex run --market プライム --no-etf --top 50
+findex dividend rank --market プライム --top 50
 
 # 特定銘柄のスコア詳細確認
-uv run findex check 7203 4452 9432
+findex dividend check 7203
 
-# 全指標有効でCSV出力
-uv run findex run --market プライム --no-etf --out ranking.csv
-
-# EDINETスキップ（高速モード）
-uv run findex run --market プライム --no-etf --no-edinet --top 30
-
-# 電気機器セクターのみ
-uv run findex run --sector 電気機器 --top 20
+# モメンタムランキング
+findex momentum rank --top 30
 
 # 並列取得（3並列）でキャッシュをリフレッシュ
-uv run findex run --market プライム --no-etf --workers 3 --refresh
+findex update --quarterly --workers 3
 ```
 
 ---

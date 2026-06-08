@@ -115,10 +115,12 @@ def save_to_db(result: RunResult, rules_path: Path, mode: str = "run",
             score_json = {"total": row.get("total_score", 0)}
 
         raw_fields = [
-            "payout_ratio", "eps_growth_5y", "equity_ratio", "debt_to_equity",
+            "payout_ratio", "eps_growth_5y", "equity_ratio",
             "roe", "operating_margin", "div_yield", "net_cash_per", "mix_coefficient",
             "consecutive_no_cut_years", "consecutive_dividend_growth_years",
-            "dividend_growth_5y_cagr", "roic_minus_wacc", "retained_earnings_div_ratio",
+            "dividend_growth_10y_cagr", "dividend_reliability",
+            "fcf_payout_coverage", "revenue_growth_5y_cagr",
+            "roic_minus_wacc", "retained_earnings_div_ratio",
             "per", "pbr", "market_cap",
         ]
         raw_json = {f: row.get(f) for f in raw_fields if row.get(f) is not None}

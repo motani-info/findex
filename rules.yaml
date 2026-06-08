@@ -3,6 +3,12 @@
 # 【スコアリング方式】
 #   生スコア  = min(10, 値 / threshold × 10)   direction: high
 #             = min(10, threshold / 値 × 10)   direction: low
+#
+# 【キャップ設計】
+#   upper_cap  : direction=high 専用。閾値超で満点プラトー、cap超でペナルティ下降
+#                用途: 配当利回りの「利回りの罠」対策
+#   penalty_cap: direction=low  専用。値 ≥ cap で一律0点（ハズレ値の強制排除）
+#                用途: PER×PBRなど割高株を線形減点ではなく0点にする
 #   加重スコア = 生スコア × weight
 #   合計      = Σ(加重スコア) / max_weighted_total × 100
 #
@@ -11,12 +17,20 @@
 #
 # 【重み設計思想】（高配当株投資における重要度）
 #   配当継続性 > 配当余力 > 事業の質 > 割安度
-#   max_weighted_total = 145点 → 100点換算
 #
 # 【ルール変更時の運用】
 #   - weight / threshold のみ変更 → findex rescore（API再取得不要）
 #   - 指標の追加・入れ替え       → findex run（API再取得が必要）
 #   - 変更のたびに rule_versions テーブルに自動スナップショット
+#
+# 【v3 改訂方針 2026-06-06】
+#   統廃合: dividend_growth_5y_cagr（10y CAGRと重複）、debt_to_equity（equity_ratioと重複）を除外
+#   重み調整:
+#     - payout_ratio: 1.5→2.0（高カバレッジ91%、配当余力の最重要指標）
+#     - dividend_reliability: 1.5→0.8（37%のみ有効、consecutive_no_cut_yearsと重複）
+#     - fcf_payout_coverage: 1.5→1.0（41%のみ有効、配当性向の補完として位置づけ）
+#     - roic_minus_wacc: 1.3→0.8（48%のみ有効、ROEと重複大）
+#     - consecutive_no_cut_years: 2.0→2.5（核心指標として最高重みに格上げ）
 
 rules:
 
@@ -24,12 +38,11 @@ rules:
   - name: 連続非減配年数
     field: consecutive_no_cut_years
     direction: high
-    threshold: 17       # 17年以上で満点（リーマン耐性）
+    threshold: 17       # 17年以上で満点（リーマン・コロナ耐性）
     max_score: 10
-    weight: 2.0         # 【最重要】リーマン・コロナ耐性の最高証拠
+    weight: 2.5         # 【最重要・格上げ】配当継続性の核心。リーマン・コロナ両方耐えた証拠
     available: true
 
-  # ── カテゴリー2: 増配実績 ─────────────────────────────────────
   - name: 連続増配年数
     field: consecutive_dividend_growth_years
     direction: high
@@ -38,29 +51,55 @@ rules:
     weight: 1.5         # 経営陣の能動的な増配コミットメント
     available: true
 
-  - name: 5年増配率CAGR
-    field: dividend_growth_5y_cagr
+  - name: 減配信頼性スコア
+    field: dividend_reliability
     direction: high
-    threshold: 0.30     # 30%以上で満点
+    threshold: 1.0      # 1.0=過去20年無減配（満点）、0.6=1回、0.0=2回以上
     max_score: 10
-    weight: 1.0         # ①②と情報重複あり。複利加速度として参考
+    weight: 0.8         # 【減重】有効率37%。consecutive_no_cut_yearsと概念重複。補完的に使用
     available: true
 
-  # ── カテゴリー3: 増配余力 ─────────────────────────────────────
+  # ── カテゴリー2: 増配実績・余力 ──────────────────────────────
+  - name: 10年増配率CAGR
+    field: dividend_growth_10y_cagr
+    direction: high
+    threshold: 0.08     # 8%以上で満点（10年で2.16倍。優良増配株の基準）
+    max_score: 10
+    weight: 1.2         # 長期実績の信頼性。5年CAGRは10年CAGRに統合
+    available: true     # 必要条件: 11期以上の配当履歴
+
   - name: 予想配当性向
     field: payout_ratio
     direction: low
     threshold: 0.35     # 35%以下で満点（利益半減でも無配にならない水準）
+    penalty_cap: 1.0    # 100%以上（配当が利益を超える）は一律0点
     max_score: 10
-    weight: 1.5         # 配当の安全余白。最重要クラスの財務指標
+    weight: 2.0         # 【格上げ】配当余力の最重要指標。高カバレッジ(91%)かつ直接的
     available: true
 
-  - name: EPS成長率5年
+  - name: FCF配当カバレッジ
+    field: fcf_payout_coverage
+    direction: high
+    threshold: 2.0      # FCFが配当総額の2倍以上で満点
+    max_score: 10
+    weight: 1.0         # 【減重】有効率41%。配当性向の現金ベース補完として使用
+    available: true
+
+  # ── カテゴリー3: 成長性（配当原資の確認）─────────────────────
+  - name: EPS成長率（3〜5年CAGR）
     field: eps_growth_5y
     direction: high
-    threshold: 0.20     # 20%以上で満点
+    threshold: 0.15     # 15%以上で満点
     max_score: 10
-    weight: 1.0         # 配当原資の成長性。yfinanceの1年値はノイズ多め
+    weight: 1.0         # 配当原資の成長性
+    available: true
+
+  - name: 売上高5年CAGR
+    field: revenue_growth_5y_cagr
+    direction: high
+    threshold: 0.07     # 7%以上で満点（名目GDP成長の2〜3倍）
+    max_score: 10
+    weight: 1.0         # 売上はごまかせない。EPS成長の裏付け
     available: true
 
   # ── カテゴリー4: 財務健全性 ───────────────────────────────────
@@ -69,32 +108,16 @@ rules:
     direction: high
     threshold: 0.80     # 80%以上で満点
     max_score: 10
-    weight: 1.2         # 財務の要塞度。倒産リスクを十分フィルタする閾値
+    weight: 1.5         # 【格上げ】有効率98.8%。D/Eレシオ廃止による吸収
     available: true
 
-  - name: 有利子負債比率
-    field: debt_to_equity
-    direction: low
-    threshold: 0.10     # 10%以下で満点（実質無借金）
-    max_score: 10
-    weight: 0.8         # ⑥自己資本比率の補完。借入依存度の確認
-    available: true     # yfinance BSから計算（EDINET実装後に精度向上）
-
-  # ── カテゴリー5: 競争優位性 ───────────────────────────────────
+  # ── カテゴリー5: 競争優位性・収益性 ──────────────────────────
   - name: ROE（自己資本利益率）
     field: roe
     direction: high
     threshold: 0.20     # 20%以上で満点
     max_score: 10
-    weight: 1.2         # 自己資本の収益効率。増配パワーの源泉
-    available: true
-
-  - name: ROIC-WACC
-    field: roic_minus_wacc
-    direction: high
-    threshold: 0.10     # 10%以上で満点（超過リターン）
-    max_score: 10
-    weight: 1.3         # 最も理論的な付加価値指標。持続的増配の根拠
+    weight: 1.5         # 【格上げ】自己資本の収益効率。ROIC-WACC廃止による吸収
     available: true
 
   - name: 営業利益率
@@ -105,22 +128,32 @@ rules:
     weight: 1.0         # 価格決定力・競争優位の代理指標
     available: true
 
+  - name: ROIC-WACC
+    field: roic_minus_wacc
+    direction: high
+    threshold: 0.10     # 10%以上で満点（超過リターン）
+    max_score: 10
+    weight: 0.8         # 【減重】有効率48%。理論的に優れるがデータ欠損多く補完的扱い
+    available: true
+
   # ── カテゴリー6: 割安度 ────────────────────────────────────────
   - name: 配当利回り
     field: div_yield
     direction: high
-    threshold: 0.045    # 4.5%以上で満点
+    threshold: 0.030    # 3.0%以上で満点ゾーン開始
+    upper_cap: 0.070    # 7.0%超でペナルティ開始（利回りの罠）
     max_score: 10
-    weight: 1.2         # 現在の受取リターン。高利回り罠を避け過剰評価しない
+    weight: 1.2         # 3〜7%が最適ゾーン
     available: true
 
   - name: ネットキャッシュPER（実質PER）
     field: net_cash_per
     direction: low
     threshold: 10.0     # 10倍以下で満点
+    penalty_cap: 60.0   # 60倍以上は一律0点
     max_score: 10
-    weight: 0.8         # 割安度の精緻指標。計算精度への依存を考慮して控えめに
-    available: true     # yfinance BSから計算（投資有価証券は省略した簡易版）
+    weight: 1.5         # 割安度の主指標
+    available: true
 
   # ── 代替指標: 大型株・金融株向け ─────────────────────────────
   - name: 利益剰余金配当倍率
@@ -128,7 +161,7 @@ rules:
     direction: high
     threshold: 10.0     # 10倍以上で満点（10年分の配当を内部留保で賄える）
     max_score: 10
-    weight: 1.3         # ⑨ROIC-WACCの代替。同じ重みを適用
+    weight: 1.0         # 【減重】ROIC-WACCの代替。大型株・金融株のみ適用
     available: true
     replaces: roic_minus_wacc
     applies_to: [large_cap, financial]
@@ -137,28 +170,35 @@ rules:
     field: mix_coefficient
     direction: low
     threshold: 22.5     # 22.5以下で満点（バフェット目安: PER15×PBR1.5）
+    penalty_cap: 90.0   # PER30×PBR3=90 以上は一律0点
     max_score: 10
-    weight: 0.8         # ⑫ネットキャッシュPERの代替。同じ重みを適用
+    weight: 1.5         # 【減重】net_cash_perの代替。大型株・金融株のみ適用
     available: true
     replaces: net_cash_per
     applies_to: [large_cap, financial]
 
 
-# ── 満点内訳（通常銘柄 145点 → 100点換算）──────────────────────
-# ① 10 × 2.0 = 20点
-# ② 10 × 1.5 = 15点
-# ③ 10 × 1.0 = 10点
-# ④ 10 × 1.5 = 15点
-# ⑤ 10 × 1.0 = 10点
-# ⑥ 10 × 1.2 = 12点
-# ⑦ 10 × 0.8 =  8点
-# ⑧ 10 × 1.2 = 12点
-# ⑨ 10 × 1.3 = 13点   ← 大型株・金融株では⑬に入れ替え
-# ⑩ 10 × 1.0 = 10点
-# ⑪ 10 × 1.2 = 12点
-# ⑫ 10 × 0.8 =  8点   ← 大型株・金融株では⑭に入れ替え
-# ───────────────
-# 合計最大    145点（入れ替え後も同じ。weightが同一のため）
+# ── 満点内訳（v3 通常銘柄）────────────────────────────────────
+# ① 10 × 2.5 = 25点  連続非減配年数         【核心・最高重み】
+# ② 10 × 1.5 = 15点  連続増配年数
+# ③ 10 × 0.8 =  8点  減配信頼性スコア（補完）
+# ④ 10 × 1.2 = 12点  10年増配CAGR
+# ⑤ 10 × 2.0 = 20点  予想配当性向           【格上げ・高カバレッジ】
+# ⑥ 10 × 1.0 = 10点  FCF配当カバレッジ（補完）
+# ⑦ 10 × 1.0 = 10点  EPS成長率
+# ⑧ 10 × 1.0 = 10点  売上高5年CAGR
+# ⑨ 10 × 1.5 = 15点  自己資本比率           【格上げ・D/E廃止吸収】
+# ⑩ 10 × 1.5 = 15点  ROE                   【格上げ・ROIC補完吸収】
+# ⑪ 10 × 1.0 = 10点  営業利益率
+# ⑫ 10 × 0.8 =  8点  ROIC-WACC（補完）
+# ⑬ 10 × 1.2 = 12点  配当利回り
+# ⑭ 10 × 1.5 = 15点  ネットキャッシュPER
+# ───────────────────────────────────────
+# 合計最大    185点（100点換算）
+#
+# 【廃止した指標】
+#   dividend_growth_5y_cagr: 10y CAGRと重複（5年は短期ノイズが多い）
+#   debt_to_equity: equity_ratioと概念重複（equity_ratioの方がシンプルで高カバレッジ）
 
 
 # ── 動的入れ替えルール ────────────────────────────────────────
@@ -168,10 +208,10 @@ rules:
 #                          "その他金融業", "保険業"]
 #
 # large_cap_rules（時価総額1兆円以上）:
-#   ⑨ roic_minus_wacc → ⑬ retained_earnings_div_ratio
-#   ⑫ net_cash_per    → ⑭ mix_coefficient
+#   ⑫ roic_minus_wacc → retained_earnings_div_ratio（weight 0.8→1.0）
+#   ⑭ net_cash_per    → mix_coefficient（weight 1.5→1.5）
 #
 # financial_rules（銀行・保険・証券等）:
-#   ⑥ equity_ratio    → ⑦ debt_to_equity   （業種特性上、自己資本比率が低く算出される）
-#   ⑨ roic_minus_wacc → ⑬ retained_earnings_div_ratio
-#   ⑫ net_cash_per    → ⑭ mix_coefficient
+#   ⑨ equity_ratio    除外（業種特性上、自己資本比率が低く算出される）
+#   ⑫ roic_minus_wacc → retained_earnings_div_ratio
+#   ⑭ net_cash_per    → mix_coefficient

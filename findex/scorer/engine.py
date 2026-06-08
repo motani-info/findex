@@ -13,15 +13,40 @@ def load_rules(path: str | Path) -> list[dict]:
 
 
 def _score_field(value: float | None, rule: dict) -> float:
-    """1指標の生スコアを計算する（0〜max_score）。Nullは0点。"""
+    """1指標の生スコアを計算する（0〜max_score）。Nullは0点。
+
+    upper_cap（任意、direction=high 専用）:
+        value ≤ threshold      : 線形上昇（通常通り）
+        threshold < value ≤ upper_cap : max_score（プラトー）
+        value > upper_cap      : 線形下降（ペナルティ）
+                                 upper_cap で max_score、2×upper_cap で 0点。
+        用途: 配当利回りの「利回りの罠」対策（高すぎる利回りは業績悪化シグナル）
+
+    penalty_cap（任意、direction=low 専用）:
+        value ≤ threshold      : max_score（満点）
+        threshold < value < penalty_cap : 線形下降
+        value ≥ penalty_cap    : 0点（ハズレ値を一律ゼロにキャップ）
+        用途: PER×PBRなど割高株の上限設定（3倍超PBRを一律0点扱い）
+    """
     max_score = rule.get("max_score", 10)
     if value is None or pd.isna(value):
         return 0.0
 
     threshold = rule["threshold"]
     direction = rule["direction"]
+    upper_cap  = rule.get("upper_cap")
+    penalty_cap = rule.get("penalty_cap")
 
     if threshold == 0:
+        return 0.0
+
+    # upper_cap ペナルティゾーン（direction=high かつ上限超過）
+    if upper_cap is not None and direction == "high" and value > upper_cap:
+        overshoot = (value - upper_cap) / upper_cap  # 0→1 as value: cap→2×cap
+        return round(max(0.0, max_score * (1.0 - overshoot)), 4)
+
+    # penalty_cap ハードキャップ（direction=low かつ上限以上 → 0点）
+    if penalty_cap is not None and direction == "low" and value >= penalty_cap:
         return 0.0
 
     if direction == "low" and value == 0:
