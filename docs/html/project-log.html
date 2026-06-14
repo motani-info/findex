@@ -71,6 +71,7 @@ li{margin:.2em 0}
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="indicator-system.html">D4：指標システム仕様</a>
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
@@ -266,4 +267,15 @@ li{margin:.2em 0}
 - <strong>設計ロードマップ完了</strong>: ~~D1〜D4.5, D7, D6~~ ＝ <strong>D5除く全設計完結</strong>。次=<strong>実装フェーズの方針決め</strong>(移行→fetch→derive→score→verify・コホート38社)。D5 X発信は実装が動いてから
 - <strong>次の一歩: D3 データモデル改訂（D2.5の実測gapを反映）</strong>。実装は引き続き凍結
 - gitコミット方針: <strong>findex配下だけ</strong>（無関係な親リポの変更は触らない）。D1-D2を <code>1bbe7b1</code> でコミット済み</p>
+<h4 id="d5-x2026-06-15">D5 X発信戦略（2026-06-15）— 設計ロードマップ全完結</h4>
+<p>成果物 <code>docs/design/05-x-posting-strategy.md</code>。優先度低として後回ししていたD5を設計:
+- <strong>前提＝バッジ無しアカウント</strong>: 140字制限・API投稿不可・画像は文字数外・スレッドは手動連結。→ Playwright(セッション再利用・既存x_poster.py流用)
+- <strong>140字制約の突破口＝画像主役</strong>: 「本文140字＝フック」「画像＝データ(ランキング表/チャート)」に役割分担。本文に数字を詰め込まない。フォーマット3類型(A単発/B画像主役=主力/Cスレッド)
+- <strong>投稿の定型化</strong>: 投稿=テンプレート×データクエリ×品質ゲート。フック/claim/根拠/締め/固定フッタに分解。本文の数字は必ずDB由来=手打ちしない(捏造防止)
+- <strong>テーマ体系=切り口カタログ駆動</strong>: 目標逆算シミュレーション(看板・ユーザー例「月3万つみたて→月5万配当」)/YoC実績/増配の質/連続増配ランキング/配当性向余力・DOE/割安×増配/高配当。1テーマ=1themes/<em>.yaml
+- </em><em>看板テーマ詳細</em><em>: 目標逆算シミュレーション。順算/逆算、積立＋配当再投資＋YoC上昇。</em><em>想定増配率は捏造せず切り口①で実証した本物の増配株のEPS牽引実績レンジから採る</em><em>＋保守/標準/強気3シナリオ＋実在銘柄併記＋免責必須
+- </em><em>品質ゲート連動(定款の鉄則の実装)</em><em>: status=okのclaimのみ・N+表示徹底・claim別グレード整合・出典/as_of必須・D6照合異常で自動停止・免責フッタ。不変条件=「自信ありげな誤った数字を絶対に出さない」
+- </em><em>データモデル追記提案</em><em>: themes/post_queue/post_log(post_queue.claimsで事後監査可能性を担保)
+- </em><em>段階導入(Phase6)</em><em>: MVP(連続増配ランキング・手動承認)→看板(目標逆算)→自動化(ゲート緑後cron)→学習(post_log効果測定)
+- </em><em>設計フェーズ完全完結（D1〜D7・D5すべて）</em>*。残るは実装着手の判断（ユーザーGO待ち・実装凍結継続）</p>
 </main></div></body></html>

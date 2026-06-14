@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D5：X発信戦略 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="implementation-plan.html">実装フェーズ計画</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="active" href="x-posting-strategy.html">D5：X発信戦略</a>
+<a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 前提と制約（バッジ無しアカウント）</a>
+<a class="l2" href="#1-3">1. 制約の突破：投稿フォーマット3類型</a>
+<a class="l2" href="#2">2. 投稿の定型化（テンプレート構造）</a>
+<a class="l2" href="#3">3. テーマ体系（切り口カタログ駆動）</a>
+<a class="l2" href="#4">4. 看板テーマ詳細：目標逆算シミュレーション</a>
+<a class="l3" href="#41">4.1 入力パラメータ</a>
+<a class="l3" href="#42-2">4.2 計算モデル（2つの見せ方）</a>
+<a class="l3" href="#43">4.3 データ連動（捏造しない仕掛け）</a>
+<a class="l3" href="#44">4.4 出力（画像主役）</a>
+<a class="l3" href="#45">4.5 必須の但し書き</a>
+<a class="l2" href="#5">5. 品質ゲート連動（定款の鉄則の実装）</a>
+<a class="l2" href="#6-playwright">6. 運用（Playwright・スケジュール・学習）</a>
+<a class="l3" href="#61">6.1 投稿実行</a>
+<a class="l3" href="#62">6.2 スケジュール</a>
+<a class="l3" href="#63">6.3 投稿ログと学習ループ</a>
+<a class="l2" href="#7-d3">7. データモデル追記提案（D3への差分）</a>
+<a class="l2" href="#8-phase-6">8. 段階導入（実装フェーズ Phase 6）</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d5-x">D5: X発信戦略（投稿の定型化とテーマ体系）</h1>
+<p><strong>作成日</strong>: 2026-06-15
+<strong>位置づけ</strong>: 定款・<strong>柱3</strong>「進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける」の実装設計。<a href="analysis-angles.html">分析切り口カタログ</a>で有望と検証した切り口を、<strong>反復可能な投稿テンプレート</strong>に落とす。正本の指標は D4/D4.5、データは D3、品質ゲートは D2/D6。
+<strong>鉄則（定款から継承）</strong>: <strong>確証を持てない数字は投稿に一切流さない</strong>。status=ok のclaimだけが投稿に出る。誤った数字を自信ありげに出すこと＝最大の事故（花王 36年を16年と言う類）。</p>
+<hr />
+<h2 id="0">0. 前提と制約（バッジ無しアカウント）</h2>
+<table>
+<thead>
+<tr>
+<th>制約</th>
+<th>内容</th>
+<th>設計上の含意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>140字制限</strong></td>
+<td>バッジ無し＝日本語約140字（CJKは加重2）。本文だけで複雑な分析は載らない</td>
+<td><strong>画像でデータを運ぶ</strong>のが主戦術（§1）</td>
+</tr>
+<tr>
+<td><strong>API投稿不可</strong></td>
+<td>無料APIプランでは投稿不可</td>
+<td><strong>Playwright</strong>（ブラウザ操作・セッション再利用）。既存 <code>x_poster.py</code> を流用</td>
+</tr>
+<tr>
+<td><strong>画像は文字数外</strong></td>
+<td>画像は最大4枚、本文文字数を消費しない。URLは t.co 23字固定</td>
+<td>表・チャートを画像化＝<strong>実質的な文字数制約の突破口</strong></td>
+</tr>
+<tr>
+<td><strong>スレッドは手動連結</strong></td>
+<td>API無しでもPlaywrightで「投稿→自分にリプ」を繰り返せばスレッド化可能</td>
+<td>長い話はスレッド型（§1-C）。各ツイートは140字＋画像</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>設計の核</strong>: 「140字の本文＝フック（興味喚起）」「画像＝データ（証拠）」に役割分担する。本文に数字を詰め込まない。</p>
+<hr />
+<h2 id="1-3">1. 制約の突破：投稿フォーマット3類型</h2>
+<table>
+<thead>
+<tr>
+<th>類型</th>
+<th>構成</th>
+<th>用途</th>
+<th>文字数会計</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A 単発フック型</strong></td>
+<td>本文140字のみ</td>
+<td>問いかけ・気づき・1つの数字</td>
+<td>本文≤140</td>
+</tr>
+<tr>
+<td><strong>B 画像主役型</strong>（主力）</td>
+<td>本文140字（フック）＋ 画像1〜4（ランキング表/チャート）</td>
+<td>ランキング・比較・シミュレーション</td>
+<td>本文≤140＋画像</td>
+</tr>
+<tr>
+<td><strong>C スレッド型</strong></td>
+<td>親（フック＋画像）→ リプ連結（各140字＋画像）</td>
+<td>1銘柄の深掘り・シミュレーションの手順</td>
+<td>各ツイート個別に≤140</td>
+</tr>
+</tbody>
+</table>
+<p><strong>主力は B（画像主役型）</strong>。140字では「○○な増配株トップ5」とフックだけ書き、5銘柄の数字・グレード・status は画像の表に載せる。画像はサーバ側で生成（HTML/matplotlib→PNG）し、Playwrightで添付する。</p>
+<hr />
+<h2 id="2">2. 投稿の定型化（テンプレート構造）</h2>
+<p>投稿物 ＝ <strong>テンプレート × データクエリ × 品質ゲート</strong>。1投稿を固定パーツに分解する。</p>
+<table>
+<thead>
+<tr>
+<th>パーツ</th>
+<th>役割</th>
+<th>ルール</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>フック</strong>（1行目）</td>
+<td>スクロールを止める。問い・意外性・数字1つ</td>
+<td>投稿の生命線。テーマごとに型を用意</td>
+</tr>
+<tr>
+<td><strong>主張（claim）</strong></td>
+<td>中身。「○○は△△」</td>
+<td><strong>status=ok のみ</strong>。数字は出典・as_of が紐づくものだけ</td>
+</tr>
+<tr>
+<td><strong>根拠</strong></td>
+<td>画像（表/チャート）or 簡潔な一文</td>
+<td>画像に銘柄・指標・グレード・status を明記</td>
+</tr>
+<tr>
+<td><strong>締め</strong></td>
+<td>問いかけ/次回予告（CTA）</td>
+<td>エンゲージ誘導。煽らない</td>
+</tr>
+<tr>
+<td><strong>固定フッタ</strong></td>
+<td>出典・免責・ハッシュタグ</td>
+<td><strong>免責は必須</strong>（§5）。<code>#日本株 #増配株 #高配当</code> 等</td>
+</tr>
+</tbody>
+</table>
+<p>テンプレートは <code>themes/*.yaml</code>（テーマ定義）で管理し、差し込み変数（銘柄・数値・グレード）は computed_metrics / dividend_scores から取得。<strong>本文に出る数字は必ずDB由来＝手打ちしない</strong>（捏造防止）。</p>
+<hr />
+<h2 id="3">3. テーマ体系（切り口カタログ駆動）</h2>
+<p>テーマ ＝ <a href="analysis-angles.html">切り口カタログ</a>の具体化。1切り口から複数テーマが生える。</p>
+<table>
+<thead>
+<tr>
+<th>テーマ</th>
+<th>元の切り口</th>
+<th style="text-align: center;">形式</th>
+<th>必要データ（status=ok前提）</th>
+<th style="text-align: center;">想定頻度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>目標逆算シミュレーション</strong>（つみたて→将来配当）</td>
+<td>①YoC×持続性</td>
+<td style="text-align: center;">B/C</td>
+<td>YoC実績・実証済み増配率レンジ</td>
+<td style="text-align: center;">月次・看板</td>
+</tr>
+<tr>
+<td><strong>YoC実績</strong>（N年前に買っていたら今利回り○%）</td>
+<td>①A</td>
+<td style="text-align: center;">B</td>
+<td>price_history(2000〜)・DPS</td>
+<td style="text-align: center;">週次</td>
+</tr>
+<tr>
+<td><strong>増配の質</strong>（本物の増配株 vs 一過性の罠）</td>
+<td>①B</td>
+<td style="text-align: center;">B/C</td>
+<td>DPS倍率・EPS倍率・配当性向</td>
+<td style="text-align: center;">週次</td>
+</tr>
+<tr>
+<td><strong>連続増配ランキング</strong></td>
+<td>既存＋override</td>
+<td style="text-align: center;">B</td>
+<td>streaks（N+表示・result_override）</td>
+<td style="text-align: center;">週次</td>
+</tr>
+<tr>
+<td><strong>配当性向の余力 / DOE</strong></td>
+<td>①C</td>
+<td style="text-align: center;">B</td>
+<td>配当性向・DOE・FCFカバレッジ</td>
+<td style="text-align: center;">隔週</td>
+</tr>
+<tr>
+<td><strong>割安×増配</strong>（バリュエーション）</td>
+<td>（D4財務）</td>
+<td style="text-align: center;">B</td>
+<td>PER/PBR・グレード（valuation）</td>
+<td style="text-align: center;">隔週</td>
+</tr>
+<tr>
+<td><strong>高配当ランキング</strong></td>
+<td>（D4配当）</td>
+<td style="text-align: center;">B</td>
+<td>配当利回り・配当grade</td>
+<td style="text-align: center;">週次</td>
+</tr>
+</tbody>
+</table>
+<p><strong>運用</strong>: 1テーマ＝1 <code>themes/*.yaml</code>。新しい切り口がカタログに増えたらテーマを追加する（柱2/柱3の蓄積が投稿バリエーションに直結）。</p>
+<hr />
+<h2 id="4">4. 看板テーマ詳細：目標逆算シミュレーション</h2>
+<blockquote>
+<p>ユーザー例：「毎月3万円のつみたてで将来月5万円の配当を得る方法」</p>
+</blockquote>
+<p>万人に刺さる「目標→道筋」型。切り口①（YoC×増配持続性）を物語化する。</p>
+<h3 id="41">4.1 入力パラメータ</h3>
+<ul>
+<li>月額つみたて額（例 30,000円）</li>
+<li>目標（月配当 50,000円 ＝ 年60万円、または「達成年数」）</li>
+<li>期間（例 20年）</li>
+<li>想定増配率・想定利回り（<strong>捏造しない</strong>＝§4.3）</li>
+</ul>
+<h3 id="42-2">4.2 計算モデル（2つの見せ方）</h3>
+<ul>
+<li><strong>(a) 順算</strong>: 「月3万 × N年・増配率r%・利回りy%」→ 将来の年間受取配当</li>
+<li><strong>(b) 逆算</strong>: 「月5万円の配当に必要な元本・年数」→ つみたて額から逆算</li>
+<li>要素: 積立（元本累積）＋ 配当再投資（複利）＋ <strong>YoC上昇</strong>（増配で取得利回りが育つ＝切り口①の主張そのもの）</li>
+<li>税の扱いを明示（税引前/後、NISA前提の有無）</li>
+</ul>
+<h3 id="43">4.3 データ連動（捏造しない仕掛け）</h3>
+<p>シミュレーションの肝は<strong>想定増配率</strong>。ここを適当な数字にすると定款違反。</p>
+<ul>
+<li>増配率は、切り口①で<strong>実証した「本物の増配株」（EPS牽引・DSS高）の実績レンジ</strong>から採る（例：過去5年のEPS牽引増配株の中央値）</li>
+<li>「夢の数字」を避け、<strong>保守/標準/強気</strong>の3シナリオで幅を見せる</li>
+<li>実在の増配株（status=ok・配当grade A）を<strong>具体例として併記</strong>（「例：○○は5年で取得利回りが3%→X%」）</li>
+</ul>
+<h3 id="44">4.4 出力（画像主役）</h3>
+<ul>
+<li>本文（≤140字）: 「月3万円の積立、増配株ならいつ月5万円の配当になる？」＋ 結論1つ</li>
+<li>画像1: 積立＋配当成長カーブ（年×受取配当、3シナリオ）</li>
+<li>画像2: 根拠となる実在増配株のYoC実績表（銘柄・YoC・EPS倍率・grade）</li>
+<li>スレッドにする場合: 親=結論、リプ1=前提、リプ2=実例、リプ3=注意点</li>
+</ul>
+<h3 id="45">4.5 必須の但し書き</h3>
+<p>将来予測は<strong>前提次第</strong>。固定フッタで「これはシミュレーションであり将来の成果を保証しない／投資判断は自己責任」を明示（§5）。特定個人向けの助言はしない（一般教育コンテンツとして設計）。</p>
+<hr />
+<h2 id="5">5. 品質ゲート連動（定款の鉄則の実装）</h2>
+<p>投稿は D2/D6 の品質判定に従属する。<strong>ゲートを通らない数字は本文にも画像にも出さない。</strong></p>
+<table>
+<thead>
+<tr>
+<th>ゲート</th>
+<th>ルール</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>status フィルタ</strong></td>
+<td>投稿に使う全claimが <code>status=ok</code>。<code>missing/insufficient</code> は出さない</td>
+</tr>
+<tr>
+<td><strong>N+ 表示の徹底</strong></td>
+<td>左打ち切りの連続年数は「N年以上」。<strong>裸の数字で言い切らない</strong>（花王36→16事故の再発防止）</td>
+</tr>
+<tr>
+<td><strong>claim別グレード整合</strong></td>
+<td>配当grade=A だが capital=D の銘柄は「配当の話」だけ。財務優良と混同させない</td>
+</tr>
+<tr>
+<td><strong>出典・as_of 必須</strong></td>
+<td>result_override由来の数字は出典・基準年を画像/フッタに記載。定義差（「上場前から起算」等）も注記</td>
+</tr>
+<tr>
+<td><strong>自動停止</strong>（D6接続）</td>
+<td>照合レポートで override乖離・status分布異常を検知したら<strong>当該テーマの投稿を自動停止</strong></td>
+</tr>
+<tr>
+<td><strong>免責フッタ</strong></td>
+<td>「投資助言ではない／自己責任」を全投稿に固定。シミュレーション系は「将来を保証しない」を追加</td>
+</tr>
+</tbody>
+</table>
+<p><strong>不変条件</strong>: findexは「自信ありげな誤った数字」を絶対に出さない。確証が持てないなら<strong>投稿しない</strong>（沈黙は許容、誤発信は不可）。</p>
+<hr />
+<h2 id="6-playwright">6. 運用（Playwright・スケジュール・学習）</h2>
+<h3 id="61">6.1 投稿実行</h3>
+<ul>
+<li><strong>Playwright・セッション再利用</strong>（既存方針）: <code>~/.findex/x_session.json</code> を再利用しレート制限を回避。初回/失効時のみログイン</li>
+<li>既存 <code>x_poster.py</code>（ログイン/投稿/スレッド/画像添付のセレクタ判明済）を流用。テーマ定義・画像生成・品質ゲートを上流に足す</li>
+<li>投稿前に<strong>ドライラン</strong>（本文・画像・通過したゲートを標準出力で確認）→ <code>--publish</code> で実投稿</li>
+</ul>
+<h3 id="62">6.2 スケジュール</h3>
+<ul>
+<li>cron（朝9:00/昼12:00/夕18:30 を基本）。テーマを曜日・時間に割り当て（例：週次ランキングは特定曜日）</li>
+<li>1日の投稿数・同一テーマ間隔の上限を設定（連投・重複の抑制）</li>
+</ul>
+<h3 id="63">6.3 投稿ログと学習ループ</h3>
+<ul>
+<li><code>post_log</code>（§7）に テーマ・銘柄・claim・画像・投稿URL・エンゲージメント を記録</li>
+<li>将来：エンゲージメントを集計し<strong>効くフック/テーマを強化</strong>（柱2/柱3の進化）。初期は手動レビューで十分</li>
+</ul>
+<hr />
+<h2 id="7-d3">7. データモデル追記提案（D3への差分）</h2>
+<p>X発信に必要なテーブル（D3 <a href="data-model.html">data-model</a> に追加）。</p>
+<table>
+<thead>
+<tr>
+<th>テーブル</th>
+<th>役割</th>
+<th>主なカラム</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>themes</code></td>
+<td>テーマ定義のレジストリ</td>
+<td>theme_id, name, angle_ref, format(A/B/C), enabled</td>
+</tr>
+<tr>
+<td><code>post_queue</code></td>
+<td>生成済み・投稿待ち</td>
+<td>id, theme_id, body, image_paths, claims(json), gates_passed, status(draft/approved/posted/blocked)</td>
+</tr>
+<tr>
+<td><code>post_log</code></td>
+<td>投稿実績・効果測定</td>
+<td>id, theme_id, posted_at, tweet_url, body, claim_refs, engagement(json)</td>
+</tr>
+</tbody>
+</table>
+<p><code>post_queue.claims</code> は使用した数字とその status/source/as_of を保持（<strong>事後監査可能性</strong>＝何を根拠に投稿したか追跡できる）。</p>
+<hr />
+<h2 id="8-phase-6">8. 段階導入（実装フェーズ Phase 6）</h2>
+<p>実装は<a href="implementation-plan.html">実装計画</a> Phase 6（優先度低・他フェーズ安定後）。中でも段階を踏む。</p>
+<ol>
+<li><strong>MVP</strong>: 1テーマ（連続増配ランキング・画像主役B）を<strong>手動承認付き</strong>（draft→人が確認→publish）で開始</li>
+<li><strong>看板</strong>: 目標逆算シミュレーション（§4）を追加。シナリオ幅・実例・免責を実装</li>
+<li><strong>自動化</strong>: 品質ゲートと自動停止が緑で安定してから cron 自動投稿へ</li>
+<li><strong>学習</strong>: post_log の効果測定→テーマ調整</li>
+</ol>
+<p>→ <strong>着手はユーザーGO後</strong>。本書は設計（実装凍結中）。</p>
+</main></div></body></html>

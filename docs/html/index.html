@@ -70,6 +70,7 @@ li{margin:.2em 0}
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="indicator-system.html">D4：指標システム仕様</a>
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
@@ -89,6 +90,7 @@ li{margin:.2em 0}
 <h3 style="margin-top:1.4em"><a href="result-override-layer.html">D2.7：結果補正レイヤ</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 種別 | 何を入れるか | 例 | 対象 | |---|---|---|---| | マスター補填（raw） | 生の系列値 | haitoukin で FY1989〜の年間配当 | 機械計算の入力を増やす | | 結果補正（override・本書） | 導出済みの"結果"値 | ZAi集計「連続増配28年」 | </p>
 <h3 style="margin-top:1.4em"><a href="indicator-system.html">D4：指標システム仕様</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| status | 意味 | 実例 | 採点での扱い | |---|---|---|---| | `ok` | 値あり | 連続増配16年 | 通常採点 | | `zero_legit` | 正当な0（実値としての0） | 増配してない→連続増配0年、過去20年で減配2回→信頼性0 | 0点として採点（実力。分母に残</p>
 <h3 style="margin-top:1.4em"><a href="indicator-calibration.html">D4.5：指標較正（v4提案）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| # | 問題（D4で検出） | 較正 | |---|---|---| | ① | 10年CAGRは低ベース/一過性を過大評価 | YoC（取得利回り）に置換＋EPS牽引ゲート＋DOE追加 | | ② | 自己資本比率80%満点は上位10%のみ・ROEと数学的に矛盾 | 閾値70%へ・ROE再較正・矛盾を緩和 | |</p>
+<h3 style="margin-top:1.4em"><a href="x-posting-strategy.html">D5：X発信戦略</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 制約 | 内容 | 設計上の含意 | |---|---|---| | 140字制限 | バッジ無し＝日本語約140字（CJKは加重2）。本文だけで複雑な分析は載らない | 画像でデータを運ぶのが主戦術（§1） | | API投稿不可 | 無料APIプランでは投稿不可 | Playwright（ブラウザ操作・セッショ</p>
 <h3 style="margin-top:1.4em"><a href="verification-strategy.html">D6：多フィールド検証戦略</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 層 | 対象 | 頻度 | 速度 | 役割 | |---|---|---|---|---| | L1 単体テスト | 純粋関数（streaks/CAGR/YoC/status判定/採点式） | CI・コミット毎 | 即時 | ロジックの正しさ（API不要） | | L2 コホート検証 | 約38社（失敗モード網羅）</p>
 <h3 style="margin-top:1.4em"><a href="analysis-angles.html">分析切り口カタログ</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Angles]</span></h3><p style="color:var(--muted)">実証（5年・DPS2倍以上、旧DB）:</p>
 <h3 style="margin-top:1.4em"><a href="requirements.html">要件定義書 v2</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Requirements]</span></h3><p style="color:var(--muted)">旧実装（`../back_findex`）を切り離し、ゼロから作り直すための要件定義書。 旧実装は 計画ドキュメントは良質だったが、実装コードが破綻していた:</p>

@@ -71,6 +71,7 @@ li{margin:.2em 0}
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="indicator-system.html">D4：指標システム仕様</a>
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
@@ -93,14 +94,14 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>設計フェーズ完結（D1〜D7、D5除く）</strong>/ <strong>次の一歩</strong>: 実装フェーズの方針決め（移行→fetch→derive→score→verify）。D5 X発信は実装が動いてから</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>設計フェーズ完結（D1〜D7・D5すべて）</strong>/ <strong>次の一歩</strong>: 実装フェーズの方針決め（移行→fetch→derive→score→verify）。D5 X発信は実装が動いてから（Phase6）</p>
 <hr />
 <h2 id="1">1. ひとことサマリ</h2>
 <p>findex v2 は <strong>ゼロから設計し直し中</strong>。旧実装（<code>back_findex</code>）はデータ品質が破綻していたため切り離した。
 いまは <strong>設計フェーズ・実装凍結</strong>。定款（全銘柄・全フィールドのデータ完全性を土台に、進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける）に沿って、D1→D7 の設計成果物を順に固めている。</p>
 <ul>
-<li><strong>完了（設計フェーズ）</strong>: D1〜D2.7、D3 データモデル、D4 指標システム、D4.5 較正v4、D7 ワークフロー、<strong>D6 多フィールド検証</strong> ＝ <strong>D5を除く全設計が完結</strong></li>
-<li><strong>次</strong>: <strong>実装フェーズの方針決め</strong>。順序＝移行(legacy→v2)→fetch実装(kabutan/EDINET/J-Quants/yfinance2000)→derive(status付き)→score(v4)→verify。コホート38社で回す。D5 X発信は実装が動いてから</li>
+<li><strong>完了（設計フェーズ）</strong>: D1〜D2.7、D3 データモデル、D4 指標システム、D4.5 較正v4、D7 ワークフロー、D6 多フィールド検証、<strong>D5 X発信戦略</strong> ＝ <strong>全設計が完結</strong></li>
+<li><strong>次</strong>: <strong>実装フェーズの方針決め</strong>。順序＝移行(legacy→v2)→fetch実装(kabutan/EDINET/J-Quants/yfinance2000)→derive(status付き)→score(v4)→verify→X発信。コホート38社で回す。X発信は実装が動いてから（Phase6）</li>
 <li><strong>凍結解除のタイミング</strong>: 設計完結により、次は実装着手の判断。既存雛形(schema.sql/streaks.py/fetch基盤)は設計（特にdata-model D3・v4）と突合してから流用</li>
 </ul>
 <h3 id="d25-2026-06-14">D2.5 実測の要点（2026-06-14）</h3>
@@ -185,10 +186,10 @@ li{margin:.2em 0}
 <td><a href="data-workflow.html">data-workflow</a></td>
 </tr>
 <tr>
-<td>D5</td>
-<td>X発信戦略（フック体系・テーマ設計・品質連動・学習）</td>
-<td style="text-align: center;">⏬ 優先度低（後回し）</td>
-<td>—</td>
+<td><strong>D5</strong></td>
+<td>X発信戦略（バッジ無し前提・140字突破・テーマ体系・品質連動・学習）</td>
+<td style="text-align: center;">✅ 完了</td>
+<td><a href="x-posting-strategy.html">x-posting-strategy</a></td>
 </tr>
 </tbody>
 </table>
@@ -224,8 +225,8 @@ li{margin:.2em 0}
 <tr>
 <td>柱3</td>
 <td>Xユーザーの興味を引く切り口での発信</td>
-<td>🟨 D5で戦略化予定。D2でMVP（最小データで投稿開始）を確保</td>
-<td>🟥 凍結（Playwright方式・骨格あり）</td>
+<td>🟩 D5で戦略化済（140字突破=画像主役・テーマ体系・品質ゲート連動）</td>
+<td>🟥 凍結（Playwright方式・骨格あり・Phase6）</td>
 </tr>
 </tbody>
 </table>
