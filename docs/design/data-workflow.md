@@ -156,18 +156,23 @@ compute_yoc(code):
 ## 6. X投稿ワークフロー（出力層・優先度低＝後回し）
 
 ```
-1. テーマ選択（ローテーション。切り口は analysis-angles.md に蓄積）
+1. テーマ選択（claim内ランキングが主。切り口は analysis-angles.md に蓄積。看板=切り口①）
 2. dividend_scores + computed_metrics + claim別グレード から文面生成
-3. 【品質ゲート】← 投稿前必須
+3. 【画像生成＝自前サイト兼用】← design-review #6
+     ランキング表/チャートをローカルHTMLで描画→PNG化。同じHTMLは閲覧可能サイトにも出力
+     （Xはメイン、サイトはX障害時の受け皿＋SEO資産。HTML生成層は一級コンポーネント）
+4. 【品質ゲート】← 投稿前必須（D6 §5）
      a. golden test 全green（花王=36 等）
      b. censored銘柄を裸の数字で含まない（N+ or override出典付きのみ）
      c. 対象claimの grade が基準以上（例 grade_dividend>=B）
-     d. body_sha256 が過去30日に無い（二重投稿防止）
+     d. 本文に status∈{missing,insufficient} の数字が無い
+     e. body_sha256 が過去30日に無い（二重投稿防止）
+     f. 免責フッタ付き（投資助言でない・自己責任）
    不合格 → status='skipped'
-4. Playwright ログイン（~/.findex/x_session.json 再利用）→ スレッド投稿
-5. 成功→post_log(posted, tweet_id) / 失敗→failed（リトライしない）
+5. 投稿: 自動（Playwright・~/.findex/x_session.json 再利用）or 手動承認フォールバック（draft→確認→publish）
+6. 成功→post_log(posted, tweet_id) / 失敗→failed（リトライしない）
 ```
-※D5（X発信戦略）は優先度低のため詳細は後続。本節は枠組みのみ。
+※詳細は [D5 X発信戦略](05-x-posting-strategy.md)。出力チャネル＝Xメイン＋ローカルHTML生成（自前サイト兼用）。
 
 ---
 
@@ -181,6 +186,8 @@ migrate():
   2. findex_v2.db を initdb（新スキーマ）
   3. stocks コピー（edinet_code/会計メタはEDINETリストで新規補充、listing_dateはkabutanで後追い）
   4. dividend_annual 全sourceコピー（haitoukin/ir/manual 最優先）
+     ★能動洗浄（design-review #7）: yfinance配当(1999+)を再取得し移行データと相互照合。
+       乖離は confidence=review でレポート→override/手動で確定。旧DBの silent error を持ち越さない
   5. streak_overrides → result_overrides に変換（field='consecutive_dividend_growth_years'等で汎用化）
   6. dividend_history(legacy) → dividend_events に変換コピー
   7. price_history は移行せず J-Quants＋yfinanceで2000年まで再取得（旧は2024-06〜のみ＝不足）
@@ -223,3 +230,24 @@ RateLimitedFetcher.run(codes):
 - 検出結果を run_log に記録。不合格なら X投稿を自動停止
 ```
 詳細な検証戦略（golden拡張・照合レポート・自動停止条件）は **D6 多フィールド検証** で規定。
+
+---
+
+## 10. バックテスト・ワークフロー（D8・モデル検証）
+
+採点エンジンを**過去の各時点（as_of）に対してPIT入力で回し**、スコアが前方アウトカムを予測するか検証する。フェッチ不要（DB内データのみ＝レート制限の外）。
+
+```
+backtest():  # 詳細は D8
+  for as_of in グリッド（例 2008-2024 各年6月末）:
+    1. 時点ユニバース確定（is_active or delisting_date>as_of）        # 生存バイアス排除
+    2. PIT入力ビュー（price≤as_of / financial.fy≤as_of /
+       dividend.fy≤as_of / result_overrides.as_of_fiscal_year≤as_of） # 先読み排除
+    3. derive(status付き) → score(対象rule_version) → backtest_scores
+  4. 前方アウトカム算出（減配有無/DPS成長/トータルリターン/最大DD）→ backtest_outcomes
+  5. メトリクス（Spearman/指標別IC/分位スプレッド/グレード較正）→ backtest_metrics
+  6. HTMLレポート（自前サイトの一部）→ 重み較正提案（ウォークフォワード検証）→ v5
+```
+
+- 採点本体は評価層と同一を使い、**入力を as_of で絞った派生ビュー**に差し替える（一方向フロー維持）。
+- まず golden+コホート38社で配線検証→フルで統計的有意性。詳細・前提（delisting_date収集等）は [D8 バックテスト基盤](08-backtest-framework.md)。

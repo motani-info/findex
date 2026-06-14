@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,12 +74,17 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="active" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
 <a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
   <div class="toc"><a class="l2" href="#0">0. 前提と制約（バッジ無しアカウント）</a>
+<a class="l2" href="#05-design-review-26">0.5 読者・差別化・出力チャネル（design-review #2・#6）</a>
+<a class="l3" href="#_1">読者像</a>
+<a class="l3" href="#1">差別化テーゼ（1行）</a>
+<a class="l3" href="#xhtml">出力チャネル（確定: Xメイン＋ローカルHTML生成）</a>
 <a class="l2" href="#1-3">1. 制約の突破：投稿フォーマット3類型</a>
 <a class="l2" href="#2">2. 投稿の定型化（テンプレート構造）</a>
 <a class="l2" href="#3">3. テーマ体系（切り口カタログ駆動）</a>
@@ -89,6 +95,7 @@ li{margin:.2em 0}
 <a class="l3" href="#44">4.4 出力（画像主役）</a>
 <a class="l3" href="#45">4.5 必須の但し書き</a>
 <a class="l2" href="#5">5. 品質ゲート連動（定款の鉄則の実装）</a>
+<a class="l3" href="#design-review-6">コンプライアンス・スタンス（design-review #6）</a>
 <a class="l2" href="#6-playwright">6. 運用（Playwright・スケジュール・学習）</a>
 <a class="l3" href="#61">6.1 投稿実行</a>
 <a class="l3" href="#62">6.2 スケジュール</a>
@@ -136,6 +143,47 @@ li{margin:.2em 0}
 </tbody>
 </table>
 <p>→ <strong>設計の核</strong>: 「140字の本文＝フック（興味喚起）」「画像＝データ（証拠）」に役割分担する。本文に数字を詰め込まない。</p>
+<hr />
+<h2 id="05-design-review-26">0.5 読者・差別化・出力チャネル（<a href="design-review.html">design-review</a> #2・#6）</h2>
+<h3 id="_1">読者像</h3>
+<ul>
+<li>個別株の<strong>配当（インカム）投資</strong>に関心のある個人。新NISA成長投資枠での高配当・増配株の長期保有層。</li>
+<li>「高配当ランキング」は既に飽和。<strong>読者が本当に知りたいのは「その配当は続くのか／罠ではないのか」</strong>。</li>
+</ul>
+<h3 id="1">差別化テーゼ（1行）</h3>
+<blockquote>
+<p><strong>「増配率の高さに騙されない。質（EPS牽引）で選ぶ増配株」</strong> ＝ 切り口①（YoC×増配持続性）を製品の中心に置く。</p>
+</blockquote>
+<ul>
+<li>汎用ランキングは誰でも出せる。findexの勝ち筋は <strong>DPS倍率＝EPS倍率×配当性向変化</strong> で「本物の増配株 vs 一過性の罠（イクヨ/日本製鉄型）」を判別できること。</li>
+<li>テーマは7個並べるより、<strong>この看板1〜2個を磨く</strong>。他テーマは導線・バリエーション。</li>
+</ul>
+<h3 id="xhtml">出力チャネル（確定: Xメイン＋ローカルHTML生成）</h3>
+<table>
+<thead>
+<tr>
+<th>役割</th>
+<th>実体</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>一次チャネル</strong></td>
+<td>X（Playwright・セッション再利用）</td>
+</tr>
+<tr>
+<td><strong>画像生成＝自前サイト兼用</strong></td>
+<td>投稿画像（ランキング表・チャート）は<strong>ローカルHTMLで生成→PNG化</strong>。このHTML生成層は単独で<strong>閲覧可能なサイト</strong>にもなる（確実に動く・SEO資産・X障害時の受け皿）</td>
+</tr>
+<tr>
+<td><strong>脆さへの保険</strong></td>
+<td>X自動化はToS・レート制限・ログインブロックのリスクがある（既知）。<strong>手動承認フォールバック</strong>（draft→人が確認→publish・§6/§8）と、サイト側は自動化に依存しない二重化</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>HTML生成層を<strong>一級コンポーネント</strong>に格上げ（D7・実装計画に反映）。「最も脆いX自動化に全依存」というレビュー指摘#6を、サイト兼用で構造的に回避する。</p>
+</blockquote>
 <hr />
 <h2 id="1-3">1. 制約の突破：投稿フォーマット3類型</h2>
 <table>
@@ -349,6 +397,11 @@ li{margin:.2em 0}
 </tbody>
 </table>
 <p><strong>不変条件</strong>: findexは「自信ありげな誤った数字」を絶対に出さない。確証が持てないなら<strong>投稿しない</strong>（沈黙は許容、誤発信は不可）。</p>
+<h3 id="design-review-6">コンプライアンス・スタンス（<a href="design-review.html">design-review</a> #6）</h3>
+<p>株式分析の公開は投資助言と取られうる領域。意図的に線引きする。
+- <strong>個別銘柄の売買推奨はしない</strong>。「事実（連続増配N年・YoC実績・グレード）の提示」に留め、「買うべき/売るべき」と言わない。
+- <strong>免責の固定フッタ</strong>（全投稿）: 「情報提供であり投資助言ではない／投資判断は自己責任」。シミュレーション系（§4）は「将来の成果を保証しない／前提次第」を追加。
+- 数字は必ず出典・as_of付き（断定リスクを出典に移譲）。特定個人の状況に合わせた助言はしない（一般教育コンテンツ）。</p>
 <hr />
 <h2 id="6-playwright">6. 運用（Playwright・スケジュール・学習）</h2>
 <h3 id="61">6.1 投稿実行</h3>

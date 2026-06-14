@@ -63,6 +63,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -72,6 +73,7 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -83,6 +85,7 @@ li{margin:.2em 0}
 <h3 style="margin-top:1.4em"><a href="progress.html">進捗ダッシュボード</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ Progress]</span></h3><p style="color:var(--muted)">プロジェクト全体の現在地・残作業・計画を一望するページ。設計が動くたびに更新する（正本の状態は各設計書、本ページはその要約）。</p>
 <h3 style="margin-top:1.4em"><a href="charter.html">ノーススター：定款とデータ完全性</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ North Star]</span></h3><p style="color:var(--muted)">旧PJ（`back_findex`）を参照した結果、「データ品質 = 2000年以前の配当履歴の欠落」と問題が誤って狭められた。 これは旧PJがその切り口で書かれていたためで、新 findex を立ち上げた本来の目的——旧設計の前提のまま進む誤りを断つこと——に反していた。</p>
 <h3 style="margin-top:1.4em"><a href="project-log.html">プロジェクトログ（フェーズ記録）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Log]</span></h3><p style="color:var(--muted)">セッションをまたいで文脈を失わないための公式記録。新しい作業を始める前に必ず本書とノーススター（00-charter-and-data-integrity.md）を読むこと。 フェーズが終わるごとに追記する（上に新しいフェーズを積む）。</p>
+<h3 style="margin-top:1.4em"><a href="design-review.html">設計レビューと是正</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ Review]</span></h3><p style="color:var(--muted)">| 観点 | 評価 | |---|---| | データ基盤（柱1）の厳密さ | 高い。自己認識・5状態Null・claim別グレード・N+・結果補正・来歴メタ・D2.5実証は多くの製品より堅い | | 分析モデル（柱2）の妥当性 | 盲点。重みは旧PJ継承の手づけ、スコアが何かを予測する実証が無い | | プロダクト/</p>
 <h3 style="margin-top:1.4em"><a href="implementation-plan.html">実装フェーズ計画</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ Plan]</span></h3><p style="color:var(--muted)">- 設計ドキュメントが正本。コードは data-model(D3)・indicator-system(D4)・indicator-calibration(D4.5)・data-workflow(D7)・verification(D6)と必ず突合してから書く。 - 一方向フロー（取得→導出→評価→出力）。後段は前段テーブ</p>
 <h3 style="margin-top:1.4em"><a href="data-integrity-framework.html">D2：データ完全性フレームワーク</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">findex の根本欠陥は「収集すべきデータの定義が無かったこと」だった（旧 `stocks` が上場日を持たず、欠損に気づけなかった）。 本書はまず「完全とは何か」をフィールド単位で定義する（データディクショナリ）。 カバレッジ・期間充足・品質ゲートはすべて「この定義に対して」測られる。「揃っているか」＝「定義に対し</p>
 <h3 style="margin-top:1.4em"><a href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 問い | 実測結果 | |---|---| | 現在スナップショットの財務は1ソースで足りるか | J-Quants v2 `/fins/summary` がほぼ充足（売上/営業益/純益/EPS/総資産/自己資本/現金/営業CF・投資CF・財務CF/発行株数/配当/予想配当/配当性向）。1コールで潤沢 | | 長期</p>
@@ -92,6 +95,7 @@ li{margin:.2em 0}
 <h3 style="margin-top:1.4em"><a href="indicator-calibration.html">D4.5：指標較正（v4提案）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| # | 問題（D4で検出） | 較正 | |---|---|---| | ① | 10年CAGRは低ベース/一過性を過大評価 | YoC（取得利回り）に置換＋EPS牽引ゲート＋DOE追加 | | ② | 自己資本比率80%満点は上位10%のみ・ROEと数学的に矛盾 | 閾値70%へ・ROE再較正・矛盾を緩和 | |</p>
 <h3 style="margin-top:1.4em"><a href="x-posting-strategy.html">D5：X発信戦略</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 制約 | 内容 | 設計上の含意 | |---|---|---| | 140字制限 | バッジ無し＝日本語約140字（CJKは加重2）。本文だけで複雑な分析は載らない | 画像でデータを運ぶのが主戦術（§1） | | API投稿不可 | 無料APIプランでは投稿不可 | Playwright（ブラウザ操作・セッショ</p>
 <h3 style="margin-top:1.4em"><a href="verification-strategy.html">D6：多フィールド検証戦略</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 層 | 対象 | 頻度 | 速度 | 役割 | |---|---|---|---|---| | L1 単体テスト | 純粋関数（streaks/CAGR/YoC/status判定/採点式） | CI・コミット毎 | 即時 | ロジックの正しさ（API不要） | | L2 コホート検証 | 約38社（失敗モード網羅）</p>
+<h3 style="margin-top:1.4em"><a href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">- 入力データは D2〜D6 で厳密に検証される。だがスコアの重み配分・指標選定は一度も予測力を検証されていない（D4.5は閾値をパーセンタイル化したが重みは未検証）。 - 「100%正確なデータ ＋ 恣意的なモデル ＝ 自信ありげな無意味」。これは定款が憎む有害物と構造的に同じ。 - 「進化する指標」（柱2）には進化</p>
 <h3 style="margin-top:1.4em"><a href="analysis-angles.html">分析切り口カタログ</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Angles]</span></h3><p style="color:var(--muted)">実証（5年・DPS2倍以上、旧DB）:</p>
 <h3 style="margin-top:1.4em"><a href="requirements.html">要件定義書 v2</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Requirements]</span></h3><p style="color:var(--muted)">旧実装（`../back_findex`）を切り離し、ゼロから作り直すための要件定義書。 旧実装は 計画ドキュメントは良質だったが、実装コードが破綻していた:</p>
 <h3 style="margin-top:1.4em"><a href="data-model.html">テーブル定義（データモデル）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">1. 一方向フロー: 取得層 → 導出層 → 評価層 → 出力層。後段は前段テーブルだけを読む 2. 粒度別テーブル: 年間配当（FY粒度）とイベント配当（権利落ち日粒度）を混ぜない（地雷1） 3. 計算は導出層に集約: ストリーク・CAGR等は `computed_metrics` にのみ書く 4. 全値に来歴メタ:</p>

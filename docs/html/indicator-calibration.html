@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,6 +74,7 @@ li{margin:.2em 0}
 <a class="active" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -91,7 +93,8 @@ li{margin:.2em 0}
 <a class="l3" href="#_5">較正</a>
 <a class="l2" href="#5-5">5. 較正⑤: 成長軸の整理</a>
 <a class="l2" href="#6-v4-v3">6. 提案する v4 指標セット（v3からの差分）</a>
-<a class="l2" href="#7-2026-06-14">7. 確定事項（ユーザー承認 2026-06-14）</a></div>
+<a class="l2" href="#7-2026-06-14">7. 確定事項（ユーザー承認 2026-06-14）</a>
+<a class="l2" href="#8-v4v5design-review-1">8. v4は閾値較正どまり・重みはv5でバックテスト較正（design-review #1）</a></div>
 </nav>
 <main>
   <div class="badge">Design</div>
@@ -330,4 +333,10 @@ li{margin:.2em 0}
 <li><strong>YoC暫定運用</strong>: 株価2000遡及までは <code>dividend_multiple_5y</code> を代理に使う。✅（既定）</li>
 </ol>
 <p>→ <strong>v4として確定</strong>。<code>rule_versions</code> 設計に反映。実装フェーズで rules.yaml を更新し（<code>null_policy: status_based</code>・YoC質ゲート・DOE・閾値・業種相対）再スコア。capex/investment_securities/cost_of_debt/株価2000遡及の取得後に #6FCF・#12ROIC・YoC本算出を有効化。</p>
+<hr />
+<h2 id="8-v4v5design-review-1">8. v4は閾値較正どまり・重みはv5でバックテスト較正（<a href="design-review.html">design-review</a> #1）</h2>
+<p>v4で較正したのは<strong>閾値</strong>（70%/15%・業種相対）と<strong>指標構成</strong>（YoC/DOE/CAGR廃止）であり、<strong>重み配分（2.5/1.5/1.2/0.8…）は旧PJ継承の手づけのまま</strong>。これらが前方アウトカムを予測するかは未検証。
+- <strong>重みの妥当性は <a href="backtest-framework.html">D8 バックテスト</a>で検証</strong>: 指標別IC（情報係数）・分位スプレッド・グレード較正で「効く指標/効かない指標」を炙り出し、客観的根拠で重みを改訂 → <strong>v5</strong>。
+- v4の質ゲート（YoC×sound/payout_driven/cyclical）も<strong>前方減配を予測できているかをD8で直接検証</strong>（イクヨ/日本製鉄型を実際に弾けているか）。
+- 過学習回避（ウォークフォワード）・解釈可能性優先は D8 の原則に従う。v5は「手づけ」から「アウトカム較正済み」への進化。</p>
 </main></div></body></html>

@@ -209,11 +209,28 @@
 
 | テーブル | 役割 | 要点 |
 |---|---|---|
-| `dividend_scores` | 採点結果を日付別に積む（バックテスト・推移） | PK(`code`,`scored_at`)、`rule_version_id`、`total_score`、`score_json` |
+| `dividend_scores` | 現在採点を日付別に積む（推移） | PK(`code`,`scored_at`)、`rule_version_id`、`total_score`、`score_json` |
 | `rule_versions` | rules.yaml を SHA256 で版管理（再現性） | `id` AUTO、`rules_sha256` UNIQUE |
-| `post_log` | X投稿履歴。本文SHA256で30日窓の二重投稿防止 | `id` AUTO、`status`∈posted/failed/skipped |
+| `themes` | X/サイトのテーマ定義レジストリ（D5） | `theme_id`、`name`、`angle_ref`、`format`(A/B/C)、`enabled` |
+| `post_queue` | 生成済み・投稿待ち（D5） | `id`、`theme_id`、`body`、`image_paths`、`claims`(json：使用数字とstatus/source/as_of＝事後監査)、`gates_passed`、`status`∈draft/approved/posted/blocked |
+| `post_log` | X投稿履歴。本文SHA256で30日窓の二重投稿防止 | `id` AUTO、`status`∈posted/failed/skipped、`engagement`(json) |
 | `run_log` | バッチ実行記録 | `id` AUTO、`job`/`started_at`/`status` |
 | `schema_version` | スキーマ世代 | `version` PK |
+
+### バックテスト（D8・モデル検証）
+
+> [D8 バックテスト基盤](08-backtest-framework.md) のPIT（時点正確）スコアとアウトカムを保持。現在採点 `dividend_scores` とは分け、再現可能なバックテスト結果を別系統で持つ。
+
+| テーブル | 役割 | 要点 |
+|---|---|---|
+| `backtest_runs` | 1回のバックテスト実行 | `run_id`、`rule_version_id`、`as_of_grid`、`universe_def`、`params_json` |
+| `backtest_scores` | **PIT再現スコア**（as_of別・入力をas_offで絞って算出） | `run_id`、`code`、`as_of_date`、`total_score`、`score_json`、`grade_*` |
+| `backtest_outcomes` | 前方アウトカム | `code`、`as_of_date`、`horizon_y`、`fwd_div_cut`、`fwd_dps_cagr`、`fwd_total_return`、`fwd_max_dd` |
+| `backtest_metrics` | 評価結果 | `run_id`、`level`(total/claim/indicator)、`key`、`metric`(spearman/IC/decile_spread/grade_calib)、`value`、`sample_n` |
+
+### 対象ユニバース・生存バイアス（[design-review](design-review.md) #8）
+- `stocks` は**国内上場普通株のみ**（ETF/REIT/優先株/出資証券を除外）。正準ユニバースは JPX一覧から普通株抽出で確定（[charter §2](00-charter-and-data-integrity.md)）。
+- 上場廃止銘柄も `is_active=0`＋`delisting_date` で**残す**（D8の時点ユニバース・生存バイアス排除に必須）。`delisting_date` はクラスC・D8の前提条件。
 
 > **Nullポリシー（D4で確定）**: 現 rules.yaml「None→生スコア0」はアンチパターン。**①欠損（減点）②正当な0（増配なし＝実値）③構造的不能（若い銘柄＝分母から除外）**を区別する。本モデルの来歴メタとグレードがその判定材料。
 

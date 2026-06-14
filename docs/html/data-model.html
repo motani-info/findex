@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,6 +74,7 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="active" href="data-model.html">テーブル定義（データモデル）</a>
@@ -89,6 +91,8 @@ li{margin:.2em 0}
 <a class="l2" href="#7-result_overrides-d27">7. result_overrides — 結果補正（公表値オーバーライド・汎用）⭐ D2.7</a>
 <a class="l2" href="#8-computed_metrics-claim">8. computed_metrics — 派生指標＋claim別グレード（導出層の出口）⭐</a>
 <a class="l2" href="#9-dividend_scores-rule_versions-post_log-run_log-schema_version">9. dividend_scores / rule_versions / post_log / run_log / schema_version</a>
+<a class="l3" href="#d8">バックテスト（D8・モデル検証）</a>
+<a class="l3" href="#design-review-8">対象ユニバース・生存バイアス（design-review #8）</a>
 <a class="l2" href="#10">10. 参照グラフ</a></div>
 </nav>
 <main>
@@ -715,7 +719,7 @@ li{margin:.2em 0}
 <tbody>
 <tr>
 <td><code>dividend_scores</code></td>
-<td>採点結果を日付別に積む（バックテスト・推移）</td>
+<td>現在採点を日付別に積む（推移）</td>
 <td>PK(<code>code</code>,<code>scored_at</code>)、<code>rule_version_id</code>、<code>total_score</code>、<code>score_json</code></td>
 </tr>
 <tr>
@@ -724,9 +728,19 @@ li{margin:.2em 0}
 <td><code>id</code> AUTO、<code>rules_sha256</code> UNIQUE</td>
 </tr>
 <tr>
+<td><code>themes</code></td>
+<td>X/サイトのテーマ定義レジストリ（D5）</td>
+<td><code>theme_id</code>、<code>name</code>、<code>angle_ref</code>、<code>format</code>(A/B/C)、<code>enabled</code></td>
+</tr>
+<tr>
+<td><code>post_queue</code></td>
+<td>生成済み・投稿待ち（D5）</td>
+<td><code>id</code>、<code>theme_id</code>、<code>body</code>、<code>image_paths</code>、<code>claims</code>(json：使用数字とstatus/source/as_of＝事後監査)、<code>gates_passed</code>、<code>status</code>∈draft/approved/posted/blocked</td>
+</tr>
+<tr>
 <td><code>post_log</code></td>
 <td>X投稿履歴。本文SHA256で30日窓の二重投稿防止</td>
-<td><code>id</code> AUTO、<code>status</code>∈posted/failed/skipped</td>
+<td><code>id</code> AUTO、<code>status</code>∈posted/failed/skipped、<code>engagement</code>(json)</td>
 </tr>
 <tr>
 <td><code>run_log</code></td>
@@ -740,6 +754,46 @@ li{margin:.2em 0}
 </tr>
 </tbody>
 </table>
+<h3 id="d8">バックテスト（D8・モデル検証）</h3>
+<blockquote>
+<p><a href="backtest-framework.html">D8 バックテスト基盤</a> のPIT（時点正確）スコアとアウトカムを保持。現在採点 <code>dividend_scores</code> とは分け、再現可能なバックテスト結果を別系統で持つ。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>テーブル</th>
+<th>役割</th>
+<th>要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>backtest_runs</code></td>
+<td>1回のバックテスト実行</td>
+<td><code>run_id</code>、<code>rule_version_id</code>、<code>as_of_grid</code>、<code>universe_def</code>、<code>params_json</code></td>
+</tr>
+<tr>
+<td><code>backtest_scores</code></td>
+<td><strong>PIT再現スコア</strong>（as_of別・入力をas_offで絞って算出）</td>
+<td><code>run_id</code>、<code>code</code>、<code>as_of_date</code>、<code>total_score</code>、<code>score_json</code>、<code>grade_*</code></td>
+</tr>
+<tr>
+<td><code>backtest_outcomes</code></td>
+<td>前方アウトカム</td>
+<td><code>code</code>、<code>as_of_date</code>、<code>horizon_y</code>、<code>fwd_div_cut</code>、<code>fwd_dps_cagr</code>、<code>fwd_total_return</code>、<code>fwd_max_dd</code></td>
+</tr>
+<tr>
+<td><code>backtest_metrics</code></td>
+<td>評価結果</td>
+<td><code>run_id</code>、<code>level</code>(total/claim/indicator)、<code>key</code>、<code>metric</code>(spearman/IC/decile_spread/grade_calib)、<code>value</code>、<code>sample_n</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="design-review-8">対象ユニバース・生存バイアス（<a href="design-review.html">design-review</a> #8）</h3>
+<ul>
+<li><code>stocks</code> は<strong>国内上場普通株のみ</strong>（ETF/REIT/優先株/出資証券を除外）。正準ユニバースは JPX一覧から普通株抽出で確定（<a href="charter.html">charter §2</a>）。</li>
+<li>上場廃止銘柄も <code>is_active=0</code>＋<code>delisting_date</code> で<strong>残す</strong>（D8の時点ユニバース・生存バイアス排除に必須）。<code>delisting_date</code> はクラスC・D8の前提条件。</li>
+</ul>
 <blockquote>
 <p><strong>Nullポリシー（D4で確定）</strong>: 現 rules.yaml「None→生スコア0」はアンチパターン。<strong>①欠損（減点）②正当な0（増配なし＝実値）③構造的不能（若い銘柄＝分母から除外）</strong>を区別する。本モデルの来歴メタとグレードがその判定材料。</p>
 </blockquote>

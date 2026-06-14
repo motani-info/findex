@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,6 +74,7 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -88,6 +90,7 @@ li{margin:.2em 0}
 <a class="l3" href="#31">3.1 結論</a>
 <a class="l3" href="#32-d4">3.2 実測を踏まえた重みの再検討（D4の宿題→将来版）</a>
 <a class="l2" href="#4-claimd26-6">4. claim別グレードの閾値（D2.6 §6 の具体化）</a>
+<a class="l2" href="#45-design-review-5">4.5 ランキングの比較可能性（design-review #5）</a>
 <a class="l2" href="#5-computed_metrics">5. 出力契約（computed_metrics への書き込み）</a>
 <a class="l2" href="#6">6. 次への引き渡し</a></div>
 </nav>
@@ -431,6 +434,16 @@ li{margin:.2em 0}
 - <code>missing</code> を含む claim はその指標を分母除外しつつ、claimグレードを1段下げる
 - <code>insufficient</code>（若い銘柄）はそのclaimを「評価対象外」とし、<strong>減点でなく非表示</strong>
 - 総合スコアは「採点できた指標」での%、グレードは「どれだけ採点できたか」。<strong>投稿は両方を見る</strong>（D2.6）</p>
+<hr />
+<h2 id="45-design-review-5">4.5 ランキングの比較可能性（<a href="design-review.html">design-review</a> #5）</h2>
+<p>動的分母（§1.3）は「持っていないデータで罰しない」ために必須だが、副作用として <strong>6指標で採点された銘柄と14指標で採点された銘柄の <code>total_score</code> が同じ物差しでない</strong>（両方「/100」だが採点母数が違う）。横断ランキングをそのまま並べると誤解を生む。</p>
+<p><strong>決定</strong>:
+- <strong>claim内ランキングを主</strong>にする（例: 配当claimのトップ、健全性claimのトップ）。claim内は依存指標集合が揃っており比較可能。投稿・サイトの主役はこれ。
+- <strong>総合 <code>total_score</code> は参考値</strong>とし、<strong>最小採点指標数の足切り</strong>を付ける（例: 規定数未満しか採点できない銘柄は総合ランキングに載せない＝薄データ銘柄が上位に紛れない）。総合を出すときは必ず claim別グレードを併示。
+- <strong>重み配分の妥当性は <a href="backtest-framework.html">D8 バックテスト</a>で検証</strong>する。総合スコアが前方アウトカム（減配回避・リターン）と相関しなければ、総合ランキングの扱いを下げ claim内に寄せる（D8の分位スプレッド・グレード較正が判断材料）。</p>
+<blockquote>
+<p>本書の重み（2.5/1.5/…）は v3/v4 の<strong>手づけスナップショット</strong>。D8で前方アウトカムにより較正し v5 へ進める（<a href="charter.html">charter §5</a>）。</p>
+</blockquote>
 <hr />
 <h2 id="5-computed_metrics">5. 出力契約（computed_metrics への書き込み）</h2>
 <p>derive層は各指標について以下を computed_metrics に書く（data-model §8）:

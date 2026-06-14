@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,6 +74,7 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="active" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -88,7 +90,10 @@ li{margin:.2em 0}
 <a class="l3" href="#31-override-vs-machined27">3.1 override vs machine（定義差の早期発見・D2.7）</a>
 <a class="l3" href="#32-j-quants-vs-edinet">3.2 ソース間クロスチェック（J-Quants vs EDINET）</a>
 <a class="l3" href="#33-machine-vs-golden">3.3 machine vs golden</a>
+<a class="l3" href="#34-yfinance-2000-2024design-review-3">3.4 株価履歴の検証（yfinance 2000-2024・design-review #3）</a>
+<a class="l3" href="#35-dbdesign-review-7">3.5 旧DB配当の能動洗浄（移行照合・design-review #7）</a>
 <a class="l2" href="#4-status">4. status 分布の監視（取得障害・劣化の検知）</a>
+<a class="l3" href="#41-edinetdesign-review-4">4.1 EDINETパースのリスク低減ゲート（design-review #4）</a>
 <a class="l2" href="#5">5. 投稿の自動停止条件（品質ゲートの確定仕様）</a>
 <a class="l2" href="#6-ci">6. CI / 開発フローへの組み込み</a>
 <a class="l2" href="#7">7. まとめと実装フェーズへの引き渡し</a></div>
@@ -252,6 +257,16 @@ li{margin:.2em 0}
 <li>L2で golden_streaks / golden_financials と機械計算を突合。</li>
 <li>不一致は CI/コホート検証を<strong>赤</strong>にし、原因（パース辞書・FY正規化・分割調整）を特定。</li>
 </ul>
+<h3 id="34-yfinance-2000-2024design-review-3">3.4 株価履歴の検証（yfinance 2000-2024・<a href="design-review.html">design-review</a> #3）</h3>
+<p>YoC（看板指標）とバックテストの背骨は <strong>yfinance の過去株価</strong>（J-Quantsは2024〜のみ＝照合源が無い区間）。降格したはずの主ソースに依存するため、独自に検証する。
+- <strong>複数ソース突合</strong>: 入手可能な区間でJ-Quants（2024〜）とyfinanceを重ね、調整後終値の乖離を監視（直近の整合が取れていれば過去の信頼度の傍証）。
+- <strong>分割イベントの独立検証</strong>: 分割・併合（NTT/SBG/電通総研の地雷）を別途イベントリストで持ち、yfinanceの調整係数と突合。前日比の異常（×0.1/×10）を外れ値検知。
+- <strong>YoC感度チェック</strong>: 5年前株価が外れ値の銘柄はYoCを <code>confidence=review</code> にして投稿・ランキングから除外。
+- <strong>信頼度の上限</strong>: pre-2024に golden 価格源が無い区間は、YoCに<strong>信頼度の上限</strong>を付け正直に扱う（捏造しない＝定款）。</p>
+<h3 id="35-dbdesign-review-7">3.5 旧DB配当の能動洗浄（移行照合・<a href="design-review.html">design-review</a> #7）</h3>
+<p>連続増配claimの土台 <code>dividend_annual</code>(FY1989〜) は<strong>旧DBにしか無い再現困難データ</strong>で、かつ花王26 vs 36 事故の当該データ。移行時に受け身で信じず能動的に洗う。
+- <strong>yfinance配当(1999+)を再取得し、移行した dividend_annual と相互照合</strong>。乖離は <code>confidence=review</code> で要確認。
+- 不一致銘柄をレポート化し、result_override/手動で確定。旧DBの silent error を移行で持ち越さない。</p>
 <hr />
 <h2 id="4-status">4. status 分布の監視（取得障害・劣化の検知）</h2>
 <p>D4で各値に status を付けたので、<strong>status分布の異常</strong>が品質劣化のセンサーになる。</p>
@@ -289,9 +304,19 @@ li{margin:.2em 0}
 <td>漸減目標</td>
 <td>横ばい/増（＝補正パイプライン停滞）</td>
 </tr>
+<tr>
+<td><strong>EDINETパース成功率</strong>（会計基準別）</td>
+<td>基準別に高位安定</td>
+<td><strong>基準別に低下</strong>（＝タクソノミ変更・ラベル辞書の未対応）</td>
+</tr>
 </tbody>
 </table>
 <p>→ L3（半年次）で集計し <code>run_log</code> に記録。閾値超は X投稿を自動停止（§5）。</p>
+<h3 id="41-edinetdesign-review-4">4.1 EDINETパースのリスク低減ゲート（<a href="design-review.html">design-review</a> #4）</h3>
+<p>EDINET会計基準別XBRLパースは<strong>実装最大の工数リスク</strong>（基準別ラベル辞書・タクソノミ変更）。削らず<strong>ゲートで守る</strong>:
+- <strong>早期スパイク</strong>: 実装着手時にJGAAP/IFRS/US各数社で基準別辞書の成立を先に確認（D2.5はKDDI1社・current_assetsで既に空振り）。
+- <strong>パース成功率ゲート</strong>: 基準別の必須フィールド取得率が閾値未満なら、その基準の銘柄の <strong>capital claim を grade C以下に固定</strong>（capex/投資有価証券が埋まらない銘柄を高評価にしない）。
+- <strong>基準別辞書を独立成果物に</strong>: golden_financials（§1.1・IFRS/JGAAP/US散らす）で<strong>辞書の正しさを単体検証</strong>してから本適用。辞書はコードでなくデータ（YAML）として版管理。</p>
 <hr />
 <h2 id="5">5. 投稿の自動停止条件（品質ゲートの確定仕様）</h2>
 <p><a href="data-workflow.html">data-workflow</a> §6 の品質ゲートを<strong>判定基準として確定</strong>する。1つでも不合格なら該当claimの投稿を止める。</p>

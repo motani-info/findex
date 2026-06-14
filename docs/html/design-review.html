@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>設計レビューと是正 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="active" href="design-review.html">設計レビューと是正</a>
+<a class="" href="implementation-plan.html">実装フェーズ計画</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
+<a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 総評</a>
+<a class="l2" href="#1">1. 指摘一覧と是正方針（重い順）</a>
+<a class="l2" href="#2">2. 是正の中身（要点）</a>
+<a class="l3" href="#21-d81">2.1 モデル検証＝D8バックテスト基盤（#1・最重要）</a>
+<a class="l3" href="#22-26">2.2 プロダクト/読者（#2・#6）</a>
+<a class="l3" href="#23-374">2.3 データ品質の検証強化（#3・#7・#4）</a>
+<a class="l3" href="#24-589">2.4 整合性（#5・#8・#9）</a>
+<a class="l2" href="#3">3. これによる設計フェーズの更新</a></div>
+</nav>
+<main>
+  <div class="badge">★ Review</div>
+  <h1 id="_1">設計レビューと是正（フラット第三者レビュー）</h1>
+<p><strong>作成日</strong>: 2026-06-15
+<strong>位置づけ</strong>: 設計フェーズ完結（D1〜D7・D5）後に、実装着手前へ向けて<strong>フラットな第三者視点で全設計を点検</strong>した記録と、各指摘への<strong>是正方針・反映先</strong>。本書は是正の索引であり、実体は各設計書の改訂とD8新設に落ちる。
+<strong>動機</strong>: 設計品質が今後の製品品質を直接決める。「データだけ厳密でモデル・プロダクトが手薄」という重心の偏りを実装前に正す。</p>
+<hr />
+<h2 id="0">0. 総評</h2>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>評価</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>データ基盤（柱1）の厳密さ</td>
+<td><strong>高い</strong>。自己認識・5状態Null・claim別グレード・N+・結果補正・来歴メタ・D2.5実証は多くの製品より堅い</td>
+</tr>
+<tr>
+<td>分析モデル（柱2）の妥当性</td>
+<td><strong>盲点</strong>。重みは旧PJ継承の手づけ、スコアが何かを予測する実証が無い</td>
+</tr>
+<tr>
+<td>プロダクト/読者（柱3）</td>
+<td><strong>手薄</strong>。読者像・競合・差別化テーゼ・出力物の実体設計が弱い</td>
+</tr>
+</tbody>
+</table>
+<p>→ 重心が「入力の正確性」に偏り、定款が警戒した完璧主義が<strong>投資配分そのもの</strong>に出ていた。本レビューでモデルとプロダクトの設計を引き上げる。</p>
+<hr />
+<h2 id="1">1. 指摘一覧と是正方針（重い順）</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>指摘</th>
+<th style="text-align: center;">深刻度</th>
+<th>ユーザー判断</th>
+<th>是正方針</th>
+<th>反映先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>入力は厳密だが<strong>スコアモデルが無検証</strong>（重みは旧PJ手づけ・予測力未実証）</td>
+<td style="text-align: center;">★★★</td>
+<td><strong>本格バックテスト基盤を構築</strong></td>
+<td><strong>D8新設</strong>。PIT（時点正確）入力で過去スコアを再現し、減配/増配/リターンとの関係を検証。重みはバックテストで較正（v5へ）</td>
+<td><strong>D8</strong>・D4・D4.5</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>読者/競合/差別化が未設計</strong>（高配当株Xは飽和市場）</td>
+<td style="text-align: center;">★★★</td>
+<td>（#6と一体で判断）</td>
+<td>D5に読者像・競合・1行差別化テーゼ（切り口①＝質で選ぶ増配株）を追加。テーマは絞って磨く</td>
+<td>D5</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>YoC・バックテストの背骨がyfinance</strong>（降格したはずの主ソース）で検証手段が無い</td>
+<td style="text-align: center;">★★★</td>
+<td>（フル設計維持）</td>
+<td>D6に株価履歴の検証戦略（複数ソース突合・分割イベント独立検証・外れ値検知・信頼度上限）を追加</td>
+<td>D6・D3</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>EDINET XBRLパースがクリティカルパス最大リスク</strong>（1社実証・基準別辞書は大工事）</td>
+<td style="text-align: center;">★★</td>
+<td><strong>全部設計通り（削らない）</strong></td>
+<td>削らず<strong>リスクを設計で潰す</strong>：早期スパイク・<strong>パース成功率ゲート</strong>・基準別辞書を検証可能な独立成果物化・段階ロールアウト</td>
+<td>実装計画・D6</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>単一総合スコア vs claim別グレードの比較可能性</strong>（動的分母で銘柄間が同一物差しでない）</td>
+<td style="text-align: center;">★★</td>
+<td>（バックテスト判断に従属）</td>
+<td>claim内ランキングを主、<strong>total_scoreは最小採点指標数の足切り付き参考値</strong>と明示。重み根拠はD8</td>
+<td>D4</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>出力チャネル（X自動投稿）が最も脆い</strong>（ToS/レート/ログインブロック）</td>
+<td style="text-align: center;">★★★</td>
+<td><strong>Xメイン＋画像をローカルHTML生成（自前サイト兼用）</strong></td>
+<td>HTML生成層を一級コンポーネント化（X画像＝サイト）。X自動化に手動承認フォールバック。助言コンプラ明文化</td>
+<td>D5・D7</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>配当深履歴が旧DB単一依存</strong>（再現不能・かつ花王事故の当該データ）</td>
+<td style="text-align: center;">★★</td>
+<td>（フル設計維持）</td>
+<td>移行時に<strong>yfinance配当1999+を再取得し移行データと相互照合</strong>して旧DBの誤りを能動的に洗う</td>
+<td>D7・D6</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ユニバース定義が曖昧（3,842 / 3,747 / 普通株）</td>
+<td style="text-align: center;">★</td>
+<td>—</td>
+<td>charterで対象ユニバースを定義（普通株のみ・ETF/REIT/優先株除外・delistingで生存バイアス対策）</td>
+<td>charter・D3</td>
+</tr>
+<tr>
+<td>9</td>
+<td>post_log二重定義（D3とD5）・16/18反復・min_history曖昧・運用設計空白</td>
+<td style="text-align: center;">★</td>
+<td>—</td>
+<td>D3を単一正本に（themes/post_queue畳み込み）。運用（実行環境・実時間・通知）を実装計画に明記</td>
+<td>D3・実装計画</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="2">2. 是正の中身（要点）</h2>
+<h3 id="21-d81">2.1 モデル検証＝D8バックテスト基盤（#1・最重要）</h3>
+<ul>
+<li><strong>PIT（Point-in-Time）原則</strong>: as-of 時点で入手可能なデータだけでスコアを再現（先読みバイアス排除）。<code>result_overrides.as_of_fiscal_year</code> が既にPIT合成を支える設計になっている点を活用。</li>
+<li><strong>生存バイアス排除</strong>: 上場廃止銘柄（<code>delisting_date</code>）を時点ユニバースに含める。</li>
+<li><strong>アウトカム</strong>: 前方N年の減配有無・増配継続・トータルリターン。</li>
+<li><strong>評価</strong>: スコア×アウトカムの順位相関・分位スプレッド・指標別IC・グレード較正（grade-A配当claimは本当に減配が少ないか）。</li>
+<li><strong>重み較正</strong>: ウォークフォワード（訓練/検証分割）で過学習を防ぎ、解釈可能性を優先（ブラックボックス化しない＝透明性が製品価値）。</li>
+<li>詳細は <a href="backtest-framework.html">D8 バックテスト基盤</a>。</li>
+</ul>
+<h3 id="22-26">2.2 プロダクト/読者（#2・#6）</h3>
+<ul>
+<li><strong>差別化テーゼ</strong>: 「増配率の高さに騙されない、<strong>質（EPS牽引）で選ぶ増配株</strong>」＝切り口①を製品の中心に。汎用ランキングは誰でも出せる。</li>
+<li><strong>出力チャネル</strong>: Xメイン。ただし投稿画像（ランキング表・チャート）は<strong>ローカルHTMLで生成</strong>＝自前サイトを兼ねる。サイトは確実に動きSEO資産にもなる。Xの脆い自動化は<strong>手動承認フォールバック</strong>付き。</li>
+<li><strong>コンプラ</strong>: 個別銘柄の売買推奨はしない／免責定型／シミュレーションは前提明示。</li>
+</ul>
+<h3 id="23-374">2.3 データ品質の検証強化（#3・#7・#4）</h3>
+<ul>
+<li><strong>株価履歴（yfinance 2000-2024）</strong>: golden照合源が無い区間なので、複数ソース突合・分割イベント独立検証・外れ値検知でYoCの信頼度を担保（無理なら信頼度に上限を付け正直に）。</li>
+<li><strong>旧DB配当の能動洗浄</strong>: yfinance配当1999+の再取得と移行データの相互照合。</li>
+<li><strong>EDINETリスク低減</strong>: 削らず、パース成功率をゲート化し基準別辞書を独立検証（golden_financialsで基準を散らす＝D6既設計を前倒し運用）。</li>
+</ul>
+<h3 id="24-589">2.4 整合性（#5・#8・#9）</h3>
+<ul>
+<li>ランキングはclaim内が主、総合は足切り付き参考値。</li>
+<li>ユニバース定義を確定（普通株のみ・約数）。</li>
+<li>D3を単一正本化（themes/post_queue/post_log）。運用設計を実装計画へ。</li>
+</ul>
+<hr />
+<h2 id="3">3. これによる設計フェーズの更新</h2>
+<ul>
+<li><strong>新設</strong>: D8 バックテスト基盤（モデル検証）。</li>
+<li><strong>改訂</strong>: charter（ユニバース・モデル検証原則）/ D4（比較可能性・重みのバックテスト較正）/ D4.5（v4は暫定・v5はバックテスト較正）/ D5（読者・差別化・出力・コンプラ）/ D6（株価検証・旧DB照合・EDINETゲート）/ D7（バックテスト工程・移行照合・HTML生成）/ D3（themes/post_queue畳み込み・backtestテーブル・ユニバース）/ 実装計画（EDINETスパイク・バックテストPhase・運用）。</li>
+<li>実装は引き続き凍結。本レビューは設計の質を上げる工程。</li>
+</ul>
+</main></div></body></html>

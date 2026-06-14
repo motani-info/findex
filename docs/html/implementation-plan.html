@@ -64,6 +64,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="design-review.html">設計レビューと是正</a>
 <a class="active" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
@@ -73,6 +74,7 @@ li{margin:.2em 0}
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
 <a class="" href="x-posting-strategy.html">D5：X発信戦略</a>
 <a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="backtest-framework.html">D8：バックテスト基盤（モデル検証）</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -87,7 +89,8 @@ li{margin:.2em 0}
 <a class="l3" href="#phase-3-d4d45derive">Phase 3: 導出層（D4・D4.5・derive）</a>
 <a class="l3" href="#phase-4-d4d45score">Phase 4: 評価層（D4・D4.5・score）</a>
 <a class="l3" href="#phase-5-d6verify">Phase 5: 検証（D6・verify）</a>
-<a class="l3" href="#phase-6-xd5">Phase 6: X発信（D5・優先度低）</a>
+<a class="l3" href="#phase-55-d8design-review-1">Phase 5.5: バックテスト＝モデル検証（D8・design-review #1）</a>
+<a class="l3" href="#phase-6-htmlxd5">Phase 6: 出力＝HTML生成＋X発信（D5）</a>
 <a class="l2" href="#3">3. マイルストーン</a>
 <a class="l2" href="#4-go">4. 着手前の確認事項（GO時に決める）</a></div>
 </nav>
@@ -165,16 +168,20 @@ li{margin:.2em 0}
 <li><strong>EDINETコードリストzip → edinet_code/決算期末月/連結</strong>（実証済・3,842件・即時）</li>
 <li>kabutan → listing_date（<strong>現0%・打ち切り判定の鍵</strong>）</li>
 <li>移行: 旧DBから <code>dividend_annual</code>(source!='events') と <code>streak_overrides</code>→<code>result_overrides</code>変換 を投入（再現困難・最優先）。price/financialは移行せず再取得</li>
-<li><strong>ゲート</strong>: コホート38社のstocksが会計メタ・listing_dateまで揃う</li>
+<li><strong>能動洗浄（design-review #7）</strong>: yfinance配当(1999+)を再取得し移行dividend_annualと相互照合→乖離をreviewレポート</li>
+<li><strong>ユニバース確定（#8）</strong>: JPX一覧から普通株抽出（ETF/REIT/優先株除外）。<code>delisting_date</code> 収集（生存バイアス排除・D8前提）</li>
+<li><strong>ゲート</strong>: コホート38社のstocksが会計メタ・listing_date・delisting_dateまで揃う</li>
 </ul>
 <h3 id="phase-2-d7-034fetch">Phase 2: 取得層（D7 §0,§3,§4・fetch）</h3>
 <ul>
+<li><strong>EDINET早期スパイク（design-review #4）</strong>: 着手最初にJGAAP/IFRS/US各数社で会計基準別ラベル辞書の成立を確認（KDDI1社では不足・current_assets空振り既知）。辞書はYAMLで版管理・golden_financialsで単体検証</li>
 <li>prices: J-Quants（直近）＋ <strong>yfinance 2000年遡及</strong>（旧は2024-06〜のみ＝不足）</li>
+<li><strong>株価検証（#3）</strong>: J-Quants×yfinance突合・分割イベント独立検証・外れ値検知（YoCの背骨の信頼度担保）</li>
 <li>financials: J-Quants <code>/fins/summary</code>（現在〜2年）＋ <strong>EDINET有報XBRL</strong>（深いBS・capex・<strong>会計基準別ラベル辞書</strong>・提出日日次スキャン）</li>
 <li>dividends: events取得 → dividend_annual(events) 再構築 ＋ haitoukin backfill</li>
 <li>result_overrides: ZAi/みんかぶ/IRから連続年数の"結果"取り込み（出典・as_of必須）</li>
 <li>すべて RateLimitedFetcher 経由</li>
-<li><strong>ゲート</strong>: コホートで各フィールドのstatus（ok/missing）が想定通り（capex/investment_securitiesがEDINETで埋まる）</li>
+<li><strong>ゲート</strong>: コホートで各フィールドのstatus（ok/missing）が想定通り。<strong>EDINETパース成功率が基準別に閾値以上</strong>（未満なら当該capital claimをgrade C固定）</li>
 </ul>
 <h3 id="phase-3-d4d45derive">Phase 3: 導出層（D4・D4.5・derive）</h3>
 <ul>
@@ -202,9 +209,21 @@ li{margin:.2em 0}
 <li><code>findex verify</code> CLI（L1単体＋L2コホート＋L3分布を束ねる）</li>
 <li><strong>ゲート</strong>: <code>findex verify --cohort</code> が緑 → <strong>全銘柄スキャン1回</strong>へ</li>
 </ul>
-<h3 id="phase-6-xd5">Phase 6: X発信（D5・優先度低）</h3>
+<h3 id="phase-55-d8design-review-1">Phase 5.5: バックテスト＝モデル検証（D8・design-review #1）</h3>
 <ul>
-<li>実装が安定してから着手。フック（切り口①YoC×持続性等）・品質ゲート連動・Playwright投稿</li>
+<li>PIT入力ビュー（price/financial/dividend/override を as_of で絞る）＋時点ユニバース（delisting含む・生存バイアス排除）</li>
+<li>採点エンジンを as_off グリッド（2008-2024各年）で回す → <code>backtest_scores</code></li>
+<li>前方アウトカム（減配回避/増配実現/トータルリターン/最大DD）→ <code>backtest_outcomes</code></li>
+<li>メトリクス（Spearman/指標別IC/分位スプレッド/グレード較正）→ <code>backtest_metrics</code> → HTMLレポート</li>
+<li><strong>重み較正 → rules.yaml v5</strong>（ウォークフォワードで検証期間が崩れないこと・解釈可能性優先）</li>
+<li>まず golden+コホートで配線検証→フル</li>
+<li><strong>ゲート</strong>: 総合/claim/グレードが前方アウトカムと相関（効かなければclaim内ランキングに寄せる根拠）</li>
+</ul>
+<h3 id="phase-6-htmlxd5">Phase 6: 出力＝HTML生成＋X発信（D5）</h3>
+<ul>
+<li><strong>HTML生成層を一級コンポーネントに（design-review #6）</strong>: ランキング表/チャートをローカルHTMLで描画→PNG（X画像）＋閲覧可能サイト（X障害時の受け皿・SEO資産）</li>
+<li>X発信: フック（看板=切り口①YoC×持続性）・品質ゲート連動・Playwright投稿（<strong>手動承認フォールバック</strong>）・コンプラ（売買推奨しない・免責固定）</li>
+<li>claim内ランキングを主、総合は足切り付き参考値</li>
 </ul>
 <hr />
 <h2 id="3">3. マイルストーン</h2>
@@ -238,9 +257,14 @@ li{margin:.2em 0}
 <td><code>findex verify</code>緑・全銘柄ランキング生成</td>
 </tr>
 <tr>
+<td><strong>M4.5</strong></td>
+<td><strong>バックテスト＝モデル検証（Phase5.5）</strong></td>
+<td>スコアが前方アウトカムと相関・重みv5較正</td>
+</tr>
+<tr>
 <td>M5</td>
-<td>X発信（Phase6・後日）</td>
-<td>品質ゲート通過の投稿</td>
+<td>出力（HTML生成＋X発信）（Phase6・後日）</td>
+<td>サイト生成＋品質ゲート通過の投稿</td>
 </tr>
 </tbody>
 </table>
@@ -251,6 +275,7 @@ li{margin:.2em 0}
 <li><strong>着手範囲</strong>: M1から順か、特定フェーズ先行か</li>
 <li><strong>.env整備</strong>: 現在キーは <code>back_findex/.env</code>。findex/.env を正式に用意するか（gitignore済）</li>
 <li><strong>作業の進め方</strong>: 1フェーズずつレビュー or まとめて</li>
+<li><strong>運用設計（design-review #9）</strong>: 実行環境（ローカルMac/cron想定）・フルスキャンの実時間見積（3,800銘柄×2000遡及＋EDINET日次は数時間〜日規模）・API課金/上限・部分失敗の再開・<strong>停止条件の通知手段</strong>（run_logだけでなく通知）</li>
 </ol>
 <p>→ GO が出たら Phase 0（スキーマ再生成）から着手。各フェーズ末にコホート検証で区切る。</p>
 </main></div></body></html>
