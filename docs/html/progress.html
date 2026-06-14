@@ -89,6 +89,8 @@ li{margin:.2em 0}
 <a class="l2" href="#5-d25">5. D2.5（次フェーズ）でやること</a>
 <a class="l2" href="#6">6. 設計確定後の実装タスク（凍結解除後）</a>
 <a class="l2" href="#7">7. 既知のリスク・宿題</a>
+<a class="l3" href="#71">7.1 設計で解決済み・実装待ち（🟩）</a>
+<a class="l3" href="#72">7.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
 <a class="l2" href="#75-23">7.5 分析切り口カタログ（柱2/柱3の蓄積）</a>
 <a class="l2" href="#8">8. レビューの入口</a></div>
 </nav>
@@ -304,6 +306,47 @@ li{margin:.2em 0}
 </ul>
 <hr />
 <h2 id="7">7. 既知のリスク・宿題</h2>
+<p>設計凍結中なので「未解決の設計課題」と「設計で解決済み・実装待ち」を区別する。</p>
+<h3 id="71">7.1 設計で解決済み・実装待ち（🟩）</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>対処（設計上の所在）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>edinet_code</code> 投入（旧0%）</td>
+<td>EDINETコードリストで即3,842件（D2.5）・Phase1</td>
+</tr>
+<tr>
+<td><code>listing_date</code> 全銘柄取得（打ち切り判定の鍵・旧0%）</td>
+<td>kabutan（D3/実装計画Phase1）</td>
+</tr>
+<tr>
+<td><code>capex</code> 取得（FCFの真のボトルネック・旧0%）</td>
+<td>EDINET CF（D2.5/D3/Phase2・※EDINETパース依存）</td>
+</tr>
+<tr>
+<td><code>investment_securities</code>（yfinance不在）</td>
+<td>EDINET有報（D2.5実証/Phase2・※パース依存）</td>
+</tr>
+<tr>
+<td>Nullポリシー「None→0点」アンチパターン</td>
+<td>D4で5状態status-basedに再設計済・実装待ち</td>
+</tr>
+<tr>
+<td>旧DB（223MB）からの移行</td>
+<td>D7移行フロー設計済＋yfinance1999+で能動洗浄・照合（design-review #7）</td>
+</tr>
+<tr>
+<td>株価2000遡及（旧は2024-06〜のみ）</td>
+<td>yfinance再取得（D2.5/Phase2）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72">7.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</h3>
 <table>
 <thead>
 <tr>
@@ -313,40 +356,36 @@ li{margin:.2em 0}
 </thead>
 <tbody>
 <tr>
-<td><code>listing_date</code> 全銘柄取得（打ち切り判定の鍵）</td>
-<td>🟥 0%（kabutanスクレイパー未実装）</td>
+<td><strong>EDINET会計基準別XBRLパース</strong></td>
+<td>🟨 <strong>実装最大の工数リスク</strong>。1社(KDDI)実証どまり・IFRS空振り既知→早期スパイク＋パース成功率ゲート＋基準別辞書を独立検証（D6 §4.1/Phase2・design-review #4）</td>
 </tr>
 <tr>
-<td><code>capex</code> 取得（FCFの真のボトルネック）</td>
-<td>🟥 旧DB0%。EDINET CFから取得（D2.5判明）</td>
+<td><strong>モデル（重み）が無検証</strong></td>
+<td>🟨 重みは旧PJ手づけで予測力未実証＝最大の盲点→<strong>D8バックテストで前方アウトカム較正→v5</strong>（Phase5.5・design-review #1）</td>
 </tr>
 <tr>
-<td><code>edinet_code</code> 投入</td>
-<td>🟥 旧DB0%だがEDINETコードリストで即3,842件埋まる（D2.5判明）</td>
+<td><strong>yfinance過去株価(2000-2024)の検証手段なし</strong></td>
+<td>🟨 YoC・バックテストの背骨だがgolden源なし→複数ソース突合・分割イベント独立検証・外れ値・信頼度上限（D6 §3.4・design-review #3）</td>
 </tr>
 <tr>
-<td><code>investment_securities</code> 取得</td>
-<td>🟥 yfinance不在→EDINETで取得（D2.5実証済み）</td>
+<td><strong><code>delisting_date</code> 収集</strong></td>
+<td>🟨 新規宿題。生存バイアス排除＝D8バックテストの前提条件・クラスC（Phase1・design-review #8）</td>
 </tr>
 <tr>
-<td>EDINET XBRL パース（会計基準別ラベル辞書）</td>
-<td>🟨 実現性は実証済み。基準別辞書の実装が要</td>
+<td><strong>X自動化の脆さ/ToS</strong></td>
+<td>🟨 出力チャネルが最脆→HTML生成兼用（自前サイト）＋手動承認フォールバック＋コンプラ（D5/Phase6・design-review #6）</td>
 </tr>
 <tr>
-<td>rules.yaml の Nullポリシー「None→0点」アンチパターン</td>
-<td>🟨 D4で再設計</td>
+<td><strong>ユニバース確定・運用設計</strong></td>
+<td>🟨 普通株抽出で件数固定（charter §2）／実行環境・フルスキャン実時間・通知手段（実装計画 §4・design-review #9）</td>
 </tr>
 <tr>
-<td>streaks.py ギャップ中断の打ち切り未検知</td>
-<td>🟥 実装凍結中・解除後に修正</td>
-</tr>
-<tr>
-<td>旧DB（218MB）からの移行</td>
-<td>🟥 設計確定後</td>
+<td><code>streaks.py</code> ギャップ中断の打ち切り未検知</td>
+<td>🟥 既知の実装バグ・凍結解除後に修正（Phase3）</td>
 </tr>
 </tbody>
 </table>
-<p>凡例: 🟥要対応/未着手 🟨計画済み・後続 🟩対応済み</p>
+<p>凡例: 🟩設計で解決・実装待ち / 🟨未解決リスク・要注視 / 🟥実装バグ</p>
 <hr />
 <h2 id="75-23">7.5 分析切り口カタログ（柱2/柱3の蓄積）</h2>
 <p>有望と検証できた「切り口」を <code>docs/design/analysis-angles.md</code>（<a href="analysis-angles.html">analysis-angles</a>）に蓄積する。
