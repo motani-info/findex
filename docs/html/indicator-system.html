@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D4：指標システム仕様 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="active" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#1-null">1. Nullポリシー再設計（最重要・現行アンチパターンの是正）</a>
+<a class="l3" href="#11">1.1 現行の何が間違いか</a>
+<a class="l3" href="#12-4">1.2 値の「不在」を4状態に分解する</a>
+<a class="l3" href="#13">1.3 採点式（分母を動的にする）</a>
+<a class="l3" href="#14-inflation">1.4 「薄いデータinflation」を防ぐ歯止め</a>
+<a class="l2" href="#2-override-n">2. 合成順序のデータ契約（機械計算 → override → N+）</a>
+<a class="l2" href="#3-1618">3. 指標セットの確定（16/18問題）</a>
+<a class="l3" href="#31">3.1 結論</a>
+<a class="l3" href="#32-d4">3.2 実測を踏まえた重みの再検討（D4の宿題→将来版）</a>
+<a class="l2" href="#4-claimd26-6">4. claim別グレードの閾値（D2.6 §6 の具体化）</a>
+<a class="l2" href="#5-computed_metrics">5. 出力契約（computed_metrics への書き込み）</a>
+<a class="l2" href="#6">6. 次への引き渡し</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d4">D4: 指標システム仕様</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>親</strong>: <a href="charter.html">charter</a> §6 / <a href="data-limits-and-impact.html">D2.6影響</a> / <a href="result-override-layer.html">D2.7結果補正</a> / <a href="data-model.html">data-model</a>
+<strong>目的</strong>: 指標を「進化するシステム」として仕様化する。本書で決めるのは ①<strong>Nullポリシー再設計</strong> ②<strong>合成順序のデータ契約</strong> ③<strong>指標セットの確定（16/18）</strong> ④<strong>claim別グレード閾値</strong>。
+<strong>原則</strong>: 指標の「数」は本質でない（定款）。<code>rule_versions</code> で版管理し、追加・廃止・重み変更を前提とする。本書は v3 スナップショットの仕様。</p>
+<hr />
+<h2 id="1-null">1. Nullポリシー再設計（最重要・現行アンチパターンの是正）</h2>
+<h3 id="11">1.1 現行の何が間違いか</h3>
+<p>現 rules.yaml: 「<strong>データ取得不可（None）→ 生スコア0（分母から除外しない）</strong>」。
+これは<strong>二重に不当</strong>:
+- データを「持っていないだけ」の銘柄を、実力0と同じに減点する
+- かつ分母に残すので総合スコアを不当に押し下げる
+- 結果、<strong>「データが薄い銘柄」と「実際にダメな銘柄」を区別できない</strong>（旧PJの誤りの一般形）</p>
+<h3 id="12-4">1.2 値の「不在」を4状態に分解する</h3>
+<p>derive層は値を計算するとき<strong>なぜ不在か</strong>を知っている。だから値と一緒に<strong>status</strong>を出す。スコアラは数字でなく status を見て採点する。</p>
+<table>
+<thead>
+<tr>
+<th>status</th>
+<th>意味</th>
+<th>実例</th>
+<th>採点での扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ok</code></td>
+<td>値あり</td>
+<td>連続増配16年</td>
+<td>通常採点</td>
+</tr>
+<tr>
+<td><code>zero_legit</code></td>
+<td><strong>正当な0</strong>（実値としての0）</td>
+<td>増配してない→連続増配0年、過去20年で減配2回→信頼性0</td>
+<td><strong>0点として採点</strong>（実力。分母に残す）</td>
+</tr>
+<tr>
+<td><code>missing</code></td>
+<td><strong>欠損（修正可能）</strong></td>
+<td>capex未取得でFCF不能、EDINETパース失敗</td>
+<td><strong>分母から除外</strong>＋backfillフラグ。0点にしない</td>
+</tr>
+<tr>
+<td><code>insufficient</code></td>
+<td><strong>期間不足（構造的）</strong></td>
+<td>上場11年未満で10年CAGR不能</td>
+<td><strong>分母から除外</strong>（評価不能。欠陥でない）</td>
+</tr>
+<tr>
+<td><code>censored</code></td>
+<td><strong>打ち切り</strong>（過小確定リスク）</td>
+<td>pre-2000で連続年数が頭打ち</td>
+<td><strong>N+表示</strong>。裸の数字で採点しない</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>実測根拠（D4調査）: データ11年+銘柄の10年CAGR NULLは5%だが、<strong>11年未満銘柄は100%NULL</strong>（1,199銘柄）。これは欠損でなく <code>insufficient</code>＝構造的に不能。0点減点は誤り。</p>
+</blockquote>
+<h3 id="13">1.3 採点式（分母を動的にする）</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>総合スコア = Σ_i(生スコア_i × weight_i)  for i in {status ∈ ok, zero_legit}
+           ────────────────────────────────────────────────────  × 100
+             Σ_i(max_score × weight_i)    for i in {status ∈ ok, zero_legit}
+</code></pre></div>
+
+<ul>
+<li><code>missing</code> / <code>insufficient</code> / <code>censored</code> は<strong>分子・分母の両方から除外</strong>（持っていないデータで罰しない）</li>
+<li>ただし<strong>除外した事実はグレードに必ず反映</strong>（§4）。「薄いデータで高得点」を防ぐのはスコアでなく<strong>グレード</strong>の役目</li>
+<li><code>zero_legit</code> は分母に残す（増配してない事実は減点に値する）</li>
+</ul>
+<h3 id="14-inflation">1.4 「薄いデータinflation」を防ぐ歯止め</h3>
+<p>分母除外だけだと、2指標しか無い銘柄が満点になりうる。歯止め=<strong>グレード＋最小要件</strong>:
+- claim別グレード（§4）で「何を測れたか」を必ず併示
+- 投稿は score だけでなく <strong>score×grade</strong> で判断（高スコア×低グレード＝注記 or 投稿対象外）
+- core指標（配当継続性の最低限）が <code>missing</code>/<code>insufficient</code> の銘柄はそのclaimをCグレード以下に固定</p>
+<hr />
+<h2 id="2-override-n">2. 合成順序のデータ契約（機械計算 → override → N+）</h2>
+<p>ストリーク系（連続増配/非減配/減配信頼性）の値は、以下の決定的順序で確定する（D2.7）。</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>machine<span style="color: #BBB">    </span><span style="color: #666">=</span><span style="color: #BBB"> </span>dividend_annual<span style="color: #BBB"> </span>から純粋計算<span style="border: 1px solid #F00">（</span>derive<span style="color: #666">/</span>streaks<span style="color: #666">.</span>py<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">2.</span><span style="color: #BBB"> </span>override<span style="border: 1px solid #F00">?</span><span style="color: #BBB">   </span><span style="color: #666">=</span><span style="color: #BBB"> </span>result_overrides<span style="color: #BBB"> </span>に該当<span style="color: #BBB"> </span>field<span style="color: #BBB"> </span>があり<span style="border: 1px solid #F00">、</span>かつ<span style="color: #BBB"> </span>override<span style="color: #666">.</span><span style="color: #008000">val</span>ue<span style="color: #BBB"> </span><span style="border: 1px solid #F00">≥</span><span style="color: #BBB"> </span>machine
+<span style="color: #BBB">                 </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span><span style="color: #008000">val</span>ue<span style="color: #666">=</span>override,<span style="color: #BBB"> </span>status<span style="color: #666">=</span>ok,<span style="color: #BBB"> </span>is_censored<span style="color: #666">=</span>False,<span style="color: #BBB"> </span>source<span style="color: #666">=</span>override
+<span style="color: #BBB">                 </span><span style="border: 1px solid #F00">（</span>as_of以降は機械で確認できた連続分を加算<span style="border: 1px solid #F00">＝</span>経年補正<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">3.</span><span style="color: #BBB"> </span>censored<span style="border: 1px solid #F00">?</span><span style="color: #BBB">  </span><span style="color: #666">=</span><span style="color: #BBB"> </span>override無し<span style="color: #BBB"> </span>かつ<span style="color: #BBB"> </span>machineが下限band<span style="color: #666">/</span>ギャップで打ち切り
+<span style="color: #BBB">                 </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>status<span style="color: #666">=</span>censored<span style="border: 1px solid #F00">（</span>N<span style="color: #666">+</span>表示<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">4.</span><span style="color: #BBB"> </span>else<span style="color: #BBB">       </span><span style="color: #666">=</span><span style="color: #BBB"> </span><span style="color: #008000">val</span>ue<span style="color: #666">=</span>machine,<span style="color: #BBB"> </span>status<span style="color: #666">=</span>ok,<span style="color: #BBB"> </span>source<span style="color: #666">=</span>machine
+</code></pre></div>
+
+<p><strong>契約事項</strong>:
+- override は<strong>昇格のみ</strong>（公表値が機械計算より長いときだけ）。古い公表値で機械計算を下げない
+- override採用時、<strong>その指標の <code>censored</code> を解除</strong>（他指標は不変＝claim単位）
+- 定義差は <code>definition_note</code> に必ず保持し、<strong>投稿時は出典明示</strong>（「ZAi集計で連続増配N年」）。機械値とのギャップはD6照合の対象
+- 配当CAGRは override 対象外（"結果"がクリーンに公表されない）＝raw補填(haitoukin)経由のみ</p>
+<hr />
+<h2 id="3-1618">3. 指標セットの確定（16/18問題）</h2>
+<h3 id="31">3.1 結論</h3>
+<p><strong>現スナップショット = rules.yaml v3 の16定義</strong>（標準14＋大型/金融の代替2）。「18」は v3 前（<code>dividend_growth_5y_cagr</code> と <code>debt_to_equity</code> を含んでいた旧版）。<strong>数は版管理事項であり固定しない</strong>（定款）。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>指標</th>
+<th>field</th>
+<th style="text-align: right;">weight</th>
+<th>主入力</th>
+<th>必要履歴</th>
+<th>データクラス</th>
+<th>想定status分布</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>連続非減配年数</td>
+<td>consecutive_no_cut_years</td>
+<td style="text-align: right;">2.5</td>
+<td>dividend_annual</td>
+<td>長い</td>
+<td>B/D(打切)</td>
+<td>ok/censored/zero</td>
+</tr>
+<tr>
+<td>2</td>
+<td>連続増配年数</td>
+<td>consecutive_dividend_growth_years</td>
+<td style="text-align: right;">1.5</td>
+<td>dividend_annual</td>
+<td>長い</td>
+<td>B/D</td>
+<td>ok/censored/zero_legit</td>
+</tr>
+<tr>
+<td>3</td>
+<td>減配信頼性</td>
+<td>dividend_reliability</td>
+<td style="text-align: right;">0.8</td>
+<td>dividend_annual(20y)</td>
+<td>20年</td>
+<td>B/D</td>
+<td>ok/zero_legit/insufficient</td>
+</tr>
+<tr>
+<td>4</td>
+<td>10年増配CAGR</td>
+<td>dividend_growth_10y_cagr</td>
+<td style="text-align: right;">1.2</td>
+<td>dividend_annual(11y)</td>
+<td>11年</td>
+<td>B</td>
+<td>ok/<strong>insufficient</strong>(若32%)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>予想配当性向</td>
+<td>payout_ratio</td>
+<td style="text-align: right;">2.0</td>
+<td>forecast_dps,net_income</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（99.8%）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>FCF配当カバレッジ</td>
+<td>fcf_payout_coverage</td>
+<td style="text-align: right;">1.0</td>
+<td>CFO,capex,配当</td>
+<td>現在</td>
+<td><strong>C(capex)</strong></td>
+<td>ok/<strong>missing</strong>(capex回復で改善)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>EPS成長5y</td>
+<td>eps_growth_5y</td>
+<td style="text-align: right;">1.0</td>
+<td>eps,eps5y前</td>
+<td>5年</td>
+<td>A/B</td>
+<td>ok/insufficient</td>
+</tr>
+<tr>
+<td>8</td>
+<td>売上5yCAGR</td>
+<td>revenue_growth_5y_cagr</td>
+<td style="text-align: right;">1.0</td>
+<td>revenue,5y前</td>
+<td>5年</td>
+<td>A</td>
+<td>ok（97%）</td>
+</tr>
+<tr>
+<td>9</td>
+<td>自己資本比率</td>
+<td>equity_ratio</td>
+<td style="text-align: right;">1.5</td>
+<td>equity,total_assets</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（99.5%）</td>
+</tr>
+<tr>
+<td>10</td>
+<td>ROE</td>
+<td>roe</td>
+<td style="text-align: right;">1.5</td>
+<td>net_income,equity</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（95%）</td>
+</tr>
+<tr>
+<td>11</td>
+<td>営業利益率</td>
+<td>operating_margin</td>
+<td style="text-align: right;">1.0</td>
+<td>op_income,revenue</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（99.3%）</td>
+</tr>
+<tr>
+<td>12</td>
+<td>ROIC-WACC</td>
+<td>roic_minus_wacc</td>
+<td style="text-align: right;">0.8</td>
+<td>NOPAT,投下資本,WACC(beta,負債,税)</td>
+<td>現在</td>
+<td>A/C</td>
+<td>ok/missing（beta有・cost_of_debt要EDINET）</td>
+</tr>
+<tr>
+<td>13</td>
+<td>配当利回り</td>
+<td>div_yield</td>
+<td style="text-align: right;">1.2</td>
+<td>price,forecast_dps</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（84%）</td>
+</tr>
+<tr>
+<td>14</td>
+<td>ネットキャッシュPER</td>
+<td>net_cash_per</td>
+<td style="text-align: right;">1.5</td>
+<td>時価総額,現金,投資有価証券,負債</td>
+<td>現在</td>
+<td>A/<strong>C</strong></td>
+<td>ok/missing（investment_sec要EDINET）</td>
+</tr>
+<tr>
+<td>代1</td>
+<td>利益剰余金配当倍率</td>
+<td>retained_earnings_div_ratio</td>
+<td style="text-align: right;">1.0</td>
+<td>retained_earnings,配当</td>
+<td>現在</td>
+<td>A</td>
+<td>ok（99.5%）replaces #12</td>
+</tr>
+<tr>
+<td>代2</td>
+<td>ミックス係数</td>
+<td>mix_coefficient</td>
+<td style="text-align: right;">1.5</td>
+<td>per,pbr</td>
+<td>現在</td>
+<td>A</td>
+<td>ok replaces #14</td>
+</tr>
+</tbody>
+</table>
+<p>代1/代2 は <strong>large_cap（時価総額1兆円+）/financial（銀行・保険・証券）</strong> で #12/#14 と差し替え。financial は #9 自己資本比率を除外。</p>
+<h3 id="32-d4">3.2 実測を踏まえた重みの再検討（D4の宿題→将来版）</h3>
+<ul>
+<li>
+<h1 id="6-fcf-41-capex-0-weight-10">6 FCFカバレッジ: 旧41%の主因 capex 0% が回復すれば有効率上昇 → <strong>回復後に重み再評価</strong>（現在 weight 1.0 は暫定）</h1>
+</li>
+<li>
+<h1 id="12-roic-wacc-beta-95d26cost_of_debt-edinet">12 ROIC-WACC: beta は95%有（D2.6訂正）。cost_of_debt を EDINET支払利息で埋めれば改善 → 回復後再評価</h1>
+</li>
+<li>これらは <code>rule_versions</code> で次版として扱う。<strong>今は v3 を凍結スナップショットとして確定</strong>。</li>
+</ul>
+<hr />
+<h2 id="4-claimd26-6">4. claim別グレードの閾値（D2.6 §6 の具体化）</h2>
+<p>各 claim は依存指標群の status から A〜D を機械判定する。</p>
+<table>
+<thead>
+<tr>
+<th>claim</th>
+<th>構成指標</th>
+<th>A</th>
+<th>B</th>
+<th>C</th>
+<th>D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>dividend</strong>（配当継続性）</td>
+<td>#1,#2,#3,#4</td>
+<td>全てok（censored無し）＋照合済</td>
+<td>okだが一部未照合</td>
+<td>一部 censored/insufficient</td>
+<td>core(#1)が missing</td>
+</tr>
+<tr>
+<td><strong>valuation</strong>（割安度）</td>
+<td>#5,#13,#14(or代2)</td>
+<td>全てok</td>
+<td>一部present</td>
+<td>一部 missing</td>
+<td>price無し</td>
+</tr>
+<tr>
+<td><strong>health</strong>（財務健全）</td>
+<td>#9,#10,#11</td>
+<td>全てok</td>
+<td>—</td>
+<td>一部 missing</td>
+<td>全て missing</td>
+</tr>
+<tr>
+<td><strong>capital</strong>（資本効率）</td>
+<td>#6,#12(or代1)</td>
+<td>全てok</td>
+<td>—</td>
+<td>一部 missing</td>
+<td>全て missing(capex/inv_sec欠落)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>判定規則</strong>:
+- <code>censored</code> を含む claim は <strong>A不可</strong>（確定でないため）。N+で投稿は可だが「以上」と明示
+- <code>missing</code> を含む claim はその指標を分母除外しつつ、claimグレードを1段下げる
+- <code>insufficient</code>（若い銘柄）はそのclaimを「評価対象外」とし、<strong>減点でなく非表示</strong>
+- 総合スコアは「採点できた指標」での%、グレードは「どれだけ採点できたか」。<strong>投稿は両方を見る</strong>（D2.6）</p>
+<hr />
+<h2 id="5-computed_metrics">5. 出力契約（computed_metrics への書き込み）</h2>
+<p>derive層は各指標について以下を computed_metrics に書く（data-model §8）:
+- 値: <code>&lt;field&gt;</code>（数値 or NULL）
+- status: <code>&lt;field&gt;_status</code> ∈ ok/zero_legit/missing/insufficient/censored
+- 由来: <code>&lt;field&gt;_source</code> ∈ machine/override/censored
+- claim別グレード: grade_dividend/valuation/health/capital（A〜D）
+- <code>identity_ok</code>, <code>streak_is_censored</code></p>
+<p>スコアラは <code>&lt;field&gt;</code> と <code>&lt;field&gt;_status</code> だけを読んで §1.3 の式で採点する（生SQLや原データを読まない＝一方向フロー）。</p>
+<hr />
+<h2 id="6">6. 次への引き渡し</h2>
+<ul>
+<li><strong>D5 X発信</strong>: claim別グレードとstatusを投稿の品質ゲートに使う。「高配当×増配ランキング」等のフックは grade_dividend≥B かつ censored明示で構成。override由来は出典付き</li>
+<li><strong>D6 検証</strong>: override値 vs machine値のギャップ、status分布の異常監視、golden（花王36年等）</li>
+<li><strong>実装フェーズ</strong>: rules.yaml に <code>null_policy: status_based</code> を導入し「None→0」を撤廃。derive層が status を emit するよう改修。capex/investment_securities/cost_of_debt 取得後に #6/#12 を再評価し次 rule_version へ</li>
+</ul>
+</main></div></body></html>

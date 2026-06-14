@@ -68,6 +68,9 @@ li{margin:.2em 0}
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
 <a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
@@ -225,8 +228,31 @@ li{margin:.2em 0}
 - <strong>financial_snapshots のソース分担明記</strong>: J-Quants fins/summary（現在〜2年・潤沢）＋ EDINET XBRL（深いBS・入手難）。capex(C・edinet)・investment_securities(C・edinet)・interest_expense(cost_of_debt)を追加。<strong>betaは導出（旧95%・入手難でないと訂正）</strong>
 - <strong>price_history を2000年遡及</strong>＋ソース分担（yfinance主・J-Quants補完）。pre-2000は構造的不能を明示
 - <strong>computed_metrics に claim別グレード</strong>（grade_dividend/valuation/health/capital＋identity_ok）と由来フラグ（machine/override/censored）
-- 各フィールドにクラス注記（A完全/C修正可/B・D構造的）
-- 設計ロードマップ: ~~D2~~→~~D2.5~~→~~D2.6~~→~~D2.7~~→~~D3~~→ <strong>D4 指標システム仕様（次・Nullポリシー再設計／機械→override→N+合成順序／16-18確定／beta訂正反映）</strong> → D5 X発信戦略（高配当×増配ランキング等フック）→ D6 多フィールド検証（override照合）→ D7 ワークフロー改訂
+- 各フィールドにクラス注記（A完全/C修正可/B・D構造的）</p>
+<h4 id="d4-2026-06-14">D4 指標システム仕様（2026-06-14）</h4>
+<p>成果物 <code>docs/design/04-indicator-system.md</code>。
+- <strong>Nullポリシー再設計（現「None→0」アンチパターン撤廃）</strong>: 値の不在を5状態に分解 <code>ok/zero_legit(正当な0)/missing(欠損・修正可)/insufficient(期間不足・構造的)/censored(打切)</code>。derive層が(値,status)を出しスコアラはstatusを見て採点。<strong>missing/insufficient/censoredは分子・分母とも除外</strong>（持ってないデータで罰しない）、zero_legitは0点で分母に残す。実測根拠=データ11年未満1,199銘柄は10年CAGR100%不能=insufficientで減点は誤り
+- <strong>薄いデータinflation防止</strong>: 分母除外だけだと2指標で満点化→グレードで「何を測れたか」を併示。投稿は score×grade で判断
+- <strong>合成順序データ契約</strong>: machine→override(昇格のみ・採用時censored解除・as_of経年補正)→censored(N+)→machine。CAGRはoverride対象外
+- <strong>指標セット確定</strong>: v3の16定義(標準14＋大型/金融代替2)。「18」はv3前(dividend_growth_5y_cagr/debt_to_equity含む旧版)。数は版管理事項で固定しない。capex回復後に#6FCF・#12ROIC(beta有)を再評価し次rule_versionへ
+- <strong>claim別グレード閾値</strong>: dividend(#1-4)/valuation(#5,13,14)/health(#9-11)/capital(#6,12)をstatusからA〜D判定。censored含むclaimはA不可</p>
+<h4 id="d45-v42026-06-14">D4.5 指標較正・v4確定（2026-06-14）</h4>
+<p>成果物 <code>docs/design/04_5-indicator-calibration.md</code>。D4で検出した指標設計の歪みを実データで較正。<strong>全項目ユーザー承認でv4確定</strong>:
+- ①<strong>10年CAGR廃止→YoC(取得利回り5年)新設(weight1.2)</strong>＋<strong>増配の質ゲート=掛け算減点</strong>(EPS牽引sound×1.0/性向拡大payout_driven×0.5/一過性cyclical×0.3)。分解式DPS倍率=EPS倍率×配当性向変化で一過性株(イクヨ/日本製鉄)を弾く。株価2000遡及までdividend_multiple_5yを代理
+- ②<strong>DOE新設(weight0.8)</strong>=ROE×配当性向。利益変動に強い持続性シグナル
+- ③<strong>自己資本比率 満点80%→70%</strong>(実測:中央値55%・80%超は10%のみ)、<strong>ROE 20%→15%</strong>(20%は上位10%)。両満点は0.4%＝数学的綱引きを緩和
+- ④<strong>営業利益率を業種相対スコア化</strong>(絶対20%は卸売3.3%〜証券19.8%の業種差で不公平・絶対フロア併用)。ROE相対化は効果見て判断
+- ⑤予想配当性向/利回りに実績フォールバック＋confidence（Nullポリシーと接続）
+- v4指標数: 標準15(CAGR-1・YoC+1・DOE+1)＋代替2。数は固定しない
+- 較正の根拠データは全て旧DB実測。実装フェーズでrules.yaml更新（null_policy:status_based・YoC質ゲート・DOE・閾値・業種相対）後に再スコア</p>
+<h4 id="d7-2026-06-15">D7 ワークフロー改訂（2026-06-15）</h4>
+<p>成果物 <code>docs/design/data-workflow.md</code>（全面改訂）。D2.5〜D4.5の確定をワークフローに反映:
+- <strong>ソース分担を明記</strong>: JPX(マスター)/EDINETコードリスト(edinet_code・会計メタ・月次)/kabutan(上場日)/J-Quants(直近株価・現在〜2年財務)/yfinance(株価2000遡及)/EDINET有報XBRL(深いBS・capex・会計基準別パース・提出日日次スキャン)/haitoukin(配当backfill)/result_overrides(公表結果)。beta=price×TOPIX回帰で自前算出
+- <strong>導出はstatus付き</strong>(ok/zero_legit/missing/insufficient/censored)、合成順序(機械→override昇格→N+)、YoC＋増配の質係数(×1.0/0.5/0.3)、DOE
+- <strong>採点はv4 status-based</strong>(missing/insufficient/censoredは動的分母から除外、zero_legitは0点で残す、営業益率は業種相対、予想欠損は実績フォールバック)
+- <strong>移行更新</strong>: streak_overrides→result_overridesに変換、price_historyは移行せず2000年まで再取得(旧2024-06〜のみ)、financial_snapshotsはJ-Quants＋EDINETで再取得(旧raw_financialsは捨てる)
+- <strong>整合性チェック</strong>にoverride vs machine乖離・status分布異常・残存N+数を追加(D6に接続)
+- 設計ロードマップ: ~~D2〜D4.5~~→~~D7~~→ <strong>D6 多フィールド検証（設計の最後）</strong> → 実装フェーズ判断 / <strong>D5 X発信は優先度低</strong>（後回し）/ 切り口は <code>analysis-angles.md</code> に蓄積
 - <strong>次の一歩: D3 データモデル改訂（D2.5の実測gapを反映）</strong>。実装は引き続き凍結
 - gitコミット方針: <strong>findex配下だけ</strong>（無関係な親リポの変更は触らない）。D1-D2を <code>1bbe7b1</code> でコミット済み</p>
 </main></div></body></html>

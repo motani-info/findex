@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D4.5：指標較正（v4提案） — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="active" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 較正対象サマリ</a>
+<a class="l2" href="#1-1-10cagr-yoc-doe">1. 較正①: 10年CAGR → YoC ＋ 持続性ゲート ＋ DOE</a>
+<a class="l3" href="#_1">変更</a>
+<a class="l2" href="#2-2-roe">2. 較正②: 自己資本比率の閾値ダウン＋ROE矛盾の緩和</a>
+<a class="l3" href="#db">実測（旧DB）</a>
+<a class="l3" href="#_2">較正</a>
+<a class="l2" href="#3-3">3. 較正③: 業種相対スコアの導入</a>
+<a class="l3" href="#_3">実測（営業利益率の業種別中央値）</a>
+<a class="l3" href="#_4">較正</a>
+<a class="l2" href="#4-4">4. 較正④: 予想値依存のフォールバック</a>
+<a class="l3" href="#_5">較正</a>
+<a class="l2" href="#5-5">5. 較正⑤: 成長軸の整理</a>
+<a class="l2" href="#6-v4-v3">6. 提案する v4 指標セット（v3からの差分）</a>
+<a class="l2" href="#7-2026-06-14">7. 確定事項（ユーザー承認 2026-06-14）</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d45-v3-v4">D4.5: 指標較正（v3 → v4提案）</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>親</strong>: <a href="indicator-system.html">D4 指標システム</a> / <a href="analysis-angles.html">分析切り口①</a> / <a href="data-limits-and-impact.html">D2.6影響</a>
+<strong>目的</strong>: D4で洗い出した<strong>指標設計そのものの歪み</strong>を、実データに基づいて較正する。設計のみ（実装凍結）。確定すれば次の <code>rule_version</code>（v4）として版管理。
+<strong>方針</strong>: X発信(D5)より較正を優先（ユーザー指示）。閾値は旧DB実測の分布で裏づける。
+<strong>ステータス</strong>: ✅ v4確定（2026-06-14・§7の全項目ユーザー承認）</p>
+<hr />
+<h2 id="0">0. 較正対象サマリ</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>問題（D4で検出）</th>
+<th>較正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td>10年CAGRは低ベース/一過性を過大評価</td>
+<td><strong>YoC（取得利回り）に置換</strong>＋EPS牽引ゲート＋DOE追加</td>
+</tr>
+<tr>
+<td>②</td>
+<td>自己資本比率80%満点は上位10%のみ・ROEと数学的に矛盾</td>
+<td><strong>閾値70%へ</strong>・ROE再較正・矛盾を緩和</td>
+</tr>
+<tr>
+<td>③</td>
+<td>営業利益率の絶対20%が低マージン業種を不当に0点</td>
+<td><strong>業種相対スコア</strong>導入</td>
+</tr>
+<tr>
+<td>④</td>
+<td>予想配当性向・利回りが予想値単一依存</td>
+<td><strong>実績フォールバック</strong>＋confidence</td>
+</tr>
+<tr>
+<td>⑤</td>
+<td>成長の三重カウント（EPS・売上・配当CAGR）</td>
+<td>①でCAGR除去により自然に解消</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="1-1-10cagr-yoc-doe">1. 較正①: 10年CAGR → YoC ＋ 持続性ゲート ＋ DOE</h2>
+<p>切り口①（<a href="analysis-angles.html">analysis-angles.md</a>）の結論を指標に落とす。</p>
+<h3 id="_1">変更</h3>
+<ul>
+<li><strong>廃止</strong>: <code>dividend_growth_10y_cagr</code>（weight 1.2）。理由=低ベース/市況回復を過大評価（イクヨ66x・日本製鉄36x が上位）。</li>
+<li><strong>新設</strong>: <code>yield_on_cost_5y</code>（主）＝最新DPS ÷ 5年前株価。低ベースノイズを自動抑制。weight 1.2 を継承。</li>
+<li>補助に <code>yield_on_cost_3y</code>、<code>dividend_multiple_5y</code>（dividend_annualのみで算出可・株価不要）。</li>
+<li>データ要件: 5年前株価（<strong>株価2000遡及が前提</strong>・クラスC）。それまでは <code>dividend_multiple_5y</code> を暫定代理。</li>
+<li><strong>持続性ゲート（質）</strong>: YoCの生スコアに<strong>増配の質</strong>を掛ける。分解式 <code>DPS倍率 = EPS倍率 × 配当性向変化</code> から判定:</li>
+<li><code>sound</code>（EPS牽引・EPS倍率≥1.5）→ ×1.0</li>
+<li><code>payout_driven</code>（性向拡大依存）→ ×0.5</li>
+<li><code>cyclical</code>（EPS横ばい/減・赤字）→ ×0.3</li>
+<li>これにより「高YoCだが一過性」を自動減点（イクヨ/日本製鉄を弾く）。<strong>新指標を増やさずYoCの質補正</strong>で実現＝既存の配当性向/FCF/EPS指標と二重計上しない。</li>
+<li><strong>新設候補</strong>: <code>doe</code>（=年間配当総額÷自己資本＝ROE×配当性向）。weight 0.8。利益が振れても自己資本は安定→<strong>配当性向より持続性シグナルとして優秀</strong>。日本で配当政策指標として普及。</li>
+</ul>
+<hr />
+<h2 id="2-2-roe">2. 較正②: 自己資本比率の閾値ダウン＋ROE矛盾の緩和</h2>
+<h3 id="db">実測（旧DB）</h3>
+<ul>
+<li>自己資本比率: 中央値<strong>54.9%</strong>、75%ile 70.1%、90%ile 80.2%。<strong>現閾値80%＝上位10%のみ満点</strong>＝厳しすぎ。</li>
+<li>ROE: 中央値8.3%、75%ile 13.3%、90%ile 20.8%。<strong>現閾値20%＝上位10%</strong>。</li>
+<li>矛盾実測: 自己資本比率80%+かつROE20%+は<strong>16社（0.4%）</strong>＝両立ほぼ不能（分母の資本が増えるとROEは下がる数学的関係）。</li>
+</ul>
+<h3 id="_2">較正</h3>
+<ul>
+<li>自己資本比率: <strong>満点閾値 80% → 70%</strong>（上位約25%）。安全性は方向として高いほど良いが、<strong>80%超は過小レバレッジ＝資本非効率</strong>の領域なので、満点を70%に置き「健全な厚み」を評価。weight 1.5 維持。</li>
+<li>（任意）<code>&gt;90%</code> かつ ROE低 は資本非効率として軽い頭打ち＝将来検討。</li>
+<li>ROE: 満点閾値 <strong>20% → 15%</strong>（上位約25%）。20%は稀すぎ。weight 1.5 維持。</li>
+<li><strong>矛盾の扱い</strong>: 両者は「安全性（資本の厚み）」と「効率性（資本の稼ぐ力）」の<strong>意図的なペア</strong>。閾値を現実水準（70%/15%）に下げることで、優良企業が両方で適正得点を取れるようにし、ゼロサムの綱引きを緩和する。</li>
+</ul>
+<hr />
+<h2 id="3-3">3. 較正③: 業種相対スコアの導入</h2>
+<h3 id="_3">実測（営業利益率の業種別中央値）</h3>
+<p>卸売3.3%・小売3.7%・食料品3.4% … vs 銀行19.5%・証券19.8%。<strong>絶対20%満点では低マージン業種はベスト企業でも常に0点</strong>。</p>
+<h3 id="_4">較正</h3>
+<ul>
+<li><code>operating_margin</code> を <strong>業種相対スコア</strong>に変更: sector33内のパーセンタイル順位 → 0〜10点（業種内で上位ほど高得点）。</li>
+<li>「卸売業の中で営業利益率トップ」は高評価されるべき＝業種の構造差を吸収。</li>
+<li>暴走防止に<strong>絶対フロア併用</strong>（業種全体が赤字水準なら相対上位でも満点にしない）。</li>
+<li>候補拡大: <code>roe</code> も業種相対の余地（金融は別途swap済み）。まず営業利益率で導入し効果を見て判断。</li>
+<li><strong>据え置き（絶対のまま）</strong>: 自己資本比率（安全性は絶対量に意味）、配当利回り・配当性向（投資家視点の絶対水準）。</li>
+</ul>
+<hr />
+<h2 id="4-4">4. 較正④: 予想値依存のフォールバック</h2>
+<p><code>payout_ratio</code>（weight 2.0・最高位級）と <code>div_yield</code> は <code>forecast_dps</code>（会社予想）依存。予想欠損・保守性で歪む。</p>
+<h3 id="_5">較正</h3>
+<ul>
+<li>予想欠損時は<strong>実績TTMの年間配当にフォールバック</strong>し、<code>confidence=present</code>（予想ありは <code>verified</code> 寄り）を立てる。</li>
+<li><strong>Nullポリシー（D4）と接続</strong>: forecast欠損→<code>missing</code>で分母除外、ではなく<strong>実績で代替</strong>して採点継続（高ウェイト指標を簡単に落とさない）。代替したことは status/confidence に記録。</li>
+</ul>
+<hr />
+<h2 id="5-5">5. 較正⑤: 成長軸の整理</h2>
+<ul>
+<li>①で10年CAGRを除去 → 成長軸は <code>eps_growth_5y</code> と <code>revenue_growth_5y_cagr</code> の2本に。</li>
+<li>インカム側（連続増配・YoC・DOE・配当性向・利回り）とのバランスが取れ、<strong>成長三重カウントは解消</strong>。</li>
+<li>追加変更なし（①の副次効果として完了）。</li>
+</ul>
+<hr />
+<h2 id="6-v4-v3">6. 提案する v4 指標セット（v3からの差分）</h2>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th>v3</th>
+<th>v4提案</th>
+<th>変更</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続非減配年数</td>
+<td>2.5</td>
+<td>2.5</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>連続増配年数</td>
+<td>1.5</td>
+<td>1.5</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>減配信頼性</td>
+<td>0.8</td>
+<td>0.8</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>~~10年増配CAGR~~</td>
+<td>1.2</td>
+<td>—</td>
+<td><strong>廃止</strong></td>
+</tr>
+<tr>
+<td><strong>YoC（取得利回り5年）</strong></td>
+<td>—</td>
+<td>1.2</td>
+<td><strong>新設</strong>（質ゲート付）</td>
+</tr>
+<tr>
+<td><strong>DOE</strong></td>
+<td>—</td>
+<td>0.8</td>
+<td><strong>新設</strong></td>
+</tr>
+<tr>
+<td>予想配当性向</td>
+<td>2.0</td>
+<td>2.0</td>
+<td>実績フォールバック追加</td>
+</tr>
+<tr>
+<td>FCF配当カバレッジ</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>据置（capex回復で有効率↑）</td>
+</tr>
+<tr>
+<td>EPS成長5y</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>売上5yCAGR</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>自己資本比率</td>
+<td>1.5(80%)</td>
+<td>1.5(<strong>70%</strong>)</td>
+<td>閾値↓</td>
+</tr>
+<tr>
+<td>ROE</td>
+<td>1.5(20%)</td>
+<td>1.5(<strong>15%</strong>)</td>
+<td>閾値↓</td>
+</tr>
+<tr>
+<td>営業利益率</td>
+<td>1.0(絶対20%)</td>
+<td>1.0(<strong>業種相対</strong>)</td>
+<td>相対化</td>
+</tr>
+<tr>
+<td>ROIC-WACC</td>
+<td>0.8</td>
+<td>0.8</td>
+<td>据置（beta有・cost_of_debt回復で改善）</td>
+</tr>
+<tr>
+<td>配当利回り</td>
+<td>1.2</td>
+<td>1.2</td>
+<td>実績フォールバック追加</td>
+</tr>
+<tr>
+<td>ネットキャッシュPER</td>
+<td>1.5</td>
+<td>1.5</td>
+<td>据置（investment_sec回復で改善）</td>
+</tr>
+<tr>
+<td>代替: 利益剰余金配当倍率</td>
+<td>1.0</td>
+<td>1.0</td>
+<td>据置</td>
+</tr>
+<tr>
+<td>代替: ミックス係数</td>
+<td>1.5</td>
+<td>1.5</td>
+<td>据置</td>
+</tr>
+</tbody>
+</table>
+<p>指標数: v3の14標準 → v4は14標準（CAGR-1, YoC+1, DOE+1 で実質+1＝15標準）＋代替2。<strong>数は版管理事項で固定しない</strong>（定款）。</p>
+<hr />
+<h2 id="7-2026-06-14">7. 確定事項（ユーザー承認 2026-06-14）</h2>
+<ol>
+<li><strong>YoCの質ゲート＝掛け算で減点</strong>（×1.0 sound / ×0.5 payout_driven / ×0.3 cyclical）。厳格除外ではなく段階評価で採用。✅</li>
+<li><strong>DOE 新設・weight 0.8</strong> で採用。✅</li>
+<li><strong>自己資本比率 満点閾値 70%、ROE 満点閾値 15%</strong> に較正。✅</li>
+<li><strong>業種相対は営業利益率のみ先行</strong>（効果を見てROEへ拡大判断）。✅（既定）</li>
+<li><strong>YoC暫定運用</strong>: 株価2000遡及までは <code>dividend_multiple_5y</code> を代理に使う。✅（既定）</li>
+</ol>
+<p>→ <strong>v4として確定</strong>。<code>rule_versions</code> 設計に反映。実装フェーズで rules.yaml を更新し（<code>null_policy: status_based</code>・YoC質ゲート・DOE・閾値・業種相対）再スコア。capex/investment_securities/cost_of_debt/株価2000遡及の取得後に #6FCF・#12ROIC・YoC本算出を有効化。</p>
+</main></div></body></html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>分析切り口カタログ — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="active" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#1-yoc-vs">切り口① YoC（取得利回り）× 増配持続性 — 「本物の増配株 vs 一過性の罠」</a>
+<a class="l3" href="#a-yocyield-on-cost">A. 量の指標：YoC（Yield on Cost＝取得利回り）</a>
+<a class="l3" href="#b-dss">B. 質の指標：増配持続性スコア（DSS）— なぜ増えたかを問う</a>
+<a class="l3" href="#c">C. 持続性の評価観点（一般論＝ほぼ教科書通り。ユーザー主観と一致）</a>
+<a class="l3" href="#d-yoc-dss2">D. 組み合わせ方：「YoC（量）× DSS（質）」の2軸</a>
+<a class="l3" href="#e">E. 留意（実装時）</a></div>
+</nav>
+<main>
+  <div class="badge">Angles</div>
+  <h1 id="_1">分析切り口カタログ</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>位置づけ</strong>: findexの「独自指標で多角的に分析し、Xユーザーの興味を引く切り口」（定款・柱2/柱3）の<strong>切り口（アングル）の蓄積場所</strong>。検証して有望と分かった切り口をここに残し、D4.5（指標較正）・D5（X発信）で実装に落とす。
+<strong>運用</strong>: 新しい切り口を思いついて検証したら、1セクション追記する（番号を振る）。</p>
+<hr />
+<h2 id="1-yoc-vs">切り口① YoC（取得利回り）× 増配持続性 — 「本物の増配株 vs 一過性の罠」</h2>
+<p><strong>ステータス</strong>: 検証済み（2026-06-14・旧DB実データ）。有望。
+<strong>着想（ユーザー）</strong>: 1万円投資して当初3%(300円)だった配当が、増配で数年後に15%(1500円/取得利回り)になっている会社を見つけたい。ただし<strong>好景気やブーストで一時的に増えただけの可能性</strong>があるので、健全性と組み合わせて評価したい。</p>
+<h3 id="a-yocyield-on-cost">A. 量の指標：YoC（Yield on Cost＝取得利回り）</h3>
+<ul>
+<li>定義: <code>YoC_Ny = 最新の年間配当(DPS) ÷ N年前の株価</code>（N=3,5,10）。「当時1万円で買った人が、今いくら受け取るか」</li>
+<li>補助: <code>dividend_multiple_Ny = 最新DPS ÷ N年前DPS</code>（dividend_annualだけで算出可）</li>
+<li><strong>CAGR/倍率より優れる理由</strong>: 倍率は低ベースを過大評価する（実証: イクヨ 0.5円→33円=66倍、日本製鉄 市況回復36倍が上位を占める）。YoCは「当時の配当が極小なら取得利回りも低い」ので<strong>低ベースノイズを自動で抑制</strong>する。</li>
+<li>データ要件: N年前の株価（price_history・<strong>2000年以降のみ</strong>。株価バックフィルが前提＝クラスC）。</li>
+</ul>
+<h3 id="b-dss">B. 質の指標：増配持続性スコア（DSS）— なぜ増えたかを問う</h3>
+<p><strong>核心の分解式（実証済み）</strong>:</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>DPS倍率 ＝ EPS倍率 × 配当性向の変化倍率
+</code></pre></div>
+
+<p>増配が<strong>EPS（利益）牽引なら持続的</strong>、<strong>配当性向の拡大頼みなら頭打ち/一過性</strong>。</p>
+<p>実証（5年・DPS2倍以上、旧DB）:</p>
+<table>
+<thead>
+<tr>
+<th>銘柄</th>
+<th>DPS倍</th>
+<th>EPS倍</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>霞ヶ関キャピタル</td>
+<td>24x</td>
+<td>7.9x</td>
+<td>EPS牽引＝<strong>健全</strong></td>
+</tr>
+<tr>
+<td>ジャパンエンジン</td>
+<td>14.7x</td>
+<td>8.0x</td>
+<td>EPS牽引＝健全</td>
+</tr>
+<tr>
+<td>イクヨ</td>
+<td>66x</td>
+<td>0.0x</td>
+<td>EPS無し＝<strong>性向拡大の一過性</strong></td>
+</tr>
+<tr>
+<td>日本製鉄</td>
+<td>36x</td>
+<td>0.5x(減)</td>
+<td>EPS低下＝<strong>市況回復の罠</strong></td>
+</tr>
+<tr>
+<td>THK</td>
+<td>16.4x</td>
+<td>−3.6x(赤)</td>
+<td>一過性</td>
+</tr>
+</tbody>
+</table>
+<p>→ 同じ高YoCでも<strong>EPSが伴うものだけが本物</strong>。ブースト株を弾ける。</p>
+<h3 id="c">C. 持続性の評価観点（一般論＝ほぼ教科書通り。ユーザー主観と一致）</h3>
+<table>
+<thead>
+<tr>
+<th>観点</th>
+<th>見る指標</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原資が利益で増えているか</td>
+<td>EPS成長（分解式のEPS牽引度）</td>
+<td>性向拡大頼みでない</td>
+</tr>
+<tr>
+<td>払い過ぎていないか</td>
+<td>配当性向</td>
+<td>高すぎ＝増配余地なし/減配リスク</td>
+</tr>
+<tr>
+<td>現金で賄えているか</td>
+<td>FCF配当カバレッジ</td>
+<td>借金・資産売却でなく実キャッシュ</td>
+</tr>
+<tr>
+<td>不況に耐える体力</td>
+<td>ネットキャッシュ・現金</td>
+<td>下落局面で配当を守れる</td>
+</tr>
+<tr>
+<td>還元方針へのコミット</td>
+<td><strong>DOE</strong>（=ROE×配当性向）</td>
+<td>利益が振れても自己資本は安定→持続性シグナルとして配当性向より優秀。日本で採用増。<strong>現16指標に無く追加候補</strong></td>
+</tr>
+<tr>
+<td>一過性でないか</td>
+<td>連続増配年数（既存）</td>
+<td>毎年か単発か</td>
+</tr>
+</tbody>
+</table>
+<h3 id="d-yoc-dss2">D. 組み合わせ方：「YoC（量）× DSS（質）」の2軸</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>        持続性 高
+          │ ②育成株        ① 本命
+          │ (YoCはまだ低い   (高YoC×高持続=
+          │  が健全)          狙うべき増配株)
+──────────┼──────────────── YoC 高
+          │ ④地味          ③ 一過性の罠
+          │                 (高YoCだがEPS伴わず
+        持続性 低             =イクヨ/日鉄)
+</code></pre></div>
+
+<ul>
+<li><strong>①右上が本命、③右下が罠</strong>。YoC単独だと③に騙される（＝ユーザーの懸念そのもの）</li>
+<li>使い方候補: (a)2軸分類で見せる (b)「質調整YoC＝YoC×DSS」でランキング (c)持続性ゲート（DSS基準未満はYoC無効）。<strong>方式はD4.5で確定</strong></li>
+<li>投稿フックとして優秀: 「増配率は高いが危ない株 vs 本物の増配株」は興味を引く</li>
+</ul>
+<h3 id="e">E. 留意（実装時）</h3>
+<ul>
+<li>特別配当がDPSを膨らませる → 普通配当と特別配当を分離（J-Quants DivAnnの内訳確認）</li>
+<li>市況ピーク益での一時的高配当 → EPSの自己トレンド比（循環株検出）も併用余地</li>
+<li>N年前株価が要る → 株価2000年遡及（クラスC）が前提</li>
+</ul>
+<p>→ <strong>D4.5（指標較正）</strong>でYoC・DSS・DOEを指標化、<strong>D5（X発信）</strong>で2軸の投稿テーマ化。10年CAGRはこの切り口で置換/降格を検討。</p>
+<hr />
+<!-- 切り口② 以降はここに追記 -->
+</main></div></body></html>

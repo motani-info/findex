@@ -1,56 +1,58 @@
-# 設計: データワークフロー
+# 設計: データワークフロー（D7改訂版）
 
-**作成日**: 2026-06-14
-**関連**: [data-model.md](data-model.md) / [pre2000-data.md](pre2000-data.md) / [requirements.md](../requirements.md)
-
-データが外部ソースから取り込まれ、正準系列に整形され、指標化・採点され、Xに投稿されるまでの全工程。
-原則は一方向フロー（後段は前段テーブルだけを読む）。
+**作成日**: 2026-06-14（D7でD2.5〜D4.5の確定を反映して全面改訂）
+**親**: [charter](00-charter-and-data-integrity.md) / [data-model](data-model.md)（D3）/ [indicator-system](04-indicator-system.md)（D4）/ [indicator-calibration](04_5-indicator-calibration.md)（D4.5）
+**範囲**: 外部ソース取得 → 来歴付き保管 → 導出（status付き）→ v4採点 → 出力までの全工程。原則は**一方向フロー**（後段は前段テーブルだけを読む）。
 
 ---
 
-## 0. 全体データフロー
+## 0. 全体データフロー（D2.5実測のソース分担を反映）
 
 ```
-[取得層 fetch]
-JPX Excel ──月次→ stocks（コード/名称/市場/業種）
-kabutan ──初回→ stocks.listing_date / founded_date
-yfinance prices ──日次→ price_history
-yfinance dividends ──半年→ dividend_events
-yfinance financials ──四半期→ financial_snapshots
-haitoukin/IR/手入力 ─────→ dividend_annual（source=haitoukin/ir/manual）
-ZAi・各社IR ─────────────→ streak_overrides
-
-         │ すべて RateLimitedFetcher 経由（--codes / バッチ / レジューム / バックオフ）
-         ▼
-[導出層 derive]
-dividend_events ──build_dividend_annual──→ dividend_annual（source=events）
-dividend_annual + streak_overrides + stocks.listing_date ──streaks──→ ストリーク＋打ち切り
-dividend_annual + financial_snapshots + price_history ──compute──→ computed_metrics（唯一の出口）
+[取得層 fetch]  ※すべて RateLimitedFetcher 経由（--codes/バッチ/レジューム/バックオフ）
+JPX Excel ─────────月次→ stocks（コード/名称/市場/sector33）
+EDINETコードリスト ─月次→ stocks（edinet_code/決算期末月/連結）★zipで全社・即時
+kabutan ───────────初回→ stocks.listing_date（打ち切り判定の鍵・現0%）
+J-Quants /equities ─日次→ price_history（直近・2024-03〜の契約窓）
+yfinance prices ───初回→ price_history（2000年まで遡及。pre-2000は不能）
+J-Quants /fins/summary ─四半期→ financial_snapshots（現在〜2年：売上/営業益/純益/EPS/TA/Eq/Cash/CFO/配当/予想）
+EDINET 有報XBRL ───四半期→ financial_snapshots（深いBS：投資有価証券/有利子負債/支払利息/利益剰余金/流動資産/capex）★会計基準別パース
+haitoukin/IR/手入力 ─────→ dividend_annual（source=haitoukin/ir/manual：2000年以前backfill）
+ZAi・みんかぶ・各社IR ────→ result_overrides（公表"結果"：連続増配年数 等・汎用）
 
          ▼
-[評価層 score]
-computed_metrics + rules.yaml ──engine──→ dividend_scores（rule_versionで版管理）
+[導出層 derive]  ※各値に status を付与（ok/zero_legit/missing/insufficient/censored）
+dividend_events ──build──→ dividend_annual（source=events）
+beta ← price_history × TOPIX 回帰（自前算出。fetchしない）
+dividend_annual + result_overrides + stocks.listing_date ──streaks──→ 連続年数＋is_censored
+  （合成順序: 機械計算 →(昇格のみ)override →(不足)N+）
+dividend_annual + price_history ──→ YoC（取得利回り）＋dividend_multiple＋増配の質(EPS牽引度)
+financial_snapshots ──→ ROE/自己資本比率/FCF/ROIC/DOE/営業益率 等
+全部 ──→ computed_metrics（唯一の出口・指標値＋status＋claim別グレード）
+
+         ▼
+[評価層 score]  ※v4・status-based Nullポリシー
+computed_metrics + rules.yaml(v4) ──engine──→ dividend_scores（rule_versionで版管理）
 
          ▼
 [出力層 post]
-dividend_scores + computed_metrics ──→ CLI rank / 投稿文面生成
-投稿文面 ──品質ゲート──→ X（Playwright）──→ post_log
+dividend_scores + computed_metrics + claim別グレード ──→ CLI rank / 投稿文面
+投稿文面 ──品質ゲート（grade/status/censored/golden）──→ X（Playwright）──→ post_log
 ```
 
 ---
 
 ## 1. 更新サイクル（カテゴリ別TTL）
 
-データは「変わる頻度」で3カテゴリに分け、毎日重いAPIを叩かない設計にする。
-
-| カテゴリ | 内容 | コマンド | 頻度 | TTL | 所要 |
+| カテゴリ | 内容 | コマンド | 頻度 | TTL | 主ソース |
 |---|---|---|---|---|---|
-| A 価格由来 | 終値→利回り/PER/PBR/時価総額/モメンタム | `findex update` | 日次(平日) | — | 約5分 |
-| B 財務諸表 | ROE/自己資本比率/EPS成長/FCF 等 | `findex update --quarterly` | 四半期 | 90日 | 約20分 |
-| C 配当履歴 | 連続増配/非減配/配当CAGR/減配信頼性 | `findex update --dividends` | 半年 | 180日 | 約40分 |
-| 初回/年1 | 全データ一括 | フルスキャン | 初回/年1 | — | 2〜4時間 |
+| A 価格由来 | 終値→利回り/PER/PBR/時価総額/モメンタム/YoC | `findex update` | 日次(平日) | — | J-Quants（直近）|
+| B 財務諸表 | ROE/自己資本比率/EPS成長/FCF/DOE/ROIC | `findex update --quarterly` | 四半期 | 90日 | J-Quants＋EDINET |
+| C 配当履歴 | 連続増配/非減配/配当倍率/減配信頼性 | `findex update --dividends` | 半年 | 180日 | events＋backfill＋override |
+| マスター | edinet_code/会計メタ/上場日 | `findex update --master` | 月次/初回 | — | JPX/EDINETリスト/kabutan |
+| 初回/年1 | 全データ一括（株価2000遡及含む） | フルスキャン | 初回/年1 | — | 全ソース |
 
-**ポイント**: 毎日の更新は株価のみ。財務・配当はDBから読み出してローカル再計算するため高速。TTL未経過の銘柄はAPIをスキップする。
+毎日叩くのは株価のみ。財務・配当はDBから読みローカル再計算。TTL未経過はAPIスキップ。
 
 ---
 
@@ -58,150 +60,166 @@ dividend_scores + computed_metrics ──→ CLI rank / 投稿文面生成
 
 ```
 1. backup_db()                       # findex_v2.db.bak-YYYYMMDD
-2. PriceFetcher.run(codes)           # 最新2日分の終値を price_history に追記
-   └ RateLimitedFetcher: 200銘柄/バッチ・バッチ間スリープ・チェックポイント
-3. compute_price_metrics()           # per/pbr/div_yield/時価総額/mix/net_cash_per を再計算
-                                     # → computed_metrics（price_computed_at 更新）
-4. score()                           # computed_metrics + rules.yaml → dividend_scores
+2. PriceFetcher.run(codes)           # J-Quantsで最新終値を price_history に追記
+3. compute_price_metrics()           # per/pbr/div_yield/時価総額/mix/net_cash_per/YoC を再計算
+                                     # → computed_metrics（price_computed_at 更新・各値にstatus）
+4. score()                           # computed_metrics + rules.yaml(v4) → dividend_scores
 5. run_log に記録
 ```
-財務・配当カラムはDBの既存値をそのまま使う（再取得しない）。
+財務・配当カラムはDBの既存値を使う（再取得しない）。
 
 ---
 
-## 3. 配当の正準化（半年・最重要ロジック）
+## 3. 配当の正準化（半年・最重要・地雷集中）
 
-`findex update --dividends` の中核。**ここが正確性の生命線**（地雷1〜5が集中）。
+`findex update --dividends` の中核。**正確性の生命線**。
 
-### 3.1 events 取得 → dividend_annual 再構築
+### 3.1 events → dividend_annual 再構築
 ```
 rebuild_annual_from_events(code):
-  1. DividendFetcher で dividend_events を更新（権利落ち日ベースの実イベント）
-  2. 会計年度で集計（fy = year if month>=4 else year-1）    # 地雷2
-  3. first_complete_fy = min(集計年度) + 1                  # 期中開始年を捨てる・地雷1
-  4. source='events' の既存行を削除して再INSERT
-     ただし fiscal_year >= first_complete_fy の年度のみ
-     既存行が source='manual'/'ir' なら上書きしない          # 優先順位
-  5. fiscal_year < first_complete_fy はバックフィル行が残る
+  1. dividend_events を更新（権利落ち日ベースの実イベント）
+  2. 会計年度で集計（fy = year if month>=4 else year-1）       # 地雷2
+  3. first_complete_fy = min(集計年度)+1（期中開始年を捨てる） # 地雷1
+  4. source='events' を再構築。manual/ir/haitoukin は上書きしない # 優先順位
 ```
 
-### 3.2 バックフィル接合（2000年以前）
+### 3.2 バックフィル接合（2000年以前・raw補填）
 ```
-backfill(code):  # haitoukin/IR/手入力
-  - 対象: fiscal_year < first_complete_fy（シーム年度を含む）
-  - 優先順位: manual > ir > haitoukin > events
-  - 取り込み後に【境界異常チェック】:                        # 地雷3
-      前年比 dps>prev*10 or dps<prev/10 の年があれば
-      → 分割調整漏れ疑い → そのバックフィル行を削除（誤データより欠落が安全）
-  - NTT/SBG/電通総研はここで弾かれる → override で対処
+backfill(code):  # haitoukin/IR/手入力 → dividend_annual
+  - 対象: fiscal_year < first_complete_fy
+  - 優先順位: manual > ir > haitoukin > jquants > events
+  - 境界異常チェック: 前年比>10倍/<0.1倍 → 分割調整漏れ疑いで削除（地雷3）
+  - NTT/SBG/電通総研はここで弾かれ override で対処
 ```
-収集済み58銘柄は移行で投入済み。追加が必要なときだけ `scripts/backfill_pre2000.py`（haitoukinスクレイパー）を使う。
 
-### 3.3 ストリーク計算＋打ち切り判定（`derive/streaks.py`）
+### 3.3 ストリーク＋打ち切り＋結果補正（合成順序）
 ```
-compute_streaks(annual, listing_year, override):
-  1. 進行中の会計年度（支払い未確定）を除外
-  2. 末尾から遡って連続年数を数える
-       増配: dps > prev*1.0001 / 非減配: dps >= prev*0.999
-  3. 年度が連続しない箇所（歯抜け）で打ち切り               # 地雷4
-  4. ストリークが系列先頭=最古年に到達 かつ 最古年<=下限band(2002)
-       → is_censored 候補
-  5. listing_year < 最古年 なら打ち切り確定 / listing_year>=最古年 なら真の開始（解除）
-  6. override.value > 機械計算 のときだけ公表値に昇格（is_censored 解除）  # 地雷5
-  → computed_metrics に consecutive_*_years と streak_is_censored を書く
+compute_streaks(annual, listing_year, result_overrides):
+  1. 進行中の会計年度を除外
+  2. 末尾から連続年数を計数（増配 dps>prev*1.0001 / 非減配 dps>=prev*0.999）
+  3. 歯抜けで打ち切り（地雷4）
+  ── 合成順序（D4 §2）──
+  4. machine値を算出
+  5. result_overrides に当該fieldあり かつ override.value >= machine
+        → value=override, status=ok(source=override), is_censored解除, as_of以降は機械で確認分を加算
+  6. else machineが下限band/歯抜けで打ち切り → status=censored（N+表示）
+  7. else status=ok(machine)
+  → computed_metrics に 連続年数・status・source・streak_is_censored を書く
 ```
-表示は `format_years()`：`is_censored` なら必ず「N年以上」、そうでなければ「N年」。
+表示 `format_years()`: censored は必ず「N年以上」。override由来は出典明示（「ZAi集計で連続増配N年」）。
+
+### 3.4 YoC・増配の質（D4.5・切り口①）
+```
+compute_yoc(code):
+  - yield_on_cost_5y = 最新DPS ÷ 5年前株価（株価2000遡及が前提。未整備中は dividend_multiple_5y 代理）
+  - 増配の質 = EPS倍率 / DPS倍率 から判定:
+       EPS牽引(sound) / 性向拡大(payout_driven) / 一過性(cyclical)
+  → YoCスコアに質係数（×1.0 / ×0.5 / ×0.3）を掛けて減点
+```
 
 ---
 
 ## 4. 財務の更新（四半期・`findex update --quarterly`）
 
 ```
-1. TTL>90日 の銘柄のみ FinancialFetcher.run(codes)
-2. yfinance info/financials/balance_sheet を取得 → financial_snapshots に年度別INSERT
-   （1行上書きせず履歴を積む）
-3. EDINETでクロスチェック（欠損・異常値の検出）              # 任意
-4. compute_financial_metrics() → computed_metrics（fin_computed_at 更新）
-     ROE / 自己資本比率 / EPS成長5y / 売上CAGR / FCFカバレッジ /
-     ROIC-WACC / 利益剰余金配当倍率 / 営業利益率 / 配当性向
+1. TTL>90日 の銘柄のみ取得
+2. J-Quants /fins/summary → financial_snapshots（現在〜2年：売上/営業益/純益/EPS/TA/Eq/Cash/CFO/配当/予想/発行株）
+3. EDINET 有報XBRL → financial_snapshots（深いBS：投資有価証券/有利子負債/支払利息/利益剰余金/流動資産/capex）
+     ★stocks.accounting_standard で JGAAP/IFRS/US のラベル辞書を切替（IFRSは科目名違い）
+     ★有報検索は提出日を日次スキャン（月末だけ見ると当たらない・3月決算は6月下旬窓）
+4. beta = price_history × TOPIX 回帰で自前算出（fetchしない）
+5. compute_financial_metrics() → computed_metrics（fin_computed_at 更新・各値にstatus）
+     ROE / 自己資本比率 / EPS成長5y / 売上CAGR / FCFカバレッジ(=CFO-capex) /
+     ROIC-WACC(beta,cost_of_debt=支払利息/有利子負債) / DOE(=ROE×配当性向) / 営業益率
 ```
 
 ---
 
-## 5. スコアリング（評価層）
+## 5. スコアリング（評価層・v4 status-based）
 
 ```
-1. rules.yaml を読み、SHA256 を rule_versions に登録（無ければ）
-2. 各銘柄の computed_metrics を18指標ルールに通す
-     - upper_cap / penalty（利回り7%超）等を適用
-     - 大型株(時価総額1兆円超)・金融銘柄は動的指標入れ替え
-3. 197点満点 → 100点換算 → dividend_scores に (code, scored_at, total_score, score_json)
+1. rules.yaml(v4) を読み SHA256 を rule_versions に登録
+2. 各銘柄の (指標値, status) を v4ルールに通す:
+     - status=missing/insufficient/censored → 分子・分母から除外（持ってないデータで罰しない）
+     - status=zero_legit → 0点で分母に残す（実力）
+     - 営業利益率は業種相対スコア（sector33パーセンタイル＋絶対フロア）
+     - 予想配当性向/利回りは予想欠損時に実績フォールバック
+     - upper_cap/penalty_cap（利回り7%超・PER×PBR等）適用
+     - 大型株(1兆円超)・金融は動的指標入れ替え（ROIC↔利益剰余金配当倍率, ネットキャッシュPER↔ミックス係数, 金融は自己資本比率除外）
+3. 総合 = Σ(加重スコア)/Σ(採点できた指標の最大加重) × 100   ※動的分母
+4. dividend_scores に (code, scored_at, total_score, score_json, rule_version_id)
+   ＋ claim別グレード（grade_dividend/valuation/health/capital）を併記
 ```
-ルール改定時は新 `rule_version` が発番され、過去スコアとの比較が可能。
 
 ---
 
-## 6. X投稿ワークフロー（出力層）
+## 6. X投稿ワークフロー（出力層・優先度低＝後回し）
 
 ```
-1. テーマ選択（21テーマのローテーション）
-2. dividend_scores + computed_metrics から文面生成（poster.py）
-3. 【品質ゲート】← 投稿前必須・最大の安全装置
-     a. golden test が全green（花王=36 等）であること
-     b. 文面中の数字が streak_is_censored=1 の銘柄を裸の数字で含まないこと
-     c. body_sha256 が post_log に過去30日存在しないこと（二重投稿防止）
-   いずれか不合格 → status='skipped' で記録し投稿しない
-4. Playwright でログイン（~/.findex/x_session.json 再利用）→ スレッド投稿
-5. 成功→post_log(status='posted', tweet_id) / 失敗→status='failed'（リトライしない）
+1. テーマ選択（ローテーション。切り口は analysis-angles.md に蓄積）
+2. dividend_scores + computed_metrics + claim別グレード から文面生成
+3. 【品質ゲート】← 投稿前必須
+     a. golden test 全green（花王=36 等）
+     b. censored銘柄を裸の数字で含まない（N+ or override出典付きのみ）
+     c. 対象claimの grade が基準以上（例 grade_dividend>=B）
+     d. body_sha256 が過去30日に無い（二重投稿防止）
+   不合格 → status='skipped'
+4. Playwright ログイン（~/.findex/x_session.json 再利用）→ スレッド投稿
+5. 成功→post_log(posted, tweet_id) / 失敗→failed（リトライしない）
 ```
+※D5（X発信戦略）は優先度低のため詳細は後続。本節は枠組みのみ。
 
 ---
 
 ## 7. 移行ワークフロー（legacy findex.db → findex_v2.db）
 
-収集済みデータ（218MB）の再利用。**必ず移行すべきは再現困難な2つ**: `dividend_annual`(source!='events') と `streak_overrides`。
+**必ず移行すべき再現困難な2つ**: `dividend_annual`(source!='events') と `result_overrides`(旧streak_overrides 12件)。
 
 ```
 migrate():
-  1. backup（findex.db は読み取りのみ、コピーで作業）
+  1. findex.db は読み取り専用（コピーで作業）
   2. findex_v2.db を initdb（新スキーマ）
-  3. stocks をコピー（listing_date は未取得なので NULL のまま → kabutanで後追い）
-  4. dividend_annual を全 source コピー（haitoukin/ir/manual は再現困難・最優先）
-  5. streak_overrides をコピー（12件）
+  3. stocks コピー（edinet_code/会計メタはEDINETリストで新規補充、listing_dateはkabutanで後追い）
+  4. dividend_annual 全sourceコピー（haitoukin/ir/manual 最優先）
+  5. streak_overrides → result_overrides に変換（field='consecutive_dividend_growth_years'等で汎用化）
   6. dividend_history(legacy) → dividend_events に変換コピー
-  7. price_history をコピー（任意・再取得可だが時間節約）
-  8. 旧 scores(27,498行) はバックテスト用途なら別テーブルで保持（任意）
-  9. derive 全再計算 → computed_metrics を再構築
-  10. golden test で検算（花王=36 等）→ 通ればOK
+  7. price_history は移行せず J-Quants＋yfinanceで2000年まで再取得（旧は2024-06〜のみ＝不足）
+  8. financial_snapshots は J-Quants＋EDINETで再取得（旧raw_financialsは移行しない＝capex 0%等の欠落のため）
+  9. derive 全再計算（status付き）→ computed_metrics 再構築
+  10. golden test 検算（花王=36 等）→ 通ればOK
 ```
-旧 `stock_fundamentals` / `raw_financials` / `momentum_scores` は二重パイプラインの遺物のため**移行しない**。
+旧 `stock_fundamentals`/`raw_financials`/`momentum_scores`/`scores` は移行しない（二重パイプライン遺物・欠落多）。
 
 ---
 
 ## 8. レート制限の運用フロー（横断）
 
-全取得は `RateLimitedFetcher` を通す。開発・検証は**全銘柄でなくコホート約30社**で回す。
+全取得は `RateLimitedFetcher` 経由。開発・検証は**コホート約30社**で回す。
 
 ```
-開発時:  findex update --cohort      # data/verification_cohort.csv の28社だけ
-        findex update --codes 4452,9433
-本番初回: フルスキャン（goldenが通ってから1回だけ）
+開発: findex update --cohort           # data/verification_cohort.csv の28社
+      findex update --codes 4452,9433
+本番初回: フルスキャン（goldenが通ってから1回だけ。株価2000遡及は重い）
 
 RateLimitedFetcher.run(codes):
-  - codes を batch_size で分割、バッチ間スリープ
-  - 各銘柄 fetch_one()。429/401 検知 → 指数バックオフ（最大5回）
-  - 成功した銘柄を checkpoint(JSON) に記録
-  - 途中失敗・中断しても resume=True で続きから（取得済みはスキップ）
+  - batch_size分割・バッチ間スリープ
+  - 429/401 → 指数バックオフ（最大5回）
+  - 成功銘柄を checkpoint(JSON)。resume=True で続きから
+  - ソース別の上限（J-Quants契約レート/EDINET日次スキャン/yfinance 2並列）を尊重
 ```
 
 ---
 
-## 9. 整合性チェック（半年次）
+## 9. 整合性チェック（半年次・D6に接続）
 
 ```
-- dividend_annual の境界異常（前年比10倍/0.1倍）が残っていないか        # 地雷3
-- streak_is_censored=1 の銘柄が dividend_scores 経由で裸の数字を出していないか
-- golden test（ZAiトップ20と機械計算+override）が一致するか
-- first_data_date と listing_date の矛盾（listing後にデータ空白）検出
+- dividend_annual 境界異常（前年比10倍/0.1倍）の残存                       # 地雷3
+- censored銘柄が dividend_scores 経由で裸の数字を出していないか
+- result_overrides値 と machine値 の乖離（定義差の早期発見）             # D2.7/D6
+- status分布の異常監視（missing急増＝取得障害の検知）
+- golden test（ZAiトップ20と機械計算+override）一致
+- listing_date と first_data_date の矛盾検出
+- backfill＋override後に残る N+ 銘柄数（減らすべき指標）
 - 検出結果を run_log に記録。不合格なら X投稿を自動停止
 ```
+詳細な検証戦略（golden拡張・照合レポート・自動停止条件）は **D6 多フィールド検証** で規定。

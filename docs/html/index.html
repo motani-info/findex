@@ -67,6 +67,9 @@ li{margin:.2em 0}
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
 <a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
@@ -81,9 +84,12 @@ li{margin:.2em 0}
 <h3 style="margin-top:1.4em"><a href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 問い | 実測結果 | |---|---| | 現在スナップショットの財務は1ソースで足りるか | J-Quants v2 `/fins/summary` がほぼ充足（売上/営業益/純益/EPS/総資産/自己資本/現金/営業CF・投資CF・財務CF/発行株数/配当/予想配当/配当性向）。1コールで潤沢 | | 長期</p>
 <h3 style="margin-top:1.4em"><a href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">データを「取得可能性のクラス」で分類する。これが定款「足りない部分を常に把握できる」の実体。</p>
 <h3 style="margin-top:1.4em"><a href="result-override-layer.html">D2.7：結果補正レイヤ</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 種別 | 何を入れるか | 例 | 対象 | |---|---|---|---| | マスター補填（raw） | 生の系列値 | haitoukin で FY1989〜の年間配当 | 機械計算の入力を増やす | | 結果補正（override・本書） | 導出済みの"結果"値 | ZAi集計「連続増配28年」 | </p>
+<h3 style="margin-top:1.4em"><a href="indicator-system.html">D4：指標システム仕様</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| status | 意味 | 実例 | 採点での扱い | |---|---|---|---| | `ok` | 値あり | 連続増配16年 | 通常採点 | | `zero_legit` | 正当な0（実値としての0） | 増配してない→連続増配0年、過去20年で減配2回→信頼性0 | 0点として採点（実力。分母に残</p>
+<h3 style="margin-top:1.4em"><a href="indicator-calibration.html">D4.5：指標較正（v4提案）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| # | 問題（D4で検出） | 較正 | |---|---|---| | ① | 10年CAGRは低ベース/一過性を過大評価 | YoC（取得利回り）に置換＋EPS牽引ゲート＋DOE追加 | | ② | 自己資本比率80%満点は上位10%のみ・ROEと数学的に矛盾 | 閾値70%へ・ROE再較正・矛盾を緩和 | |</p>
+<h3 style="margin-top:1.4em"><a href="analysis-angles.html">分析切り口カタログ</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Angles]</span></h3><p style="color:var(--muted)">実証（5年・DPS2倍以上、旧DB）:</p>
 <h3 style="margin-top:1.4em"><a href="requirements.html">要件定義書 v2</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Requirements]</span></h3><p style="color:var(--muted)">旧実装（`../back_findex`）を切り離し、ゼロから作り直すための要件定義書。 旧実装は 計画ドキュメントは良質だったが、実装コードが破綻していた:</p>
 <h3 style="margin-top:1.4em"><a href="data-model.html">テーブル定義（データモデル）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">1. 一方向フロー: 取得層 → 導出層 → 評価層 → 出力層。後段は前段テーブルだけを読む 2. 粒度別テーブル: 年間配当（FY粒度）とイベント配当（権利落ち日粒度）を混ぜない（地雷1） 3. 計算は導出層に集約: ストリーク・CAGR等は `computed_metrics` にのみ書く 4. 全値に来歴メタ:</p>
-<h3 style="margin-top:1.4em"><a href="data-workflow.html">データワークフロー</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">データが外部ソースから取り込まれ、正準系列に整形され、指標化・採点され、Xに投稿されるまでの全工程。 原則は一方向フロー（後段は前段テーブルだけを読む）。</p>
+<h3 style="margin-top:1.4em"><a href="data-workflow.html">データワークフロー</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">``` [取得層 fetch]  ※すべて RateLimitedFetcher 経由（--codes/バッチ/レジューム/バックオフ） JPX Excel ─────────月次→ stocks（コード/名称/市場/sector33） EDINETコードリスト ─月次→ stocks（edinet_code/決算期末</p>
 <h3 style="margin-top:1.4em"><a href="pre2000-data.html">2000年問題（データ完全性の一事例）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">findex の中核スコアは長期の配当履歴に依存する（連続非減配17年・連続増配17年・減配信頼性20年・配当10年CAGR）。 しかしデータソースの下限は2000年前後:</p>
 <hr><p style="color:var(--muted);font-size:12px">このHTMLは <code>scripts/build_docs_html.py</code> で <code>docs/*.md</code> から生成。docs編集後に再実行する。</p>
 </main></div></body></html>

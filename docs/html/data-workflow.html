@@ -68,62 +68,69 @@ li{margin:.2em 0}
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
 <a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="active" href="data-workflow.html">データワークフロー</a>
 <a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
-  <div class="toc"><a class="l2" href="#0">0. 全体データフロー</a>
+  <div class="toc"><a class="l2" href="#0-d25">0. 全体データフロー（D2.5実測のソース分担を反映）</a>
 <a class="l2" href="#1-ttl">1. 更新サイクル（カテゴリ別TTL）</a>
 <a class="l2" href="#2-findex-update">2. 日次ワークフロー（findex update）</a>
-<a class="l2" href="#3">3. 配当の正準化（半年・最重要ロジック）</a>
-<a class="l3" href="#31-events-dividend_annual">3.1 events 取得 → dividend_annual 再構築</a>
-<a class="l3" href="#32-2000">3.2 バックフィル接合（2000年以前）</a>
-<a class="l3" href="#33-derivestreakspy">3.3 ストリーク計算＋打ち切り判定（derive/streaks.py）</a>
+<a class="l2" href="#3">3. 配当の正準化（半年・最重要・地雷集中）</a>
+<a class="l3" href="#31-events-dividend_annual">3.1 events → dividend_annual 再構築</a>
+<a class="l3" href="#32-2000raw">3.2 バックフィル接合（2000年以前・raw補填）</a>
+<a class="l3" href="#33">3.3 ストリーク＋打ち切り＋結果補正（合成順序）</a>
+<a class="l3" href="#34-yocd451">3.4 YoC・増配の質（D4.5・切り口①）</a>
 <a class="l2" href="#4-findex-update-quarterly">4. 財務の更新（四半期・findex update --quarterly）</a>
-<a class="l2" href="#5">5. スコアリング（評価層）</a>
-<a class="l2" href="#6-x">6. X投稿ワークフロー（出力層）</a>
+<a class="l2" href="#5-v4-status-based">5. スコアリング（評価層・v4 status-based）</a>
+<a class="l2" href="#6-x">6. X投稿ワークフロー（出力層・優先度低＝後回し）</a>
 <a class="l2" href="#7-legacy-findexdb-findex_v2db">7. 移行ワークフロー（legacy findex.db → findex_v2.db）</a>
 <a class="l2" href="#8">8. レート制限の運用フロー（横断）</a>
-<a class="l2" href="#9">9. 整合性チェック（半年次）</a></div>
+<a class="l2" href="#9-d6">9. 整合性チェック（半年次・D6に接続）</a></div>
 </nav>
 <main>
   <div class="badge">Design</div>
-  <h1 id="_1">設計: データワークフロー</h1>
-<p><strong>作成日</strong>: 2026-06-14
-<strong>関連</strong>: <a href="data-model.html">data-model.md</a> / <a href="pre2000-data.html">pre2000-data.md</a> / <a href="requirements.html">requirements.md</a></p>
-<p>データが外部ソースから取り込まれ、正準系列に整形され、指標化・採点され、Xに投稿されるまでの全工程。
-原則は一方向フロー（後段は前段テーブルだけを読む）。</p>
+  <h1 id="d7">設計: データワークフロー（D7改訂版）</h1>
+<p><strong>作成日</strong>: 2026-06-14（D7でD2.5〜D4.5の確定を反映して全面改訂）
+<strong>親</strong>: <a href="charter.html">charter</a> / <a href="data-model.html">data-model</a>（D3）/ <a href="indicator-system.html">indicator-system</a>（D4）/ <a href="indicator-calibration.html">indicator-calibration</a>（D4.5）
+<strong>範囲</strong>: 外部ソース取得 → 来歴付き保管 → 導出（status付き）→ v4採点 → 出力までの全工程。原則は<strong>一方向フロー</strong>（後段は前段テーブルだけを読む）。</p>
 <hr />
-<h2 id="0">0. 全体データフロー</h2>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #008000; font-weight: bold">[取得層 fetch]</span>
-<span style="color: #687822">JPX Excel ──月次→ stocks（コード/名称/市場/業種）</span>
-<span style="color: #687822">kabutan ──初回→ stocks.listing_date / founded_date</span>
-<span style="color: #687822">yfinance prices ──日次→ price_history</span>
-<span style="color: #687822">yfinance dividends ──半年→ dividend_events</span>
-<span style="color: #687822">yfinance financials ──四半期→ financial_snapshots</span>
-<span style="color: #687822">haitoukin/IR/手入力 ─────→ dividend_annual（source</span><span style="color: #666">=</span><span style="color: #BA2121">haitoukin/ir/manual）</span>
-<span style="color: #687822">ZAi・各社IR ─────────────→ streak_overrides</span>
+<h2 id="0-d25">0. 全体データフロー（D2.5実測のソース分担を反映）</h2>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>[取得層 fetch]  ※すべて RateLimitedFetcher 経由（--codes/バッチ/レジューム/バックオフ）
+JPX Excel ─────────月次→ stocks（コード/名称/市場/sector33）
+EDINETコードリスト ─月次→ stocks（edinet_code/決算期末月/連結）★zipで全社・即時
+kabutan ───────────初回→ stocks.listing_date（打ち切り判定の鍵・現0%）
+J-Quants /equities ─日次→ price_history（直近・2024-03〜の契約窓）
+yfinance prices ───初回→ price_history（2000年まで遡及。pre-2000は不能）
+J-Quants /fins/summary ─四半期→ financial_snapshots（現在〜2年：売上/営業益/純益/EPS/TA/Eq/Cash/CFO/配当/予想）
+EDINET 有報XBRL ───四半期→ financial_snapshots（深いBS：投資有価証券/有利子負債/支払利息/利益剰余金/流動資産/capex）★会計基準別パース
+haitoukin/IR/手入力 ─────→ dividend_annual（source=haitoukin/ir/manual：2000年以前backfill）
+ZAi・みんかぶ・各社IR ────→ result_overrides（公表&quot;結果&quot;：連続増配年数 等・汎用）
 
-<span style="color: #BBB">         </span><span style="color: #687822">│ すべて RateLimitedFetcher 経由（--codes / バッチ / レジューム / バックオフ）</span>
-<span style="color: #BBB">         </span><span style="color: #687822">▼</span>
-<span style="color: #008000; font-weight: bold">[導出層 derive]</span>
-<span style="color: #687822">dividend_events ──build_dividend_annual──→ dividend_annual（source</span><span style="color: #666">=</span><span style="color: #BA2121">events）</span>
-<span style="color: #687822">dividend_annual + streak_overrides + stocks.listing_date ──streaks──→ ストリーク＋打ち切り</span>
-<span style="color: #687822">dividend_annual + financial_snapshots + price_history ──compute──→ computed_metrics（唯一の出口）</span>
+         ▼
+[導出層 derive]  ※各値に status を付与（ok/zero_legit/missing/insufficient/censored）
+dividend_events ──build──→ dividend_annual（source=events）
+beta ← price_history × TOPIX 回帰（自前算出。fetchしない）
+dividend_annual + result_overrides + stocks.listing_date ──streaks──→ 連続年数＋is_censored
+  （合成順序: 機械計算 →(昇格のみ)override →(不足)N+）
+dividend_annual + price_history ──→ YoC（取得利回り）＋dividend_multiple＋増配の質(EPS牽引度)
+financial_snapshots ──→ ROE/自己資本比率/FCF/ROIC/DOE/営業益率 等
+全部 ──→ computed_metrics（唯一の出口・指標値＋status＋claim別グレード）
 
-<span style="color: #BBB">         </span><span style="color: #687822">▼</span>
-<span style="color: #008000; font-weight: bold">[評価層 score]</span>
-<span style="color: #687822">computed_metrics + rules.yaml ──engine──→ dividend_scores（rule_versionで版管理）</span>
+         ▼
+[評価層 score]  ※v4・status-based Nullポリシー
+computed_metrics + rules.yaml(v4) ──engine──→ dividend_scores（rule_versionで版管理）
 
-<span style="color: #BBB">         </span><span style="color: #687822">▼</span>
-<span style="color: #008000; font-weight: bold">[出力層 post]</span>
-<span style="color: #687822">dividend_scores + computed_metrics ──→ CLI rank / 投稿文面生成</span>
-<span style="color: #687822">投稿文面 ──品質ゲート──→ X（Playwright）──→ post_log</span>
+         ▼
+[出力層 post]
+dividend_scores + computed_metrics + claim別グレード ──→ CLI rank / 投稿文面
+投稿文面 ──品質ゲート（grade/status/censored/golden）──→ X（Playwright）──→ post_log
 </code></pre></div>
 
 <hr />
 <h2 id="1-ttl">1. 更新サイクル（カテゴリ別TTL）</h2>
-<p>データは「変わる頻度」で3カテゴリに分け、毎日重いAPIを叩かない設計にする。</p>
 <table>
 <thead>
 <tr>
@@ -132,167 +139,191 @@ li{margin:.2em 0}
 <th>コマンド</th>
 <th>頻度</th>
 <th>TTL</th>
-<th>所要</th>
+<th>主ソース</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>A 価格由来</td>
-<td>終値→利回り/PER/PBR/時価総額/モメンタム</td>
+<td>終値→利回り/PER/PBR/時価総額/モメンタム/YoC</td>
 <td><code>findex update</code></td>
 <td>日次(平日)</td>
 <td>—</td>
-<td>約5分</td>
+<td>J-Quants（直近）</td>
 </tr>
 <tr>
 <td>B 財務諸表</td>
-<td>ROE/自己資本比率/EPS成長/FCF 等</td>
+<td>ROE/自己資本比率/EPS成長/FCF/DOE/ROIC</td>
 <td><code>findex update --quarterly</code></td>
 <td>四半期</td>
 <td>90日</td>
-<td>約20分</td>
+<td>J-Quants＋EDINET</td>
 </tr>
 <tr>
 <td>C 配当履歴</td>
-<td>連続増配/非減配/配当CAGR/減配信頼性</td>
+<td>連続増配/非減配/配当倍率/減配信頼性</td>
 <td><code>findex update --dividends</code></td>
 <td>半年</td>
 <td>180日</td>
-<td>約40分</td>
+<td>events＋backfill＋override</td>
+</tr>
+<tr>
+<td>マスター</td>
+<td>edinet_code/会計メタ/上場日</td>
+<td><code>findex update --master</code></td>
+<td>月次/初回</td>
+<td>—</td>
+<td>JPX/EDINETリスト/kabutan</td>
 </tr>
 <tr>
 <td>初回/年1</td>
-<td>全データ一括</td>
+<td>全データ一括（株価2000遡及含む）</td>
 <td>フルスキャン</td>
 <td>初回/年1</td>
 <td>—</td>
-<td>2〜4時間</td>
+<td>全ソース</td>
 </tr>
 </tbody>
 </table>
-<p><strong>ポイント</strong>: 毎日の更新は株価のみ。財務・配当はDBから読み出してローカル再計算するため高速。TTL未経過の銘柄はAPIをスキップする。</p>
+<p>毎日叩くのは株価のみ。財務・配当はDBから読みローカル再計算。TTL未経過はAPIスキップ。</p>
 <hr />
 <h2 id="2-findex-update">2. 日次ワークフロー（<code>findex update</code>）</h2>
 <div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>backup_db()<span style="color: #BBB">                       </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>findex_v2<span style="color: #666">.</span>db<span style="color: #666">.</span>bak<span style="color: #666">-</span>YYYYMMDD
-<span style="color: #666">2.</span><span style="color: #BBB"> </span>PriceFetcher<span style="color: #666">.</span><span style="color: #008000; font-weight: bold">run</span>(codes)<span style="color: #BBB">           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>最新2日分の終値を<span style="color: #BBB"> </span>price_history<span style="color: #BBB"> </span>に追記
-<span style="color: #BBB">   </span><span style="border: 1px solid #F00">└</span><span style="color: #BBB"> </span>RateLimitedFetcher:<span style="color: #BBB"> </span><span style="color: #666">200</span>銘柄<span style="color: #666">/</span>バッチ<span style="border: 1px solid #F00">・</span>バッチ間スリープ<span style="border: 1px solid #F00">・</span>チェックポイント
-<span style="color: #666">3.</span><span style="color: #BBB"> </span>compute_price_metrics()<span style="color: #BBB">           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>per<span style="color: #666">/</span>pbr<span style="color: #666">/</span>div_yield<span style="color: #666">/</span>時価総額<span style="color: #666">/</span>mix<span style="color: #666">/</span>net_cash_per<span style="color: #BBB"> </span>を再計算
-<span style="color: #BBB">                                     </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>computed_metrics<span style="border: 1px solid #F00">（</span>price_computed_at<span style="color: #BBB"> </span>更新<span style="border: 1px solid #F00">）</span>
-<span style="color: #666">4.</span><span style="color: #BBB"> </span>score()<span style="color: #BBB">                           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>computed_metrics<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>rules<span style="color: #666">.</span>yaml<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>dividend_scores
+<span style="color: #666">2.</span><span style="color: #BBB"> </span>PriceFetcher<span style="color: #666">.</span><span style="color: #008000; font-weight: bold">run</span>(codes)<span style="color: #BBB">           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>J<span style="color: #666">-</span>Quantsで最新終値を<span style="color: #BBB"> </span>price_history<span style="color: #BBB"> </span>に追記
+<span style="color: #666">3.</span><span style="color: #BBB"> </span>compute_price_metrics()<span style="color: #BBB">           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>per<span style="color: #666">/</span>pbr<span style="color: #666">/</span>div_yield<span style="color: #666">/</span>時価総額<span style="color: #666">/</span>mix<span style="color: #666">/</span>net_cash_per<span style="color: #666">/</span>YoC<span style="color: #BBB"> </span>を再計算
+<span style="color: #BBB">                                     </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>computed_metrics<span style="border: 1px solid #F00">（</span>price_computed_at<span style="color: #BBB"> </span>更新<span style="border: 1px solid #F00">・</span>各値にstatus<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">4.</span><span style="color: #BBB"> </span>score()<span style="color: #BBB">                           </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>computed_metrics<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>rules<span style="color: #666">.</span>yaml(v4)<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>dividend_scores
 <span style="color: #666">5.</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">run</span>_log<span style="color: #BBB"> </span>に記録
 </code></pre></div>
 
-<p>財務・配当カラムはDBの既存値をそのまま使う（再取得しない）。</p>
+<p>財務・配当カラムはDBの既存値を使う（再取得しない）。</p>
 <hr />
-<h2 id="3">3. 配当の正準化（半年・最重要ロジック）</h2>
-<p><code>findex update --dividends</code> の中核。<strong>ここが正確性の生命線</strong>（地雷1〜5が集中）。</p>
-<h3 id="31-events-dividend_annual">3.1 events 取得 → dividend_annual 再構築</h3>
+<h2 id="3">3. 配当の正準化（半年・最重要・地雷集中）</h2>
+<p><code>findex update --dividends</code> の中核。<strong>正確性の生命線</strong>。</p>
+<h3 id="31-events-dividend_annual">3.1 events → dividend_annual 再構築</h3>
 <div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>rebuild_annual_from_events(code):
-  1. DividendFetcher で dividend_events を更新（権利落ち日ベースの実イベント）
-  2. 会計年度で集計（fy = year if month&gt;=4 else year-1）    # 地雷2
-  3. first_complete_fy = min(集計年度) + 1                  # 期中開始年を捨てる・地雷1
-  4. source=&#39;events&#39; の既存行を削除して再INSERT
-     ただし fiscal_year &gt;= first_complete_fy の年度のみ
-     既存行が source=&#39;manual&#39;/&#39;ir&#39; なら上書きしない          # 優先順位
-  5. fiscal_year &lt; first_complete_fy はバックフィル行が残る
+  1. dividend_events を更新（権利落ち日ベースの実イベント）
+  2. 会計年度で集計（fy = year if month&gt;=4 else year-1）       # 地雷2
+  3. first_complete_fy = min(集計年度)+1（期中開始年を捨てる） # 地雷1
+  4. source=&#39;events&#39; を再構築。manual/ir/haitoukin は上書きしない # 優先順位
 </code></pre></div>
 
-<h3 id="32-2000">3.2 バックフィル接合（2000年以前）</h3>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>backfill(code):  # haitoukin/IR/手入力
-  <span style="color: #008000; font-weight: bold">-</span> 対象: fiscal_year &lt; first_complete_fy（シーム年度を含む）
-  <span style="color: #008000; font-weight: bold">-</span> 優先順位: manual &gt; ir &gt; haitoukin &gt; events
-  <span style="color: #008000; font-weight: bold">-</span> 取り込み後に【境界異常チェック】:                        # 地雷3
-      前年比 dps&gt;prev*10 or dps&lt;prev/10 の年があれば
-      → 分割調整漏れ疑い → そのバックフィル行を削除（誤データより欠落が安全）
-  <span style="color: #008000; font-weight: bold">-</span> NTT/SBG/電通総研はここで弾かれる → override で対処
+<h3 id="32-2000raw">3.2 バックフィル接合（2000年以前・raw補填）</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>backfill(code):  # haitoukin/IR/手入力 → dividend_annual
+  <span style="color: #008000; font-weight: bold">-</span> 対象: fiscal_year &lt; first_complete_fy
+  <span style="color: #008000; font-weight: bold">-</span> 優先順位: manual &gt; ir &gt; haitoukin &gt; jquants &gt; events
+  <span style="color: #008000; font-weight: bold">-</span> 境界異常チェック: 前年比&gt;10倍/&lt;0.1倍 → 分割調整漏れ疑いで削除（地雷3）
+  <span style="color: #008000; font-weight: bold">-</span> NTT/SBG/電通総研はここで弾かれ override で対処
 </code></pre></div>
 
-<p>収集済み58銘柄は移行で投入済み。追加が必要なときだけ <code>scripts/backfill_pre2000.py</code>（haitoukinスクレイパー）を使う。</p>
-<h3 id="33-derivestreakspy">3.3 ストリーク計算＋打ち切り判定（<code>derive/streaks.py</code>）</h3>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>compute_streaks(annual, listing_year, override):
-  1. 進行中の会計年度（支払い未確定）を除外
-  2. 末尾から遡って連続年数を数える
-       増配: dps &gt; prev*1.0001 / 非減配: dps &gt;= prev*0.999
-  3. 年度が連続しない箇所（歯抜け）で打ち切り               # 地雷4
-  4. ストリークが系列先頭=最古年に到達 かつ 最古年&lt;=下限band(2002)
-       → is_censored 候補
-  5. listing_year &lt; 最古年 なら打ち切り確定 / listing_year&gt;=最古年 なら真の開始（解除）
-  6. override.value &gt; 機械計算 のときだけ公表値に昇格（is_censored 解除）  # 地雷5
-  → computed_metrics に consecutive_*_years と streak_is_censored を書く
+<h3 id="33">3.3 ストリーク＋打ち切り＋結果補正（合成順序）</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>compute_streaks(annual, listing_year, result_overrides):
+  1. 進行中の会計年度を除外
+  2. 末尾から連続年数を計数（増配 dps&gt;prev*1.0001 / 非減配 dps&gt;=prev*0.999）
+  3. 歯抜けで打ち切り（地雷4）
+  ── 合成順序（D4 §2）──
+  4. machine値を算出
+  5. result_overrides に当該fieldあり かつ override.value &gt;= machine
+        → value=override, status=ok(source=override), is_censored解除, as_of以降は機械で確認分を加算
+  6. else machineが下限band/歯抜けで打ち切り → status=censored（N+表示）
+  7. else status=ok(machine)
+  → computed_metrics に 連続年数・status・source・streak_is_censored を書く
 </code></pre></div>
 
-<p>表示は <code>format_years()</code>：<code>is_censored</code> なら必ず「N年以上」、そうでなければ「N年」。</p>
+<p>表示 <code>format_years()</code>: censored は必ず「N年以上」。override由来は出典明示（「ZAi集計で連続増配N年」）。</p>
+<h3 id="34-yocd451">3.4 YoC・増配の質（D4.5・切り口①）</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>compute_yoc(code):
+  <span style="color: #008000; font-weight: bold">-</span> yield_on_cost_5y = 最新DPS ÷ 5年前株価（株価2000遡及が前提。未整備中は dividend_multiple_5y 代理）
+  <span style="color: #008000; font-weight: bold">-</span> 増配の質 = EPS倍率 / DPS倍率 から判定:
+       EPS牽引(sound) / 性向拡大(payout_driven) / 一過性(cyclical)
+  → YoCスコアに質係数（×1.0 / ×0.5 / ×0.3）を掛けて減点
+</code></pre></div>
+
 <hr />
 <h2 id="4-findex-update-quarterly">4. 財務の更新（四半期・<code>findex update --quarterly</code>）</h2>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>TTL<span style="color: #666">&gt;90</span>日<span style="color: #BBB"> </span>の銘柄のみ<span style="color: #BBB"> </span>FinancialFetcher<span style="color: #666">.</span><span style="color: #008000; font-weight: bold">run</span>(codes)
-<span style="color: #666">2.</span><span style="color: #BBB"> </span>yfinance<span style="color: #BBB"> </span>info<span style="color: #666">/</span>financials<span style="color: #666">/</span>balance_sheet<span style="color: #BBB"> </span>を取得<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>financial_snapshots<span style="color: #BBB"> </span>に年度別INSERT
-<span style="color: #BBB">   </span><span style="border: 1px solid #F00">（</span><span style="color: #666">1</span>行上書きせず履歴を積む<span style="border: 1px solid #F00">）</span>
-<span style="color: #666">3.</span><span style="color: #BBB"> </span>EDINETでクロスチェック<span style="border: 1px solid #F00">（</span>欠損<span style="border: 1px solid #F00">・</span>異常値の検出<span style="border: 1px solid #F00">）</span><span style="color: #BBB">              </span><span style="border: 1px solid #F00">#</span><span style="color: #BBB"> </span>任意
-<span style="color: #666">4.</span><span style="color: #BBB"> </span>compute_financial_metrics()<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>computed_metrics<span style="border: 1px solid #F00">（</span>fin_computed_at<span style="color: #BBB"> </span>更新<span style="border: 1px solid #F00">）</span>
-<span style="color: #BBB">     </span>ROE<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>自己資本比率<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>EPS成長5y<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>売上CAGR<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>FCFカバレッジ<span style="color: #BBB"> </span><span style="color: #666">/</span>
-<span style="color: #BBB">     </span>ROIC<span style="color: #666">-</span>WACC<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>利益剰余金配当倍率<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>営業利益率<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>配当性向
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>TTL<span style="color: #666">&gt;90</span>日<span style="color: #BBB"> </span>の銘柄のみ取得
+<span style="color: #666">2.</span><span style="color: #BBB"> </span>J<span style="color: #666">-</span>Quants<span style="color: #BBB"> </span><span style="color: #666">/</span>fins<span style="color: #666">/</span>summary<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>financial_snapshots<span style="border: 1px solid #F00">（</span>現在<span style="border: 1px solid #F00">〜</span><span style="color: #666">2</span>年<span style="border: 1px solid #F00">：</span>売上<span style="color: #666">/</span>営業益<span style="color: #666">/</span>純益<span style="color: #666">/</span>EPS<span style="color: #666">/</span>TA<span style="color: #666">/</span>Eq<span style="color: #666">/</span>Cash<span style="color: #666">/</span>CFO<span style="color: #666">/</span>配当<span style="color: #666">/</span>予想<span style="color: #666">/</span>発行株<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">3.</span><span style="color: #BBB"> </span>EDINET<span style="color: #BBB"> </span>有報XBRL<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>financial_snapshots<span style="border: 1px solid #F00">（</span>深いBS<span style="border: 1px solid #F00">：</span>投資有価証券<span style="color: #666">/</span>有利子負債<span style="color: #666">/</span>支払利息<span style="color: #666">/</span>利益剰余金<span style="color: #666">/</span>流動資産<span style="color: #666">/</span>capex<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span><span style="border: 1px solid #F00">★</span>stocks<span style="color: #666">.</span>accounting_standard<span style="color: #BBB"> </span>で<span style="color: #BBB"> </span>JGAAP<span style="color: #666">/</span><span style="color: #008000; font-weight: bold">IF</span>RS<span style="color: #666">/</span>US<span style="color: #BBB"> </span>のラベル辞書を切替<span style="border: 1px solid #F00">（</span><span style="color: #008000; font-weight: bold">IF</span>RSは科目名違い<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span><span style="border: 1px solid #F00">★</span>有報検索は提出日を日次スキャン<span style="border: 1px solid #F00">（</span>月末だけ見ると当たらない<span style="border: 1px solid #F00">・</span><span style="color: #666">3</span>月決算は6月下旬窓<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">4.</span><span style="color: #BBB"> </span>beta<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>price_history<span style="color: #BBB"> </span><span style="border: 1px solid #F00">×</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">TO</span>PIX<span style="color: #BBB"> </span>回帰で自前算出<span style="border: 1px solid #F00">（</span>fetchしない<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">5.</span><span style="color: #BBB"> </span>compute_financial_metrics()<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>computed_metrics<span style="border: 1px solid #F00">（</span>fin_computed_at<span style="color: #BBB"> </span>更新<span style="border: 1px solid #F00">・</span>各値にstatus<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span>ROE<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>自己資本比率<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>EPS成長5y<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>売上CAGR<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>FCFカバレッジ(<span style="color: #666">=</span>CFO<span style="color: #666">-</span>capex)<span style="color: #BBB"> </span><span style="color: #666">/</span>
+<span style="color: #BBB">     </span>ROIC<span style="color: #666">-</span>WACC(beta,<span style="color: #008000">cos</span>t_of_debt<span style="color: #666">=</span>支払利息<span style="color: #666">/</span>有利子負債)<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>DOE(<span style="color: #666">=</span>ROE<span style="border: 1px solid #F00">×</span>配当性向)<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>営業益率
 </code></pre></div>
 
 <hr />
-<h2 id="5">5. スコアリング（評価層）</h2>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>rules<span style="color: #666">.</span>yaml<span style="color: #BBB"> </span>を読み<span style="border: 1px solid #F00">、</span>SHA256<span style="color: #BBB"> </span>を<span style="color: #BBB"> </span>rule_versions<span style="color: #BBB"> </span>に登録<span style="border: 1px solid #F00">（</span>無ければ<span style="border: 1px solid #F00">）</span>
-<span style="color: #666">2.</span><span style="color: #BBB"> </span>各銘柄の<span style="color: #BBB"> </span>computed_metrics<span style="color: #BBB"> </span>を18指標ルールに通す
-<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>upper_cap<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>penalty<span style="border: 1px solid #F00">（</span>利回り7%超<span style="border: 1px solid #F00">）</span>等を適用
-<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>大型株(時価総額1兆円超)<span style="border: 1px solid #F00">・</span>金融銘柄は動的指標入れ替え
-<span style="color: #666">3.</span><span style="color: #BBB"> </span><span style="color: #666">197</span>点満点<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span><span style="color: #666">100</span>点換算<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>dividend_scores<span style="color: #BBB"> </span>に<span style="color: #BBB"> </span>(code,<span style="color: #BBB"> </span>scored_at,<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">to</span>tal_score,<span style="color: #BBB"> </span>score_json)
+<h2 id="5-v4-status-based">5. スコアリング（評価層・v4 status-based）</h2>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>rules<span style="color: #666">.</span>yaml(v4)<span style="color: #BBB"> </span>を読み<span style="color: #BBB"> </span>SHA256<span style="color: #BBB"> </span>を<span style="color: #BBB"> </span>rule_versions<span style="color: #BBB"> </span>に登録
+<span style="color: #666">2.</span><span style="color: #BBB"> </span>各銘柄の<span style="color: #BBB"> </span>(指標値,<span style="color: #BBB"> </span>status)<span style="color: #BBB"> </span>を<span style="color: #BBB"> </span>v4ルールに通す:
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>status<span style="color: #666">=</span>missing<span style="color: #666">/</span>insufficient<span style="color: #666">/</span>censored<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>分子<span style="border: 1px solid #F00">・</span>分母から除外<span style="border: 1px solid #F00">（</span>持ってないデータで罰しない<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>status<span style="color: #666">=</span>zero_legit<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span><span style="color: #666">0</span>点で分母に残す<span style="border: 1px solid #F00">（</span>実力<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>営業利益率は業種相対スコア<span style="border: 1px solid #F00">（</span>sector33パーセンタイル<span style="border: 1px solid #F00">＋</span>絶対フロア<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>予想配当性向<span style="color: #666">/</span>利回りは予想欠損時に実績フォールバック
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>upper_cap<span style="color: #666">/</span>penalty_cap<span style="border: 1px solid #F00">（</span>利回り7%超<span style="border: 1px solid #F00">・</span>PER<span style="border: 1px solid #F00">×</span>PBR等<span style="border: 1px solid #F00">）</span>適用
+<span style="color: #BBB">     </span><span style="color: #666">-</span><span style="color: #BBB"> </span>大型株(<span style="color: #666">1</span>兆円超)<span style="border: 1px solid #F00">・</span>金融は動的指標入れ替え<span style="border: 1px solid #F00">（</span>ROIC<span style="border: 1px solid #F00">↔</span>利益剰余金配当倍率,<span style="color: #BBB"> </span>ネットキャッシュPER<span style="border: 1px solid #F00">↔</span>ミックス係数,<span style="color: #BBB"> </span>金融は自己資本比率除外<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">3.</span><span style="color: #BBB"> </span>総合<span style="color: #BBB"> </span><span style="color: #666">=</span><span style="color: #BBB"> </span>Σ(加重スコア)<span style="color: #666">/</span>Σ(採点できた指標の最大加重)<span style="color: #BBB"> </span><span style="border: 1px solid #F00">×</span><span style="color: #BBB"> </span><span style="color: #666">100</span><span style="color: #BBB">   </span><span style="border: 1px solid #F00">※</span>動的分母
+<span style="color: #666">4.</span><span style="color: #BBB"> </span>dividend_scores<span style="color: #BBB"> </span>に<span style="color: #BBB"> </span>(code,<span style="color: #BBB"> </span>scored_at,<span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">to</span>tal_score,<span style="color: #BBB"> </span>score_json,<span style="color: #BBB"> </span>rule_version_id)
+<span style="color: #BBB">   </span><span style="border: 1px solid #F00">＋</span><span style="color: #BBB"> </span>claim別グレード<span style="border: 1px solid #F00">（</span>grade_dividend<span style="color: #666">/</span><span style="color: #008000">val</span>uation<span style="color: #666">/</span>health<span style="color: #666">/</span>capital<span style="border: 1px solid #F00">）</span>を併記
 </code></pre></div>
 
-<p>ルール改定時は新 <code>rule_version</code> が発番され、過去スコアとの比較が可能。</p>
 <hr />
-<h2 id="6-x">6. X投稿ワークフロー（出力層）</h2>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>テーマ選択<span style="border: 1px solid #F00">（</span><span style="color: #666">21</span>テーマのローテーション<span style="border: 1px solid #F00">）</span>
-<span style="color: #666">2.</span><span style="color: #BBB"> </span>dividend_scores<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>computed_metrics<span style="color: #BBB"> </span>から文面生成<span style="border: 1px solid #F00">（</span><span style="color: #008000">pos</span>ter<span style="color: #666">.</span>py<span style="border: 1px solid #F00">）</span>
-<span style="color: #666">3.</span><span style="color: #BBB"> </span><span style="border: 1px solid #F00">【</span>品質ゲート<span style="border: 1px solid #F00">】←</span><span style="color: #BBB"> </span>投稿前必須<span style="border: 1px solid #F00">・</span>最大の安全装置
-<span style="color: #BBB">     </span>a<span style="color: #666">.</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">go</span>lden<span style="color: #BBB"> </span>test<span style="color: #BBB"> </span>が全green<span style="border: 1px solid #F00">（</span>花王<span style="color: #666">=36</span><span style="color: #BBB"> </span>等<span style="border: 1px solid #F00">）</span>であること
-<span style="color: #BBB">     </span>b<span style="color: #666">.</span><span style="color: #BBB"> </span>文面中の数字が<span style="color: #BBB"> </span>streak_is_censored<span style="color: #666">=1</span><span style="color: #BBB"> </span>の銘柄を裸の数字で含まないこと
-<span style="color: #BBB">     </span>c<span style="color: #666">.</span><span style="color: #BBB"> </span>body_sha256<span style="color: #BBB"> </span>が<span style="color: #BBB"> </span><span style="color: #008000">pos</span>t_log<span style="color: #BBB"> </span>に過去30日存在しないこと<span style="border: 1px solid #F00">（</span>二重投稿防止<span style="border: 1px solid #F00">）</span>
-<span style="color: #BBB">   </span>いずれか不合格<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>status<span style="color: #666">=</span><span style="border: 1px solid #F00">&#39;</span>skipped<span style="border: 1px solid #F00">&#39;</span><span style="color: #BBB"> </span>で記録し投稿しない
-<span style="color: #666">4.</span><span style="color: #BBB"> </span>Playwright<span style="color: #BBB"> </span>でログイン<span style="border: 1px solid #F00">（~</span><span style="color: #666">/.</span>findex<span style="color: #666">/</span>x_session<span style="color: #666">.</span>json<span style="color: #BBB"> </span>再利用<span style="border: 1px solid #F00">）→</span><span style="color: #BBB"> </span>スレッド投稿
-<span style="color: #666">5.</span><span style="color: #BBB"> </span>成功<span style="border: 1px solid #F00">→</span><span style="color: #008000">pos</span>t_log(status<span style="color: #666">=</span><span style="border: 1px solid #F00">&#39;</span><span style="color: #008000">pos</span>ted<span style="border: 1px solid #F00">&#39;</span>,<span style="color: #BBB"> </span>tweet_id)<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>失敗<span style="border: 1px solid #F00">→</span>status<span style="color: #666">=</span><span style="border: 1px solid #F00">&#39;</span>failed<span style="border: 1px solid #F00">&#39;（</span>リトライしない<span style="border: 1px solid #F00">）</span>
+<h2 id="6-x">6. X投稿ワークフロー（出力層・優先度低＝後回し）</h2>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #666">1.</span><span style="color: #BBB"> </span>テーマ選択<span style="border: 1px solid #F00">（</span>ローテーション<span style="border: 1px solid #F00">。</span>切り口は<span style="color: #BBB"> </span>analysis<span style="color: #666">-</span>angles<span style="color: #666">.</span>md<span style="color: #BBB"> </span>に蓄積<span style="border: 1px solid #F00">）</span>
+<span style="color: #666">2.</span><span style="color: #BBB"> </span>dividend_scores<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>computed_metrics<span style="color: #BBB"> </span><span style="color: #666">+</span><span style="color: #BBB"> </span>claim別グレード<span style="color: #BBB"> </span>から文面生成
+<span style="color: #666">3.</span><span style="color: #BBB"> </span><span style="border: 1px solid #F00">【</span>品質ゲート<span style="border: 1px solid #F00">】←</span><span style="color: #BBB"> </span>投稿前必須
+<span style="color: #BBB">     </span>a<span style="color: #666">.</span><span style="color: #BBB"> </span><span style="color: #008000; font-weight: bold">go</span>lden<span style="color: #BBB"> </span>test<span style="color: #BBB"> </span>全green<span style="border: 1px solid #F00">（</span>花王<span style="color: #666">=36</span><span style="color: #BBB"> </span>等<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span>b<span style="color: #666">.</span><span style="color: #BBB"> </span>censored銘柄を裸の数字で含まない<span style="border: 1px solid #F00">（</span>N<span style="color: #666">+</span><span style="color: #BBB"> </span><span style="color: #A2F; font-weight: bold">or</span><span style="color: #BBB"> </span>override出典付きのみ<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span>c<span style="color: #666">.</span><span style="color: #BBB"> </span>対象claimの<span style="color: #BBB"> </span>grade<span style="color: #BBB"> </span>が基準以上<span style="border: 1px solid #F00">（</span>例<span style="color: #BBB"> </span>grade_dividend<span style="color: #666">&gt;=</span>B<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">     </span>d<span style="color: #666">.</span><span style="color: #BBB"> </span>body_sha256<span style="color: #BBB"> </span>が過去30日に無い<span style="border: 1px solid #F00">（</span>二重投稿防止<span style="border: 1px solid #F00">）</span>
+<span style="color: #BBB">   </span>不合格<span style="color: #BBB"> </span><span style="border: 1px solid #F00">→</span><span style="color: #BBB"> </span>status<span style="color: #666">=</span><span style="border: 1px solid #F00">&#39;</span>skipped<span style="border: 1px solid #F00">&#39;</span>
+<span style="color: #666">4.</span><span style="color: #BBB"> </span>Playwright<span style="color: #BBB"> </span>ログイン<span style="border: 1px solid #F00">（~</span><span style="color: #666">/.</span>findex<span style="color: #666">/</span>x_session<span style="color: #666">.</span>json<span style="color: #BBB"> </span>再利用<span style="border: 1px solid #F00">）→</span><span style="color: #BBB"> </span>スレッド投稿
+<span style="color: #666">5.</span><span style="color: #BBB"> </span>成功<span style="border: 1px solid #F00">→</span><span style="color: #008000">pos</span>t_log(<span style="color: #008000">pos</span>ted,<span style="color: #BBB"> </span>tweet_id)<span style="color: #BBB"> </span><span style="color: #666">/</span><span style="color: #BBB"> </span>失敗<span style="border: 1px solid #F00">→</span>failed<span style="border: 1px solid #F00">（</span>リトライしない<span style="border: 1px solid #F00">）</span>
 </code></pre></div>
 
+<p>※D5（X発信戦略）は優先度低のため詳細は後続。本節は枠組みのみ。</p>
 <hr />
 <h2 id="7-legacy-findexdb-findex_v2db">7. 移行ワークフロー（legacy findex.db → findex_v2.db）</h2>
-<p>収集済みデータ（218MB）の再利用。<strong>必ず移行すべきは再現困難な2つ</strong>: <code>dividend_annual</code>(source!='events') と <code>streak_overrides</code>。</p>
+<p><strong>必ず移行すべき再現困難な2つ</strong>: <code>dividend_annual</code>(source!='events') と <code>result_overrides</code>(旧streak_overrides 12件)。</p>
 <div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>migrate():
-  1. backup（findex.db は読み取りのみ、コピーで作業）
+  1. findex.db は読み取り専用（コピーで作業）
   2. findex_v2.db を initdb（新スキーマ）
-  3. stocks をコピー（listing_date は未取得なので NULL のまま → kabutanで後追い）
-  4. dividend_annual を全 source コピー（haitoukin/ir/manual は再現困難・最優先）
-  5. streak_overrides をコピー（12件）
+  3. stocks コピー（edinet_code/会計メタはEDINETリストで新規補充、listing_dateはkabutanで後追い）
+  4. dividend_annual 全sourceコピー（haitoukin/ir/manual 最優先）
+  5. streak_overrides → result_overrides に変換（field=&#39;consecutive_dividend_growth_years&#39;等で汎用化）
   6. dividend_history(legacy) → dividend_events に変換コピー
-  7. price_history をコピー（任意・再取得可だが時間節約）
-  8. 旧 scores(27,498行) はバックテスト用途なら別テーブルで保持（任意）
-  9. derive 全再計算 → computed_metrics を再構築
-  10. golden test で検算（花王=36 等）→ 通ればOK
+  7. price_history は移行せず J-Quants＋yfinanceで2000年まで再取得（旧は2024-06〜のみ＝不足）
+  8. financial_snapshots は J-Quants＋EDINETで再取得（旧raw_financialsは移行しない＝capex 0%等の欠落のため）
+  9. derive 全再計算（status付き）→ computed_metrics 再構築
+  10. golden test 検算（花王=36 等）→ 通ればOK
 </code></pre></div>
 
-<p>旧 <code>stock_fundamentals</code> / <code>raw_financials</code> / <code>momentum_scores</code> は二重パイプラインの遺物のため<strong>移行しない</strong>。</p>
+<p>旧 <code>stock_fundamentals</code>/<code>raw_financials</code>/<code>momentum_scores</code>/<code>scores</code> は移行しない（二重パイプライン遺物・欠落多）。</p>
 <hr />
 <h2 id="8">8. レート制限の運用フロー（横断）</h2>
-<p>全取得は <code>RateLimitedFetcher</code> を通す。開発・検証は<strong>全銘柄でなくコホート約30社</strong>で回す。</p>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>開発時:  findex update --cohort      # data/verification_cohort.csv の28社だけ
-        findex update --codes 4452,9433
-本番初回: フルスキャン（goldenが通ってから1回だけ）
+<p>全取得は <code>RateLimitedFetcher</code> 経由。開発・検証は<strong>コホート約30社</strong>で回す。</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>開発: findex update --cohort           # data/verification_cohort.csv の28社
+      findex update --codes 4452,9433
+本番初回: フルスキャン（goldenが通ってから1回だけ。株価2000遡及は重い）
 
 RateLimitedFetcher.run(codes):
-  <span style="color: #008000; font-weight: bold">-</span> codes を batch_size で分割、バッチ間スリープ
-  <span style="color: #008000; font-weight: bold">-</span> 各銘柄 fetch_one()。429/401 検知 → 指数バックオフ（最大5回）
-  <span style="color: #008000; font-weight: bold">-</span> 成功した銘柄を checkpoint(JSON) に記録
-  <span style="color: #008000; font-weight: bold">-</span> 途中失敗・中断しても resume=True で続きから（取得済みはスキップ）
+  <span style="color: #008000; font-weight: bold">-</span> batch_size分割・バッチ間スリープ
+  <span style="color: #008000; font-weight: bold">-</span> 429/401 → 指数バックオフ（最大5回）
+  <span style="color: #008000; font-weight: bold">-</span> 成功銘柄を checkpoint(JSON)。resume=True で続きから
+  <span style="color: #008000; font-weight: bold">-</span> ソース別の上限（J-Quants契約レート/EDINET日次スキャン/yfinance 2並列）を尊重
 </code></pre></div>
 
 <hr />
-<h2 id="9">9. 整合性チェック（半年次）</h2>
-<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #008000; font-weight: bold">-</span> dividend_annual の境界異常（前年比10倍/0.1倍）が残っていないか        # 地雷3
-<span style="color: #008000; font-weight: bold">-</span> streak_is_censored=1 の銘柄が dividend_scores 経由で裸の数字を出していないか
-<span style="color: #008000; font-weight: bold">-</span> golden test（ZAiトップ20と機械計算+override）が一致するか
-<span style="color: #008000; font-weight: bold">-</span> first_data_date と listing_date の矛盾（listing後にデータ空白）検出
+<h2 id="9-d6">9. 整合性チェック（半年次・D6に接続）</h2>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #008000; font-weight: bold">-</span> dividend_annual 境界異常（前年比10倍/0.1倍）の残存                       # 地雷3
+<span style="color: #008000; font-weight: bold">-</span> censored銘柄が dividend_scores 経由で裸の数字を出していないか
+<span style="color: #008000; font-weight: bold">-</span> result_overrides値 と machine値 の乖離（定義差の早期発見）             # D2.7/D6
+<span style="color: #008000; font-weight: bold">-</span> status分布の異常監視（missing急増＝取得障害の検知）
+<span style="color: #008000; font-weight: bold">-</span> golden test（ZAiトップ20と機械計算+override）一致
+<span style="color: #008000; font-weight: bold">-</span> listing_date と first_data_date の矛盾検出
+<span style="color: #008000; font-weight: bold">-</span> backfill＋override後に残る N+ 銘柄数（減らすべき指標）
 <span style="color: #008000; font-weight: bold">-</span> 検出結果を run_log に記録。不合格なら X投稿を自動停止
 </code></pre></div>
+
+<p>詳細な検証戦略（golden拡張・照合レポート・自動停止条件）は <strong>D6 多フィールド検証</strong> で規定。</p>
 </main></div></body></html>
