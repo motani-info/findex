@@ -27,3 +27,10 @@ code,name,category,expected_growth_years,expected_behavior,needs_confirm,source
 8267,イオン,fiscal_feb,,会計年度バケツが正しいこと（2月期決算）,no,—
 8233,高島屋,fiscal_feb,,会計年度バケツが正しいこと（2月期決算）,no,—
 3038,神戸物産,true_ipo_control,,N+を付けない・確定値（真の2000年以降上場の対照群）,yes,kabutan
+4502,武田薬品工業,ifrs_standard,,IFRS会計基準ラベル辞書が成立（配当は横ばい維持＝grade_dividend中・grade_capital別評価）,yes,edinet
+6758,ソニーグループ,ifrs_standard,,IFRSパース成立・大型・低配当利回り（valuation/capital claimの分離）,yes,edinet
+7751,キヤノン,usgaap_standard,,US基準ラベル辞書が成立＋過去減配でdividend_reliability低下,yes,edinet
+2914,JT,high_yield_cut,,2021減配をdividend_cut_count_20yが捕捉・高利回りでも信頼性減点,yes,ir
+8306,三菱UFJフィナンシャルG,financial_large,,金融大型swap（自己資本比率の業種相対扱い）・grade_health分離,yes,ir
+4385,メルカリ,no_dividend,,無配=zero_legit/missing判定でgrade_dividend最低・分母から除外の確認,yes,ir
+7201,日産自動車,cut_and_loss,,減配＋赤字でgrade_dividend/grade_health低・claim別評価の分離確認,yes,ir

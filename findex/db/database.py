@@ -13,7 +13,7 @@ from pathlib import Path
 from .. import config
 
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # D3 全面再生成（result_overrides汎用化・claim別グレード・backtest・universe）
 
 
 def connect(db_path: Path | None = None) -> sqlite3.Connection:
