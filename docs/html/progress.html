@@ -70,6 +70,7 @@ li{margin:.2em 0}
 <a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="indicator-system.html">D4：指標システム仕様</a>
 <a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
 <a class="" href="analysis-angles.html">分析切り口カタログ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
@@ -91,15 +92,15 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: 設計（D7ワークフロー改訂完了）/ <strong>次の一歩</strong>: D6 多フィールド検証（残る設計）→ その後 実装フェーズ判断（D5 X発信は優先度低）</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>設計フェーズ完結（D1〜D7、D5除く）</strong>/ <strong>次の一歩</strong>: 実装フェーズの方針決め（移行→fetch→derive→score→verify）。D5 X発信は実装が動いてから</p>
 <hr />
 <h2 id="1">1. ひとことサマリ</h2>
 <p>findex v2 は <strong>ゼロから設計し直し中</strong>。旧実装（<code>back_findex</code>）はデータ品質が破綻していたため切り離した。
 いまは <strong>設計フェーズ・実装凍結</strong>。定款（全銘柄・全フィールドのデータ完全性を土台に、進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける）に沿って、D1→D7 の設計成果物を順に固めている。</p>
 <ul>
-<li><strong>完了</strong>: D1〜D2.7、D3 データモデル改訂、D4 指標システム仕様、D4.5 指標較正（v4確定）、<strong>D7 ワークフロー改訂</strong></li>
-<li><strong>次</strong>: D6 多フィールド検証（設計の最後の1つ）→ 設計完了後に実装フェーズ判断（<strong>D5 X発信は優先度低＝後回し</strong>）</li>
-<li><strong>凍結中</strong>: 既存コード（schema.sql / streaks.py / fetch基盤 / CLI）。設計確定まで触らない（D2.5の検証は<code>.scratch/</code>の使い捨てプローブで実施）</li>
+<li><strong>完了（設計フェーズ）</strong>: D1〜D2.7、D3 データモデル、D4 指標システム、D4.5 較正v4、D7 ワークフロー、<strong>D6 多フィールド検証</strong> ＝ <strong>D5を除く全設計が完結</strong></li>
+<li><strong>次</strong>: <strong>実装フェーズの方針決め</strong>。順序＝移行(legacy→v2)→fetch実装(kabutan/EDINET/J-Quants/yfinance2000)→derive(status付き)→score(v4)→verify。コホート38社で回す。D5 X発信は実装が動いてから</li>
+<li><strong>凍結解除のタイミング</strong>: 設計完結により、次は実装着手の判断。既存雛形(schema.sql/streaks.py/fetch基盤)は設計（特にdata-model D3・v4）と突合してから流用</li>
 </ul>
 <h3 id="d25-2026-06-14">D2.5 実測の要点（2026-06-14）</h3>
 <ul>
@@ -171,10 +172,10 @@ li{margin:.2em 0}
 <td><a href="indicator-calibration.html">indicator-calibration</a></td>
 </tr>
 <tr>
-<td>D6</td>
-<td>多フィールド検証戦略（golden拡張・照合レポート・投稿停止条件）</td>
-<td style="text-align: center;">⬜ 後続</td>
-<td>—</td>
+<td><strong>D6</strong></td>
+<td>多フィールド検証戦略（テストピラミッド・golden拡張・照合・status監視・自動停止）</td>
+<td style="text-align: center;">✅ 完了</td>
+<td><a href="verification-strategy.html">verification-strategy</a></td>
 </tr>
 <tr>
 <td><strong>D7</strong></td>

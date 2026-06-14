@@ -124,6 +124,15 @@ back_findexの課題を気にするあまり「正確だが投稿に役立たな
 - **採点はv4 status-based**(missing/insufficient/censoredは動的分母から除外、zero_legitは0点で残す、営業益率は業種相対、予想欠損は実績フォールバック)
 - **移行更新**: streak_overrides→result_overridesに変換、price_historyは移行せず2000年まで再取得(旧2024-06〜のみ)、financial_snapshotsはJ-Quants＋EDINETで再取得(旧raw_financialsは捨てる)
 - **整合性チェック**にoverride vs machine乖離・status分布異常・残存N+数を追加(D6に接続)
-- 設計ロードマップ: ~~D2〜D4.5~~→~~D7~~→ **D6 多フィールド検証（設計の最後）** → 実装フェーズ判断 / **D5 X発信は優先度低**（後回し）/ 切り口は `analysis-angles.md` に蓄積
+#### D6 多フィールド検証戦略（2026-06-15）— 設計フェーズ完結
+成果物 `docs/design/06-verification-strategy.md`。検証を配当ストリーク中心から全フィールド・全statusに拡張:
+- **テストピラミッド3層**: L1単体テスト(streaks/yoc/status/採点式・CI毎・API不要) / L2コホート検証(約38社・各変更時・golden突合) / L3全銘柄サニティ(半年次・分布監視)
+- **golden拡張**: 既存golden_streaks(連続増配20社)に加え golden_financials新設(EDINET/IR一次情報の財務正解値・会計基準IFRS/JGAAP/US-GAAPを散らしパース辞書を検証) ＋ golden_valuation(任意)
+- **コホート28→38社**: 財務/会計基準/status系を追加(accounting_ifrs/usgaap/jgaap, financial_sector=銀行保険のswap検証, young_ipo=insufficient検証, loss=zero_legit検証, low_margin=業種相対検証, capex_heavy, high_invest_securities)
+- **照合レポート**: ①override vs machine乖離(定義差検出) ②J-Quants vs EDINETクロスチェック(10%超でreview) ③machine vs golden
+- **status分布監視**: missing急増(フェッチ障害)/censored上昇/review上昇/残存N+を半年次に監視しアラート
+- **投稿自動停止条件を確定仕様化**: golden全green＋claim grade≥B＋missing/insufficient指標を文面に含まない＋censoredは必ずN+/override出典付き＋status異常なし＋二重投稿防止。最優先不変条件=「確定値に見える誤った数字を出さない」(花王26vs36再発防止)
+- `findex verify` CLI新設(L1/L2/L3を束ねる・実装フェーズ)
+- **設計ロードマップ完了**: ~~D1〜D4.5, D7, D6~~ ＝ **D5除く全設計完結**。次=**実装フェーズの方針決め**(移行→fetch→derive→score→verify・コホート38社)。D5 X発信は実装が動いてから
 - **次の一歩: D3 データモデル改訂（D2.5の実測gapを反映）**。実装は引き続き凍結
 - gitコミット方針: **findex配下だけ**（無関係な親リポの変更は触らない）。D1-D2を `1bbe7b1` でコミット済み

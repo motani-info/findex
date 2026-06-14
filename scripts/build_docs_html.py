@@ -28,6 +28,7 @@ PAGES = [
     (DOCS / "design" / "02_7-result-override-layer.md", "result-override-layer.html", "D2.7：結果補正レイヤ", "Design"),
     (DOCS / "design" / "04-indicator-system.md", "indicator-system.html", "D4：指標システム仕様", "Design"),
     (DOCS / "design" / "04_5-indicator-calibration.md", "indicator-calibration.html", "D4.5：指標較正（v4提案）", "Design"),
+    (DOCS / "design" / "06-verification-strategy.md", "verification-strategy.html", "D6：多フィールド検証戦略", "Design"),
     (DOCS / "design" / "analysis-angles.md", "analysis-angles.html", "分析切り口カタログ", "Angles"),
     (DOCS / "requirements.md", "requirements.html", "要件定義書 v2", "Requirements"),
     (DOCS / "design" / "data-model.md", "data-model.html", "テーブル定義（データモデル）", "Design"),
