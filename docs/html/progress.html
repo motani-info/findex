@@ -82,16 +82,16 @@ li{margin:.2em 0}
 <a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
   <div class="toc"><a class="l2" href="#1">1. ひとことサマリ</a>
 <a class="l3" href="#d25-2026-06-14">D2.5 実測の要点（2026-06-14）</a>
-<a class="l2" href="#2-d1d7">2. 設計ロードマップ（D1〜D7）</a>
+<a class="l2" href="#2-d1d8">2. 設計ロードマップ（D1〜D8）</a>
 <a class="l2" href="#3-3">3. 定款と3本柱（達成度）</a>
-<a class="l2" href="#4-2026-06-14">4. 直近の重要な意思決定（2026-06-14）</a>
-<a class="l3" href="#d2">D2 第三者レビュー → 目的志向への是正</a>
-<a class="l2" href="#5-d25">5. D2.5（次フェーズ）でやること</a>
-<a class="l2" href="#6">6. 設計確定後の実装タスク（凍結解除後）</a>
-<a class="l2" href="#7">7. 既知のリスク・宿題</a>
-<a class="l3" href="#71">7.1 設計で解決済み・実装待ち（🟩）</a>
-<a class="l3" href="#72">7.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
-<a class="l2" href="#75-23">7.5 分析切り口カタログ（柱2/柱3の蓄積）</a>
+<a class="l2" href="#4">4. 重要な意思決定の履歴</a>
+<a class="l3" href="#2026-06-15">設計完結後の第三者レビュー（2026-06-15）</a>
+<a class="l3" href="#d2-2026-06-14">D2 第三者レビュー → 目的志向への是正（2026-06-14）</a>
+<a class="l2" href="#5-go">5. 実装フェーズの段取り（GO後に着手・現状は凍結）</a>
+<a class="l2" href="#6">6. 既知のリスク・宿題</a>
+<a class="l3" href="#61">6.1 設計で解決済み・実装待ち（🟩）</a>
+<a class="l3" href="#62">6.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
+<a class="l2" href="#7-23">7. 分析切り口カタログ（柱2/柱3の蓄積）</a>
 <a class="l2" href="#8">8. レビューの入口</a></div>
 </nav>
 <main>
@@ -102,7 +102,7 @@ li{margin:.2em 0}
 <hr />
 <h2 id="1">1. ひとことサマリ</h2>
 <p>findex v2 は <strong>ゼロから設計し直し中</strong>。旧実装（<code>back_findex</code>）はデータ品質が破綻していたため切り離した。
-いまは <strong>設計フェーズ・実装凍結</strong>。定款（全銘柄・全フィールドのデータ完全性を土台に、進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける）に沿って、D1→D7 の設計成果物を順に固めている。</p>
+いまは <strong>設計フェーズ完結・実装凍結</strong>。定款（全銘柄・全フィールドのデータ完全性を土台に、進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける）に沿って、D1→D8 の設計成果物を固め、フラット第三者レビューで是正済み。次は実装着手の判断（GO待ち）。</p>
 <ul>
 <li><strong>完了（設計フェーズ）</strong>: D1〜D2.7、D3 データモデル、D4 指標システム、D4.5 較正v4、D7 ワークフロー、D6 多フィールド検証、D5 X発信戦略、<strong>第三者レビュー是正</strong>、<strong>D8 バックテスト基盤（モデル検証）</strong> ＝ <strong>全設計が完結＋レビュー反映済</strong></li>
 <li><strong>レビュー是正（2026-06-15）</strong>: フラット第三者レビューで7論点を是正。最大の盲点=「入力は厳密だがモデル無検証」→<strong>D8バックテスト基盤</strong>新設。他=読者/差別化(D5)・yfinance株価検証(D6)・旧DB能動洗浄(D6/D7)・EDINETリスクゲート(D6/計画)・総合スコア比較可能性(D4)・出力チャネル(Xメイン＋HTML生成・D5/D7)・ユニバース定義(charter/D3)</li>
@@ -119,7 +119,7 @@ li{margin:.2em 0}
 <li><strong>時系列の下限（重要）</strong>: 2000年以前で保持できるのは<strong>配当のみ</strong>。株価はyfinanceでも2000-01-04が下限、財務(EDINET)は2008年〜。<strong>2000年以前の株価・PER・PBRは取得不能</strong>（pre-2000は価格・バリュエーション系claimを出さない＝捏造しない）。旧DBの株価は2024-06〜しか無いが2000年まで再取得で回復可</li>
 </ul>
 <hr />
-<h2 id="2-d1d7">2. 設計ロードマップ（D1〜D7）</h2>
+<h2 id="2-d1d8">2. 設計ロードマップ（D1〜D8）</h2>
 <table>
 <thead>
 <tr>
@@ -230,27 +230,29 @@ li{margin:.2em 0}
 <tr>
 <td>柱1</td>
 <td>正確なデータ基盤（全銘柄・必要データ＋充足把握）</td>
-<td>🟩 D2で枠組み確定。D2.5で実証へ</td>
+<td>🟩 D2枠組み＋D2.5実測でソース確定（J-Quants/EDINET/yfinance/kabutan）。D3でモデル化済</td>
 <td>🟥 凍結</td>
 </tr>
 <tr>
 <td>柱2</td>
 <td>進化する独自指標による多角評価</td>
-<td>🟨 D4で仕様化予定（16/18確定・Nullポリシー再設計）</td>
+<td>🟩 D4仕様化＋D4.5較正v4＋<strong>D8でモデル検証(重みv5較正)</strong>まで設計済（rules.yamlは実装で更新）</td>
 <td>🟥 凍結（rules.yaml は旧資産）</td>
 </tr>
 <tr>
 <td>柱3</td>
 <td>Xユーザーの興味を引く切り口での発信</td>
-<td>🟩 D5で戦略化済（140字突破=画像主役・テーマ体系・品質ゲート連動）</td>
+<td>🟩 D5で戦略化済（140字突破=画像主役・テーマ体系・品質ゲート連動・出力=Xメイン＋HTML生成）</td>
 <td>🟥 凍結（Playwright方式・骨格あり・Phase6）</td>
 </tr>
 </tbody>
 </table>
 <p>土台原則: <strong>正確でないデータは「無価値」でなく「有害」。確証を持てない数字は分析にも投稿にも一切流さない。</strong></p>
 <hr />
-<h2 id="4-2026-06-14">4. 直近の重要な意思決定（2026-06-14）</h2>
-<h3 id="d2">D2 第三者レビュー → 目的志向への是正</h3>
+<h2 id="4">4. 重要な意思決定の履歴</h2>
+<h3 id="2026-06-15">設計完結後の第三者レビュー（2026-06-15）</h3>
+<p>全設計を点検し7論点を是正（<a href="design-review.html">design-review</a>）。ユーザー判断3点 = <strong>MVPはフル設計維持（EDINET削らない）／出力はXメイン＋画像ローカルHTML生成（自前サイト兼用）／モデル検証は本格バックテスト構築</strong>。最大の是正＝モデル無検証→<strong>D8バックテスト基盤</strong>新設。</p>
+<h3 id="d2-2026-06-14">D2 第三者レビュー → 目的志向への是正（2026-06-14）</h3>
 <p>「back_findexの課題を気にするあまり、正確だが投稿に役立たない倉庫に偏っていないか」を点検し、4点是正:</p>
 <table>
 <thead>
@@ -285,29 +287,64 @@ li{margin:.2em 0}
 </table>
 <p>詳細は <a href="project-log.html">プロジェクトログ</a>。</p>
 <hr />
-<h2 id="5-d25">5. D2.5（次フェーズ）でやること</h2>
-<p>実データで「集めるべきもの（D2の定義）」が「実際に集まるか」を実証する。<strong>コホート約30社から、レート制限に配慮して開始</strong>。</p>
-<ol>
-<li>各フィールドの <strong>gap set 規模</strong>（全銘柄中どれだけ欠損/不足か）。特に入手難フィールド（投資有価証券 / beta / cost_of_debt）</li>
-<li><strong>ソース階層の確定</strong>（EDINET/J-Quants でどこまで埋まるか。EDINET一本足リスクの実測。yfinanceフォールバック要否）</li>
-<li>埋まらない分の<strong>手動バックフィルの工数・入手性</strong></li>
-<li><strong>保管モデル</strong>の方式選定（ドメイン別 source カラム vs 汎用 provenance 層）</li>
-<li>手動データの<strong>正確性担保</strong>（出典必須・二重チェック・golden）</li>
-<li><strong>MVP母数の実測</strong>（配当系・高配当系の最小データ集合が「いま」何銘柄でそろうか＝すぐ投稿を始められる母数）</li>
-</ol>
+<h2 id="5-go">5. 実装フェーズの段取り（GO後に着手・現状は凍結）</h2>
+<p>詳細は <a href="implementation-plan.html">実装フェーズ計画</a>。各フェーズ末は<strong>コホート38社検証</strong>で区切る。</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>内容</th>
+<th>ゲート</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>スキーマ再生成（D3）</td>
+<td>全Dのテーブル定義と一致</td>
+</tr>
+<tr>
+<td>1</td>
+<td>マスター＋移行（ユニバース確定・delisting・edinet_code・listing_date・旧DB能動洗浄）</td>
+<td>コホートのstocks完備</td>
+</tr>
+<tr>
+<td>2</td>
+<td>取得層（<strong>EDINET早期スパイク</strong>・株価2000遡及＋検証・財務J-Quants＋EDINET）</td>
+<td>status妥当・EDINETパース成功率が閾値以上</td>
+</tr>
+<tr>
+<td>3</td>
+<td>導出（status付き・YoC質ゲート・DOE・打ち切り合成）</td>
+<td>golden_streaks緑・status分布妥当</td>
+</tr>
+<tr>
+<td>4</td>
+<td>採点（v4 status-based・動的分母・業種相対）</td>
+<td>スコア説明可能</td>
+</tr>
+<tr>
+<td>backtest</td>
+<td><strong>モデル検証</strong>（PIT・生存バイアス排除・前方アウトカム・重みv5較正）</td>
+<td>スコアが前方アウトカムと相関</td>
+</tr>
+<tr>
+<td>5</td>
+<td>検証（findex verify・全銘柄スキャン1回）</td>
+<td>verify緑・全銘柄ランキング生成</td>
+</tr>
+<tr>
+<td>6</td>
+<td>出力（HTML生成＋X発信・claim内ランキング主）</td>
+<td>サイト生成＋品質ゲート通過の投稿</td>
+</tr>
+</tbody>
+</table>
+<p><strong>移行で必ず救う再現困難データ</strong>: <code>dividend_annual</code>(source!='events') と <code>result_overrides</code>(旧streak_overrides変換)。price/financialは移行せず再取得。配当は yfinance1999+ で能動洗浄・照合。</p>
 <hr />
-<h2 id="6">6. 設計確定後の実装タスク（凍結解除後）</h2>
-<p>設計（D2〜D7）が固まってから着手する。<strong>いまは書かない</strong>。</p>
-<ul>
-<li>既存データ移行（<code>findex.db</code> → <code>findex_v2.db</code>。<code>dividend_annual</code> の <code>source!='events'</code> と <code>streak_overrides</code> は再現困難なので必須）</li>
-<li>streaks の実DB突合 golden test（花王36年 等）。<strong>ギャップ中断時の <code>is_censored</code> 未検知バグの修正</strong>（約210銘柄に影響）</li>
-<li>fetch 各実装（kabutan の <code>listing_date</code> を最優先。現状0%）</li>
-<li>score / post の旧資産からの移植（Playwright投稿・21テーマ生成器）</li>
-</ul>
-<hr />
-<h2 id="7">7. 既知のリスク・宿題</h2>
+<h2 id="6">6. 既知のリスク・宿題</h2>
 <p>設計凍結中なので「未解決の設計課題」と「設計で解決済み・実装待ち」を区別する。</p>
-<h3 id="71">7.1 設計で解決済み・実装待ち（🟩）</h3>
+<h3 id="61">6.1 設計で解決済み・実装待ち（🟩）</h3>
 <table>
 <thead>
 <tr>
@@ -346,7 +383,7 @@ li{margin:.2em 0}
 </tr>
 </tbody>
 </table>
-<h3 id="72">7.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</h3>
+<h3 id="62">6.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</h3>
 <table>
 <thead>
 <tr>
@@ -387,7 +424,7 @@ li{margin:.2em 0}
 </table>
 <p>凡例: 🟩設計で解決・実装待ち / 🟨未解決リスク・要注視 / 🟥実装バグ</p>
 <hr />
-<h2 id="75-23">7.5 分析切り口カタログ（柱2/柱3の蓄積）</h2>
+<h2 id="7-23">7. 分析切り口カタログ（柱2/柱3の蓄積）</h2>
 <p>有望と検証できた「切り口」を <code>docs/design/analysis-angles.md</code>（<a href="analysis-angles.html">analysis-angles</a>）に蓄積する。
 - <strong>切り口①: YoC（取得利回り）× 増配持続性</strong>（検証済2026-06-14）。YoC=量、DSS(増配持続性)=質の2軸で「本物の増配株 vs 一過性の罠」を判別。核心の分解式「DPS倍率=EPS倍率×配当性向変化」でブースト株（イクヨ66x/EPS0x、日本製鉄36x/EPS減）を弾く。DOE追加候補。D4.5で指標化・D5でテーマ化</p>
 <hr />
@@ -397,7 +434,7 @@ li{margin:.2em 0}
 <li><strong><a href="implementation-plan.html">実装フェーズ計画</a></strong> = 設計→コードの橋渡し（Phase0〜Phase6・backtest含む・GO待ち）</li>
 <li>このダッシュボード（progress.html）= 全体の現在地</li>
 <li><a href="charter.html">ノーススター（charter）</a> = 正本。迷ったらここに戻る</li>
-<li><a href="data-integrity-framework.html">D2 データ完全性フレームワーク</a> = いまレビュー対象</li>
+<li><a href="backtest-framework.html">D8 バックテスト基盤</a> = モデル検証（最新の追加設計）</li>
 <li><a href="project-log.html">プロジェクトログ</a> = 意思決定の履歴（過ちと是正）</li>
 </ul>
 </main></div></body></html>
