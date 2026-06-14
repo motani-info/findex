@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>プロジェクトログ（フェーズ記録） — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="active" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#phase-1-2026-06-14">Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）</a>
+<a class="l3" href="#_1">このフェーズで到達したこと</a>
+<a class="l3" href="#_2">定款（最上位制約・不変）</a>
+<a class="l3" href="#_3">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</a>
+<a class="l3" href="#_4">確定した設計判断</a>
+<a class="l3" href="#phase-1-docshtml-html">成果物（Phase 1 で作成、docs/html/ でHTML閲覧可）</a>
+<a class="l3" href="#_5">⚠️ 既存コードの注意（凍結中）</a>
+<a class="l3" href="#_6">現在地と次フェーズ</a></div>
+</nav>
+<main>
+  <div class="badge">Log</div>
+  <h1 id="findex">findex プロジェクトログ</h1>
+<p>セッションをまたいで文脈を失わないための公式記録。<strong>新しい作業を始める前に必ず本書とノーススター（<a href="charter.html">00-charter-and-data-integrity.md</a>）を読むこと。</strong>
+フェーズが終わるごとに追記する（上に新しいフェーズを積む）。</p>
+<hr />
+<h2 id="phase-1-2026-06-14">Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）</h2>
+<h3 id="_1">このフェーズで到達したこと</h3>
+<ul>
+<li>findex v2 を<strong>ゼロから設計し直す</strong>方針を確立（旧実装 <code>../back_findex</code> は切り離し、参照元としてのみ使う）</li>
+<li><strong>定款（サービスのコアコンセプト）</strong>を明文化し、データ完全性を土台とするアーキテクチャを確立</li>
+<li>設計の途中で<strong>重大な誤解が発生し、ユーザー指摘により是正</strong>（下記「犯した過ちと是正」が本フェーズ最大の学び）</li>
+<li>成果物はすべて markdown + HTML（<code>uv run python scripts/build_docs_html.py</code> で再生成、<code>docs/html/</code> でレビュー）</li>
+</ul>
+<h3 id="_2">定款（最上位制約・不変）</h3>
+<blockquote>
+<p>あらゆる上場株式について、<strong>必要なデータを正確に保持し、足りない部分を常に把握できる</strong>ことを土台に、
+<strong>独自指標（進化し続ける指標群）</strong>で多角的に分析し、Xユーザーの興味を引く切り口で投稿し続ける。</p>
+</blockquote>
+<ul>
+<li>柱1 正確なデータ基盤（全銘柄・必要データの保持＋充足把握）← 土台</li>
+<li>柱2 独自指標による多角評価（<strong>指標群は進化する。数は本質でない</strong>）</li>
+<li>柱3 Xユーザーの興味を引く切り口での発信</li>
+<li>土台原則: <strong>正確でないデータは「無価値」でなく「有害」。確証を持てない数字は分析にも投稿にも一切流さない。</strong></li>
+</ul>
+<h3 id="_3">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>犯した過ち</th>
+<th>なぜ起きたか</th>
+<th>正しい理解（是正後）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>データ品質を「<strong>2000年以前の配当</strong>」に狭めた</td>
+<td><code>back_findex</code> がその切り口で書かれており、それを設計の前提にした</td>
+<td>データ不足・不正確は<strong>全銘柄・全フィールド</strong>の問題。財務は universe 半分が低カバレッジ。2000年配当は問題空間の1セル</td>
+</tr>
+<tr>
+<td>2</td>
+<td>「<strong>18指標</strong>」を定款のコアに固定しようとした</td>
+<td>旧 README/記憶の「18指標」を不変と誤認</td>
+<td>指標は<strong>進化する</strong>（追加・廃止・重み変更）。コアは「数」でなく「版管理された進化する指標システム」</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>yfinance が根本原因</strong>と診断した</td>
+<td>表層の症状に飛びついた</td>
+<td>真因は ①<strong>収集すべきデータの定義が不完全</strong>だった ②<strong>欠損に気づけない設計</strong>だった。ソース変更だけでは直らない</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>完全なデータ取得を前提</strong>にした</td>
+<td>実現可能性を検証せず理想を前提化</td>
+<td>全データ完全は<strong>物理的に不可能</strong>（back_findex結論）。ゴールは「充足状況を100%正確に把握し、持てないものは正直に扱う」</td>
+</tr>
+<tr>
+<td>5</td>
+<td>進捗を<strong>チャット内ウィジェット</strong>で可視化した</td>
+<td>ユーザーの作業環境を考慮せず</td>
+<td>レビュー成果物は<strong>HTMLファイル</strong>で出す</td>
+</tr>
+<tr>
+<td>6</td>
+<td>設計確定前に<strong>実装（雛形）を進めた</strong></td>
+<td>手応えを急いだ</td>
+<td><strong>設計確定まで実装凍結</strong>。コードを書かない</td>
+</tr>
+</tbody>
+</table>
+<p><strong>メタ教訓（最も大事）</strong>:</p>
+<blockquote>
+<p><code>back_findex</code> は「部品・地雷知識の参照元」であって、<strong>設計の前提・出発点にしてはならない</strong>。
+旧PJの切り口をなぞると、ユーザーが新findexを立ち上げた目的（旧設計の前提のまま進む誤りを断つこと）そのものを裏切る。
+常に <a href="charter.html">ノーススター</a> を正本とし、問題を一領域に狭めない。</p>
+</blockquote>
+<h3 id="_4">確定した設計判断</h3>
+<ul>
+<li><strong>データソース</strong>: 一次情報（EDINET=財務XBRL / J-Quants=株価・配当 / JPX=マスター / kabutan=上場日 / 各社IR）を主に。<strong>yfinance はフォールバックに格下げ</strong></li>
+<li><strong>設計の出発点はデータディクショナリ</strong>（収集すべきデータの完全定義）。ソース選定はそれを満たす手段</li>
+<li><strong>取得できないデータ</strong>は、カバレッジ追跡で gap を列挙 → マスターデータ（上場日等）で対象銘柄を特定 → 1社ずつIR/HP収集 → 来歴付きで保管（バルクで上書きしない）。<code>dividend_annual.source</code> / <code>streak_overrides</code> がその先行実装</li>
+<li><strong>銘柄データグレード A〜D</strong>: Dは分析・投稿から除外（誤情報より「出さない」が正しい）</li>
+<li><strong>検証は約30社コホート</strong>（<code>data/verification_cohort.csv</code>）で回す（レート制限対策）</li>
+<li><strong>DB</strong>: 開発は <code>~/.findex/db/findex_v2.db</code>。旧 <code>~/.findex/db/findex.db</code>（218MB・収集済み）は<strong>移行元として温存・直接触らない</strong></li>
+</ul>
+<h3 id="phase-1-docshtml-html">成果物（Phase 1 で作成、<code>docs/html/</code> でHTML閲覧可）</h3>
+<ul>
+<li><code>docs/design/00-charter-and-data-integrity.md</code> — <strong>ノーススター（正本）</strong></li>
+<li><code>docs/requirements.md</code> — 要件定義書（※2000年に寄った前提を含む。D2以降で是正予定）</li>
+<li><code>docs/design/data-model.md</code> — テーブル定義（同上・改訂予定）</li>
+<li><code>docs/design/data-workflow.md</code> — ワークフロー（同上・改訂予定）</li>
+<li><code>docs/design/pre2000-data.md</code> — 2000年問題（データ完全性の<strong>一事例</strong>に位置づけ是正済み）</li>
+<li><code>data/verification_cohort.csv</code> / <code>data/golden_streaks_zai_20260601.csv</code> — 検証データ</li>
+<li><code>scripts/build_docs_html.py</code> — md→HTMLビルダー</li>
+</ul>
+<h3 id="_5">⚠️ 既存コードの注意（凍結中）</h3>
+<p><code>findex/</code> 配下に雛形コード（schema.sql / streaks.py / fetch基盤 / CLI / tests）が存在するが、
+これは<strong>軌道修正（定款確立）より前に書かれ、狭い設計（配当中心）を部分的に体現している</strong>。
+<strong>設計確定（D2以降）まで凍結。流用する際は必ずノーススターと突合してから</strong>。盲目的に使わない。</p>
+<h3 id="_6">現在地と次フェーズ</h3>
+<ul>
+<li>状態: <strong>設計フェーズ・実装凍結</strong>。D1（ノーススター）完了、<strong>D2 改訂済み（目的志向バイアス是正を反映）</strong></li>
+<li>D2 成果物: <code>docs/design/02-data-integrity-framework.md</code> — データディクショナリ（識別/会計メタ/株価/配当/財務PL・BS・CF・資本コスト）、ソース階層、照合、カバレッジ状態、claim単位グレード、期間充足、品質ゲート。入手難フィールド（investment_securities/beta/cost_of_debt）を低カバレッジ要因として特定</li>
+</ul>
+<h4 id="d2-2026-06-14">⚠️ D2 第三者レビューで検出した偏り → 是正（2026-06-14）</h4>
+<p>back_findexの課題を気にするあまり「正確だが投稿に役立たない倉庫」に偏っていないかを点検し、4点是正:
+1. <strong>目的からの逆算が弱かった</strong> — データ辞書が旧18指標から逆算されていた（最大のback_findex残留）。§0に原則2「投稿フック→必要データ→定義」を追加。<code>used_by</code>は参考であって前提でないと明記
+2. <strong>総合グレードが投稿を絞りすぎ</strong> — 1銘柄1グレードでcore欠損=投稿対象外だと「配当だけ完璧な銘柄」の真実すら出せない。§6を<strong>claim（主張）単位グレード</strong>に作り替え（識別グレード§6.1＋claim別§6.2）
+3. <strong>完璧主義リスク</strong> — §6.5「投稿開始の最小データ集合(MVP)」を新設（柱1完成待ちで投稿ゼロを回避）。§5カバレッジは初期はmaterializeせず集計クエリで導出
+4. <strong>ソース階層が実証前に断定</strong> — §3を「仮説」に格下げ。EDINET一本足リスク明記。確定はD2.5へ
+- 設計ロードマップ: ~~D2~~（改訂済）→ <strong>D2.5 取得可能性スタディ（次）</strong> → D3 データモデル改訂 → D4 指標システム仕様（16/18確定・Nullポリシー再設計）→ D5 X発信戦略 → D6 多フィールド検証 → D7 ワークフロー改訂
+- <strong>次の一歩: D2.5（各フィールドが全銘柄分そろうかの実証＋MVP母数の実測）</strong>。実装はしない</p>
+</main></div></body></html>

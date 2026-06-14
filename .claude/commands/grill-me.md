@@ -1,1 +1,0 @@
-/Users/motani/Develop/github/findex/.agents/skills/grill-me//SKILL.md

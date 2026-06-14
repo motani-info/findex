@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D2：データ完全性フレームワーク — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="active" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 本書の狙い</a>
+<a class="l2" href="#1">1. データディクショナリのメタモデル</a>
+<a class="l2" href="#2">2. データディクショナリ本体</a>
+<a class="l3" href="#21-grain-11">2.1 識別・属性（grain: 1銘柄1値 / 不変・準不変）</a>
+<a class="l3" href="#22-grain-11">2.2 会計メタ（grain: 1銘柄1値 / 年度で変わりうる）</a>
+<a class="l3" href="#23-grain">2.3 株価・市場（grain: 銘柄×日）</a>
+<a class="l3" href="#24-grain">2.4 配当（grain: 銘柄×会計年度 ＋ 銘柄×イベント）</a>
+<a class="l3" href="#25-plgrain">2.5 財務 PL（grain: 銘柄×会計年度）</a>
+<a class="l3" href="#26-bsgrain">2.6 財務 BS（grain: 銘柄×会計年度）</a>
+<a class="l3" href="#27-cfgrain-11">2.7 財務 CF・資本コスト（grain: 銘柄×会計年度 / 1銘柄1値）</a>
+<a class="l2" href="#3-d25">3. ソース権威階層（仮説・D2.5で実証して確定）</a>
+<a class="l2" href="#4-reconciliation">4. 照合（reconciliation）ルール</a>
+<a class="l2" href="#5-field-stock">5. カバレッジ追跡（field × stock の状態）</a>
+<a class="l2" href="#6-claim">6. データ品質グレード（claim 単位）</a>
+<a class="l3" href="#61">6.1 識別グレード（銘柄が分析土俵に乗るか）</a>
+<a class="l3" href="#62-claim">6.2 claim 単位グレード</a>
+<a class="l3" href="#65-mvp">6.5 投稿開始の最小データ集合（MVP）</a>
+<a class="l2" href="#7">7. 期間充足モデル（打ち切りの一般化）</a>
+<a class="l2" href="#8-silent-never">8. データ層の品質ゲート（silent never）</a>
+<a class="l2" href="#9-d25">9. D2.5（取得可能性スタディ）への引き渡し</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d2">D2: データ完全性フレームワーク詳細</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: 設計（実装しない）
+<strong>親</strong>: <a href="charter.html">00-charter-and-data-integrity.md</a>（ノーススター）。本書は §4 を仕様レベルに具体化する。
+<strong>次</strong>: D2.5 取得可能性スタディ（本書の各フィールドが全銘柄分そろうかを実証）</p>
+<hr />
+<h2 id="0">0. 本書の狙い</h2>
+<p>findex の根本欠陥は「<strong>収集すべきデータの定義が無かったこと</strong>」だった（旧 <code>stocks</code> が上場日を持たず、欠損に気づけなかった）。
+本書はまず「<strong>完全とは何か</strong>」をフィールド単位で定義する（データディクショナリ）。
+カバレッジ・期間充足・品質ゲートはすべて「<strong>この定義に対して</strong>」測られる。「揃っているか」＝「定義に対して揃っているか」。</p>
+<blockquote>
+<p>原則1: 定義が先、ソースは後。ソース選定（§3）は定義（§2）を満たすための手段にすぎない。</p>
+<p>原則2（目的からの逆算）: <strong>何を集めるかは「どんな投稿フックを出したいか」から逆算する</strong>。
+定款の目的は正確な倉庫を作ることではなく、<strong>Xユーザーの興味を引く切り口で投稿し続ける</strong>こと。
+本書の <code>used_by</code>（依存指標）列は <strong>back_findex から引き継いだ現指標群に基づく参考</strong>であって、データ辞書の根拠ではない。
+指標体系そのものが旧PJの遺産であり、無検証の前提にはしない（D4で再検討）。投稿フックのカタログ（D5）が確定したら、本辞書はそれに照らして見直す。</p>
+<p>原則3（完璧主義を避ける）: 柱1（データ）は柱2・柱3（分析・投稿）に到達して初めて目的を果たす。
+全フィールドの完全を待たず、<strong>最小データ集合（§6.5）がそろった主張から投稿を始める</strong>。「正確でない数字を出さない」と「言えることまで黙る」は別物。</p>
+</blockquote>
+<hr />
+<h2 id="1">1. データディクショナリのメタモデル</h2>
+<p>各フィールドは以下の属性で一意に定義する。本書ではこれを表で表現し、実装時に機械可読（例: <code>data_dictionary.yaml</code>）へ落とす。</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>field</code></td>
+<td>正準フィールド名</td>
+</tr>
+<tr>
+<td><code>domain</code></td>
+<td>識別 / 会計メタ / 株価 / 配当 / 財務PL / 財務BS / 財務CF / 資本コスト</td>
+</tr>
+<tr>
+<td><code>type/unit/range</code></td>
+<td>型・単位・値域（値域外は異常として弾く）</td>
+</tr>
+<tr>
+<td><code>grain</code></td>
+<td>粒度（1銘柄1値 / 銘柄×日 / 銘柄×会計年度 / 銘柄×イベント）</td>
+</tr>
+<tr>
+<td><code>required</code></td>
+<td><strong>core</strong>（無ければ分析不可＝グレードD）/ <strong>required</strong>（必須・欠損で減点）/ <strong>optional</strong>（補完）</td>
+</tr>
+<tr>
+<td><code>min_history</code></td>
+<td>必要履歴年数（時系列フィールドのみ。期間充足判定に使う）</td>
+</tr>
+<tr>
+<td><code>primary</code> / <code>crosscheck</code></td>
+<td>主ソース / 照合ソース（§3）</td>
+</tr>
+<tr>
+<td><code>validation</code></td>
+<td>値域・整合・golden突合などの検証ルール</td>
+</tr>
+<tr>
+<td><code>used_by</code></td>
+<td>このフィールドに依存する指標（欠損の影響範囲＝なぜ必要か）</td>
+</tr>
+</tbody>
+</table>
+<p><code>confidence</code> / <code>source</code> / <code>as_of</code> / <code>collected_at</code> は<strong>全フィールドの行が持つ来歴メタ</strong>（§5）。ディクショナリ側では持たない。</p>
+<hr />
+<h2 id="2">2. データディクショナリ本体</h2>
+<blockquote>
+<p>注1: <code>used_by</code>（依存指標）は現指標群に基づく<strong>参考</strong>。指標は進化する（D4）ため固定ではない（§0 原則2）。
+注2: 算出指標（ROE・PER等）は<strong>生フィールドから導出</strong>するため、ここでは原則として生の入力を定義する。
+注3: <code>min_history</code> の数値は<strong>暫定</strong>。各指標が要求する遡及年数（例: 配当10年CAGR→10y、5年CAGR→5y）から D4 で確定する。現状の値は「その指標の窓に合わせた仮置き」であり恣意ではないが、指標確定まで暫定扱い。</p>
+</blockquote>
+<h3 id="21-grain-11">2.1 識別・属性（grain: 1銘柄1値 / 不変・準不変）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型/単位</th>
+<th>required</th>
+<th>主ソース / 照合</th>
+<th>役割・備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td>TEXT(4桁)</td>
+<td>core</td>
+<td>JPX / J-Quants</td>
+<td>主キー</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>TEXT</td>
+<td>core</td>
+<td>JPX</td>
+<td>銘柄名</td>
+</tr>
+<tr>
+<td><code>market</code></td>
+<td>TEXT</td>
+<td>required</td>
+<td>JPX</td>
+<td>プライム/スタンダード/グロース等。動的指標入替の判定に使用</td>
+</tr>
+<tr>
+<td><code>sector33</code></td>
+<td>TEXT</td>
+<td>required</td>
+<td>JPX</td>
+<td>33業種。セクター比較・金融判定</td>
+</tr>
+<tr>
+<td><code>edinet_code</code></td>
+<td>TEXT</td>
+<td>required</td>
+<td>EDINET</td>
+<td>財務XBRL紐付けの鍵</td>
+</tr>
+<tr>
+<td><code>listing_date</code></td>
+<td>DATE</td>
+<td><strong>core</strong></td>
+<td>kabutan / minkabu</td>
+<td><strong>gap set 特定の鍵</strong>（期間充足判定の独立シグナル）</td>
+</tr>
+<tr>
+<td><code>founded_date</code></td>
+<td>DATE</td>
+<td>optional</td>
+<td>kabutan</td>
+<td>補助</td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>BOOL</td>
+<td>core</td>
+<td>JPX</td>
+<td>上場廃止で false</td>
+</tr>
+<tr>
+<td><code>delisting_date</code></td>
+<td>DATE</td>
+<td>optional</td>
+<td>JPX/適時開示</td>
+<td>バックテストの生存バイアス対策</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22-grain-11">2.2 会計メタ（grain: 1銘柄1値 / 年度で変わりうる）</h3>
+<p>旧実装が踏んだ「会計年度の二重定義」を断つための必須メタ。</p>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型</th>
+<th>required</th>
+<th>主ソース</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fiscal_period_end_month</code></td>
+<td>INT(1-12)</td>
+<td>required</td>
+<td>EDINET/J-Quants</td>
+<td>決算期末月（3月/12月/2月…）。FY正規化の基準</td>
+</tr>
+<tr>
+<td><code>consolidated</code></td>
+<td>BOOL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>連結/単体。指標を同一基準でそろえる</td>
+</tr>
+<tr>
+<td><code>accounting_standard</code></td>
+<td>TEXT</td>
+<td>optional</td>
+<td>EDINET</td>
+<td>JGAAP/IFRS/US。項目対応の差異吸収</td>
+</tr>
+</tbody>
+</table>
+<h3 id="23-grain">2.3 株価・市場（grain: 銘柄×日）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型/単位</th>
+<th>required</th>
+<th>min_history</th>
+<th>主 / 照合</th>
+<th>used_by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>close_adj</code></td>
+<td>REAL/円</td>
+<td>core</td>
+<td>1y+</td>
+<td>J-Quants / yfinance</td>
+<td>PER,PBR,利回り,モメンタム</td>
+</tr>
+<tr>
+<td><code>volume</code></td>
+<td>INT</td>
+<td>optional</td>
+<td>—</td>
+<td>J-Quants</td>
+<td>流動性</td>
+</tr>
+<tr>
+<td><code>shares_outstanding</code></td>
+<td>REAL</td>
+<td>core</td>
+<td>—</td>
+<td>EDINET/J-Quants</td>
+<td>時価総額,EPS,BPS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-grain">2.4 配当（grain: 銘柄×会計年度 ＋ 銘柄×イベント）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型/単位</th>
+<th>required</th>
+<th>min_history</th>
+<th>主 / 照合</th>
+<th>used_by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dps_annual[fy]</code></td>
+<td>REAL/円</td>
+<td><strong>core</strong></td>
+<td>可能な限り長く</td>
+<td>J-Quants/EDINET ＋ haitoukin/IR(歴史)</td>
+<td>連続増配/非減配,配当CAGR,信頼性</td>
+</tr>
+<tr>
+<td><code>forecast_dps</code></td>
+<td>REAL/円</td>
+<td>required</td>
+<td>—</td>
+<td>適時開示/IR / yfinance</td>
+<td>予想利回り,予想配当性向</td>
+</tr>
+<tr>
+<td><code>ex_date</code> events</td>
+<td>DATE</td>
+<td>required</td>
+<td>—</td>
+<td>J-Quants / yfinance</td>
+<td>dps_annual構築,権利確定月（季節フック）</td>
+</tr>
+<tr>
+<td><code>record_month</code></td>
+<td>INT</td>
+<td>optional</td>
+<td>—</td>
+<td>適時開示</td>
+<td>季節性の投稿切り口</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>dps_annual は<strong>正準系列</strong>（FY粒度・4月始まり）。イベントとは別粒度で保持（地雷1）。pre2000-data.md の打ち切り・N+は本フィールドの期間充足の一事例。</p>
+</blockquote>
+<h3 id="25-plgrain">2.5 財務 PL（grain: 銘柄×会計年度）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型</th>
+<th>required</th>
+<th>min_history</th>
+<th>主 / 照合</th>
+<th>used_by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>revenue</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>5y+</td>
+<td>EDINET / J-Quants</td>
+<td>売上CAGR</td>
+</tr>
+<tr>
+<td><code>operating_income</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>1y+</td>
+<td>EDINET</td>
+<td>営業利益率</td>
+</tr>
+<tr>
+<td><code>net_income</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>1y+</td>
+<td>EDINET</td>
+<td>EPS,ROE,配当性向</td>
+</tr>
+<tr>
+<td><code>eps</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>5y+</td>
+<td>EDINET（or net_income/shares）</td>
+<td>EPS成長</td>
+</tr>
+</tbody>
+</table>
+<h3 id="26-bsgrain">2.6 財務 BS（grain: 銘柄×会計年度）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型</th>
+<th>required</th>
+<th>主 / 照合</th>
+<th>used_by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>total_assets</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>自己資本比率,総資産</td>
+</tr>
+<tr>
+<td><code>equity_attributable</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>自己資本比率,ROE,BPS</td>
+</tr>
+<tr>
+<td><code>retained_earnings</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>利益剰余金配当倍率</td>
+</tr>
+<tr>
+<td><code>total_liabilities</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>ネットキャッシュ</td>
+</tr>
+<tr>
+<td><code>interest_bearing_debt</code></td>
+<td>REAL</td>
+<td>optional</td>
+<td>EDINET</td>
+<td>有利子負債比率</td>
+</tr>
+<tr>
+<td><code>current_assets</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>ネットキャッシュ</td>
+</tr>
+<tr>
+<td><code>investment_securities</code></td>
+<td>REAL</td>
+<td><strong>optional(入手難)</strong></td>
+<td>EDINET</td>
+<td>ネットキャッシュ（×70%）← 低カバレッジ要因</td>
+</tr>
+<tr>
+<td><code>cash_and_equivalents</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>ネットキャッシュ</td>
+</tr>
+</tbody>
+</table>
+<h3 id="27-cfgrain-11">2.7 財務 CF・資本コスト（grain: 銘柄×会計年度 / 1銘柄1値）</h3>
+<table>
+<thead>
+<tr>
+<th>field</th>
+<th>型</th>
+<th>required</th>
+<th>主 / 照合</th>
+<th>used_by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>operating_cf</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>FCF配当カバレッジ</td>
+</tr>
+<tr>
+<td><code>capex</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET</td>
+<td>FCF（=営業CF−capex）</td>
+</tr>
+<tr>
+<td><code>beta</code></td>
+<td>REAL</td>
+<td><strong>optional(入手難)</strong></td>
+<td>（要検討）</td>
+<td>ROIC-WACC ← 低カバレッジ要因</td>
+</tr>
+<tr>
+<td><code>cost_of_debt</code></td>
+<td>REAL</td>
+<td><strong>optional(入手難)</strong></td>
+<td>EDINET(支払利息/有利子負債)</td>
+<td>ROIC-WACC ← 低カバレッジ要因</td>
+</tr>
+<tr>
+<td><code>effective_tax_rate</code></td>
+<td>REAL</td>
+<td>optional</td>
+<td>EDINET</td>
+<td>ROIC-WACC(NOPAT)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>入手難フィールド</strong>（investment_securities / beta / cost_of_debt）が、旧 rules.yaml の低カバレッジ（ROIC48%・FCF/ネットキャッシュ）の主因と推定。D2.5 で実証し、D4 でこれら依存指標の扱い（重み・代替・不足時挙動）を決める。</p>
+</blockquote>
+<hr />
+<h2 id="3-d25">3. ソース権威階層（<strong>仮説</strong>・D2.5で実証して確定）</h2>
+<blockquote>
+<p><strong>ステータス: 仮説</strong>。下表はまだ確定でない。<strong>ソース選定は D2.5（取得可能性スタディ）の実証結果で決める</strong>。
+ここでは「定義（§2）を満たせそうな候補と優先仮説」を示すに留める。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>領域</th>
+<th>主ソース候補（一次情報）</th>
+<th>照合 / 補完</th>
+<th>フォールバック</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>識別・マスター</td>
+<td>JPX 公式</td>
+<td>J-Quants 銘柄一覧</td>
+<td>—</td>
+</tr>
+<tr>
+<td>上場日・設立日</td>
+<td>kabutan</td>
+<td>minkabu / EDINET沿革</td>
+<td>—</td>
+</tr>
+<tr>
+<td>株価</td>
+<td>J-Quants</td>
+<td>—</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>会計メタ・財務</td>
+<td>EDINET XBRL（一次・<strong>要検証</strong>）</td>
+<td>J-Quants statements</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>配当（現代）</td>
+<td>J-Quants / EDINET</td>
+<td>各社IR・適時開示</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>配当（2000年以前）</td>
+<td>haitoukin / 各社IR</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>検証 golden</td>
+<td>各社IR / ダイヤモンドZAi</td>
+<td>みんかぶ</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>優先仮説: <strong>EDINET（財務）・J-Quants（株価/配当）・JPX（マスター）の一次情報を主</strong>とし、yfinance はフォールバック。</p>
+<blockquote>
+<p><strong>リスク（D2.5で潰す）</strong>:
+- <strong>EDINET一本足リスク</strong>: XBRL は会計基準（JGAAP/IFRS/US）・年度をまたぐパースが難しく、財務の全フィールドを一社依存にするとカバレッジ・工数が読めない。J-Quants statements との二系統で冗長化する案も含めて検証する。
+- <strong>yfinance降格の根拠</strong>: 真因は「データ定義の欠如＋欠損検知の欠如」であって yfinance 自体ではない（§00）。よって降格は「品質が劣るから」でなく「<strong>一次情報を主にすべきだから</strong>」。欠損検知が効くなら yfinance をフォールバックに残すのは合理的で、全排除はしない。</p>
+</blockquote>
+<hr />
+<h2 id="4-reconciliation">4. 照合（reconciliation）ルール</h2>
+<p>複数ソースに値があるときの決定的解決:
+1. <strong>優先順位</strong>: <code>manual ≥ ir &gt; 一次バルク(EDINET/J-Quants/JPX) &gt; フォールバック(yfinance)</code>
+2. <strong>乖離検知</strong>: 上位と下位の差が閾値超なら <code>confidence=要レビュー</code> を立て、<strong>分析から除外</strong>
+   - 財務・株価: 相対差 10% 超
+   - 配当（分割調整疑い）: 前年比 10倍 / 0.1倍（地雷3）
+3. <strong>解決の記録</strong>: 採用値・不採用値・理由を残し再現可能にする
+4. 手動・IR値はバルク再取得で<strong>上書きしない</strong>（§00 §4.8）</p>
+<hr />
+<h2 id="5-field-stock">5. カバレッジ追跡（field × stock の状態）</h2>
+<p>すべての (銘柄, フィールド[, 年度]) に状態を持たせ、充足を<strong>測定可能</strong>にする。</p>
+<table>
+<thead>
+<tr>
+<th>状態</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verified</code></td>
+<td>値あり＋照合/golden済み（信頼最大）</td>
+</tr>
+<tr>
+<td><code>present</code></td>
+<td>値あり・未照合</td>
+</tr>
+<tr>
+<td><code>insufficient</code></td>
+<td>値はあるが期間不足（§7）</td>
+</tr>
+<tr>
+<td><code>missing</code></td>
+<td>必要だが欠損</td>
+</tr>
+<tr>
+<td><code>n/a</code></td>
+<td>その銘柄に適用されない（例: 金融に有利子負債比率）</td>
+</tr>
+</tbody>
+</table>
+<p>来歴メタ（<code>source</code> / <code>confidence</code> / <code>as_of</code> / <code>collected_at</code>）を各値に付与（§00 §4.2）。
+カバレッジは集計してダッシュボード化し、改善の進捗（＝gapが埋まる様子）を可視化する。</p>
+<blockquote>
+<p><strong>実装注（完璧主義を避ける）</strong>: (銘柄 × フィールド × 年度) を<strong>materialized table で全件保持すると数百万セル</strong>になり、初期から作るのは過剰。
+まずは来歴メタを持つ実データ行から<strong>集計クエリで状態を導出</strong>する（present/missing は値の有無、insufficient は §7 の充足判定で算出）。
+専用カバレッジテーブルの materialize は、集計が重くなって初めて検討する（D3で判断）。</p>
+</blockquote>
+<hr />
+<h2 id="6-claim">6. データ品質グレード（claim 単位）</h2>
+<blockquote>
+<p><strong>設計変更（目的からの逆算）</strong>: 当初は「1銘柄＝1総合グレード」でcore欠損なら投稿対象外としていた。
+しかしそれだと<strong>配当だけ完璧な銘柄が財務欠損でDになり、「30年連続増配」という真実すら投稿できない</strong>。
+投稿フックは多様なので、グレードは<strong>銘柄全体でなく「主張（claim）／指標セット単位」</strong>で付ける。</p>
+</blockquote>
+<h3 id="61">6.1 識別グレード（銘柄が分析土俵に乗るか）</h3>
+<p>最低限の同定だけを見る。これを満たさない銘柄のみ全面除外。
+- <code>identity_ok</code> = <code>code,name,market,sector33,listing_date,is_active</code> が <code>present</code> 以上
+- <code>identity_ok=false</code> → 全面除外（そもそも何の銘柄か確定できない）</p>
+<h3 id="62-claim">6.2 claim 単位グレード</h3>
+<p>「言いたいこと（claim）」ごとに、それが依存するフィールド集合で A〜D を付ける。</p>
+<table>
+<thead>
+<tr>
+<th>claim 例</th>
+<th>依存フィールド集合</th>
+<th>このclaimのグレードで判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続増配/非減配ストリーク</td>
+<td><code>dps_annual</code> 系列＋<code>listing_date</code></td>
+<td>配当系</td>
+</tr>
+<tr>
+<td>配当利回り・予想配当性向</td>
+<td><code>close_adj,forecast_dps,net_income</code></td>
+<td>配当バリュ系</td>
+</tr>
+<tr>
+<td>バリュエーション（PER/PBR/ミックス）</td>
+<td><code>close_adj,eps,equity,shares_outstanding</code></td>
+<td>バリュ系</td>
+</tr>
+<tr>
+<td>財務健全性（自己資本比率/ROE等）</td>
+<td><code>equity,total_assets,net_income</code></td>
+<td>財務系</td>
+</tr>
+<tr>
+<td>ROIC-WACC・FCF</td>
+<td><code>operating_cf,capex,投資有価証券,beta,cost_of_debt</code></td>
+<td>資本効率系（入手難依存）</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>グレード</th>
+<th>条件（その claim の依存集合に対して）</th>
+<th>扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>依存フィールドが全て <code>verified</code>、時系列は期間充足</td>
+<td>その claim を投稿に全面採用</td>
+</tr>
+<tr>
+<td>B</td>
+<td>全て <code>present</code> 以上（一部未照合）</td>
+<td>採用可・必要なら注記</td>
+</tr>
+<tr>
+<td>C</td>
+<td>一部 <code>insufficient</code>/<code>missing</code></td>
+<td><strong>その claim は「評価不能」</strong>として出さない（他の claim は出せる）</td>
+</tr>
+<tr>
+<td>D</td>
+<td>依存フィールドが欠損</td>
+<td>その claim は出さない</td>
+</tr>
+</tbody>
+</table>
+<p>→ 1銘柄が「配当系A・バリュ系B・資本効率系D」のように<strong>claim ごとに別グレード</strong>を持つ。
+総合スコア／ランキングは「採用可能な claim だけ」で構成し、欠けた claim は分母から除外（黙って0点にしない＝§8）。</p>
+<h3 id="65-mvp">6.5 投稿開始の最小データ集合（MVP）</h3>
+<p>柱1完璧主義を防ぐ安全弁。<strong>以下がそろえば、その claim についてはこの段階でも投稿してよい</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>投稿カテゴリ</th>
+<th>必要（これだけそろえば出せる）</th>
+<th>不要（後追いでよい）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>配当ストリーク系</td>
+<td><code>identity_ok</code> ＋ <code>dps_annual</code>系列(verified) ＋ <code>listing_date</code></td>
+<td>財務全般・資本コスト</td>
+</tr>
+<tr>
+<td>高配当・利回り系</td>
+<td><code>identity_ok</code> ＋ <code>close_adj</code> ＋ <code>forecast_dps</code>/<code>dps_annual</code></td>
+<td>ROIC・FCF・投資有価証券</td>
+</tr>
+</tbody>
+</table>
+<p>入手難フィールド（投資有価証券/beta/cost_of_debt）に依存する claim（資本効率系）は<strong>MVPに含めない</strong>。
+そろってから段階的に解放する。これにより「データ完成待ちで一切投稿できない」状態を回避する。</p>
+<hr />
+<h2 id="7">7. 期間充足モデル（打ち切りの一般化）</h2>
+<p>時系列フィールド／指標は <code>min_history</code> を宣言し、銘柄ごとに充足判定する。
+- 充足 → 確定値
+- 不足 → 「<strong>N年以上（N+）／評価不能</strong>」と明示（裸の数字にしない）
+- 充足判定には <code>listing_date</code>（識別ドメイン）を独立シグナルに使う（データ開始＝真の開始か、欠落かを区別）</p>
+<blockquote>
+<p>これは配当ストリーク専用ではなく<strong>全時系列指標の一般則</strong>。2000年以前配当（pre2000-data.md）はこのモデルの一事例。</p>
+</blockquote>
+<hr />
+<h2 id="8-silent-never">8. データ層の品質ゲート（silent never）</h2>
+<p>分析・投稿の<strong>前段</strong>でゲートする（投稿層だけに頼らない）:
+- <code>identity_ok=false</code> → 全面除外（§6.1）
+- <strong>claim 単位</strong>でゲート（§6.2）: その claim の依存集合がグレードC/D → <strong>その claim は「評価不能」として出さない</strong>（他の claim は出せる）
+- <code>要レビュー</code> / <code>insufficient</code> フィールド → 依存指標を「評価不能」とし、<strong>黙って0点・裸の数字にしない</strong>
+- スコアと並べて<strong>データ品質（claim別グレード・充足）を必ず提示</strong>
+- 多フィールド golden（D6）が赤 → 該当 claim の投稿停止</p>
+<blockquote>
+<p>rules.yaml の現 Null ポリシー「None→生スコア0（分母から除外しない）」は本ゲートと矛盾する。D4 で再設計する。</p>
+</blockquote>
+<hr />
+<h2 id="9-d25">9. D2.5（取得可能性スタディ）への引き渡し</h2>
+<p>本書のディクショナリは「<strong>集めるべきもの</strong>」の定義。D2.5 は「<strong>実際に集まるか</strong>」を実証する。検証対象:
+1. 各フィールドの gap set 規模（全銘柄中どれだけ欠損/不足になるか）。特に入手難フィールド（investment_securities / beta / cost_of_debt）
+2. <strong>ソース階層（§3）の確定</strong>: EDINET/J-Quants で core/required がどこまで埋まるか。EDINET一本足リスクの実測（パース成功率・会計基準別カバレッジ）。yfinanceフォールバックの要否
+3. 埋まらない分の手動バックフィルの工数・入手性（§00 §4.8）
+4. 保管モデルの方式選定（ドメイン別 source カラム vs 汎用 provenance 層）
+5. 手動データの正確性担保（出典必須・二重チェック・golden）
+6. <strong>MVP（§6.5）の実在性</strong>: 配当系・高配当系の最小データ集合が「いま」何銘柄でそろうか（＝すぐ投稿を始められる母数）</p>
+<p>→ 結果を <strong>claim 別グレード（§6）・ソース階層（§3）の確定</strong>と、指標のデータ契約（D4）に反映する。</p>
+</main></div></body></html>

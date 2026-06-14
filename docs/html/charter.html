@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ノーススター：定款とデータ完全性 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="active" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 軌道修正の記録（なぜ本書が必要か）</a>
+<a class="l2" href="#1">1. 定款（サービスのコアコンセプト）</a>
+<a class="l2" href="#2">2. 「正確なデータ基盤」の定義</a>
+<a class="l3" href="#_1">「完全」は目標であって前提ではない（実現可能性を直視する）</a>
+<a class="l2" href="#3">3. データ品質の問題空間（誤った狭め方の是正）</a>
+<a class="l3" href="#yfinance">真の根本原因（yfinanceは犯人ではない）</a>
+<a class="l2" href="#4">4. データ完全性フレームワーク（中核設計）</a>
+<a class="l3" href="#40">4.0 データ定義（データディクショナリ）— すべての出発点</a>
+<a class="l3" href="#41-yfinance">4.1 ソース権威階層（定義を満たす手段。一次情報を主に、yfinanceを格下げ）</a>
+<a class="l3" href="#42-as-of">4.2 来歴・as-of・確信度（全フィールドに付与）</a>
+<a class="l3" href="#43-reconciliation">4.3 ソース間照合（reconciliation）</a>
+<a class="l3" href="#44">4.4 カバレッジ＆品質マトリクスと銘柄グレード</a>
+<a class="l3" href="#45">4.5 期間充足モデル（打ち切りの一般化）</a>
+<a class="l3" href="#46-silent-never">4.6 データ層の品質ゲート（silent never）</a>
+<a class="l3" href="#47-golden">4.7 継続的検証（多フィールドgolden）</a>
+<a class="l3" href="#48">4.8 取得できないデータの保管と手動バックフィル（要調査・検証）</a>
+<a class="l2" href="#5">5. 分析層：進化する独自指標システム</a>
+<a class="l3" href="#_2">指標システムの要件</a>
+<a class="l2" href="#6-x">6. 発信層：Xユーザーの興味を引く切り口</a>
+<a class="l2" href="#7">7. 設計フェーズの計画（実装しない）</a>
+<a class="l3" href="#2026-06-14">現状サマリ（2026-06-14）</a>
+<a class="l3" href="#_3">次の一歩</a></div>
+</nav>
+<main>
+  <div class="badge">★ North Star</div>
+  <h1 id="findex">findex ノーススター：定款とデータ完全性</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: 設計（実装しない）
+<strong>位置づけ</strong>: 本書が findex の最上位設計。他の全ドキュメント（<a href="requirements.html">requirements</a> / <a href="data-model.html">data-model</a> / <a href="data-workflow.html">data-workflow</a> / <a href="pre2000-data.html">pre2000-data</a>）は本書に従属する。</p>
+<hr />
+<h2 id="0">0. 軌道修正の記録（なぜ本書が必要か）</h2>
+<p>旧PJ（<code>back_findex</code>）を参照した結果、「データ品質 = 2000年以前の配当履歴の欠落」と<strong>問題が誤って狭められた</strong>。
+これは旧PJがその切り口で書かれていたためで、新 findex を立ち上げた本来の目的——<strong>旧設計の前提のまま進む誤りを断つこと</strong>——に反していた。</p>
+<p><strong>是正</strong>: findex の土台は「<strong>あらゆる上場株式の、あらゆるデータが正確に保持されていること</strong>」。
+2000年以前の配当はこの大問題の <strong>1セル</strong>にすぎない。本書はこの正しい定款を起点に全体を設計し直す。</p>
+<hr />
+<h2 id="1">1. 定款（サービスのコアコンセプト）</h2>
+<blockquote>
+<p><strong>あらゆる上場株式について、必要なデータを正確に保持し、足りない部分を常に把握できることを土台に、
+独自指標（進化し続ける指標群）で多角的に分析し、Xユーザーの興味を引く切り口で投稿し続ける。</strong></p>
+</blockquote>
+<p>3本の柱と、それを貫く1つの土台原則:</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>          ┌─────────────────────────────────────────┐
+   柱3    │  発信   Xユーザーの興味を引く切り口で投稿     │
+          ├─────────────────────────────────────────┤
+   柱2    │  分析   独自指標による多角評価（指標群は進化）  │
+          ├─────────────────────────────────────────┤
+   柱1    │  基盤   全銘柄・必要データの正確な保持＋充足把握 │  ← 土台
+          └─────────────────────────────────────────┘
+土台原則:  正確でないデータは「無価値」ではなく「有害」。
+          findex は自分が確証を持てない数字を、分析にも投稿にも一切流さない。
+</code></pre></div>
+
+<p>柱は積み上げ式。<strong>土台（柱1）が崩れれば、その上の分析も発信も自動的に無価値（むしろ誤情報を拡散する有害物）になる。</strong> ゆえに正確性は最優先制約であり、後段の都合で妥協しない。</p>
+<p><strong>指標の数は定款の本質ではない。</strong> 「18指標」は現時点のスナップショットにすぎず、指標は今後<strong>追加・廃止・重み変更</strong>される前提（<code>rule_versions</code> で版管理）。定款が約束するのは固定の指標集合ではなく、「<strong>正確なデータの上で、進化する独自指標により多角評価する能力</strong>」である。詳細は §5。</p>
+<hr />
+<h2 id="2">2. 「正確なデータ基盤」の定義</h2>
+<p>「正確」を曖昧にしないため、5つの測定可能な要件に分解する。全銘柄・全フィールドがこれを満たすことを目指す。</p>
+<table>
+<thead>
+<tr>
+<th>要件</th>
+<th>意味</th>
+<th>反例（あってはならない状態）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>網羅性</strong></td>
+<td>必要なフィールドに値が在る、または「無い」と明示されている</td>
+<td>値が黙って欠けている／NULLと未取得の区別がつかない</td>
+</tr>
+<tr>
+<td><strong>正確性</strong></td>
+<td>値が一次情報（公的開示）と一致する</td>
+<td>yfinanceのEPSキー揺れで誤った値が入る</td>
+</tr>
+<tr>
+<td><strong>来歴</strong></td>
+<td>すべての値が「どのソースか・いつ時点か・確信度」を持つ</td>
+<td>出所不明の値が混在する</td>
+</tr>
+<tr>
+<td><strong>期間充足</strong></td>
+<td>各指標が必要とする年数の履歴が在る</td>
+<td>連続非減配20年指標を10年データで算出する</td>
+</tr>
+<tr>
+<td><strong>自己認識</strong></td>
+<td>システムが自分のデータ品質を銘柄×フィールド単位で把握している</td>
+<td>打ち切りや欠損に気づけず誤った数字を出す（旧実装の失敗）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>自己認識が最重要</strong>。旧実装は <code>listing_date</code> が0%で「データが切れている」ことに気づけなかった。
+findex は「<strong>知らないことを知っている</strong>」状態を常に保つ。確証がなければ分析対象から外すか、不確実と明示する。</p>
+<h3 id="_1">「完全」は目標であって前提ではない（実現可能性を直視する）</h3>
+<p>back_findex は「<strong>全銘柄の全データを完全に揃えるのは不可能</strong>」と結論している（無料で入手できないデータが存在する）。
+この現実を踏まえ、定款の「正確に保持」は次の意味に定義する:</p>
+<blockquote>
+<p><strong>持てるデータは最大化する。持てないデータは「持てない」と正確に把握し、正直に扱う。</strong></p>
+</blockquote>
+<p>つまり findex のゴールは「100%完全」ではなく（それは不能）、「<strong>自分の充足状況を100%正確に把握していること</strong>」。
+- 揃うフィールド → verified にして全面活用
+- 揃わないフィールド → insufficient/missing と明示し、依存指標を評価不能にする（黙って0や裸の数字にしない）
+- 揃わない銘柄 → グレードDとして分析・投稿から外す（誤情報より「出さない」が正しい）</p>
+<p>この線引きの前提として、「<strong>どのフィールドが全銘柄分そろえられるのか</strong>」を実証する必要がある（§7 の取得可能性スタディ D2.5）。</p>
+<hr />
+<h2 id="3">3. データ品質の問題空間（誤った狭め方の是正）</h2>
+<p>データ品質は配当だけの問題ではない。<strong>リスク種別 × データ領域</strong>のマトリクスで全体を捉える。
+各セルが対処すべき課題であり、2000年以前の配当は左下の1セルにすぎない。</p>
+<table>
+<thead>
+<tr>
+<th>リスク種別＼領域</th>
+<th>銘柄マスター</th>
+<th>株価</th>
+<th>配当</th>
+<th>財務諸表</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>欠損</strong>（値が無い）</td>
+<td>上場日が0%</td>
+<td>上場廃止銘柄の空白</td>
+<td>歯抜け210銘柄</td>
+<td><strong>ROIC48%/FCF41%/信頼性37%</strong> ← 最大の穴</td>
+</tr>
+<tr>
+<td><strong>不正確</strong>（値が誤り）</td>
+<td>業種分類のずれ</td>
+<td>分割未調整</td>
+<td>分割調整不一致(NTT等)</td>
+<td>EPSキー揺れ・一過性利益の混入</td>
+</tr>
+<tr>
+<td><strong>期間不足</strong>（履歴が短い）</td>
+<td>—</td>
+<td>2000年floor</td>
+<td><strong>2000年以前の配当</strong></td>
+<td>5年/10年CAGRに満たない若い銘柄</td>
+</tr>
+<tr>
+<td><strong>定義差</strong>（基準が違う）</td>
+<td>—</td>
+<td>—</td>
+<td>公表値vs機械計算(±2年)</td>
+<td>会計年度の二重定義・連結/単体</td>
+</tr>
+<tr>
+<td><strong>ソース間不一致</strong></td>
+<td>名称表記</td>
+<td>ソース別終値差</td>
+<td>yfinance vs IR</td>
+<td>EDINET vs yfinance</td>
+</tr>
+</tbody>
+</table>
+<p><strong>含意</strong>:
+- 規模で見れば<strong>財務の欠損セル（universe の約半分）が最大</strong>。配当の期間不足（約68社）より桁違いに広い。
+- 旧実装・旧設計はこのマトリクスの一部しか見ていなかった。findex はマトリクス全体を体系的に塞ぐ。
+- 個々の「地雷」（<code>back_findex/plans/02</code>）は、このマトリクスの個別セルの実例として有効。</p>
+<h3 id="yfinance">真の根本原因（yfinanceは犯人ではない）</h3>
+<p>「yfinanceを軸にしたこと」は精度を下げた<strong>一因</strong>だが、<strong>根本ではない</strong>。根本原因は2つ:</p>
+<ol>
+<li><strong>収集すべきデータの定義が不完全だった</strong> — 「何が揃っていれば完全か」を仕様化していなかったため、欠損を測ることも気づくこともできなかった（旧 <code>stocks</code> テーブルが上場日を持たなかったのが象徴）</li>
+<li><strong>欠損・誤りを検知できない設計だった</strong> — 自己認識（§2）の欠如</li>
+</ol>
+<p>→ <strong>ソースを EDINET に替えるだけでは直らない。</strong> 定義が不完全で検知できなければ同じ失敗をする。
+設計は「<strong>データ定義（データディクショナリ）= 完全とは何かの仕様</strong>」から始め、ソース選定はその定義を満たす手段として後から決める（§4.0 → §4.1）。</p>
+<hr />
+<h2 id="4">4. データ完全性フレームワーク（中核設計）</h2>
+<p>全セルを統一的に塞ぐための仕組み。個別対処の寄せ集めにしない。<strong>出発点はソースではなくデータ定義</strong>。</p>
+<h3 id="40">4.0 データ定義（データディクショナリ）— すべての出発点</h3>
+<p>「完全とは何か」を先に仕様化する。これが無いと欠損を測れない（旧実装の根本欠陥）。
+各フィールドについて以下を一意に定める <strong>データディクショナリ</strong> を、設計の最初の実体とする（D2）:</p>
+<table>
+<thead>
+<tr>
+<th>定義項目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>フィールド名 / 意味</td>
+<td>例: <code>equity_ratio</code>（自己資本比率）</td>
+</tr>
+<tr>
+<td>型・単位・値域</td>
+<td>REAL / %・0〜100 等。値域外は異常として弾く</td>
+</tr>
+<tr>
+<td>必須度</td>
+<td>必須 / 任意（必須欠損はグレードを下げる）</td>
+</tr>
+<tr>
+<td>必要履歴年数</td>
+<td>例: 連続非減配=可能な限り長く、10年CAGR=10年</td>
+</tr>
+<tr>
+<td>主ソース / 照合ソース</td>
+<td>§4.1 の階層から割当</td>
+</tr>
+<tr>
+<td>検証ルール</td>
+<td>一次情報・golden との突合方法</td>
+</tr>
+<tr>
+<td>依存指標</td>
+<td>このフィールドを使う指標（欠損時の影響範囲）</td>
+</tr>
+</tbody>
+</table>
+<p>カバレッジ（§4.4）・期間充足（§4.5）・品質ゲート（§4.6）はすべて、<strong>この定義に対して</strong>測られる。
+「揃っているか」は常に「定義に対して揃っているか」を意味する。</p>
+<h3 id="41-yfinance">4.1 ソース権威階層（定義を満たす手段。一次情報を主に、yfinanceを格下げ）</h3>
+<p>ソース選定は §4.0 の定義を埋めるための<strong>手段</strong>であって、根本対策そのものではない（§3 根本原因を参照）。
+領域ごとに「主ソース（権威）」と「照合ソース」を定義する。<strong>非公式で不安定な yfinance は主データから格下げし、フォールバック専用にする。</strong>
+領域ごとに「主ソース（権威）」と「照合ソース」を定義する。<strong>非公式で不安定な yfinance は主データから格下げし、フォールバック専用にする。</strong></p>
+<table>
+<thead>
+<tr>
+<th>領域</th>
+<th>主ソース（権威・一次情報）</th>
+<th>照合／補完</th>
+<th>フォールバック</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>銘柄マスター</td>
+<td>JPX 公式</td>
+<td>J-Quants 銘柄一覧</td>
+<td>—</td>
+</tr>
+<tr>
+<td>上場日・設立日</td>
+<td>kabutan</td>
+<td>minkabu / EDINET沿革</td>
+<td>—</td>
+</tr>
+<tr>
+<td>株価</td>
+<td>J-Quants（公式）</td>
+<td>—</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>財務諸表</td>
+<td><strong>EDINET XBRL（有報・一次情報）</strong></td>
+<td>J-Quants statements</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>配当（現代）</td>
+<td>J-Quants / EDINET</td>
+<td>各社IR</td>
+<td>yfinance</td>
+</tr>
+<tr>
+<td>配当（2000年以前）</td>
+<td>haitoukin / 各社IR</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>検証用 正解値</td>
+<td>各社IR・ダイヤモンドZAi等</td>
+<td>みんかぶ</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>重要な転換: 旧実装は yfinance を主ソースにして欠損・誤りを量産した。
+findex は <strong>EDINET（財務）・J-Quants（株価/配当）・JPX（マスター）の一次情報を主</strong>とし、yfinance は埋め草に降格する。</p>
+</blockquote>
+<h3 id="42-as-of">4.2 来歴・as-of・確信度（全フィールドに付与）</h3>
+<p>すべての保持値に <code>source</code> / <code>as_of</code>（時点）/ <code>fetched_at</code>（取得時刻）/ <code>confidence</code>（検証済み・未検証・推定）を持たせる。
+（データモデルへの反映は設計成果物 D3 で詳細化。現 <code>data-model.md</code> を改訂する。）</p>
+<h3 id="43-reconciliation">4.3 ソース間照合（reconciliation）</h3>
+<p>複数ソースに値があるとき、決定的に解決する:
+1. 権威階層の上位を採用
+2. 上位と下位の乖離が閾値超（例: 財務10%・配当 分割疑い10倍）→ <code>confidence=要レビュー</code> を立て、分析から除外
+3. 解決履歴を記録（再現性）</p>
+<h3 id="44">4.4 カバレッジ＆品質マトリクスと銘柄グレード</h3>
+<p>銘柄 × フィールドごとに状態を持つ: <code>verified</code>（検証済み）/ <code>present</code>（在るが未検証）/ <code>insufficient</code>（期間不足）/ <code>missing</code>（欠損）。
+これを集約し<strong>銘柄データグレード</strong>を付ける:</p>
+<table>
+<thead>
+<tr>
+<th>グレード</th>
+<th>条件</th>
+<th>扱い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>全必須フィールドが verified かつ期間充足</td>
+<td>分析・投稿に全面採用</td>
+</tr>
+<tr>
+<td>B</td>
+<td>present 主体・一部未検証</td>
+<td>分析可・投稿は注記付き</td>
+</tr>
+<tr>
+<td>C</td>
+<td>一部 insufficient/missing</td>
+<td>該当指標のみ除外して分析・投稿は慎重</td>
+</tr>
+<tr>
+<td>D</td>
+<td>必須が欠損・分析不適格</td>
+<td>ランキング除外・投稿対象外</td>
+</tr>
+</tbody>
+</table>
+<p>カバレッジは可視化（ダッシュボード）し、品質改善の進捗を測る。</p>
+<h3 id="45">4.5 期間充足モデル（打ち切りの一般化）</h3>
+<p>各指標は「必要な最小履歴年数」を宣言する（例: 連続非減配=可能な限り長く・10年CAGR=10年・5年CAGR=5年）。
+銘柄ごとに充足判定し、不足なら「<strong>N年以上（N+）／不足</strong>」と明示する。
+<strong>これは配当ストリーク専用ではなく、全指標に適用する一般則。</strong> 2000年以前の配当打ち切り（pre2000-data.md）はこのモデルの一事例。</p>
+<h3 id="46-silent-never">4.6 データ層の品質ゲート（silent never）</h3>
+<p>分析・投稿の<strong>前段、データ層で</strong>ゲートする。
+- グレードDは分析対象外
+- <code>confidence=要レビュー</code>・<code>insufficient</code> のフィールドは該当指標を「不足」とし、<strong>黙って0点や裸の数字にしない</strong>（rules.yaml の現Nullポリシー「None→0点」は本原則と矛盾するため D4 で再設計）
+- 投稿層のgolden gateは最後の砦であって、唯一の砦にしない</p>
+<h3 id="47-golden">4.7 継続的検証（多フィールドgolden）</h3>
+<p>検証を配当ストリークだけでなく<strong>多数のフィールド</strong>へ拡張する。
+- 各社IR・公的開示から既知の正解値（売上・配当・自己資本比率等）を golden セット化
+- 定期的にDB値と突合し、乖離を検出してレポート
+- 検証スイートが赤い間は投稿停止（土台原則の自動執行）</p>
+<h3 id="48">4.8 取得できないデータの保管と手動バックフィル（要調査・検証）</h3>
+<p>バルク（API/スクレイピング）で取得できないデータをどう埋め、どう保管するかを定義する。
+<strong>鍵は「自己認識が手動収集を現実的にする」ループ</strong>：</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>カバレッジ追跡(§4.4) ──→ 欠損・不足の (銘柄×フィールド) を列挙 = バックフィル・ワークリスト
+       │  ※マスターデータ(上場日・設立日)が gap set を特定可能にする
+       ▼
+優先度付け（ランキング/投稿に効く銘柄・フィールドから）
+       ▼
+1銘柄ずつ収集（各社IR・HP・ファクトブック・国会図書館 等）
+       ▼
+来歴付きで保管（バルク値と区別・上書き禁止）
+       ▼
+検証 → カバレッジ更新（穴が1つ埋まる）
+</code></pre></div>
+
+<p><strong>例（ユーザー提案）</strong>: 2000年以前上場の会社が100銘柄あるなら、<code>stocks</code> の上場日・設立日で<strong>その100銘柄を特定</strong>し、1社ずつIR/HPから不足データを収集する。4000件一括は無理でも100件なら現実的。</p>
+<p><strong>保管モデルの原則</strong>（詳細仕様と方式選定は D2 / D2.5）:
+- すべての値に来歴を持たせる（§4.2）: <code>source</code> / <code>confidence</code> / <code>source_url</code> / <code>as_of</code> / <code>collected_at</code>
+- <strong>手動・IR値はバルク値より優先</strong>し、<strong>バルク再取得で上書きしない</strong>。優先順位 <code>manual ≥ ir &gt; 一次バルク(EDINET/J-Quants) &gt; フォールバック(yfinance)</code>
+- 手入力は誤りやすい → <code>source_url</code> 必須、<code>confidence</code> で <code>manual_verified</code> / <code>manual_unverified</code> を区別、可能なら golden 突合
+- ワークリストの進捗を追跡（残り何件か＝充足の自己認識そのもの）</p>
+<blockquote>
+<p>back_findex の <code>dividend_annual.source</code>（events/haitoukin/ir/manual）と <code>streak_overrides</code> は、この保管モデルの<strong>配当ドメインでの先行実装</strong>。これを全フィールドに一般化する。</p>
+</blockquote>
+<p><strong>要調査・検証（D2.5に集約）</strong>:
+- 各フィールドの gap set の規模（何銘柄が手動対象になるか）
+- 1銘柄ずつの収集が現実的な工数か（フィールド別の入手性）
+- 保管モデルの方式選定: ドメイン別 <code>source</code> カラム方式 vs 汎用 provenance/override 層
+- 手動データの正確性をどう担保するか（出典必須・二重チェック・golden）</p>
+<hr />
+<h2 id="5">5. 分析層：進化する独自指標システム</h2>
+<p>指標は<strong>固定ではなく進化する資産</strong>。現時点は18（流用 <code>rules.yaml</code> は統廃合済みの16=v3）だが、数は本質でない。
+設計が担保するのは「指標を<strong>安全に増減・改訂できる仕組み</strong>」である。</p>
+<h3 id="_2">指標システムの要件</h3>
+<ul>
+<li><strong>版管理</strong>: 指標の追加・廃止・重み変更は <code>rule_versions</code> に版として記録。過去スコアは当時の版で再現可能</li>
+<li><strong>データ契約</strong>: 各指標 = { 依存フィールド, 最低品質（grade/confidence）, 最小履歴年数, 不足時の挙動 }。指標を足すときはこの契約を必ず定義する</li>
+<li><strong>データ定義との連動</strong>: 新指標が要求するフィールドは §4.0 のデータディクショナリに追加され、カバレッジ・取得可能性の対象になる（「指標は増やせるが、裏付けデータが揃うかは別問題」を可視化する）</li>
+<li><strong>不足時の挙動は「黙って0点」を禁止</strong>: 「不足（評価不能）」として扱い、スコアと並べてデータ品質を提示する。グレードC銘柄は欠損指標を除いた部分採点とその旨を明示</li>
+</ul>
+<blockquote>
+<p>数（16/18）の確定は D4 で行うが、それは「現時点のスナップショット」を決めるだけ。
+定款・アーキテクチャは指標数に依存しない。</p>
+</blockquote>
+<hr />
+<h2 id="6-x">6. 発信層：Xユーザーの興味を引く切り口</h2>
+<p>定款の第3の柱。「正確さ」と「面白さ」を両立させる設計を、出力層の付け足しではなく<strong>一級の設計対象</strong>として扱う。</p>
+<p><strong>大原則</strong>: 投稿する数字は必ずデータ層の品質ゲートを通った検証済み事実のみ。<code>as_of</code> を添える。面白さのために正確性を犠牲にしない。</p>
+<p><strong>切り口（フック）の体系</strong>（詳細は設計成果物 D5）:
+- ランキング（連続増配TOP・隠れ増配・高利回り×高安全）
+- 意外性（「実は36年増配の地味株」「高利回りなのに減配リスク低」）
+- 逆張り（割安に放置された優良増配株）
+- 危機耐性（リーマン・コロナを越えた銘柄）
+- 季節性（権利確定月カレンダー）
+- 比較（セクター内対決・大型vs中小）
+- 異常検知（増配率の急加速・配当性向の急改善）</p>
+<p><strong>エンゲージメント学習</strong>: 投稿のテーマ別反応（いいね/RT/インプレッション）を記録し、伸びる切り口を優先するフィードバックループを設計する。</p>
+<hr />
+<h2 id="7">7. 設計フェーズの計画（実装しない）</h2>
+<p>本書（D1）を起点に、以下の設計成果物を順に作る。<strong>コードは書かない。</strong> 各成果物は markdown→HTML で出力しレビュー可能にする。</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>設計成果物</th>
+<th>内容</th>
+<th>状態</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>D1</strong></td>
+<td>ノーススター（本書）</td>
+<td>定款・データ完全性・全体像</td>
+<td>✅ 本書</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>データ完全性フレームワーク詳細</td>
+<td><strong>データディクショナリ（§4.0）</strong>・権威階層・照合・カバレッジ・<strong>claim単位品質グレード</strong>・期間充足の仕様化（pre2000-dataを内包）</td>
+<td>✅ 改訂済（<a href="data-integrity-framework.html">02-data-integrity-framework</a>・第三者レビューで目的志向に是正）</td>
+</tr>
+<tr>
+<td><strong>D2.5</strong></td>
+<td><strong>取得可能性スタディ（検証）</strong></td>
+<td>データディクショナリの各フィールドが<strong>全銘柄分そろえられるか</strong>を実証。back_findexの「不可能」結論を field 単位で具体化。<strong>取得できないデータの保管モデル（§4.8）と手動バックフィルの工数・正確性も検証</strong>。ソース階層（§3 仮説）の確定とMVP母数の実測も含む。グレード設計に反映</td>
+<td>⏭️ 次（要実施）</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>データモデル改訂</td>
+<td>全テーブルに来歴/確信度/品質を付与、カバレッジ追跡テーブル（data-model.md改訂）</td>
+<td>後続</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>指標システム仕様</td>
+<td>指標のデータ契約・版管理・不足時挙動・Nullポリシー再設計。現時点の指標集合（16/18）を確定</td>
+<td>後続</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>X発信戦略</td>
+<td>フック体系・テーマ設計・品質連動・エンゲージメント学習</td>
+<td>後続</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>多フィールド検証戦略</td>
+<td>golden拡張・照合レポート・投稿停止条件</td>
+<td>後続</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>ワークフロー改訂</td>
+<td>取得→照合→品質判定→分析→発信の一方向フロー再設計（data-workflow.md改訂）</td>
+<td>後続</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2026-06-14">現状サマリ（2026-06-14）</h3>
+<ul>
+<li>設計の<strong>枠組み</strong>は是正してこれから作り直す段階。既存の requirements/data-model/data-workflow/pre2000-data は「配当に寄った」前提を含むため、D2以降で本書に沿って改訂する</li>
+<li>実装（雛形・コード）は存在するが、<strong>設計確定まで凍結</strong></li>
+<li>既存の良い資産（地雷集の知見・検証コホート・golden値）は、より広いフレームワークの部品として再利用する</li>
+</ul>
+<h3 id="_3">次の一歩</h3>
+<p>D2（データ完全性フレームワーク詳細）の設計に着手する。<strong>起点はデータディクショナリ（§4.0）＝収集すべきデータの完全な定義</strong>。
+これが固まり次第、D2.5（取得可能性スタディ）で「全銘柄分そろうか」を field 単位で検証する。実装は行わない。</p>
+</main></div></body></html>

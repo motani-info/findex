@@ -2,5 +2,15 @@
 .venv/
 __pycache__/
 *.pyc
-*.csv
+*.egg-info/
+.pytest_cache/
+.scratch/
 .playwright-mcp/
+# ローカルDB・取得キャッシュ（再生成可能）
+*.db
+*.db-wal
+*.db-shm
+*.db.bak-*
+.checkpoints/
+# data/ の参照CSV（検証コホート・golden）は追跡する
+!data/*.csv

@@ -1,1 +1,0 @@
-/Users/motani/Develop/github/findex/.agents/skills/git-guardrails-claude-code//SKILL.md

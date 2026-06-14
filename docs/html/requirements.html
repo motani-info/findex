@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>要件定義書 v2 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="active" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. このドキュメントについて</a>
+<a class="l2" href="#1">1. 背景と再構築の理由</a>
+<a class="l3" href="#_1">最大の課題: データ品質・正確性</a>
+<a class="l2" href="#2">2. プロダクトゴール</a>
+<a class="l2" href="#3">3. スコープ</a>
+<a class="l3" href="#_2">やること</a>
+<a class="l3" href="#_3">やらないこと（アンチ要件）</a>
+<a class="l2" href="#4">4. 機能要件</a>
+<a class="l3" href="#f1">F1. データ基盤</a>
+<a class="l3" href="#f2-18100">F2. スコアリング（18指標・100点満点）</a>
+<a class="l3" href="#f3-cli">F3. CLI</a>
+<a class="l3" href="#f4-x">F4. X自動投稿</a>
+<a class="l3" href="#f5">F5. 運用自動化</a>
+<a class="l2" href="#5">5. データソース要件（核心）</a>
+<a class="l3" href="#2000">「2000年問題」の確定見解（複数回調査済み）</a>
+<a class="l2" href="#6">6. データ品質要件（最重要・新設）</a>
+<a class="l3" href="#_4">品質保証の仕組み</a>
+<a class="l2" href="#7">7. データアーキテクチャ方針</a>
+<a class="l3" href="#_5">設計原則（旧実装の破綻要因の裏返し）</a>
+<a class="l3" href="#_6">データフロー</a>
+<a class="l3" href="#_7">テーブル構成（新スキーマ）</a>
+<a class="l2" href="#8-18197100">8. スコアリング指標（18指標・197点満点→100点換算）</a>
+<a class="l3" href="#_8">配当継続性（最重要）</a>
+<a class="l3" href="#_9">配当安全性</a>
+<a class="l3" href="#_10">財務健全性</a>
+<a class="l3" href="#_11">バリュエーション</a>
+<a class="l3" href="#_12">動的指標入れ替え</a>
+<a class="l2" href="#9">9. 非機能要件</a>
+<a class="l3" href="#_13">レート制限への対処（最大の運用ハードル）</a>
+<a class="l3" href="#30">検証は「30社コホート」で回す（開発の前提）</a>
+<a class="l2" href="#10">10. データ移行（収集済みデータの再利用）</a>
+<a class="l2" href="#11">11. 引き継ぐ資産 / 捨てる資産</a>
+<a class="l3" href="#_14">流用（品質確認済み）</a>
+<a class="l3" href="#_15">捨てる・書き直す</a>
+<a class="l2" href="#12">12. オープンな決定事項（要ユーザー判断）</a>
+<a class="l3" href="#1-x-2026-06-14-playwright">① X投稿方式 — ✅ 決定済み（2026-06-14）: Playwright を採用</a>
+<a class="l3" href="#2-j-quants">② J-Quants移行の方針・タイミング</a>
+<a class="l3" href="#3-kabutan-2026-06-14">③ 上場日・設立日の取得（kabutanスクレイパー） — ✅ 設計済み（2026-06-14）</a>
+<a class="l3" href="#4_1">④ 残りのバックフィル宿題</a>
+<a class="l2" href="#_16">参照ドキュメント（旧プロジェクト）</a></div>
+</nav>
+<main>
+  <div class="badge">Requirements</div>
+  <h1 id="findex-v2">Findex 要件定義書 v2</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: ドラフト（§12 のオープン事項が未決）</p>
+<hr />
+<h2 id="0">0. このドキュメントについて</h2>
+<p>旧実装（<code>../back_findex</code>）を切り離し、ゼロから作り直すための要件定義書。
+旧実装は <strong>計画ドキュメントは良質だったが、実装コードが破綻</strong>していた:</p>
+<ul>
+<li><code>db.py</code>（31KB）— マイグレーション11世代の継ぎ足しで新旧テーブル定義が混在</li>
+<li><code>cli.py</code>（39KB）— コマンドごとに生SQLが埋まったモノリス</li>
+<li>フェッチャーが直接スコアまで書く<strong>二重パイプライン</strong>で値が食い違う</li>
+<li>yfinance依存による<strong>データ品質の破綻</strong>（← 再構築の最大の動機）</li>
+</ul>
+<p>旧 <code>plans/</code> <code>docs/</code> は設計資産として有効。本書はそれらを統合し、<strong>何を引き継ぎ・何を捨て・何を直すか</strong>を一本化したもの。</p>
+<p>引き継ぐ方針（確定済み）:
+- ✅ スコアリング設計思想（<strong>18指標・197点→100点換算</strong> を踏襲）
+- ✅ 収集済みデータ（<code>~/.findex/db/findex.db</code>）を移行して再利用
+- ✅ X自動投稿機能</p>
+<hr />
+<h2 id="1">1. 背景と再構築の理由</h2>
+<h3 id="_1">最大の課題: データ品質・正確性</h3>
+<p>Xに投稿する数字が間違っていることが<strong>最大の事業リスク</strong>。旧実装では yfinance 依存により、財務データの欠損・配当履歴の歯抜け・ストリークの誤算出が頻発した。</p>
+<p>代表例（花王 4452）:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>公表値（正）</th>
+<th>旧DB（誤）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続増配年数</td>
+<td>36期</td>
+<td>26期</td>
+</tr>
+</tbody>
+</table>
+<p>データ起点（yfinance/J-Quants は2000年前後が下限）でストリークが<strong>左打ち切り</strong>され、誤った年数を出していた。これは「ほぼ嘘の情報」であり、信頼性を根本から損なう。</p>
+<p>→ <strong>正確性を最優先</strong>にデータ層を再設計する。速度・網羅性はその次。</p>
+<hr />
+<h2 id="2">2. プロダクトゴール</h2>
+<blockquote>
+<p>日本の全上場普通株式（約3,750銘柄、ETF/REIT除く）のデータベースを構築し、
+増配継続株を多角的にスコアリングした結果を、定期的にX（Twitter）へ自動投稿する。</p>
+</blockquote>
+<p>個人投資家が毎日手を動かさなくても、<strong>信頼できる</strong>増配株分析がXに流れ続ける状態が完成形。</p>
+<hr />
+<h2 id="3">3. スコープ</h2>
+<h3 id="_2">やること</h3>
+<ul>
+<li>全上場普通株の銘柄マスター・株価・配当・財務データの保持と更新</li>
+<li>18指標スコアリングとランキング（CLI）</li>
+<li>連続増配/非減配年数を<strong>公表値と一致する精度</strong>で算出</li>
+<li>X自動投稿（テーマローテーション、品質ゲート、二重投稿防止）</li>
+<li>日次・半年次の運用自動化</li>
+</ul>
+<h3 id="_3">やらないこと（アンチ要件）</h3>
+<ul>
+<li>リアルタイム株価（日次終値で十分）</li>
+<li>売買執行・自動売買</li>
+<li>Web公開（将来検討。当面は個人利用・SQLite）</li>
+</ul>
+<hr />
+<h2 id="4">4. 機能要件</h2>
+<h3 id="f1">F1. データ基盤</h3>
+<ul>
+<li>全上場普通株（約3,750銘柄）の銘柄マスター・株価・配当・財務を保持</li>
+<li>配当は <strong>会計年度別の年間1株配当（<code>dividend_annual</code>）を正準データ</strong>とし、遡れる銘柄は1989年まで遡る</li>
+<li><strong>上場日・設立年月日を銘柄マスターに保持</strong>（「2000年以前から上場している会社」を正確に特定するため。旧実装はこれを後回しにして判定が近似のままだった ← 再実装のきっかけ）</li>
+</ul>
+<h3 id="f2-18100">F2. スコアリング（18指標・100点満点）</h3>
+<ul>
+<li>既存 <code>rules.yaml</code> の18指標体系を踏襲（§8）</li>
+<li>連続増配/非減配年数を公表値一致精度で計算</li>
+<li><strong>データ起点で打ち切られたストリークは「N年以上（N+）」と表示</strong>（嘘の数字を出さない）</li>
+<li>大型株・金融銘柄の動的指標入れ替えルール（§8参照）</li>
+</ul>
+<h3 id="f3-cli">F3. CLI</h3>
+<ul>
+<li><code>findex rank</code> — ランキング表示（API不要・即時。フィルタ: market/sector/min-yield/min-no-cut/top/out）</li>
+<li><code>findex update</code> — 日次更新（株価のみ、約5分）/ <code>--quarterly</code>（財務）/ <code>--dividends</code>（配当履歴）</li>
+<li><code>findex check &lt;code...&gt;</code> — 個別銘柄の詳細確認</li>
+<li><code>findex post &lt;theme&gt;</code> — X投稿（<code>--dry-run</code> で品質ゲート＋生成のみ）</li>
+<li><code>findex setup</code> — APIキー設定</li>
+</ul>
+<h3 id="f4-x">F4. X自動投稿</h3>
+<ul>
+<li>1日1〜3スレッド、テーマローテーション（旧実装に21テーマの文面生成器あり、流用可能）</li>
+<li>投稿履歴テーブル（<code>post_log</code>）で二重投稿防止（本文SHA256、30日窓）</li>
+<li><strong>品質ゲート</strong>: golden test（花王=36年 等）が通らない間は投稿を<strong>拒否</strong></li>
+<li>投稿失敗時は<strong>リトライしない</strong>（翌日の枠で回復。凍結リスク最小化）</li>
+<li><strong>投稿方式は Playwright（ブラウザ自動操作）で確定</strong>。X API は使わない（Freeティアでは実際に投稿できなかった実績あり）。<code>.env</code> の <code>X_EMAIL</code>/<code>X_PASSWORD</code> で自動ログインし、セッションを <code>~/.findex/x_session.json</code> に保存して再利用（レート制限回避）。旧 <code>x_poster.py</code> を流用</li>
+</ul>
+<h3 id="f5">F5. 運用自動化</h3>
+<ul>
+<li>日次: DBバックアップ → 株価更新 → 指標再計算 → スコア → X投稿（launchd/cron）</li>
+<li>半年次: 配当イベント全銘柄再取得 → 正準系列（<code>dividend_annual</code>）再構築 → 整合性チェック</li>
+<li>全ジョブの実行ログを <code>run_log</code> に記録</li>
+<li>破壊的DB操作の前に必ずバックアップ（<code>findex.db.bak-YYYYMMDD</code>）</li>
+</ul>
+<hr />
+<h2 id="5">5. データソース要件（核心）</h2>
+<p>すべて2026年6月時点で動作確認済み。</p>
+<table>
+<thead>
+<tr>
+<th>用途</th>
+<th>第1ソース</th>
+<th>補完・検証</th>
+<th>カバレッジ／制約</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>銘柄マスター</td>
+<td>JPX公式Excel（<a href="https://www.jpx.co.jp/markets/statistics-equities/misc/tvdivq0000001vg2-att/data_j.xls">data_j.xls</a>）</td>
+<td>—</td>
+<td>普通株 約3,750（「約4,000」はETF/REIT込み）。月次で十分</td>
+</tr>
+<tr>
+<td>上場日・設立日</td>
+<td>kabutan 銘柄プロフィール（スクレイピング）</td>
+<td>minkabu/日経会社情報、EDINET沿革</td>
+<td>初回1回のみ（不変データ）。約100分。<strong>未実装＝宿題</strong></td>
+</tr>
+<tr>
+<td>株価</td>
+<td>yfinance <code>yf.download</code>（2並列上限、バッチ間スリープ）</td>
+<td>J-Quants（将来の第1候補）</td>
+<td><code>{code}.T</code>。全銘柄約4-5分</td>
+</tr>
+<tr>
+<td>配当イベント</td>
+<td>yfinance <code>Ticker.dividends</code>（分割調整済み）</td>
+<td>—</td>
+<td><strong>1999年9月以降のみ</strong>。210銘柄で歯抜けあり（地雷4）</td>
+</tr>
+<tr>
+<td>2000年以前の年間配当</td>
+<td>haitoukin-checker.com（スクレイピング）</td>
+<td>各社IR、国会図書館デジタルコレクション</td>
+<td>1990年3月期〜。<strong>必要58銘柄分は収集済み</strong>（<code>plans/data/dividend_annual_backfill.csv</code>）。再取得不要</td>
+</tr>
+<tr>
+<td>財務諸表</td>
+<td>yfinance <code>Ticker.info</code>/<code>financials</code>/<code>balance_sheet</code></td>
+<td>EDINET API v2（XBRL、2008年〜、公式無料）</td>
+<td>infoキー不安定・欠損多数。EDINETで検証</td>
+</tr>
+<tr>
+<td>検証用 golden</td>
+<td>ダイヤモンドZAi 連続増配/非減配ランキング</td>
+<td>みんかぶ、各社IR</td>
+<td>スナップショット <code>plans/data/golden_streaks_zai_20260601.csv</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2000">「2000年問題」の確定見解（複数回調査済み）</h3>
+<ul>
+<li><strong>J-Quants は2000年前後が起点</strong>（無料プランは12週遅延で日次更新に使えない）</li>
+<li><strong>yfinance の配当は1999年9月以降のみ</strong>（それ以前は存在しない）</li>
+<li><strong>EDINET は2008年〜のXBRL</strong>（財務諸表の検証用。配当ストリークの長期遡及には使えない）</li>
+<li><strong>2000年以前の無料一括データは存在しない</strong>。haitoukin が唯一の準一括ソース、それ以外は各社IR/国会図書館で個別対応</li>
+<li>有料ルート（日経NEEDS・Compustat・Datastream）は法人/大学契約前提で個人には非現実的</li>
+</ul>
+<p>→ <strong>長期ストリークは「収集済みバックフィル＋公表値オーバーライド＋N+表示」で正直に扱う</strong>のが現実解。根本対策（全銘柄の信頼ソース移行）は将来の J-Quants 契約次第（§12 オープン事項②）。</p>
+<hr />
+<h2 id="6">6. データ品質要件（最重要・新設）</h2>
+<p>旧実装が踏んだ「9つの地雷」を<strong>ハード制約</strong>として明文化する。詳細は <code>../back_findex/plans/02-domain-knowledge.md</code>。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>地雷</th>
+<th>新実装での制約</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>年間配当とイベント配当の混在</td>
+<td><strong>粒度の違うデータは別テーブル</strong>。年間値は <code>dividend_annual</code>、イベントは <code>dividend_events</code>。ストリーク計算は前者のみから</td>
+</tr>
+<tr>
+<td>2</td>
+<td>暦年集計は決算期変更で壊れる</td>
+<td><strong>必ず会計年度（4月始まり）で集計</strong>。<code>fiscal_year = year if month&gt;=4 else year-1</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>株式分割の調整基準がソース間で不一致</td>
+<td>バックフィル接合時に<strong>境界異常チェック</strong>（前年比10倍超/1/10未満は調整漏れ疑い→そのバックフィルは捨てる）。NTT/SBG/電通総研は公表値オーバーライド</td>
+</tr>
+<tr>
+<td>4</td>
+<td>yfinance配当の年度歯抜け（210銘柄）</td>
+<td>年度が連続しない箇所で<strong>ストリーク打ち切り＋N+表示</strong>（安全側）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>機械計算と公表値の定義差（±1〜2年）</td>
+<td><code>streak_overrides</code> を持ち、<strong>公表値 &gt; 機械計算のときだけ昇格</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>2000年以前データの入手性</td>
+<td>収集済みCSVを使用。再スクレイピング不要</td>
+</tr>
+<tr>
+<td>7</td>
+<td>上場日の代用品は2000年floor</td>
+<td>真の上場日は kabutan等から取得（yfinanceの最古日付は信用しない）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>X投稿の規約・品質リスク</td>
+<td>品質ゲート必須。投稿失敗はリトライしない</td>
+</tr>
+<tr>
+<td>9</td>
+<td>細かい知見</td>
+<td>WALモード+busy_timeout、合併銘柄はフィクション扱い、破壊操作前バックアップ 等</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">品質保証の仕組み</h3>
+<ul>
+<li><strong>golden test</strong>: 公表値（花王36年等、トップ20）と機械計算の突合テストを CI/投稿前に実行</li>
+<li><strong>品質ゲート</strong>: golden test が落ちている間は X投稿を自動拒否</li>
+<li><strong>N+表示</strong>: <code>streak_is_censored=1</code> の銘柄は「N年以上」で表示し、断定しない</li>
+</ul>
+<hr />
+<h2 id="7">7. データアーキテクチャ方針</h2>
+<h3 id="_5">設計原則（旧実装の破綻要因の裏返し）</h3>
+<ol>
+<li><strong>一方向のデータフロー</strong>。取得層 → 導出層 → 評価層 → 出力層。後段は前段のテーブルだけを読む。逆流・ショートカット禁止</li>
+<li><strong>粒度の違うデータは別テーブル</strong>（地雷1）</li>
+<li><strong>指標計算は1モジュールに集約</strong>（ストリーク・CAGR・信頼性の計算は1箇所のみ）</li>
+<li><strong>全テーブルに出所（source）と更新時刻を持たせる</strong></li>
+<li><strong>DBアクセスと純粋計算を分離</strong>（テスト容易性）</li>
+</ol>
+<h3 id="_6">データフロー</h3>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code><span style="color: #008000; font-weight: bold">[取得層]</span>
+<span style="color: #687822">JPX Excel ──月次→ stocks（マスター＋上場日・設立日）</span>
+<span style="color: #687822">kabutan ──初回→ stocks.listing_date / founded_date</span>
+<span style="color: #687822">yfinance prices ─日次→ price_history</span>
+<span style="color: #687822">yfinance dividends ─半年→ dividend_events</span>
+<span style="color: #687822">yfinance financials ─四半期→ financial_snapshots（年度別・履歴保持）</span>
+<span style="color: #687822">haitoukin/IR/手入力 ──→ dividend_annual（source別）</span>
+<span style="color: #687822">公表ランキング・各社IR ──→ streak_overrides</span>
+
+<span style="color: #008000; font-weight: bold">[導出層]</span>
+<span style="color: #687822">dividend_events ─builder→ dividend_annual（source</span><span style="color: #666">=</span><span style="color: #BA2121">&#39;events&#39;</span><span style="color: #687822">）</span>
+<span style="color: #687822">dividend_annual + overrides + financial_snapshots + price_history</span>
+<span style="color: #BBB">        </span><span style="color: #687822">─compute→ computed_metrics（派生指標の唯一の出口・1銘柄1行）</span>
+
+<span style="color: #008000; font-weight: bold">[評価層]</span>
+<span style="color: #687822">computed_metrics ─scorer(rules.yaml)→ dividend_scores</span>
+
+<span style="color: #008000; font-weight: bold">[出力層]</span>
+<span style="color: #687822">dividend_scores + computed_metrics → CLI rank / 投稿文面生成</span>
+<span style="color: #687822">投稿文面 → 品質ゲート → X → post_log</span>
+</code></pre></div>
+
+<h3 id="_7">テーブル構成（新スキーマ）</h3>
+<p><code>stocks</code> / <code>price_history</code> / <code>dividend_events</code> / <code>dividend_annual</code> / <code>streak_overrides</code> / <code>financial_snapshots</code> / <code>computed_metrics</code> / <code>dividend_scores</code> / <code>post_log</code> / <code>run_log</code> / <code>rule_versions</code> / <code>schema_version</code></p>
+<p>詳細は以下に分割（正本は <code>findex/db/schema.sql</code>）:
+- <strong><a href="data-model.html">docs/design/data-model.md</a></strong> — テーブル定義（各カラム・関連・地雷メモ）
+- <strong><a href="data-workflow.html">docs/design/data-workflow.md</a></strong> — データワークフロー（更新サイクル・構築アルゴリズム・移行）</p>
+<p>旧 <code>stock_fundamentals</code> / <code>scores</code> は二重パイプラインの遺物のため<strong>新DBでは作らない</strong>。</p>
+<hr />
+<h2 id="8-18197100">8. スコアリング指標（18指標・197点満点→100点換算）</h2>
+<p>100点は「理想の増配株」。平均的な優良株は40〜60点。定義は <code>rules.yaml</code>（ドメイン資産・そのまま流用）。</p>
+<h3 id="_8">配当継続性（最重要）</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align: center;">重み</th>
+<th>満点条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続非減配年数</td>
+<td style="text-align: center;">2.0</td>
+<td>17年以上</td>
+</tr>
+<tr>
+<td>減配信頼性スコア</td>
+<td style="text-align: center;">1.5</td>
+<td>過去20年で減配0回</td>
+</tr>
+<tr>
+<td>連続増配年数</td>
+<td style="text-align: center;">1.5</td>
+<td>17年以上</td>
+</tr>
+<tr>
+<td>配当成長10年CAGR</td>
+<td style="text-align: center;">1.2</td>
+<td>年8%以上</td>
+</tr>
+<tr>
+<td>配当成長5年CAGR</td>
+<td style="text-align: center;">1.0</td>
+<td>年30%以上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_9">配当安全性</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align: center;">重み</th>
+<th>満点条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FCF配当カバレッジ</td>
+<td style="text-align: center;">1.5</td>
+<td>FCFが配当総額の2倍以上</td>
+</tr>
+<tr>
+<td>予想配当性向</td>
+<td style="text-align: center;">1.5</td>
+<td>35%以下</td>
+</tr>
+<tr>
+<td>EPS成長5年CAGR</td>
+<td style="text-align: center;">1.0</td>
+<td>年15%以上</td>
+</tr>
+<tr>
+<td>売上高5年CAGR</td>
+<td style="text-align: center;">1.0</td>
+<td>年7%以上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_10">財務健全性</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align: center;">重み</th>
+<th>満点条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROIC-WACC</td>
+<td style="text-align: center;">1.3</td>
+<td>10%以上</td>
+</tr>
+<tr>
+<td>ROE</td>
+<td style="text-align: center;">1.2</td>
+<td>20%以上</td>
+</tr>
+<tr>
+<td>自己資本比率</td>
+<td style="text-align: center;">1.2</td>
+<td>80%以上</td>
+</tr>
+<tr>
+<td>営業利益率</td>
+<td style="text-align: center;">1.0</td>
+<td>20%以上</td>
+</tr>
+<tr>
+<td>有利子負債比率</td>
+<td style="text-align: center;">0.8</td>
+<td>10%以下</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_11">バリュエーション</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align: center;">重み</th>
+<th>満点条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>利益剰余金配当倍率</td>
+<td style="text-align: center;">1.3</td>
+<td>10倍以上</td>
+</tr>
+<tr>
+<td>配当利回り</td>
+<td style="text-align: center;">1.2</td>
+<td>3〜7%（7%超はペナルティ）</td>
+</tr>
+<tr>
+<td>ミックス係数</td>
+<td style="text-align: center;">0.8</td>
+<td>PER×PBR ≤ 22.5</td>
+</tr>
+<tr>
+<td>ネットキャッシュPER</td>
+<td style="text-align: center;">0.8</td>
+<td>10倍以下</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_12">動的指標入れ替え</h3>
+<ul>
+<li><strong>大型株（時価総額1兆円以上）</strong>: ROIC-WACC→利益剰余金配当倍率、ネットキャッシュPER→ミックス係数</li>
+<li><strong>金融銘柄（銀行・リース・保険）</strong>: 自己資本比率→格付け、ROIC-WACC→利益剰余金配当倍率、ネットキャッシュPER→ミックス係数</li>
+</ul>
+<hr />
+<h2 id="9">9. 非機能要件</h2>
+<ul>
+<li><strong>正確性最優先</strong>: 投稿数字の誤りが最大リスク。速度・網羅性より正確性</li>
+<li><strong>DB</strong>: SQLite（<code>~/.findex/db/findex.db</code>）。WALモード + busy_timeout 30秒で更新ジョブとAPIの同時アクセスに耐える</li>
+<li><strong>無料データソース優先</strong>。有料化（J-Quants Light等）の判断はユーザーに委ねる</li>
+<li><strong>yfinanceは壊れる前提</strong>: リトライ・バッチ間スリープ・フォールバックを設計に織り込む</li>
+<li><strong>更新コスト</strong>: 日次（株価のみ）約5分、四半期（財務）約20分、半年（配当）約40分、初回フルスキャン2〜4時間</li>
+</ul>
+<h3 id="_13">レート制限への対処（最大の運用ハードル）</h3>
+<p>全約4,000銘柄を一気に取得すると多くのサイトでレートリミットに当たる。fetch層は以下を<strong>必須要件</strong>とする:
+- <strong>銘柄サブセット指定</strong>（<code>--codes 7203,9433</code>）で任意の部分集合だけ取得できること
+- <strong>バッチ分割＋バッチ間スリープ</strong>（yfinanceは2並列上限、礼儀スリープ1.5秒等。ソースごとに上限を設定）
+- <strong>チェックポイント／レジューム</strong>（途中失敗しても再開でき、取得済みは再取得しない）
+- <strong>レート制限検知時のバックオフ</strong>（429/401で指数バックオフ、上限超で中断して記録）</p>
+<h3 id="30">検証は「30社コホート」で回す（開発の前提）</h3>
+<p>実装の正しさは、毎回全銘柄ではなく<strong>例外になりうる約30社のコホート</strong>（<code>data/verification_cohort.csv</code>）だけで検証する。
+- レート制限を避けつつ高速に反復できる
+- 失敗モード（バックフィル・歯抜け・分割不一致・1989年境界・合併・決算期・真IPO対照群）を網羅
+- golden test の期待値は <code>data/golden_streaks_zai_20260601.csv</code> と上記コホート
+- 全銘柄スキャンは設計が固まり golden が通ってから1回だけ実行する</p>
+<hr />
+<h2 id="10">10. データ移行（収集済みデータの再利用）</h2>
+<p>本体: <code>~/.findex/db/findex.db</code>（約218MB）
+- <code>price_history</code> 約181万行（2024-06〜）— 再取得可能だが時間がかかるので移行推奨
+- <code>dividend_history</code>（→新 <code>dividend_events</code>）約87,791行
+- <code>dividend_annual</code> 約54,188行（FY1989〜、backfill+overrides適用済み）— <strong>必ず移行</strong>（<code>source != 'events'</code> の行と <code>streak_overrides</code> は再現困難）
+- 同内容は <code>plans/data/*.csv</code> にもエクスポート済み（保険）
+- 旧 <code>scores</code> 27,498行（〜2026-06）— バックテスト用途なら移行価値あり</p>
+<p>移行時は新スキーマにマッピングし、<code>dividend_annual</code> の <code>source</code> 区分（events/haitoukin/ir/manual）と <code>streak_overrides</code> を確実に引き継ぐ。</p>
+<hr />
+<h2 id="11">11. 引き継ぐ資産 / 捨てる資産</h2>
+<p>詳細は <code>../back_findex/plans/07-existing-assets.md</code>。</p>
+<h3 id="_14">流用（品質確認済み）</h3>
+<ul>
+<li><code>findex/metrics/dividend.py</code> — ストリーク計算の正準モジュール（golden test 17件で検証済み）</li>
+<li><code>tests/test_golden_streaks.py</code> / <code>test_db_streaks.py</code> — golden / 実DB突合テスト</li>
+<li><code>findex/poster.py</code> — 21テーマの投稿文面生成 + quality_gate</li>
+<li><code>findex/updater/build_dividend_annual.py</code> — dividend_annual builder</li>
+<li><code>rules.yaml</code> / <code>findex/scorer/engine.py</code> — スコアリング定義＋ルールエンジン</li>
+<li><code>findex/fetcher/master.py</code> — JPXマスター取得</li>
+<li><code>findex/fetcher/jquants/</code> — J-Quants V2クライアント（将来の移行用に保持）</li>
+<li><code>scripts/backfill_pre2000.py</code> / 運用スクリプト群</li>
+</ul>
+<h3 id="_15">捨てる・書き直す</h3>
+<ul>
+<li><code>db.py</code>（モノリス・11世代マイグレーション）→ 新スキーマで書き直し</li>
+<li><code>cli.py</code>（生SQL埋め込みモノリス）→ コマンド分割</li>
+<li><code>updater/daily.py</code>・<code>quarterly.py</code>・<code>dividends.py</code> → 素直なパイプラインに</li>
+<li><code>fetcher/dividends.py</code>・<code>fundamentals.py</code>・<code>fetch_all.py</code> → fetcherは「取得して保存するだけ」に</li>
+<li><code>stock_fundamentals</code> / <code>scores</code> テーブル → 新DBでは作らない</li>
+<li>ルート直下の一時スクリプト（<code>findex_fullscan.py</code> 等）</li>
+<li>Playwright版投稿（§12で方式が確定するまで保留）</li>
+</ul>
+<hr />
+<h2 id="12">12. オープンな決定事項（要ユーザー判断）</h2>
+<h3 id="1-x-2026-06-14-playwright">① X投稿方式 — ✅ 決定済み（2026-06-14）: <strong>Playwright を採用</strong></h3>
+<ul>
+<li>記憶と旧plansが矛盾していたが、<strong>Playwright（ブラウザ自動操作・セッション再利用）で確定</strong></li>
+<li>理由: X API Freeティアでは実際に投稿できなかった（ユーザー実績）。tweepy + API v2 は不採用</li>
+<li>旧 <code>x_poster.py</code> を流用。詳細は F4 を参照</li>
+</ul>
+<h3 id="2-j-quants">② J-Quants移行の方針・タイミング</h3>
+<ul>
+<li>データ品質の根本対策はJ-Quantsへの移行だが、無料プランは12週遅延＋2000年起点。契約プラン（取得可能な履歴年数）を確認のうえ、yfinanceからの移行範囲を決める</li>
+</ul>
+<h3 id="3-kabutan-2026-06-14">③ 上場日・設立日の取得（kabutanスクレイパー） — ✅ 設計済み（2026-06-14）</h3>
+<ul>
+<li>「2000年以前から上場」の特定に必須（再実装のきっかけ）。<strong>最終形は全銘柄取得が前提</strong>だが、打ち切り判定に効く容疑者band（〜FY2002の約1,200銘柄）を優先する段階取得でよい。kabutanスクレイピング</li>
+<li>2000年問題の解決設計の全体（判定式・3層設計・検証30社・品質ゲート）は <strong><a href="pre2000-data.html">docs/design/pre2000-data.md</a></strong> に集約</li>
+</ul>
+<h3 id="4_1">④ 残りのバックフィル宿題</h3>
+<ul>
+<li>1989年境界の13銘柄（東京瓦斯・大阪瓦斯・クレディセゾン等）、NTT/SBG/電通総研の分割調整不一致、三井不動産/日清オイリオの未実行分 — 公表値オーバーライドの手入力で対応</li>
+</ul>
+<hr />
+<h2 id="_16">参照ドキュメント（旧プロジェクト）</h2>
+<ul>
+<li><code>../back_findex/plans/01-goal-and-requirements.md</code> — ゴールと要件</li>
+<li><code>../back_findex/plans/02-domain-knowledge.md</code> — <strong>地雷集（実装前必読）</strong></li>
+<li><code>../back_findex/plans/03-data-architecture.md</code> — DDL・アルゴリズム・正準仕様</li>
+<li><code>../back_findex/plans/04-data-sources.md</code> — データソース一覧</li>
+<li><code>../back_findex/plans/07-existing-assets.md</code> — 資産棚卸し</li>
+<li><code>../back_findex/.scratch/pre2000-dividend-backfill/PRD.md</code> — 2000年以前配当補完PRD</li>
+</ul>
+</main></div></body></html>

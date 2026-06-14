@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2000年問題（データ完全性の一事例） — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="active" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#1">1. 問題定義</a>
+<a class="l3" href="#db">根本原因（実DBで確定）</a>
+<a class="l2" href="#2">2. 打ち切り判定式</a>
+<a class="l2" href="#3-3">3. 3層の解決設計</a>
+<a class="l3" href="#0">第0層 — 絶対に黙って間違えない（最優先・データ取得不要）</a>
+<a class="l3" href="#1-nlisting_date">第1層 — 精度を上げる＝過剰なN+を消す（listing_date 取得）</a>
+<a class="l3" href="#2_1">第2層 — 可能な範囲で実値に補正（既存資産で大半が完了済み）</a>
+<a class="l2" href="#4">4. データモデルへの影響</a>
+<a class="l2" href="#5">5. ストリーク計算の正準仕様（打ち切り込み）</a>
+<a class="l2" href="#6-30">6. 検証セット（約30社）</a>
+<a class="l3" href="#_1">レート制限と検証コホートの位置づけ（重要）</a>
+<a class="l2" href="#7">7. 品質ゲート・不変条件</a>
+<a class="l2" href="#8">8. 実装手順（依存順）</a>
+<a class="l2" href="#9">9. 残課題</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="2000">設計: 2000年以前データ欠落への対処</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: ⚠️ <strong>位置づけ是正済み</strong> — 本書はデータ完全性という大問題の<strong>1事例（期間不足 × 配当）</strong>にすぎない。全体像は <a href="charter.html">00-charter-and-data-integrity.md</a> を正本とする。本書の手法（打ち切り検知・N+表示・公表値override・golden検証）は、より一般的な「期間充足モデル」「品質ゲート」の具体例として有効。
+<strong>関連</strong>: <a href="charter.html">00-charter-and-data-integrity.md</a>（ノーススター）/ <a href="requirements.html">requirements.md</a> / <code>../../back_findex/plans/02-domain-knowledge.md</code>（地雷集）</p>
+<hr />
+<h2 id="1">1. 問題定義</h2>
+<p>findex の中核スコアは<strong>長期の配当履歴</strong>に依存する（連続非減配17年・連続増配17年・減配信頼性20年・配当10年CAGR）。
+しかしデータソースの下限は2000年前後:</p>
+<ul>
+<li>yfinance 配当 = 1999年9月以降のみ</li>
+<li>J-Quants = 2000年起点（無料は12週遅延）</li>
+<li>EDINET = 2008年〜（財務XBRL。配当ストリークの遡及には使えない）</li>
+</ul>
+<p>2000年以前から上場していた会社は、配当系列が<strong>下限年で左打ち切り</strong>され、ストリークが過小評価される。</p>
+<p><strong>実害の例（花王 4452）</strong>: 連続増配 実際36年 → 旧DB 26年。「ほぼ嘘の数字」をXに出していた。</p>
+<h3 id="db">根本原因（実DBで確定）</h3>
+<table>
+<thead>
+<tr>
+<th>事実</th>
+<th>数値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stocks.listing_date</code>（上場日）の充足率</td>
+<td><strong>0 / 3747（0%）</strong> — カラムは存在するが一度も埋められていない</td>
+</tr>
+<tr>
+<td><code>stocks.first_data_date</code>（DB内最古日）の充足率</td>
+<td>3747 / 3747（100%）</td>
+</tr>
+<tr>
+<td>配当が FY2000 始まり</td>
+<td>308銘柄</td>
+</tr>
+<tr>
+<td>配当が FY2001 始まり</td>
+<td>889銘柄（seam年度を捨てる地雷1のため2001が最大の壁）</td>
+</tr>
+<tr>
+<td>haitoukin バックフィル済み</td>
+<td>58銘柄（FY1989〜）</td>
+</tr>
+<tr>
+<td>公表値オーバーライド</td>
+<td>12銘柄</td>
+</tr>
+</tbody>
+</table>
+<p><code>first_data_date</code> は「<strong>自分が持っているデータの最古日</strong>」を指すだけで、「<strong>会社がそれ以前に存在したか</strong>」は分からない（自己参照）。
+打ち切りを検知するには「会社がいつから存在したか」という<strong>独立した年齢シグナル = <code>listing_date</code></strong> が必要だったが、0%だった。
+→ だから打ち切りに気づけず、誤った年数を黙って出していた。</p>
+<hr />
+<h2 id="2">2. 打ち切り判定式</h2>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>is_censored(code) =
+    (listing_year(code) &lt; earliest_div_year(code))    # 下限年より前に上場 ＝ それ以前のデータが欠落
+  AND
+    (streak_start_year(code) == earliest_div_year(code))  # ストリークが下限まで遡って切れている
+</code></pre></div>
+
+<ul>
+<li><code>earliest_div_year</code> = <code>dividend_annual</code> の最小 <code>fiscal_year</code>（計算可能）</li>
+<li><code>streak_start_year</code> = ストリーク計算の結果（計算可能）</li>
+<li><code>listing_year</code> = <code>listing_date</code> 由来（<strong>独立ソースが必要 = 欠けていた唯一のピース</strong>）</li>
+</ul>
+<p>補足:
+- ストリークが下限band に達していなければ（途中で減配して2010年などから始まる）打ち切りではない → <code>listing_date</code> 不要
+- <code>listing_year &gt;= earliest_div_year</code> なら、データは上場時まで遡れている → <strong>真の開始・打ち切りでない</strong>（確定値を出してよい）</p>
+<hr />
+<h2 id="3-3">3. 3層の解決設計</h2>
+<h3 id="0">第0層 — 絶対に黙って間違えない（最優先・データ取得不要）</h3>
+<p>ストリークが下限band（FY1999〜2002）に到達した銘柄は、<strong>デフォルトで <code>streak_is_censored=1</code></strong> とし、表示・投稿では<strong>常に「N年以上（N+）」</strong>にする。
+- これだけで「嘘の数字」は構造的に出なくなる（最悪でも正直なN+）
+- 品質ゲートで担保（§7）</p>
+<h3 id="1-nlisting_date">第1層 — 精度を上げる＝過剰なN+を消す（<code>listing_date</code> 取得）</h3>
+<p>N+ばかりではランキングが死ぬ。本当に2000年前後にIPOした会社は確定値を出したい。
+- <code>listing_date</code> を取得し、判定式で「真のIPO」と「打ち切り」を切り分ける
+- <code>listing_year ≈ earliest_div_year</code> → N+を外して<strong>確定値</strong>
+- <code>listing_year &lt; earliest_div_year</code> → 確定で打ち切り → 第2層へ</p>
+<p><strong>取得方針</strong>:
+- <strong>最終形は全銘柄（約3,750）取得が前提</strong>（上場来パフォーマンス等、将来の分析にも使う）
+- ただし<strong>段階取得可</strong>。打ち切り判定に効くのは配当が下限band（〜FY2002）で始まる<strong>約1,200銘柄</strong>なので、初回はここを優先してもよい
+- ソース = <strong>kabutan 銘柄プロフィール</strong>（上場日・設立日を掲載）。J-Quants <code>/listed/info</code> にはIPO日が無い、JPX Excel にも無い
+- 礼儀スリープ1.5秒。全銘柄で約100分、容疑者bandのみなら約30〜40分。<strong>不変データなので初回1回限り</strong>
+- 代替: minkabu、日経会社情報、EDINET有報「沿革」（テキスト解析が必要で割高）</p>
+<h3 id="2_1">第2層 — 可能な範囲で実値に補正（既存資産で大半が完了済み）</h3>
+<ol>
+<li><strong>haitoukin バックフィル</strong>（移行済み58銘柄、FY1989〜）。花王36年もこれで復元される。<code>dividend_annual</code> に <code>source='haitoukin'</code> で保持</li>
+<li><strong>公表値オーバーライド</strong>（12銘柄）。<code>streak_overrides</code> に保持し、<strong><code>公表値 &gt; 機械計算</code> のときだけ昇格</strong>（地雷5。古い公表値で機械計算を下げない）</li>
+<li><strong>接合時の境界異常チェック</strong>（地雷3）。前年比10倍超/1未満は分割調整漏れ疑い → そのバックフィルは捨てる。NTT/SBG/電通総研はこれで弾かれるため公表値オーバーライドで対処</li>
+<li>残り（1989年境界13銘柄など）は手入力オーバーライドで個別対応</li>
+</ol>
+<hr />
+<h2 id="4">4. データモデルへの影響</h2>
+<p><code>stocks</code>（新スキーマ。<code>founded_date</code> を追加）:</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>listing_date<span style="color: #BBB">    </span><span style="color: #008000">TEXT</span>,<span style="color: #BBB">   </span><span style="color: #3D7B7B; font-style: italic">-- 上場年月日（kabutan等。打ち切り判定の独立シグナル）</span>
+founded_date<span style="color: #BBB">    </span><span style="color: #008000">TEXT</span>,<span style="color: #BBB">   </span><span style="color: #3D7B7B; font-style: italic">-- 設立年月日（補助）</span>
+first_data_date<span style="color: #BBB"> </span><span style="color: #008000">TEXT</span>,<span style="color: #BBB">   </span><span style="color: #3D7B7B; font-style: italic">-- DB内最古データ日（導出値。単独では打ち切り判定に使えない）</span>
+</code></pre></div>
+
+<p><code>dividend_annual.source</code> ∈ {events, haitoukin, ir, manual}（粒度はFY。イベントと混在禁止 = 地雷1）
+<code>streak_overrides</code>（code, growth_years, nocut_years, as_of_fiscal_year, source_url, verified_at）
+<code>computed_metrics.streak_is_censored INTEGER</code>（1=「N+」表示。必須機能）</p>
+<hr />
+<h2 id="5">5. ストリーク計算の正準仕様（打ち切り込み）</h2>
+<p>入力: <code>dividend_annual</code> の (fiscal_year, dps) 昇順 + <code>streak_overrides</code> + <code>stocks.listing_date</code></p>
+<ol>
+<li>進行中の会計年度（支払い未確定）は<strong>常に除外</strong></li>
+<li>増配判定 <code>dps &gt; prev*1.0001</code>、非減配判定 <code>dps &gt;= prev*0.999</code>（浮動小数マージン）</li>
+<li><strong>年度が連続しない箇所（歯抜け）でストリーク打ち切り</strong>（地雷4）</li>
+<li>ストリークが系列先頭または歯抜けに到達 → 一旦 <code>is_censored=1</code> 候補</li>
+<li><code>listing_date</code> があり <code>listing_year &gt;= streak_start_year</code> → 真の開始と確定し <code>is_censored=0</code></li>
+<li><code>override</code> があり <code>公表値 &gt; 機械計算</code> → 公表値に置換（<code>is_censored=0</code>）</li>
+<li>残った <code>is_censored=1</code> は表示「N年以上 / N+」</li>
+</ol>
+<p><strong>この計算モジュールはプロジェクト内に1つだけ</strong>置く。DBアクセスと純粋計算を分離（旧 <code>back_findex/findex/metrics/dividend.py</code> が流用可能な完成形）。</p>
+<hr />
+<h2 id="6-30">6. 検証セット（約30社）</h2>
+<p>実装の正しさを確認するための「ハズレになりそうな会社」。各社の<strong>失敗モード</strong>と<strong>期待挙動</strong>を網羅する。
+公表値の出典は ZAi（<a href="https://diamond.jp/zai/articles/-/229803">229803</a>）。<code>*</code> は要kabutan/IR確認。</p>
+<table>
+<thead>
+<tr>
+<th>code</th>
+<th>社名</th>
+<th>分類（失敗モード）</th>
+<th>期待挙動 / 公表値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4452</td>
+<td>花王</td>
+<td>バックフィル復元 ＋ 決算期変更(3月→12月2012)</td>
+<td>増配 <strong>36年</strong> 確定</td>
+</tr>
+<tr>
+<td>6370</td>
+<td>栗田工業</td>
+<td>バックフィル復元</td>
+<td>増配 22年</td>
+</tr>
+<tr>
+<td>5947</td>
+<td>リンナイ</td>
+<td>バックフィル復元</td>
+<td>増配 24年</td>
+</tr>
+<tr>
+<td>8113</td>
+<td>ユニ・チャーム</td>
+<td>バックフィル復元</td>
+<td>増配 24年</td>
+</tr>
+<tr>
+<td>9433</td>
+<td>KDDI</td>
+<td>計算一致（回帰防止）</td>
+<td>増配 24年</td>
+</tr>
+<tr>
+<td>8593</td>
+<td>三菱HCキャピタル</td>
+<td>合併(2021) ＋ override</td>
+<td>増配 27年</td>
+</tr>
+<tr>
+<td>7466</td>
+<td>SPK</td>
+<td>歯抜け ＋ override</td>
+<td>増配 28年</td>
+</tr>
+<tr>
+<td>4967</td>
+<td>小林製薬</td>
+<td>上場前から数える(定義差) ＋ override</td>
+<td>増配 26年</td>
+</tr>
+<tr>
+<td>4732</td>
+<td>ユー・エス・エス</td>
+<td>override</td>
+<td>増配 26年</td>
+</tr>
+<tr>
+<td>9436</td>
+<td>沖縄セルラー電話</td>
+<td>歯抜け ＋ override</td>
+<td>増配 24年</td>
+</tr>
+<tr>
+<td>2659</td>
+<td>サンエー</td>
+<td>override</td>
+<td>増配 23年</td>
+</tr>
+<tr>
+<td>7532</td>
+<td>PPIH</td>
+<td>override</td>
+<td>増配 22年</td>
+</tr>
+<tr>
+<td>4527</td>
+<td>ロート製薬</td>
+<td>override</td>
+<td>増配 22年</td>
+</tr>
+<tr>
+<td>7504</td>
+<td>高速</td>
+<td>歯抜け ＋ override</td>
+<td>増配 22年</td>
+</tr>
+<tr>
+<td>9843</td>
+<td>ニトリHD</td>
+<td>override</td>
+<td>増配 22年</td>
+</tr>
+<tr>
+<td>2391</td>
+<td>プラネット</td>
+<td>override</td>
+<td>増配 21年</td>
+</tr>
+<tr>
+<td>8424</td>
+<td>芙蓉総合リース</td>
+<td>override</td>
+<td>増配 21年</td>
+</tr>
+<tr>
+<td>8425</td>
+<td>みずほリース</td>
+<td>override</td>
+<td>増配 21年</td>
+</tr>
+<tr>
+<td>9432</td>
+<td>NTT</td>
+<td>分割調整不一致(100分割等)→バックフィル不可</td>
+<td>境界異常で弾く → override待ち</td>
+</tr>
+<tr>
+<td>9984</td>
+<td>ソフトバンクG</td>
+<td>分割調整不一致</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>4812</td>
+<td>電通総研</td>
+<td>分割調整不一致</td>
+<td>同上</td>
+</tr>
+<tr>
+<td>9531</td>
+<td>東京瓦斯</td>
+<td>1989年境界・超長期非減配(36年+)</td>
+<td>データ不足 → <strong>N+表示</strong></td>
+</tr>
+<tr>
+<td>9532</td>
+<td>大阪瓦斯</td>
+<td>1989年境界・超長期非減配</td>
+<td><strong>N+表示</strong></td>
+</tr>
+<tr>
+<td>8253</td>
+<td>クレディセゾン</td>
+<td>1989年境界・超長期非減配</td>
+<td><strong>N+表示</strong></td>
+</tr>
+<tr>
+<td>4503</td>
+<td>アステラス製薬</td>
+<td>合併(2005 山之内+藤沢)＝過去連続性はフィクション</td>
+<td>naive計算禁止 → override</td>
+</tr>
+<tr>
+<td>8267</td>
+<td>イオン</td>
+<td>2月期決算</td>
+<td>会計年度バケツが正しいこと</td>
+</tr>
+<tr>
+<td>8233</td>
+<td>高島屋</td>
+<td>2月期決算</td>
+<td>会計年度バケツが正しいこと</td>
+</tr>
+<tr>
+<td>3038*</td>
+<td>神戸物産</td>
+<td>真の2000年以降IPOの対照群</td>
+<td><strong>N+を付けない</strong>・確定値</td>
+</tr>
+<tr>
+<td>(対照2社)*</td>
+<td>—</td>
+<td>2006年以降上場の配当銘柄</td>
+<td>kabutanで上場日確認し選定</td>
+</tr>
+</tbody>
+</table>
+<p>検証データの正準ファイル（新リポジトリにコピー済み）:
+- <code>data/verification_cohort.csv</code> — 上表の28社（失敗モード分類・期待挙動つき）
+- <code>data/golden_streaks_zai_20260601.csv</code> — ZAi トップ20の公表値（golden test の期待値）</p>
+<h3 id="_1">レート制限と検証コホートの位置づけ（重要）</h3>
+<p>全約4,000銘柄を一気に取得すると多くのサイトでレートリミットに当たる。
+したがって<strong>実装の検証は毎回全銘柄ではなく、このコホート（約30社）だけで行う</strong>。
+- fetch層は <code>--codes</code> でのサブセット取得を必須とする（requirements §9）
+- 開発中は <code>--codes $(cohort)</code> で kabutan/yfinance を叩き、コホート分だけ取得して検算
+- 全銘柄スキャンは設計が固まり golden が通ってから<strong>1回だけ</strong>実行する
+- これによりレート制限を避けつつ、失敗モードを網羅した高速な反復ができる</p>
+<hr />
+<h2 id="7">7. 品質ゲート・不変条件</h2>
+<ul>
+<li><strong>golden test</strong>: 上表の確定値（花王36等）と機械計算＋overrideの結果が一致すること</li>
+<li><strong>不変条件テスト</strong>: <code>streak_is_censored=1</code> の銘柄を<strong>裸の数字で出力・投稿しない</strong>（必ず「N+」）</li>
+<li><strong>境界異常テスト</strong>: バックフィル接合後、前年比10倍超/1未満の行が残っていないこと</li>
+<li>これらが落ちている間は<strong>X投稿を自動拒否</strong>（数字が嘘＝最大リスク）</li>
+</ul>
+<hr />
+<h2 id="8">8. 実装手順（依存順）</h2>
+<ol>
+<li>新スキーマ作成（<code>stocks</code> に <code>listing_date</code>/<code>founded_date</code>/<code>first_data_date</code>、<code>dividend_annual</code>、<code>streak_overrides</code>、<code>computed_metrics.streak_is_censored</code>）</li>
+<li>既存データ移行（<code>dividend_annual</code> の <code>source != 'events'</code> 行と <code>streak_overrides</code> は必ず移行。§requirements §10）</li>
+<li>ストリーク計算モジュール（純粋関数＋打ち切り判定）＋ golden test</li>
+<li><code>listing_date</code> 取得（kabutanスクレイパー。容疑者band優先 → 全銘柄）</li>
+<li>判定式適用 → <code>streak_is_censored</code> 確定 → N+表示</li>
+<li>品質ゲート組み込み（投稿前チェック）</li>
+</ol>
+<hr />
+<h2 id="9">9. 残課題</h2>
+<ul>
+<li>1989年境界13銘柄（東京瓦斯・大阪瓦斯・クレディセゾン等、非減配36年+）の確定値 → 各社IRファクトブック / 国会図書館デジタルコレクションで個別調査</li>
+<li>NTT(9432)・SBG(9984)・電通総研(4812) の公表値手入力</li>
+<li>三井不動産(8801)・日清オイリオ(2602) のバックフィル未実行分（対象抽出漏れ）</li>
+<li>根本対策としての J-Quants 全面移行（無料は12週遅延・2000年起点のため、契約プラン次第）</li>
+</ul>
+</main></div></body></html>

@@ -1,1 +1,0 @@
-/Users/motani/Develop/github/findex/.agents/skills/migrate-to-shoehorn//SKILL.md

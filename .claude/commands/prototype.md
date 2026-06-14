@@ -1,1 +1,0 @@
-/Users/motani/Develop/github/findex/.agents/skills/prototype//SKILL.md
