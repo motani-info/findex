@@ -22,6 +22,7 @@ PAGES = [
     (DOCS / "PROGRESS.md", "progress.html", "進捗ダッシュボード", "★ Progress"),
     (DOCS / "design" / "00-charter-and-data-integrity.md", "charter.html", "ノーススター：定款とデータ完全性", "★ North Star"),
     (DOCS / "PROJECT-LOG.md", "project-log.html", "プロジェクトログ（フェーズ記録）", "Log"),
+    (DOCS / "IMPLEMENTATION-PLAN.md", "implementation-plan.html", "実装フェーズ計画", "★ Plan"),
     (DOCS / "design" / "02-data-integrity-framework.md", "data-integrity-framework.html", "D2：データ完全性フレームワーク", "Design"),
     (DOCS / "design" / "02_5-feasibility-findings.md", "feasibility-findings.html", "D2.5：取得可能性スタディ実測", "Design"),
     (DOCS / "design" / "02_6-data-limits-and-impact.md", "data-limits-and-impact.html", "D2.6：取得限界と評価軸への影響", "Design"),

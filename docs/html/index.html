@@ -63,6 +63,7 @@ li{margin:.2em 0}
 <a class="" href="progress.html">進捗ダッシュボード</a>
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="implementation-plan.html">実装フェーズ計画</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
 <a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
 <a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
@@ -81,6 +82,7 @@ li{margin:.2em 0}
 <h3 style="margin-top:1.4em"><a href="progress.html">進捗ダッシュボード</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ Progress]</span></h3><p style="color:var(--muted)">プロジェクト全体の現在地・残作業・計画を一望するページ。設計が動くたびに更新する（正本の状態は各設計書、本ページはその要約）。</p>
 <h3 style="margin-top:1.4em"><a href="charter.html">ノーススター：定款とデータ完全性</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ North Star]</span></h3><p style="color:var(--muted)">旧PJ（`back_findex`）を参照した結果、「データ品質 = 2000年以前の配当履歴の欠落」と問題が誤って狭められた。 これは旧PJがその切り口で書かれていたためで、新 findex を立ち上げた本来の目的——旧設計の前提のまま進む誤りを断つこと——に反していた。</p>
 <h3 style="margin-top:1.4em"><a href="project-log.html">プロジェクトログ（フェーズ記録）</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Log]</span></h3><p style="color:var(--muted)">セッションをまたいで文脈を失わないための公式記録。新しい作業を始める前に必ず本書とノーススター（00-charter-and-data-integrity.md）を読むこと。 フェーズが終わるごとに追記する（上に新しいフェーズを積む）。</p>
+<h3 style="margin-top:1.4em"><a href="implementation-plan.html">実装フェーズ計画</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[★ Plan]</span></h3><p style="color:var(--muted)">- 設計ドキュメントが正本。コードは data-model(D3)・indicator-system(D4)・indicator-calibration(D4.5)・data-workflow(D7)・verification(D6)と必ず突合してから書く。 - 一方向フロー（取得→導出→評価→出力）。後段は前段テーブ</p>
 <h3 style="margin-top:1.4em"><a href="data-integrity-framework.html">D2：データ完全性フレームワーク</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">findex の根本欠陥は「収集すべきデータの定義が無かったこと」だった（旧 `stocks` が上場日を持たず、欠損に気づけなかった）。 本書はまず「完全とは何か」をフィールド単位で定義する（データディクショナリ）。 カバレッジ・期間充足・品質ゲートはすべて「この定義に対して」測られる。「揃っているか」＝「定義に対し</p>
 <h3 style="margin-top:1.4em"><a href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">| 問い | 実測結果 | |---|---| | 現在スナップショットの財務は1ソースで足りるか | J-Quants v2 `/fins/summary` がほぼ充足（売上/営業益/純益/EPS/総資産/自己資本/現金/営業CF・投資CF・財務CF/発行株数/配当/予想配当/配当性向）。1コールで潤沢 | | 長期</p>
 <h3 style="margin-top:1.4em"><a href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a> <span style="color:var(--muted);font-weight:400;font-size:13px">[Design]</span></h3><p style="color:var(--muted)">データを「取得可能性のクラス」で分類する。これが定款「足りない部分を常に把握できる」の実体。</p>

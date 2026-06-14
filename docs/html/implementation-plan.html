@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>実装フェーズ計画 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="active" href="implementation-plan.html">実装フェーズ計画</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="indicator-system.html">D4：指標システム仕様</a>
+<a class="" href="indicator-calibration.html">D4.5：指標較正（v4提案）</a>
+<a class="" href="verification-strategy.html">D6：多フィールド検証戦略</a>
+<a class="" href="analysis-angles.html">分析切り口カタログ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 大原則（凍結解除後も厳守）</a>
+<a class="l2" href="#1">1. 雛形の流用可否（棚卸し）</a>
+<a class="l2" href="#2">2. 実装フェーズ（依存順）</a>
+<a class="l3" href="#phase-0-d3">Phase 0: スキーマ再生成（D3）</a>
+<a class="l3" href="#phase-1-d7-7">Phase 1: マスター＋移行（D7 §7）</a>
+<a class="l3" href="#phase-2-d7-034fetch">Phase 2: 取得層（D7 §0,§3,§4・fetch）</a>
+<a class="l3" href="#phase-3-d4d45derive">Phase 3: 導出層（D4・D4.5・derive）</a>
+<a class="l3" href="#phase-4-d4d45score">Phase 4: 評価層（D4・D4.5・score）</a>
+<a class="l3" href="#phase-5-d6verify">Phase 5: 検証（D6・verify）</a>
+<a class="l3" href="#phase-6-xd5">Phase 6: X発信（D5・優先度低）</a>
+<a class="l2" href="#3">3. マイルストーン</a>
+<a class="l2" href="#4-go">4. 着手前の確認事項（GO時に決める）</a></div>
+</nav>
+<main>
+  <div class="badge">★ Plan</div>
+  <h1 id="findex-v2">findex v2 実装フェーズ計画</h1>
+<p><strong>作成日</strong>: 2026-06-15
+<strong>位置づけ</strong>: 設計（D1〜D7・D5除く）完結を受け、<strong>設計を実装可能なタスクに分解</strong>した橋渡し。正本の設計は各Dドキュメント、本書は実行順序とゲート。
+<strong>重要</strong>: 着手は<strong>ユーザーのGO後</strong>。現時点は実装凍結のまま（本書は計画）。</p>
+<hr />
+<h2 id="0">0. 大原則（凍結解除後も厳守）</h2>
+<ul>
+<li><strong>設計ドキュメントが正本</strong>。コードは <a href="data-model.html">data-model</a>(D3)・<a href="indicator-system.html">indicator-system</a>(D4)・<a href="indicator-calibration.html">indicator-calibration</a>(D4.5)・<a href="data-workflow.html">data-workflow</a>(D7)・<a href="verification-strategy.html">verification</a>(D6)と必ず突合してから書く。</li>
+<li><strong>一方向フロー</strong>（取得→導出→評価→出力）。後段は前段テーブルだけ読む。</li>
+<li><strong>各フェーズの完了ゲート＝コホート検証(L2)が緑</strong>。golden不一致なら次へ進まない。</li>
+<li><strong>レート制限</strong>: 開発は常にコホート38社（<code>--cohort</code>）。全銘柄スキャンは golden が通ってから1回だけ。</li>
+<li><strong>DB</strong>: 開発は <code>~/.findex/db/findex_v2.db</code>。旧 <code>findex.db</code>(223MB)は<strong>読み取り専用の移行元</strong>。直接書かない。</li>
+</ul>
+<hr />
+<h2 id="1">1. 雛形の流用可否（棚卸し）</h2>
+<table>
+<thead>
+<tr>
+<th>既存</th>
+<th>状態</th>
+<th>方針</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>derive/streaks.py</code>（+test 10件green）</td>
+<td>打ち切り判定あり・配当中心</td>
+<td><strong>流用</strong>。result_overrides汎用化＋status出力＋ギャップ打ち切りバグ修正</td>
+</tr>
+<tr>
+<td><code>fetch/base.py</code>（RateLimitedFetcher）</td>
+<td>バッチ/レジューム/バックオフ実装</td>
+<td><strong>流用</strong>（ソース別レート設定を追加）</td>
+</tr>
+<tr>
+<td><code>fetch/listing.py</code> <code>fetch/prices.py</code></td>
+<td>骨格(NotImplemented)</td>
+<td><strong>作り直し</strong>（kabutan/J-Quants/yfinance）</td>
+</tr>
+<tr>
+<td><code>db/schema.sql</code>（12テーブル・旧）</td>
+<td>streak_overrides・status無し・会計メタ無し</td>
+<td><strong>全面更新</strong>（D3へ）</td>
+</tr>
+<tr>
+<td><code>score/</code> <code>post/</code></td>
+<td>ほぼ空</td>
+<td><strong>新規実装</strong>（v4）</td>
+</tr>
+<tr>
+<td><code>cohort.py</code> <code>config.py</code> <code>cli.py</code></td>
+<td>骨格</td>
+<td>拡張</td>
+</tr>
+</tbody>
+</table>
+<p>→ 流用は streaks/base のみ。<strong>schema と fetch本体・score・verify は設計（D3/D4/D4.5/D6）から新規</strong>。</p>
+<hr />
+<h2 id="2">2. 実装フェーズ（依存順）</h2>
+<h3 id="phase-0-d3">Phase 0: スキーマ再生成（D3）</h3>
+<ul>
+<li><code>db/schema.sql</code> を data-model(D3) から作り直す:</li>
+<li><code>result_overrides</code>（旧streak_overrides汎用化）、<code>stocks</code>に会計メタ+edinet_code、<code>financial_snapshots</code>にcapex/investment_securities/interest_expense等、来歴メタ(source/confidence/as_of/collected_at)、<code>computed_metrics</code>にstatus列＋claim別グレード</li>
+<li><code>findex initdb</code> で findex_v2.db に適用（旧DBは触らない）</li>
+<li><strong>ゲート</strong>: スキーマが全Dドキュメントのテーブル定義と一致</li>
+</ul>
+<h3 id="phase-1-d7-7">Phase 1: マスター＋移行（D7 §7）</h3>
+<ul>
+<li>JPX Excel → stocks（コード/名称/市場/sector33）</li>
+<li><strong>EDINETコードリストzip → edinet_code/決算期末月/連結</strong>（実証済・3,842件・即時）</li>
+<li>kabutan → listing_date（<strong>現0%・打ち切り判定の鍵</strong>）</li>
+<li>移行: 旧DBから <code>dividend_annual</code>(source!='events') と <code>streak_overrides</code>→<code>result_overrides</code>変換 を投入（再現困難・最優先）。price/financialは移行せず再取得</li>
+<li><strong>ゲート</strong>: コホート38社のstocksが会計メタ・listing_dateまで揃う</li>
+</ul>
+<h3 id="phase-2-d7-034fetch">Phase 2: 取得層（D7 §0,§3,§4・fetch）</h3>
+<ul>
+<li>prices: J-Quants（直近）＋ <strong>yfinance 2000年遡及</strong>（旧は2024-06〜のみ＝不足）</li>
+<li>financials: J-Quants <code>/fins/summary</code>（現在〜2年）＋ <strong>EDINET有報XBRL</strong>（深いBS・capex・<strong>会計基準別ラベル辞書</strong>・提出日日次スキャン）</li>
+<li>dividends: events取得 → dividend_annual(events) 再構築 ＋ haitoukin backfill</li>
+<li>result_overrides: ZAi/みんかぶ/IRから連続年数の"結果"取り込み（出典・as_of必須）</li>
+<li>すべて RateLimitedFetcher 経由</li>
+<li><strong>ゲート</strong>: コホートで各フィールドのstatus（ok/missing）が想定通り（capex/investment_securitiesがEDINETで埋まる）</li>
+</ul>
+<h3 id="phase-3-d4d45derive">Phase 3: 導出層（D4・D4.5・derive）</h3>
+<ul>
+<li>streaks: result_overrides汎用合成（機械→override昇格→N+）＋<strong>status出力</strong>＋ギャップ打ち切りバグ修正</li>
+<li>YoC（取得利回り）＋ dividend_multiple ＋ <strong>増配の質係数</strong>（EPS倍率/DPS倍率→sound/payout_driven/cyclical）</li>
+<li>DOE（=ROE×配当性向）</li>
+<li>財務指標（ROE/自己資本比率/FCF=CFO−capex/ROIC-WACC/営業益率）＋ <strong>beta=price×TOPIX回帰</strong></li>
+<li>各値に <strong>status付与</strong>（ok/zero_legit/missing/insufficient/censored）＋ <strong>claim別グレード</strong>算出</li>
+<li>→ computed_metrics（唯一の出口）</li>
+<li><strong>ゲート</strong>: golden_streaks 一致（花王=36等）＋ status分布が妥当</li>
+</ul>
+<h3 id="phase-4-d4d45score">Phase 4: 評価層（D4・D4.5・score）</h3>
+<ul>
+<li>rules.yaml を <strong>v4</strong> に更新（YoC/DOE/閾値70-15/業種相対/null_policy:status_based）</li>
+<li>スコアラ: <strong>動的分母</strong>（missing/insufficient/censored除外、zero_legitは0点）、YoC質係数、業種相対（営業益率）、予想欠損の実績フォールバック、大型/金融swap</li>
+<li>rule_versions に v4 登録</li>
+<li>→ dividend_scores（claim別グレード併記）</li>
+<li><strong>ゲート</strong>: コホートのスコアが説明可能（薄データ銘柄が不当に高得点でない＝grade併示で確認）</li>
+</ul>
+<h3 id="phase-5-d6verify">Phase 5: 検証（D6・verify）</h3>
+<ul>
+<li><code>golden_financials</code> 作成（EDINET/IRから少数銘柄の正解値・会計基準散らす）</li>
+<li>コホート 28→38社 拡張（財務/会計基準/status系）</li>
+<li>照合レポート（override乖離・J-Quants×EDINET・golden突合）</li>
+<li><code>findex verify</code> CLI（L1単体＋L2コホート＋L3分布を束ねる）</li>
+<li><strong>ゲート</strong>: <code>findex verify --cohort</code> が緑 → <strong>全銘柄スキャン1回</strong>へ</li>
+</ul>
+<h3 id="phase-6-xd5">Phase 6: X発信（D5・優先度低）</h3>
+<ul>
+<li>実装が安定してから着手。フック（切り口①YoC×持続性等）・品質ゲート連動・Playwright投稿</li>
+</ul>
+<hr />
+<h2 id="3">3. マイルストーン</h2>
+<table>
+<thead>
+<tr>
+<th>MS</th>
+<th>完了状態</th>
+<th>検証</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>スキーマ＋マスター＋移行（Phase0-1）</td>
+<td>コホートのstocks完備</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>取得層（Phase2）</td>
+<td>コホートの全フィールドstatus妥当</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>導出＋採点（Phase3-4）</td>
+<td>golden_streaks緑・スコア説明可能</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>検証完備＋全銘柄スキャン（Phase5）</td>
+<td><code>findex verify</code>緑・全銘柄ランキング生成</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>X発信（Phase6・後日）</td>
+<td>品質ゲート通過の投稿</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-go">4. 着手前の確認事項（GO時に決める）</h2>
+<ol>
+<li><strong>凍結解除のGO</strong>（実装を始めてよいか）</li>
+<li><strong>着手範囲</strong>: M1から順か、特定フェーズ先行か</li>
+<li><strong>.env整備</strong>: 現在キーは <code>back_findex/.env</code>。findex/.env を正式に用意するか（gitignore済）</li>
+<li><strong>作業の進め方</strong>: 1フェーズずつレビュー or まとめて</li>
+</ol>
+<p>→ GO が出たら Phase 0（スキーマ再生成）から着手。各フェーズ末にコホート検証で区切る。</p>
+</main></div></body></html>
