@@ -65,6 +65,9 @@ li{margin:.2em 0}
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
 <a class="active" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
@@ -516,16 +519,23 @@ li{margin:.2em 0}
 <tr>
 <td><code>beta</code></td>
 <td>REAL</td>
-<td><strong>optional(入手難)</strong></td>
-<td>（要検討）</td>
-<td>ROIC-WACC ← 低カバレッジ要因</td>
+<td>optional（導出）</td>
+<td>株価×指数の自前回帰 / yfinance</td>
+<td>ROIC-WACC。※D2.5実測: yfinanceで95%取得可＝<strong>入手難ではない</strong>（当初想定を訂正）</td>
+</tr>
+<tr>
+<td><code>capex</code></td>
+<td>REAL</td>
+<td>required</td>
+<td>EDINET CF（投資活動）</td>
+<td>FCF。※D2.5実測: <strong>旧DBで0%＝FCF低カバレッジの真因</strong>。最優先で埋める</td>
 </tr>
 <tr>
 <td><code>cost_of_debt</code></td>
 <td>REAL</td>
-<td><strong>optional(入手難)</strong></td>
+<td>optional</td>
 <td>EDINET(支払利息/有利子負債)</td>
-<td>ROIC-WACC ← 低カバレッジ要因</td>
+<td>ROIC-WACC。支払利息はEDINETで取得実証済み</td>
 </tr>
 <tr>
 <td><code>effective_tax_rate</code></td>
@@ -537,7 +547,7 @@ li{margin:.2em 0}
 </tbody>
 </table>
 <blockquote>
-<p><strong>入手難フィールド</strong>（investment_securities / beta / cost_of_debt）が、旧 rules.yaml の低カバレッジ（ROIC48%・FCF/ネットキャッシュ）の主因と推定。D2.5 で実証し、D4 でこれら依存指標の扱い（重み・代替・不足時挙動）を決める。</p>
+<p><strong>低カバレッジの真因（D2.5実測で確定・当初推定を訂正）</strong>: beta は95%あり入手難ではない。真の主因は ① <strong>capex 0%</strong>（一度も取得されず＝FCFが崩れる）② <strong>investment_securities 不在</strong>（yfinanceに無い→EDINETで取得実証済み）③ 複合指標(ROIC/FCF)が多フィールドの積で落ちること。詳細は <a href="feasibility-findings.html">02_5-feasibility-findings.md</a>。D4 でこれら依存指標の扱い（重み・代替・不足時挙動）を決める。</p>
 </blockquote>
 <hr />
 <h2 id="3-d25">3. ソース権威階層（<strong>仮説</strong>・D2.5で実証して確定）</h2>

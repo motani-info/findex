@@ -65,11 +65,15 @@ li{margin:.2em 0}
 <a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
 <a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
 <a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
 <a class="" href="requirements.html">要件定義書 v2</a>
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
 <a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
   <div class="toc"><a class="l2" href="#1">1. ひとことサマリ</a>
+<a class="l3" href="#d25-2026-06-14">D2.5 実測の要点（2026-06-14）</a>
 <a class="l2" href="#2-d1d7">2. 設計ロードマップ（D1〜D7）</a>
 <a class="l2" href="#3-3">3. 定款と3本柱（達成度）</a>
 <a class="l2" href="#4-2026-06-14">4. 直近の重要な意思決定（2026-06-14）</a>
@@ -83,15 +87,24 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-14 / <strong>現在フェーズ</strong>: 設計（実装凍結）/ <strong>次の一歩</strong>: D2.5 取得可能性スタディ</p>
+<p><strong>最終更新</strong>: 2026-06-14 / <strong>現在フェーズ</strong>: 設計（D3データモデル改訂完了）/ <strong>次の一歩</strong>: D4 指標システム仕様（Nullポリシー再設計・override合成順序・16/18確定）</p>
 <hr />
 <h2 id="1">1. ひとことサマリ</h2>
 <p>findex v2 は <strong>ゼロから設計し直し中</strong>。旧実装（<code>back_findex</code>）はデータ品質が破綻していたため切り離した。
 いまは <strong>設計フェーズ・実装凍結</strong>。定款（全銘柄・全フィールドのデータ完全性を土台に、進化する独自指標で多角分析し、Xユーザーの興味を引く切り口で投稿し続ける）に沿って、D1→D7 の設計成果物を順に固めている。</p>
 <ul>
-<li><strong>完了</strong>: D1 ノーススター、D2 データ完全性フレームワーク（第三者レビューで目的志向に是正済み）</li>
-<li><strong>次</strong>: D2.5 取得可能性スタディ（実データで gap・ソース・MVP母数を実測）</li>
-<li><strong>凍結中</strong>: 既存コード（schema.sql / streaks.py / fetch基盤 / CLI）。設計確定まで触らない</li>
+<li><strong>完了</strong>: D1 ノーススター、D2 データ完全性フレームワーク（第三者レビューで是正）、D2.5 取得可能性スタディ（実測）、D2.6 取得限界と評価軸への影響、D2.7 結果補正レイヤ、<strong>D3 データモデル改訂</strong></li>
+<li><strong>次</strong>: D4 指標システム仕様（Nullポリシー再設計・機械計算→override→N+の合成順序・16/18確定・beta訂正反映）</li>
+<li><strong>凍結中</strong>: 既存コード（schema.sql / streaks.py / fetch基盤 / CLI）。設計確定まで触らない（D2.5の検証は<code>.scratch/</code>の使い捨てプローブで実施）</li>
+</ul>
+<h3 id="d25-2026-06-14">D2.5 実測の要点（2026-06-14）</h3>
+<ul>
+<li><strong>J-Quants v2 は約2年窓</strong>（現契約）。現在スナップショット財務は<code>/fins/summary</code>1コールで潤沢だが、長期時系列（配当ストリーク等）はライブ不可 → 旧DB(FY1989〜)＋バックフィルが土台</li>
+<li><strong>入手難フィールドは入手可能</strong>。EDINET XBRLで投資有価証券・有利子負債・支払利息・利益剰余金を実取得。低カバレッジの真因は「データ欠如」でなく「会計基準をまたぐパース未対応」</li>
+<li><strong>重要訂正</strong>: beta は旧DBで95%あり入手難ではない。FCF低カバレッジの真因は <strong>capex 0%</strong>（未取得）と investment_securities 不在</li>
+<li><strong>gap実数</strong>: edinet_code 0%・listing_date 0%・capex 0% が要対応。財務BSの大半は99%超ある</li>
+<li><strong>MVP潤沢</strong>: 確定ストリーク約2,700銘柄。配当系の投稿母数は設計確定後すぐ確保できる</li>
+<li><strong>時系列の下限（重要）</strong>: 2000年以前で保持できるのは<strong>配当のみ</strong>。株価はyfinanceでも2000-01-04が下限、財務(EDINET)は2008年〜。<strong>2000年以前の株価・PER・PBRは取得不能</strong>（pre-2000は価格・バリュエーション系claimを出さない＝捏造しない）。旧DBの株価は2024-06〜しか無いが2000年まで再取得で回復可</li>
 </ul>
 <hr />
 <h2 id="2-d1d7">2. 設計ロードマップ（D1〜D7）</h2>
@@ -119,14 +132,26 @@ li{margin:.2em 0}
 </tr>
 <tr>
 <td><strong>D2.5</strong></td>
-<td>取得可能性スタディ（各フィールドが全銘柄分そろうかの実証・ソース確定・MVP母数）</td>
-<td style="text-align: center;">⏭️ 次</td>
-<td>—</td>
+<td>取得可能性スタディ（実データでソース確定・gap実測・MVP母数）</td>
+<td style="text-align: center;">✅ 実測完了</td>
+<td><a href="feasibility-findings.html">feasibility-findings</a></td>
 </tr>
 <tr>
-<td>D3</td>
-<td>データモデル改訂（全テーブルに来歴/確信度/品質、カバレッジ追跡）</td>
-<td style="text-align: center;">⬜ 後続</td>
+<td><strong>D2.6</strong></td>
+<td>取得限界の整理と評価軸への影響調査（実測）</td>
+<td style="text-align: center;">✅ 完了</td>
+<td><a href="data-limits-and-impact.html">data-limits-and-impact</a></td>
+</tr>
+<tr>
+<td><strong>D2.7</strong></td>
+<td>結果補正レイヤ（公表値オーバーライドの一般化）</td>
+<td style="text-align: center;">✅ 完了</td>
+<td><a href="result-override-layer.html">result-override-layer</a></td>
+</tr>
+<tr>
+<td><strong>D3</strong></td>
+<td>データモデル改訂（来歴メタ・result_overrides汎用化・C群フィールド・claim別グレード・株価2000遡及）</td>
+<td style="text-align: center;">✅ 完了</td>
 <td><a href="data-model.html">data-model</a></td>
 </tr>
 <tr>
@@ -264,12 +289,20 @@ li{margin:.2em 0}
 <td>🟥 0%（kabutanスクレイパー未実装）</td>
 </tr>
 <tr>
-<td>EDINET XBRL パースの実現性（会計基準別カバレッジ）</td>
-<td>🟨 D2.5で実測</td>
+<td><code>capex</code> 取得（FCFの真のボトルネック）</td>
+<td>🟥 旧DB0%。EDINET CFから取得（D2.5判明）</td>
 </tr>
 <tr>
-<td>入手難フィールド（投資有価証券/beta/cost_of_debt）の扱い</td>
-<td>🟨 D2.5でgap実測→D4で代替・重み決定</td>
+<td><code>edinet_code</code> 投入</td>
+<td>🟥 旧DB0%だがEDINETコードリストで即3,842件埋まる（D2.5判明）</td>
+</tr>
+<tr>
+<td><code>investment_securities</code> 取得</td>
+<td>🟥 yfinance不在→EDINETで取得（D2.5実証済み）</td>
+</tr>
+<tr>
+<td>EDINET XBRL パース（会計基準別ラベル辞書）</td>
+<td>🟨 実現性は実証済み。基準別辞書の実装が要</td>
 </tr>
 <tr>
 <td>rules.yaml の Nullポリシー「None→0点」アンチパターン</td>

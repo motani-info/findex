@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8787", "--directory", "docs/html"],
       "port": 8787
+    },
+    {
+      "name": "adrm-lt",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4599", "--directory", "/Users/motani/Develop/github/adrm-lt"],
+      "port": 4599
     }
   ]
 }

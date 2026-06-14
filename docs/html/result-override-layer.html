@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D2.7：結果補正レイヤ — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="active" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0">0. 結論</a>
+<a class="l2" href="#1">1. 何が"結果補正"できて、何ができないか</a>
+<a class="l2" href="#2">2. 確報補正レイヤの設計</a>
+<a class="l3" href="#21-streak_overrides">2.1 データ構造（現 streak_overrides を一般化）</a>
+<a class="l3" href="#22">2.2 採用ポリシー（機械計算との合成）</a>
+<a class="l3" href="#23-definition-mismatch">2.3 最大の地雷: 定義差（definition mismatch）</a>
+<a class="l3" href="#24">2.4 カバレッジの現実</a>
+<a class="l2" href="#3-3">3. 投稿（柱3）との相性 — むしろ強み</a>
+<a class="l2" href="#4">4. まとめと引き渡し</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d27">D2.7: 結果補正レイヤ（公表値オーバーライド）の一般化</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: 設計（先行実装 <code>streak_overrides</code> あり）
+<strong>親</strong>: <a href="data-limits-and-impact.html">02_6-data-limits-and-impact.md</a>。本書は「クラスB/D（マスターが取れない）」への現実解として、<strong>結果（derived result）だけを公表情報から補填する</strong>仕組みを設計する。
+<strong>問い（ユーザー）</strong>: 2000年以前のマスターデータ収集は難しいが、評価に必要な"結果"（例: 連続増配30年）だけなら公表集計から集められる。それを補正データとして入れられないか？</p>
+<hr />
+<h2 id="0">0. 結論</h2>
+<p><strong>できる。ただし対象を選ぶ。</strong> findexには2種類のバックフィルがある:</p>
+<table>
+<thead>
+<tr>
+<th>種別</th>
+<th>何を入れるか</th>
+<th>例</th>
+<th>対象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>マスター補填</strong>（raw）</td>
+<td>生の系列値</td>
+<td>haitoukin で FY1989〜の年間配当</td>
+<td>機械計算の入力を増やす</td>
+</tr>
+<tr>
+<td><strong>結果補正</strong>（override・本書）</td>
+<td>導出済みの"結果"値</td>
+<td>ZAi集計「連続増配28年」</td>
+<td>機械計算を上書き/確定</td>
+</tr>
+</tbody>
+</table>
+<p>本書は後者の一般化。<strong>既に <code>streak_overrides</code>（12件）・<code>golden_streaks_zai</code>（20件）として先行実装済み</strong>。これを「確報補正レイヤ」として制度化する。</p>
+<hr />
+<h2 id="1">1. 何が"結果補正"できて、何ができないか</h2>
+<p>公表されているのは<strong>要約された結果</strong>であって時系列ではない。だから補填可否はデータの性質で決まる。</p>
+<table>
+<thead>
+<tr>
+<th>評価軸</th>
+<th style="text-align: center;">結果補正できるか</th>
+<th>公表ソース</th>
+<th>備考</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続増配年数</td>
+<td style="text-align: center;">✅ できる</td>
+<td>ダイヤモンドZAi / みんかぶ / 各社IR</td>
+<td>"結果"そのものが公表される代表例</td>
+</tr>
+<tr>
+<td>連続非減配年数</td>
+<td style="text-align: center;">✅ できる</td>
+<td>各社IR / ZAi</td>
+<td>〃</td>
+</tr>
+<tr>
+<td>減配信頼性（過去N年の減配回数）</td>
+<td style="text-align: center;">🔶 一部</td>
+<td>IR沿革 / 適時開示</td>
+<td>減配の有無が文章で確認できれば</td>
+</tr>
+<tr>
+<td>配当10年/5年CAGR</td>
+<td style="text-align: center;">🔶 限定</td>
+<td>―</td>
+<td>クリーンな公表が少ない。<strong>raw補填（年間配当）経由が本筋</strong></td>
+</tr>
+<tr>
+<td>配当性向・自己資本比率・ROE等</td>
+<td style="text-align: center;">❌ 不要</td>
+<td>―</td>
+<td>現在値で完結（D2.6 ④）。補正の必要なし</td>
+</tr>
+<tr>
+<td><strong>pre-2000の株価 / PER / PBR</strong></td>
+<td style="text-align: center;">❌ <strong>できない</strong></td>
+<td>―</td>
+<td>"結果"の公表が存在しない。点列データは要約で代替不能</td>
+</tr>
+<tr>
+<td>長期トータルリターン</td>
+<td style="text-align: center;">🔶 別物</td>
+<td>―</td>
+<td>投稿フックとしては別途検討（D5）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>核心</strong>: 補正できるのは「<strong>人間が要約して公表する性質の指標</strong>＝主に配当ストリーク」。
+株価・バリュエーションは点列なので、要約結果での補填は原理的に不可。<strong>B/Dのうち救えるのは配当ストリーク系に集中する</strong>（＝findex核心の重み6.0そのもの。費用対効果が高い）。</p>
+</blockquote>
+<hr />
+<h2 id="2">2. 確報補正レイヤの設計</h2>
+<h3 id="21-streak_overrides">2.1 データ構造（現 streak_overrides を一般化）</h3>
+<p>フィールド非依存の汎用オーバーライドにする:</p>
+<table>
+<thead>
+<tr>
+<th>列</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>code</code></td>
+<td>銘柄</td>
+</tr>
+<tr>
+<td><code>field</code></td>
+<td>補正対象（consecutive_dividend_growth_years 等）。汎用化の鍵</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td>公表された結果値</td>
+</tr>
+<tr>
+<td><code>as_of_fiscal_year</code></td>
+<td><strong>その値が「何年度時点」か</strong>（経年で増えるため必須）</td>
+</tr>
+<tr>
+<td><code>source</code> / <code>source_url</code></td>
+<td>出典（信頼ソースに限定）</td>
+</tr>
+<tr>
+<td><code>definition_note</code></td>
+<td><strong>定義の but</strong>（後述の地雷対策。例「上場前から起算」）</td>
+</tr>
+<tr>
+<td><code>confidence</code></td>
+<td>verified（2ソース一致）/ single（1ソース）</td>
+</tr>
+<tr>
+<td><code>verified_at</code> / <code>verified_by</code></td>
+<td>検証時刻・方法</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22">2.2 採用ポリシー（機械計算との合成）</h3>
+<ol>
+<li><strong>信頼ソース限定</strong>: ダイヤモンドZAi・各社IR・みんかぶ等の<strong>集計主体が明確なもののみ</strong>。個人ブログ等は不可（定款「確証を持てない数字は流さない」）。</li>
+<li><strong>昇格のみ</strong>: <code>override ≥ 機械計算</code> のときだけ採用（公表値が機械計算より長い＝打ち切り救済）。機械計算の方が長ければ機械を信じる（公表の取りこぼし対策）。</li>
+<li><strong>打ち切りフラグ解除</strong>: override採用時は当該指標の <code>is_censored=False</code>（N+でなく確定値として出せる）。ただし<strong>その指標だけ</strong>。他指標は影響しない（claim単位・D2 §6）。</li>
+<li><strong>経年補正（ageing）</strong>: <code>as_of_fiscal_year</code> 以降は、<strong>機械計算で確認できた近年の連続分だけ自動加算</strong>（例: as_of2025=28年 + 2026も増配確認 → 29年）。再公表が出れば差し替え。古い override を放置して陳腐化させない。</li>
+<li><strong>二重チェック推奨</strong>: 重要銘柄（投稿頻度高）は2ソース一致で <code>confidence=verified</code>。</li>
+</ol>
+<h3 id="23-definition-mismatch">2.3 最大の地雷: 定義差（definition mismatch）</h3>
+<p>公表値を取り込む＝<strong>他者の定義を取り込む</strong>。これが最危険。
+- 例（実在）: 小林製薬 4967 は「<strong>上場前から起算</strong>」する定義差で公表26年（機械計算と食い違う）。
+- 「連続増配」は集計主体で定義が違う（据え置きの扱い・記念配当の除外・連結/単体・起算点）。
+- <strong>対策</strong>: ①<code>definition_note</code> に必ず根拠を残す ②投稿時は「<strong>ダイヤモンドZAi集計で連続増配28年</strong>」と<strong>出典を明示</strong>して断定を避ける ③機械計算値と併記してギャップを内部記録（D6の照合対象）。</p>
+<h3 id="24">2.4 カバレッジの現実</h3>
+<ul>
+<li>公表ストリークランキングが載るのは<strong>有名な増配株の頭〜数百銘柄</strong>。下限band 1,365銘柄の長い裾は補正されない。</li>
+<li><strong>だが問題ない</strong>: 投稿で扱うのはまさにその有名銘柄群。<strong>結果補正は「投稿母数の質」を直接上げる</strong>（柱3に最も効く）。裾はN+で正直に扱えばよい。</li>
+</ul>
+<hr />
+<h2 id="3-3">3. 投稿（柱3）との相性 — むしろ強み</h2>
+<p>結果補正は品質リスクであると同時に<strong>投稿の武器</strong>になる:
+- 「ダイヤモンドZAi集計で連続増配<strong>28年</strong>（出典明示）」は、<strong>真実かつ信頼性が増し、かつ興味を引く</strong>。
+- 出典付き＝定款の「確証を持てない数字は流さない」を満たしつつ、断定リスクを出典に移譲できる。
+- → 結果補正レイヤは「品質ゲートを通すための保険」であり「フックの素材」でもある。</p>
+<hr />
+<h2 id="4">4. まとめと引き渡し</h2>
+<table>
+<thead>
+<tr>
+<th>論点</th>
+<th>結論</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>結果だけの補正は可能か</td>
+<td><strong>可能。配当ストリーク系に限り高い効果</strong>。先行実装(streak_overrides)を一般化</td>
+</tr>
+<tr>
+<td>株価/PER/PBRのpre-2000</td>
+<td><strong>結果補正でも不能</strong>（点列は要約で代替できない）。N+/評価不能で正直に</td>
+</tr>
+<tr>
+<td>最大リスク</td>
+<td><strong>定義差</strong>。出典明示・definition_note・機械値併記で管理</td>
+</tr>
+<tr>
+<td>効果の所在</td>
+<td>投稿母数の頭（有名増配株）を確定値化＝<strong>柱3に直接効く</strong></td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>D3（データモデル）</strong>: <code>streak_overrides</code> を汎用 <code>result_overrides</code>（field/value/as_of/source/definition_note/confidence）に拡張。raw補填(dividend_annual.source)と二層で保持。
+→ <strong>D4（指標）</strong>: 「機械計算 → 結果override（昇格のみ）→ N+ フォールバック」の合成順序と、定義差の併記ルールをデータ契約に明記。
+→ <strong>D6（検証）</strong>: override値と機械計算値のギャップを照合レポート化（定義差の早期発見）。
+→ 実装フェーズ: 信頼ソース（ZAi等）からの結果取り込みパイプライン（出典・as_of必須）。</p>
+</main></div></body></html>

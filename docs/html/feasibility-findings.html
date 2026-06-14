@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D2.5：取得可能性スタディ実測 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="active" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#0-1">0. 結論サマリ（第1段）</a>
+<a class="l2" href="#1-j-quants-v2">1. J-Quants v2（現行キーの実測）</a>
+<a class="l3" href="#finssummary-d2">/fins/summary が返す主フィールド（D2辞書への対応）</a>
+<a class="l3" href="#_1">履歴の深さ（重要）</a>
+<a class="l2" href="#2-edinet-v2">2. EDINET v2（入手難フィールドの実証）</a>
+<a class="l3" href="#zipxbrl">コードリスト（無料zip・XBRL不要）</a>
+<a class="l3" href="#xbrlkddi-9433-docid-s100tn7r-2024-06-20-2499">有報XBRL（KDDI 9433 / docID S100TN7R / 2024-06-20提出 / 2499行）</a>
+<a class="l3" href="#_2">確定した実装上の含意</a>
+<a class="l2" href="#3-d2-3">3. ソース階層の確定（D2 §3 の仮説 → 実測で確定）</a>
+<a class="l2" href="#4-2db223mbgap">4. 第2段：旧DB(223MB)の現状gap実測（読み取り専用集計）</a>
+<a class="l3" href="#41-stocks-3747">4.1 識別・属性（stocks 3,747件）</a>
+<a class="l3" href="#42-raw_financials-3746yfinancenull">4.2 財務（raw_financials 3,746件・yfinance由来）の非NULL率</a>
+<a class="l3" href="#43-dividend_annual-3210-fy19892026-54188">4.3 配当時系列の実深さ（dividend_annual 3,210銘柄 / FY1989〜2026 / 54,188行）</a>
+<a class="l3" href="#44-mvpclaim">4.4 MVP母数（いますぐ投稿できる配当系claim）</a>
+<a class="l2" href="#45-2000">4.5 ⚠️ 時系列の下限（データ種別ごと）— 「2000年以前は配当だけ」</a>
+<a class="l3" href="#2000">花王の「2000年以前」具体回答</a>
+<a class="l3" href="#_3">設計上の含意（定款「足りない部分を常に把握」に直結）</a>
+<a class="l2" href="#5-d25">5. D2.5の結論と次への引き渡し</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d25-findings">D2.5: 取得可能性スタディ — 実測findings</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: 第1段（ライブプローブ）・第2段（旧DB集計）ともに実施済み
+<strong>親</strong>: <a href="data-integrity-framework.html">02-data-integrity-framework.md</a>（D2）。本書はD2辞書の各フィールドが「実際に集まるか」を実データで検証する。
+<strong>手法</strong>: 使い捨てプローブ（<code>.scratch/</code>・gitignore）で J-Quants v2 / EDINET v2 に実アクセス。キーは <code>back_findex/.env</code> を参照。コホート1〜数社で surface を確認（レート制限配慮）。</p>
+<hr />
+<h2 id="0-1">0. 結論サマリ（第1段）</h2>
+<table>
+<thead>
+<tr>
+<th>問い</th>
+<th>実測結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>現在スナップショットの財務は1ソースで足りるか</td>
+<td><strong>J-Quants v2 <code>/fins/summary</code> がほぼ充足</strong>（売上/営業益/純益/EPS/総資産/自己資本/現金/営業CF・投資CF・財務CF/発行株数/配当/予想配当/配当性向）。1コールで潤沢</td>
+</tr>
+<tr>
+<td>長期時系列（配当ストリーク等）はライブで取れるか</td>
+<td><strong>取れない</strong>。この J-Quants 契約は<strong>約2年窓（2024-03-22〜2026-03-22）</strong>。10年/20年の遡及は不可 → <strong>旧DB(FY1989〜)＋バックフィルが必須</strong></td>
+</tr>
+<tr>
+<td>入手難フィールドは本当に入手不能か</td>
+<td><strong>入手可能</strong>。EDINET XBRL から 利益剰余金・投資有価証券・社債及び借入金・支払利息 を実取得。<strong>低カバレッジの真因は「データ欠如」でなく「会計基準をまたぐパース未対応」</strong></td>
+</tr>
+<tr>
+<td>会計メタ（決算日・連結）は取れるか</td>
+<td><strong>EDINETコードリストに同梱</strong>（XBRLパース不要）。決算日・連結有無・上場区分・業種が無料CSVで全社分</td>
+</tr>
+<tr>
+<td><strong>2000年以前の株価・PER・PBRは取れるか</strong></td>
+<td><strong>取れない</strong>（§4.5）。2000年以前で保持できるのは<strong>配当のみ</strong>。株価はyfinanceでも2000-01-04が下限、歴史的PER/PBRは算出不能</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>「EDINET一本足」ではなく、ソースは役割分担</strong>: 現在値=J-Quants、深い時系列=旧DB＋バックフィル、BS詳細・入手難=EDINET、会計メタ=EDINETコードリスト、識別=JPX。
+→ <strong>ただし価格時系列には明確な下限</strong>: 株価2000年・財務2008年。<strong>2000年以前は配当だけ</strong>（§4.5）。当初サマリは配当・現在財務に寄っており、価格の穴を後から明示した。</p>
+<hr />
+<h2 id="1-j-quants-v2">1. J-Quants v2（現行キーの実測）</h2>
+<p>ベース <code>https://api.jquants.com/v2</code>、認証 <code>x-api-key</code>。</p>
+<table>
+<thead>
+<tr>
+<th>エンドポイント</th>
+<th>HTTP</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/fins/summary</code></td>
+<td><strong>200</strong></td>
+<td>✅ 使える。フィールド100超</td>
+</tr>
+<tr>
+<td><code>/equities/bars/daily</code></td>
+<td>200（範囲内）</td>
+<td>✅ 使える。ただし<strong>契約範囲 2024-03-22〜2026-03-22</strong> のみ。<code>AdjC</code>（調整後終値）<code>AdjFactor</code> あり</td>
+</tr>
+<tr>
+<td><code>/listed/info</code></td>
+<td>403</td>
+<td>❌ この契約では不可（識別は JPX Excel で代替）</td>
+</tr>
+<tr>
+<td><code>/fins/dividend</code></td>
+<td>403</td>
+<td>❌ この契約では不可（配当は <code>/fins/summary</code> の Div* で代替可）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="finssummary-d2"><code>/fins/summary</code> が返す主フィールド（D2辞書への対応）</h3>
+<ul>
+<li>PL: <code>Sales</code>→revenue / <code>OP</code>→operating_income / <code>OdP</code>(経常) / <code>NP</code>→net_income / <code>EPS</code> <code>DEPS</code>(希薄化)</li>
+<li>BS(一部): <code>TA</code>→total_assets / <code>Eq</code>→equity / <code>CashEq</code>→cash_and_equivalents / <code>BPS</code></li>
+<li>CF: <code>CFO</code>→operating_cf / <code>CFI</code>(投資CF) / <code>CFF</code>(財務CF) ※capex単独はEDINET</li>
+<li>株式: <code>ShOutFY</code>→shares_outstanding / <code>AvgSh</code> / <code>TrShFY</code>(自己株)</li>
+<li>配当: <code>DivAnn</code>(年間)→dps_annual / <code>DivFY</code> / <code>Div1Q..3Q</code> / <code>FDivAnn</code>→forecast_dps / <code>PayoutRatioAnn</code>→予想配当性向</li>
+<li>会計メタ: <code>CurFYSt</code>/<code>CurFYEn</code>(当期FY)→fiscal_period / <code>CurPerType</code>(FY/1Q..) / <code>NxtFYSt</code>/<code>NxtFYEn</code></li>
+<li>連単: 連結が主、<code>NC*</code>(NCSales/NCTA/NCEq…)で単体も併存</li>
+</ul>
+<h3 id="_1">履歴の深さ（重要）</h3>
+<p>KDDI で<strong>8件のみ</strong>＝FY2024〜FY2026の通期＋四半期。<strong>ライブの財務・配当は約2年しか遡れない</strong>。
+→ 配当ストリーク(17年)・配当10年CAGR・売上5年CAGR 等は J-Quants ライブ単独では<strong>不可能</strong>。旧DB(218MB, dividend_annual FY1989〜)とバックフィルが時系列の土台。</p>
+<hr />
+<h2 id="2-edinet-v2">2. EDINET v2（入手難フィールドの実証）</h2>
+<p>ベース <code>https://api.edinet-fsa.go.jp/api/v2</code>、認証 <code>Subscription-Key</code>。</p>
+<h3 id="zipxbrl">コードリスト（無料zip・XBRL不要）</h3>
+<p><code>searchdocument/codelist/Edinetcode.zip</code> → 証券コード→EDINETコード <strong>3,842件</strong>。
+同梱列に <strong>決算日・連結の有無・上場区分・資本金・業種</strong> → 会計メタはここで全社取得可。</p>
+<h3 id="xbrlkddi-9433-docid-s100tn7r-2024-06-20-2499">有報XBRL（KDDI 9433 / docID S100TN7R / 2024-06-20提出 / 2499行）</h3>
+<p>CSV列: <code>要素ID, 項目名, コンテキストID, 相対年度, 連結・個別, 期間・時点, ユニットID, 単位, 値</code></p>
+<table>
+<thead>
+<tr>
+<th>D2辞書フィールド</th>
+<th style="text-align: center;">実測</th>
+<th>例（KDDI・IFRS）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>retained_earnings（利益剰余金）</td>
+<td style="text-align: center;">✅</td>
+<td>5,522,578M</td>
+</tr>
+<tr>
+<td>investment_securities（投資有価証券）</td>
+<td style="text-align: center;">✅</td>
+<td>305,080M（個別BS）</td>
+</tr>
+<tr>
+<td>interest_bearing_debt（社債及び借入金）</td>
+<td style="text-align: center;">✅</td>
+<td>1,577,370M（非流動）＋短期分</td>
+</tr>
+<tr>
+<td>interest_expense（支払利息）→cost_of_debt</td>
+<td style="text-align: center;">✅</td>
+<td>8,813M</td>
+</tr>
+<tr>
+<td>cash（現金及び預金）</td>
+<td style="text-align: center;">✅</td>
+<td>個別 82,333M</td>
+</tr>
+<tr>
+<td>current_assets（流動資産合計）</td>
+<td style="text-align: center;">⚠️</td>
+<td><strong>空振り</strong>。KDDIはIFRSで「流動資産合計」ラベルが異なる → キーワード辞書を会計基準別に持つ必要</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">確定した実装上の含意</h3>
+<ul>
+<li><strong>会計基準（JGAAP/IFRS/US）でXBRLラベルが変わる</strong>。<code>利益剰余金（IFRS）</code> のように接尾辞・科目構成が異なる。<strong>基準別のラベル辞書＋コンテキスト(CurrentYearInstant/連結個別)選別</strong>が必須。これを怠ると拾えず低カバレッジになる（＝旧実装の症状）。</li>
+<li>有報の探索は <strong>提出日を日次スキャン</strong>して docTypeCode=120・csvFlag=1 を拾う（月末だけ見ると当たらない。旧 edinet.py のバグ）。3月決算は6月下旬窓。</li>
+<li><code>beta</code> のみ依然として外部に存在しない → <strong>株価とTOPIX等指数から自前回帰で算出</strong>（フェッチ対象でなく導出対象）。</li>
+</ul>
+<hr />
+<h2 id="3-d2-3">3. ソース階層の確定（D2 §3 の仮説 → 実測で確定）</h2>
+<table>
+<thead>
+<tr>
+<th>役割</th>
+<th>確定ソース</th>
+<th>根拠</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>識別マスター</td>
+<td>JPX Excel（J-Quants /listed/info は現契約403）</td>
+<td>実測403</td>
+</tr>
+<tr>
+<td>会計メタ（決算日・連結）</td>
+<td>EDINETコードリスト（zip）</td>
+<td>全社同梱を確認</td>
+</tr>
+<tr>
+<td>現在スナップショット財務・配当・予想</td>
+<td>J-Quants <code>/fins/summary</code></td>
+<td>1コールで潤沢を確認</td>
+</tr>
+<tr>
+<td>直近株価（調整後）</td>
+<td>J-Quants <code>/equities/bars/daily</code>（2024-03〜のみ）</td>
+<td>AdjC確認・範囲制約確認</td>
+</tr>
+<tr>
+<td>深いBS・入手難（投資有価証券/有利子負債/支払利息/利益剰余金/流動資産）</td>
+<td>EDINET 有報XBRL（基準別パース）</td>
+<td>実取得を確認</td>
+</tr>
+<tr>
+<td>長期時系列（配当ストリーク・各CAGR）</td>
+<td>旧DB(FY1989〜)＋haitoukinバックフィル＋override</td>
+<td>J-Quantsライブ2年窓では不可</td>
+</tr>
+<tr>
+<td>beta</td>
+<td>株価×指数の自前回帰（導出）</td>
+<td>外部に存在せず</td>
+</tr>
+</tbody>
+</table>
+<p><strong>「EDINET一本足リスク」は回避</strong>: 財務の現在値はJ-Quants、深い項目のみEDINET、と二系統に分散。J-Quantsの2年窓の弱点は旧DBが補う。相互補完で冗長性がある。</p>
+<hr />
+<h2 id="4-2db223mbgap">4. 第2段：旧DB(223MB)の現状gap実測（読み取り専用集計）</h2>
+<p>旧 <code>~/.findex/db/findex.db</code> を read-only 集計（新規フェッチなし）。これが「いま何が欠けているか」の実数。</p>
+<h3 id="41-stocks-3747">4.1 識別・属性（stocks 3,747件）</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>カバレッジ</th>
+<th>メモ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>market / sector</td>
+<td>100%</td>
+<td>JPX由来・問題なし</td>
+</tr>
+<tr>
+<td>first_data_date</td>
+<td>100%</td>
+<td>ただし自己参照で打ち切り検知に使えない（独立シグナルでない）</td>
+</tr>
+<tr>
+<td><strong>edinet_code</strong></td>
+<td><strong>0%</strong></td>
+<td>カラムは在るが未投入。<strong>EDINETコードリストで即3,842件埋まる</strong>（第1段で確認）</td>
+</tr>
+<tr>
+<td><strong>listing_date</strong></td>
+<td><strong>0%</strong></td>
+<td>既知の宿題。kabutan等から取得が必要。打ち切り判定の鍵</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-raw_financials-3746yfinancenull">4.2 財務（raw_financials 3,746件・yfinance由来）の非NULL率</h3>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>カバレッジ</th>
+<th>判定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>total_assets / equity / liabilities / retained_earnings</td>
+<td>99.5%</td>
+<td>✅ 十分にある</td>
+</tr>
+<tr>
+<td>current_assets</td>
+<td>96.9%</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>beta</strong></td>
+<td><strong>95.3%</strong></td>
+<td>✅ <strong>入手難ではなかった</strong>（D2 §2.7の想定を訂正）</td>
+</tr>
+<tr>
+<td>long/short_term_debt</td>
+<td>84.6 / 85.9%</td>
+<td>🟨</td>
+</tr>
+<tr>
+<td>operating_cashflow</td>
+<td>75.8%</td>
+<td>🟨</td>
+</tr>
+<tr>
+<td>free_cashflow</td>
+<td>70.6%</td>
+<td>🟨</td>
+</tr>
+<tr>
+<td><strong>capital_expenditures</strong></td>
+<td><strong>0%</strong></td>
+<td>🟥 <strong>一度も取得されていない＝FCFの真のボトルネック</strong></td>
+</tr>
+<tr>
+<td>investment_securities</td>
+<td>（列自体なし）</td>
+<td>🟥 yfinanceに存在しない。EDINETで取得（第1段で実証済み 305,080M/KDDI）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>D2への重要な訂正</strong>: 低カバレッジ指標（ROIC/FCF）の主因は <strong>beta ではなく ① capex 0% ② investment_securities 不在 ③ 複合指標が多フィールドの積で落ちる</strong>こと。
+beta は95%あり問題でない。→ D2 §2.7 の「beta=入手難・低カバレッジ要因」は誤り。D4 のデータ契約に反映する。</p>
+</blockquote>
+<h3 id="43-dividend_annual-3210-fy19892026-54188">4.3 配当時系列の実深さ（dividend_annual 3,210銘柄 / FY1989〜2026 / 54,188行）</h3>
+<p>source内訳: <code>events</code>(yfinance) 53,566行 / <code>haitoukin</code>(バックフィル) 622行。
+銘柄ごとの<strong>最古FY分布</strong>（どこまで遡れているか）:</p>
+<table>
+<thead>
+<tr>
+<th>最古FY帯</th>
+<th style="text-align: right;">銘柄数</th>
+<th>含意</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>〜1990</td>
+<td style="text-align: right;">49</td>
+<td>深い履歴あり</td>
+</tr>
+<tr>
+<td>1991-1999</td>
+<td style="text-align: right;">9</td>
+<td>〃</td>
+</tr>
+<tr>
+<td><strong>2000-2002（下限band）</strong></td>
+<td style="text-align: right;"><strong>1,365</strong></td>
+<td>データ起点で頭打ち＝<strong>打ち切り容疑</strong>。真の連続年数はもっと長い可能性</td>
+</tr>
+<tr>
+<td>2003-2009</td>
+<td style="text-align: right;">636</td>
+<td></td>
+</tr>
+<tr>
+<td>2010以降</td>
+<td style="text-align: right;">1,151</td>
+<td>多くは新しい上場＝真の開始の可能性（listing_dateで判別したい）</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>打ち切り（streak_is_censored=1）= 1,039 / 3,746（27.7%）</strong>。約4分の1がN+表示。</li>
+<li>バックフィルは 622行（≈58銘柄）止まり。下限band 1,365銘柄の大半は未補正＝正直にN+。</li>
+<li>配当データを持つのは 3,210銘柄。<strong>約537銘柄は dividend_annual が皆無</strong>（無配/取得漏れ）。</li>
+</ul>
+<h3 id="44-mvpclaim">4.4 MVP母数（いますぐ投稿できる配当系claim）</h3>
+<ul>
+<li>打ち切りでない確定ストリーク: 3,746 − 1,039 ≈ <strong>2,707銘柄</strong>が「N+でない確定値」で語れる。</li>
+<li>→ 配当系の投稿は<strong>設計確定後すぐ数千銘柄分の母数がある</strong>。柱3は柱1の完成を待つ必要がない（D2 §6.5 MVPの裏付け）。</li>
+</ul>
+<hr />
+<h2 id="45-2000">4.5 ⚠️ 時系列の下限（データ種別ごと）— 「2000年以前は配当だけ」</h2>
+<p>第1〜4節は「フィールドが取れるか」と「現在値」に寄っていた。<strong>価格時系列の穴を明示する</strong>（花王4452で実測）。</p>
+<table>
+<thead>
+<tr>
+<th>データ種別</th>
+<th>実際の下限</th>
+<th style="text-align: center;">2000年以前</th>
+<th>根拠（実測）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>年間配当(dps_annual)</td>
+<td><strong>FY1989〜</strong></td>
+<td style="text-align: center;">✅ ある</td>
+<td>haitoukinバックフィル。花王はFY1989=7.5円から連続</td>
+</tr>
+<tr>
+<td>日次株価</td>
+<td><strong>2000-01-04〜</strong></td>
+<td style="text-align: center;">❌ ない</td>
+<td>yfinance <code>4452.T</code> max=2000-01-04（2000年以前0行）。旧DBは2024-06〜しか未収集だが<strong>再取得で2000年まで回復可</strong></td>
+</tr>
+<tr>
+<td>財務(EDINET XBRL)</td>
+<td><strong>2008〜</strong></td>
+<td style="text-align: center;">❌ ない</td>
+<td>XBRL制度開始が2008</td>
+</tr>
+<tr>
+<td>歴史的PER/PBR</td>
+<td><strong>実質2008〜</strong></td>
+<td style="text-align: center;">❌ <strong>算出不能</strong></td>
+<td>株価(2000〜)×歴史的EPS/BPS(EDINET 2008〜)の重なり。両方が要る</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2000">花王の「2000年以前」具体回答</h3>
+<ul>
+<li><strong>株価</strong>: 分からない（yfinanceも2000-01-04が最古、日本株の無料の2000年以前日次株価は事実上入手不可）</li>
+<li><strong>PER / PBR</strong>: 分からない（株価も過去のEPS/BPSも無いため算出不能）</li>
+<li><strong>配当</strong>: 分かる（FY1989〜・バックフィル済み）。<strong>2000年以前で保持できるのは配当のみ</strong></li>
+</ul>
+<h3 id="_3">設計上の含意（定款「足りない部分を常に把握」に直結）</h3>
+<ul>
+<li><strong>2000年以前は配当ストリーク系claimのみ成立</strong>。価格・バリュエーション系claimは<strong>pre-2000は構造的に不能</strong>＝期間充足モデル(D2 §7)で「評価不能」と明示し、絶対に捏造しない。</li>
+<li>既存18指標のPER/PBR/利回りは<strong>現在値（スナップショット）</strong>しか使わないため、スコアリングには歴史的PER/PBR不要。<strong>影響を受けるのは「長期チャート」等の投稿フック（D5）</strong>で、それも2000年（株価）が下限と正直に扱う。</li>
+<li>旧DBの株価が2024-06〜しかないのは<strong>収集不足であって入手不能ではない</strong> → 実装フェーズで2000年まで再取得（yfinance、レート制限配慮）。</li>
+</ul>
+<hr />
+<h2 id="5-d25">5. D2.5の結論と次への引き渡し</h2>
+<ol>
+<li><strong>ソースは役割分担で確定</strong>（§3）。EDINET一本足リスクは回避。</li>
+<li><strong>入手難フィールドの再定義</strong>（§4.2の訂正）: 真のgapは capex(0%)・investment_securities(不在)・edinet_code(0%)・listing_date(0%)。beta は問題でない。</li>
+<li><strong>時系列はライブ不可・旧DBが土台</strong>。下限band 1,365銘柄・打ち切り27.7%が「期間充足モデル」(D2 §7)の実母数。</li>
+<li>
+<p><strong>MVPは潤沢</strong>（確定ストリーク約2,700銘柄）。</p>
+</li>
+<li>
+<p><strong>時系列の下限を明文化</strong>（§4.5）: 株価2000年・財務2008年。<strong>2000年以前は配当系claimのみ成立</strong>、価格・バリュエーション系はpre-2000不能（捏造しない）。</p>
+</li>
+</ol>
+<p>→ <strong>D3（データモデル改訂）</strong>: edinet_code/listing_date/capex/investment_securities を埋める導線とカバレッジ追跡を設計に組み込む。株価は2000年まで再取得する前提でモデル化。
+→ <strong>D4（指標データ契約）</strong>: beta想定を訂正。capex取得後にFCF/ROICを再評価。Nullポリシー再設計。歴史的PER/PBRはスコアリング不要（現在値のみ使用）と確認。
+→ <strong>D5（X発信）</strong>: 価格・チャート系フックは2000年が下限と正直に扱う。
+→ 残宿題（実装フェーズ）: listing_date取得（kabutan）、capex取得（EDINET CF）、edinet_code投入（コードリスト）、investment_securities取得（EDINET）、<strong>株価2000年まで再取得（yfinance）</strong>。</p>
+</main></div></body></html>

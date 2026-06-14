@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>D2.6：取得限界と評価軸への影響 — findex</title><style>
+:root{
+  --bg:#0f1115; --panel:#161922; --ink:#e6e8ee; --muted:#9aa3b2;
+  --line:#272c38; --accent:#6ea8fe; --accent2:#7ee0c0; --warn:#ffc24b;
+  --code-bg:#0b0d12; --th:#1d2230;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f7f8fa; --panel:#ffffff; --ink:#1b1f27; --muted:#5b6472;
+    --line:#e3e7ee; --accent:#2563eb; --accent2:#0f9d77; --warn:#9a6700;
+    --code-bg:#f1f3f7; --th:#eef1f6; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Segoe UI,sans-serif;
+  line-height:1.75;font-size:15px;}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+  background:var(--panel);border-right:1px solid var(--line);padding:22px 18px}
+nav.side h1{font-size:15px;margin:0 0 4px;letter-spacing:.02em}
+nav.side .sub{color:var(--muted);font-size:12px;margin-bottom:18px}
+nav.side .doclinks a{display:block;padding:8px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13px;margin-bottom:4px;border:1px solid transparent}
+nav.side .doclinks a:hover{background:var(--th)}
+nav.side .doclinks a.active{border-color:var(--line);background:var(--th);font-weight:600}
+nav.side .toc{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+nav.side .toc a{display:block;color:var(--muted);text-decoration:none;font-size:12.5px;
+  padding:3px 0;border-left:2px solid transparent;padding-left:10px}
+nav.side .toc a:hover{color:var(--ink)}
+nav.side .toc a.l3{padding-left:22px;font-size:12px}
+main{padding:48px 56px;max-width:980px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--accent2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;margin-bottom:14px}
+h1,h2,h3{line-height:1.3}
+h1{font-size:28px;margin:.2em 0 .6em}
+h2{font-size:21px;margin:1.8em 0 .6em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+h3{font-size:16.5px;margin:1.4em 0 .5em;color:var(--accent)}
+a{color:var(--accent)}
+hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+code{background:var(--code-bg);padding:.12em .4em;border-radius:5px;font-size:.88em;
+  font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;
+  padding:16px 18px;overflow:auto}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px;
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+th{background:var(--th);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+blockquote{margin:1.2em 0;padding:.6em 1.1em;border-left:3px solid var(--warn);
+  background:rgba(255,194,75,.08);color:var(--ink);border-radius:0 8px 8px 0}
+.toolbar{margin-bottom:8px;color:var(--muted);font-size:12px}
+ul,ol{padding-left:1.4em}
+li{margin:.2em 0}
+</style></head>
+<body><div class="layout">
+<nav class="side">
+  <h1>findex docs</h1><div class="sub">v2 再構築 / レビュー用</div>
+  <div class="doclinks"><a href="index.html">← 目次</a>
+<a class="" href="progress.html">進捗ダッシュボード</a>
+<a class="" href="charter.html">ノーススター：定款とデータ完全性</a>
+<a class="" href="project-log.html">プロジェクトログ（フェーズ記録）</a>
+<a class="" href="data-integrity-framework.html">D2：データ完全性フレームワーク</a>
+<a class="" href="feasibility-findings.html">D2.5：取得可能性スタディ実測</a>
+<a class="active" href="data-limits-and-impact.html">D2.6：取得限界と評価軸への影響</a>
+<a class="" href="result-override-layer.html">D2.7：結果補正レイヤ</a>
+<a class="" href="requirements.html">要件定義書 v2</a>
+<a class="" href="data-model.html">テーブル定義（データモデル）</a>
+<a class="" href="data-workflow.html">データワークフロー</a>
+<a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
+  <div class="toc"><a class="l2" href="#1">パート1: 取得限界の整理（マスターデータとして完全には取れないもの）</a>
+<a class="l3" href="#a">クラスA: 完全取得可（現在値・ほぼ全銘柄）</a>
+<a class="l3" href="#b">クラスB: 時系列に「下限」がある（過去に遡れない）</a>
+<a class="l3" href="#c">クラスC: フィールド自体が欠落（収集・ソース問題＝修正可能）</a>
+<a class="l3" href="#d">クラスD: 構造的に取得不能（諦めて「正直に扱う」対象）</a>
+<a class="l2" href="#2">パート2: 揃わないデータで「機能しない評価軸」の影響調査</a>
+<a class="l3" href="#21-null0">2.1 実測カバレッジ（実効値＝NULLでも0でもない銘柄の割合）</a>
+<a class="l3" href="#22">2.2 破綻タイプ別の整理</a>
+<a class="l3" href="#23">2.3 重要な構造的洞察</a>
+<a class="l3" href="#24-20002008">2.4 価格2000・財務2008の下限は「現在スコアリング」には実はほぼ効かない</a>
+<a class="l2" href="#_1">まとめ（次への引き渡し）</a></div>
+</nav>
+<main>
+  <div class="badge">Design</div>
+  <h1 id="d26">D2.6: 取得限界の整理 と 評価軸への影響</h1>
+<p><strong>作成日</strong>: 2026-06-14
+<strong>ステータス</strong>: 実測ベース完了
+<strong>親</strong>: <a href="feasibility-findings.html">02_5-feasibility-findings.md</a>（D2.5実測）。本書はその結果を「①取れないものの整理」「②それにより機能しない評価軸」に構造化する。
+<strong>動機</strong>: 旧PJの最大の過ちは「<strong>取れないデータがあることに気づけず、誤った数字をそのまま評価・投稿した</strong>」こと（花王 連続増配 実36年→誤26年）。本書はそれを設計レベルで根絶するための土台。</p>
+<hr />
+<h2 id="1">パート1: 取得限界の整理（マスターデータとして完全には取れないもの）</h2>
+<p>データを「取得可能性のクラス」で分類する。これが定款「足りない部分を常に把握できる」の実体。</p>
+<h3 id="a">クラスA: 完全取得可（現在値・ほぼ全銘柄）</h3>
+<p>スナップショットとして問題なく揃う。
+- 識別: code / name / market / sector33（JPX 100%）
+- 会計メタ: 決算日 / 連結（EDINETコードリスト 全社）
+- 現在財務: 売上 / 営業利益 / 純利益 / 総資産 / 自己資本 / 現金 / 発行株数（J-Quants <code>/fins/summary</code>・EDINET。実測カバレッジ95〜99%）
+- 現在の予想配当・配当性向（J-Quants 99.8%）</p>
+<h3 id="b">クラスB: 時系列に「下限」がある（過去に遡れない）</h3>
+<table>
+<thead>
+<tr>
+<th>データ</th>
+<th>下限</th>
+<th style="text-align: center;">2000年以前</th>
+<th>性質</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>年間配当 dps_annual</td>
+<td>FY1989（backfill）</td>
+<td style="text-align: center;">✅一部</td>
+<td>backfillした銘柄のみ。未backfillは2000-2002で頭打ち</td>
+</tr>
+<tr>
+<td>日次株価</td>
+<td>2000-01-04（yfinance）</td>
+<td style="text-align: center;">❌</td>
+<td><strong>pre-2000は無料で存在しない</strong>（構造的）</td>
+</tr>
+<tr>
+<td>財務諸表</td>
+<td>2008（EDINET XBRL）</td>
+<td style="text-align: center;">❌</td>
+<td>XBRL制度開始。pre-2008は個別IR/有報PDFのみ</td>
+</tr>
+<tr>
+<td>歴史的PER/PBR</td>
+<td>実質2008</td>
+<td style="text-align: center;">❌</td>
+<td>株価×歴史的財務の重なり。pre-2008は算出不能</td>
+</tr>
+</tbody>
+</table>
+<h3 id="c">クラスC: フィールド自体が欠落（収集・ソース問題＝修正可能）</h3>
+<p>「取れないのではなく、取っていなかった／別ソースが要る」もの。</p>
+<table>
+<thead>
+<tr>
+<th>フィールド</th>
+<th>現状</th>
+<th>是正策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>listing_date</td>
+<td>0%</td>
+<td>kabutan等スクレイピング</td>
+</tr>
+<tr>
+<td>edinet_code</td>
+<td>0%</td>
+<td>EDINETコードリスト（即3,842件）</td>
+</tr>
+<tr>
+<td>capital_expenditures</td>
+<td>0%</td>
+<td>EDINET CF計算書</td>
+</tr>
+<tr>
+<td>investment_securities</td>
+<td>不在</td>
+<td>EDINET 有報XBRL</td>
+</tr>
+<tr>
+<td>深い株価（2000〜現在）</td>
+<td>2024-06〜のみ</td>
+<td>yfinanceで2000年まで再取得</td>
+</tr>
+</tbody>
+</table>
+<h3 id="d">クラスD: 構造的に取得不能（諦めて「正直に扱う」対象）</h3>
+<ul>
+<li><strong>2000年以前の日次株価</strong>（→ pre-2000のPER/PBR・長期チャート不能）</li>
+<li><strong>2008年以前の詳細財務</strong>（→ pre-2008の財務系指標の遡及不能）</li>
+<li><strong>真の連続増配/非減配年数（backfill範囲外のpre-2000分）</strong> → 打ち切り＝N+でしか表せない</li>
+</ul>
+<blockquote>
+<p>重要: <strong>クラスCは「直す」、クラスB/Dは「正直に扱う（評価不能・N+と明示し捏造しない）」</strong>。この区別が設計判断の核。</p>
+</blockquote>
+<hr />
+<h2 id="2">パート2: 揃わないデータで「機能しない評価軸」の影響調査</h2>
+<p>旧DB computed_metrics（3,746銘柄）で各指標の実効値率を実測。<strong>「真の欠損」と「正当な0（増配せず/減配あり）」を分離</strong>して、破綻の正体を特定した。</p>
+<h3 id="21-null0">2.1 実測カバレッジ（実効値＝NULLでも0でもない銘柄の割合）</h3>
+<table>
+<thead>
+<tr>
+<th>指標</th>
+<th style="text-align: right;">重み</th>
+<th style="text-align: right;">真NULL率</th>
+<th style="text-align: right;">値=0率</th>
+<th style="text-align: right;">実効値率</th>
+<th>破綻タイプ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>連続非減配年数</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">14.9%</td>
+<td style="text-align: right;">11.0%</td>
+<td style="text-align: right;">74.1%</td>
+<td>③打切り＋配当無</td>
+</tr>
+<tr>
+<td>連続増配年数</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">14.9%</td>
+<td style="text-align: right;">31.7%</td>
+<td style="text-align: right;">53.4%</td>
+<td>③打切り（0は正当も多い）</td>
+</tr>
+<tr>
+<td>減配信頼性</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">14.9%</td>
+<td style="text-align: right;">49.0%</td>
+<td style="text-align: right;">36.1%</td>
+<td>③打切り（0は正当）</td>
+</tr>
+<tr>
+<td>10年増配CAGR</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">35.6%</td>
+<td style="text-align: right;">3.2%</td>
+<td style="text-align: right;">61.3%</td>
+<td>②履歴長不足</td>
+</tr>
+<tr>
+<td>予想配当性向</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.2%</td>
+<td style="text-align: right;">18.0%</td>
+<td style="text-align: right;">81.7%</td>
+<td>―（健全）</td>
+</tr>
+<tr>
+<td>FCF配当カバレッジ</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;"><strong>57.4%</strong></td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">42.6%</td>
+<td>①field欠落(capex)</td>
+</tr>
+<tr>
+<td>EPS成長5y</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">31.2%</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">68.8%</td>
+<td>②履歴長不足</td>
+</tr>
+<tr>
+<td>売上5yCAGR</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">2.8%</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">97.2%</td>
+<td>―（健全）</td>
+</tr>
+<tr>
+<td>自己資本比率</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">0.5%</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">99.5%</td>
+<td>―（健全）</td>
+</tr>
+<tr>
+<td>ROE</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">5.0%</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">95.0%</td>
+<td>―（健全）</td>
+</tr>
+<tr>
+<td>営業利益率</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.7%</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">99.3%</td>
+<td>―（健全）</td>
+</tr>
+<tr>
+<td>ROIC-WACC</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">24.1%</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">75.9%</td>
+<td>①複合field欠落</td>
+</tr>
+<tr>
+<td>配当利回り</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">16.0%</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">84.0%</td>
+<td>（現在値・概ね健全）</td>
+</tr>
+<tr>
+<td>ネットキャッシュPER</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">12.0%</td>
+<td style="text-align: right;">0.0%</td>
+<td style="text-align: right;">87.9%</td>
+<td>①investment_sec欠落</td>
+</tr>
+<tr>
+<td>利益剰余金配当倍率</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">17.8%</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">82.2%</td>
+<td>（概ね健全）</td>
+</tr>
+<tr>
+<td>ミックス係数</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">9.2%</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">90.8%</td>
+<td>（現在値・健全）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="22">2.2 破綻タイプ別の整理</h3>
+<p><strong>① field欠落で機能不全（修正可能・最優先）</strong>
+- <strong>FCF配当カバレッジ（真NULL 57%）</strong>: 原因は <code>capex</code> 0%。FCF=営業CF−capex が計算できず半数以上が欠損。→ EDINET CFでcapex取得すれば回復。
+- <strong>ROIC-WACC（24%）/ ネットキャッシュPER（12%）</strong>: investment_securities不在・複合計算。→ EDINETで構成要素を埋めれば改善。
+- <strong>性質</strong>: これらは「データが無い」ではなく「<strong>取っていなかった</strong>」。クラスCの是正で直る。</p>
+<p><strong>② 履歴長不足で機能不全（一部は構造的）</strong>
+- <strong>10年増配CAGR（35.6%）/ EPS成長5y（31.2%）</strong>: 11年/5年の履歴が要る。
+  - 若い銘柄（上場が新しい）は<strong>そもそも歴史が無い＝構造的に算出不能</strong>（クラスD的）。これは欠損でなく「評価対象外」が正しい。
+  - 既存銘柄でも配当/財務の遡及下限（配当2000floor・財務2008）に当たると不足。
+- <strong>性質</strong>: 「データを増やせば直る部分」と「銘柄が若くて原理的に無理な部分」が混在。後者をNULL扱いで減点するのは誤り（D4 Nullポリシーで是正）。</p>
+<p><strong>③ 打ち切りで「静かに誤る」（最危険・前回の過ちの本体）</strong>
+- 連続非減配/増配/減配信頼性は、配当履歴の下限で<strong>左打ち切り</strong>される。
+- <strong>streak_is_censored=1 が 1,039銘柄（27.7%）</strong>。これらは「16年」のような<strong>確定値に見える過小な数字</strong>を出す（花王26 vs 36の構造）。
+- <strong>NULLでないので品質フィルタをすり抜ける</strong>のが致命的。値はあるが<strong>間違っている</strong>。
+- <strong>性質</strong>: backfill範囲外のpre-2000はクラスD（構造的）。<strong>N+表示（「N年以上」）でしか正直に表せない</strong>。listing_dateで「真の新規上場」と「打ち切り」を区別してN+を減らす。</p>
+<p><strong>④ 影響軽微（現在値スナップショットのみ使用）</strong>
+- 自己資本比率・ROE・営業利益率・売上5yCAGR・予想配当性向・ミックス係数・配当利回り。
+- これらは<strong>現在値で完結</strong>するため、価格2000年・財務2008年の下限の影響をほぼ受けない。実効値率90%以上。</p>
+<h3 id="23">2.3 重要な構造的洞察</h3>
+<blockquote>
+<p><strong>findexの核心（最高重み）が、最も取得が難しいデータ領域に乗っている。</strong></p>
+</blockquote>
+<ul>
+<li>配当継続性（連続非減配2.5＋連続増配1.5＋減配信頼性0.8＋10年CAGR1.2 = <strong>重み6.0、全体の約1/3</strong>）は、すべて<strong>深い配当履歴に依存</strong>し、打ち切り（27.7%）の直撃を受ける。</li>
+<li>一方、健全性・割安度（現在値系）は安定して取れる。</li>
+<li>つまり「増配株分析」というfindexのアイデンティティは、<strong>まさにデータが最も不確かな場所に成立している</strong>。だからこそ ①N+の正直運用 ②backfill ③listing_dateでの打切り判定 が品質の生命線。</li>
+</ul>
+<h3 id="24-20002008">2.4 価格2000・財務2008の下限は「現在スコアリング」には実はほぼ効かない</h3>
+<ul>
+<li>価格2000下限: 配当利回り・PER/PBR系は<strong>現在値</strong>を使うため、現在のスコアリングには影響しない。<strong>効くのはバックテストと長期チャート投稿（D5）</strong>。</li>
+<li>財務2008下限: 5年成長は直近5年（2021-26）で足り、現在のスコアリングには影響しない。<strong>効くのは長期の時系列分析</strong>。</li>
+<li>→ <strong>下限B/Dの実害は「現在スコア」より「過去再現（バックテスト）と長期フック投稿」に出る</strong>。現在スコアの実害の主因は ① capex欠落 と ③ 打ち切り。</li>
+</ul>
+<hr />
+<h2 id="_1">まとめ（次への引き渡し）</h2>
+<table>
+<thead>
+<tr>
+<th>課題</th>
+<th>クラス</th>
+<th>対処方針</th>
+<th>渡す先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>capex 0%（FCF崩壊）</td>
+<td>C</td>
+<td>EDINET CFで取得</td>
+<td>D3/実装</td>
+</tr>
+<tr>
+<td>investment_securities 不在</td>
+<td>C</td>
+<td>EDINET有報</td>
+<td>D3/実装</td>
+</tr>
+<tr>
+<td>listing_date 0%（打切り判定の鍵）</td>
+<td>C</td>
+<td>kabutan取得</td>
+<td>D3/実装</td>
+</tr>
+<tr>
+<td>株価2024→2000へ再取得</td>
+<td>C</td>
+<td>yfinance遡及</td>
+<td>D3/実装</td>
+</tr>
+<tr>
+<td>打ち切り27.7%（静かに誤る）</td>
+<td>D</td>
+<td>N+表示＋listing_dateで判別＋backfill</td>
+<td>D3/D4/D6</td>
+</tr>
+<tr>
+<td>若い銘柄の履歴長不足</td>
+<td>D</td>
+<td>「評価不能」明示・減点しない</td>
+<td>D4 Nullポリシー</td>
+</tr>
+<tr>
+<td>pre-2000株価/PER/PBR</td>
+<td>D</td>
+<td>取得不能を明示・長期フックは2000下限</td>
+<td>D5</td>
+</tr>
+<tr>
+<td>Nullポリシー「None→0」</td>
+<td>―</td>
+<td>欠損と正当0と構造的不能を区別して採点</td>
+<td>D4</td>
+</tr>
+</tbody>
+</table>
+</main></div></body></html>

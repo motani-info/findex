@@ -70,5 +70,37 @@ back_findexの課題を気にするあまり「正確だが投稿に役立たな
 2. **総合グレードが投稿を絞りすぎ** — 1銘柄1グレードでcore欠損=投稿対象外だと「配当だけ完璧な銘柄」の真実すら出せない。§6を**claim（主張）単位グレード**に作り替え（識別グレード§6.1＋claim別§6.2）
 3. **完璧主義リスク** — §6.5「投稿開始の最小データ集合(MVP)」を新設（柱1完成待ちで投稿ゼロを回避）。§5カバレッジは初期はmaterializeせず集計クエリで導出
 4. **ソース階層が実証前に断定** — §3を「仮説」に格下げ。EDINET一本足リスク明記。確定はD2.5へ
-- 設計ロードマップ: ~~D2~~（改訂済）→ **D2.5 取得可能性スタディ（次）** → D3 データモデル改訂 → D4 指標システム仕様（16/18確定・Nullポリシー再設計）→ D5 X発信戦略 → D6 多フィールド検証 → D7 ワークフロー改訂
-- **次の一歩: D2.5（各フィールドが全銘柄分そろうかの実証＋MVP母数の実測）**。実装はしない
+#### D2.5 取得可能性スタディ 実測完了（2026-06-14）
+2段階方式で実施。成果物 `docs/design/02_5-feasibility-findings.md`（HTML: feasibility-findings.html）。
+- **第1段（ライブプローブ）**: J-Quants v2 `/fins/summary` は現在財務を1コールで潤沢に返すが**約2年窓**（長期時系列はライブ不可）。`/listed/info`・`/fins/dividend`は現契約403。EDINET XBRLで投資有価証券・有利子負債・支払利息・利益剰余金を実取得＝**入手難フィールドは入手可能**。会計基準でラベルが変わる（IFRS接尾辞等）ことを実証。EDINETコードリストで証券→EDINETコード3,842件＋会計メタ(決算日・連結)取得可
+- **第2段（旧DB集計・read-only）**: edinet_code/listing_date/capex が0%、財務BSは99%超。**重要訂正: betaは95%あり入手難でない。FCF低カバレッジの真因はcapex 0%とinvestment_securities不在**。配当はFY1989〜・3,210銘柄・打ち切り27.7%(1,039銘柄)・下限band(2000-2002)1,365銘柄。確定ストリーク約2,700銘柄=MVP母数潤沢
+- D2を訂正（§2.7 betaの位置づけ、capex追加）。検証は`.scratch/`の使い捨てプローブ（gitignore）で実施・本番コード未着手
+#### D2.6 取得限界の整理と評価軸への影響（2026-06-14）
+成果物 `docs/design/02_6-data-limits-and-impact.md`。旧PJ最大の過ち（取れないデータに気づかず誤値を評価・投稿＝花王26 vs 36）を設計で根絶するための土台。
+- **取得限界を4クラスに整理**: A完全取得可（現在値）/ B時系列下限あり（配当1989・株価2000・財務2008）/ C field欠落＝修正可能（listing_date・edinet_code・capex・investment_securities・深い株価）/ D構造的に取得不能（pre-2000株価/PER/PBR・backfill外の真の連続年数）
+- **評価軸への影響を実測**（computed_metrics 3,746・真NULLと正当0を分離）。破綻4タイプ:
+  - ①field欠落で機能不全（修正可）: FCF配当カバレッジ 真NULL57%（capex 0%が主因）、ROIC-WACC24%、ネットキャッシュPER12%（investment_sec）
+  - ②履歴長不足（一部構造的）: 10年増配CAGR 35.6%、EPS成長5y 31.2%（若い銘柄は原理的に不能）
+  - ③**打ち切りで静かに誤る（最危険）**: 連続年数系。streak_is_censored 27.7%（1,039銘柄）がNULLでないのに過小＝品質フィルタをすり抜ける。N+表示が生命線
+  - ④影響軽微（現在値のみ）: 自己資本比率99.5%・ROE95%・営業益率99.3%・売上CAGR97%・配当性向99.8%
+- **構造的洞察**: findex核心の配当継続性（重み6.0＝全体の約1/3）が最も取得困難な深い配当履歴に乗る。増配株分析というアイデンティティ自体が最も不確かなデータ領域に成立
+- **価格2000・財務2008の下限は「現在スコア」にはほぼ効かない**（現在値指標が大半）。実害はバックテストと長期チャート投稿(D5)。現在スコアの実害主因は①capex欠落と③打ち切り
+#### D2.7 結果補正レイヤ（公表値オーバーライドの一般化・2026-06-14）
+成果物 `docs/design/02_7-result-override-layer.md`。ユーザー問い「pre-2000のマスターは無理でも、"結果"（連続増配30年）だけ公表集計から補填できないか」への設計回答。
+- **結論: できる。ただし配当ストリーク系に限る**。株価/PER/PBRのpre-2000は"結果"の公表が無く点列なので補正不能
+- 2種のバックフィルを区別: ①マスター補填(raw, haitoukin年間配当) ②結果補正(override, ZAi集計の連続年数)。後者は`streak_overrides`12件・golden20件で先行実装済み→汎用`result_overrides`(field/value/as_of/source/definition_note/confidence)に拡張
+- ポリシー: 信頼ソース限定/昇格のみ(override≥機械計算)/採用時is_censored解除(当該指標のみ)/as_ofで経年補正/2ソースでverified
+- **最大の地雷=定義差**（小林製薬「上場前から起算」で公表26年）。出典明示・definition_note・機械値併記で管理。投稿では「ZAi集計で連続増配28年」と出典付き断定回避＝柱3の武器にもなる
+- 効果は投稿母数の頭(有名増配株)を確定値化＝柱3に直接効く。裾はN+で正直に
+#### D3 データモデル改訂（2026-06-14）
+成果物 `docs/design/data-model.md`（全面改訂）。本書がモデルの正本（schema.sqlは実装時に再生成）。D2.5〜D2.7の実測を反映:
+- **来歴メタを全取得テーブル共通規約に**（source/confidence/as_of/collected_at）。カバレッジは集計クエリで導出（materializeしない）
+- **streak_overrides → 汎用 result_overrides**（code/field/value/as_of/source/definition_note/confidence）。フィールド非依存に一般化（D2.7）
+- **stocks に会計メタ追加**（fiscal_period_end_month/consolidated/accounting_standard）。edinet_codeはEDINETコードリストで即埋まる（旧0%）
+- **financial_snapshots のソース分担明記**: J-Quants fins/summary（現在〜2年・潤沢）＋ EDINET XBRL（深いBS・入手難）。capex(C・edinet)・investment_securities(C・edinet)・interest_expense(cost_of_debt)を追加。**betaは導出（旧95%・入手難でないと訂正）**
+- **price_history を2000年遡及**＋ソース分担（yfinance主・J-Quants補完）。pre-2000は構造的不能を明示
+- **computed_metrics に claim別グレード**（grade_dividend/valuation/health/capital＋identity_ok）と由来フラグ（machine/override/censored）
+- 各フィールドにクラス注記（A完全/C修正可/B・D構造的）
+- 設計ロードマップ: ~~D2~~→~~D2.5~~→~~D2.6~~→~~D2.7~~→~~D3~~→ **D4 指標システム仕様（次・Nullポリシー再設計／機械→override→N+合成順序／16-18確定／beta訂正反映）** → D5 X発信戦略（高配当×増配ランキング等フック）→ D6 多フィールド検証（override照合）→ D7 ワークフロー改訂
+- **次の一歩: D3 データモデル改訂（D2.5の実測gapを反映）**。実装は引き続き凍結
+- gitコミット方針: **findex配下だけ**（無関係な親リポの変更は触らない）。D1-D2を `1bbe7b1` でコミット済み

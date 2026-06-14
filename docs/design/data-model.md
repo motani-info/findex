@@ -1,214 +1,234 @@
-# 設計: テーブル定義（データモデル）
+# 設計: テーブル定義（データモデル）— D3改訂版
 
-**作成日**: 2026-06-14
-**正本**: `findex/db/schema.sql`（このドキュメントは解説。DDLの一次情報はSQLファイル）
-**関連**: [requirements.md](../requirements.md) §7 / [pre2000-data.md](pre2000-data.md) §4 / [data-workflow.md](data-workflow.md)
+**作成日**: 2026-06-14（D3でD2.5〜D2.7の実測を反映して全面改訂）
+**位置づけ**: 本書がデータモデルの**正本（設計）**。`findex/db/schema.sql` は実装フェーズで本書から再生成する（旧 schema.sql は配当中心の雛形＝凍結）。
+**親**: [charter](00-charter-and-data-integrity.md) / [D2](02-data-integrity-framework.md) / [D2.5実測](02_5-feasibility-findings.md) / [D2.6影響](02_6-data-limits-and-impact.md) / [D2.7結果補正](02_7-result-override-layer.md)
 
 ---
 
-## 0. 設計原則（再掲）
+## 0. 設計原則
 
-1. **一方向フロー**: 取得層 → 導出層 → 評価層 → 出力層。後段は前段のテーブルだけを読む
+1. **一方向フロー**: 取得層 → 導出層 → 評価層 → 出力層。後段は前段テーブルだけを読む
 2. **粒度別テーブル**: 年間配当（FY粒度）とイベント配当（権利落ち日粒度）を混ぜない（地雷1）
-3. **計算は導出層に集約**: ストリーク・CAGR等の計算結果は `computed_metrics` にのみ書く
-4. **source と更新時刻**: すべての行に「どこから来たか」「いつ更新したか」を持たせる
-5. **履歴を消さない**: 財務・スコアは年度別/日付別に積む（1行上書き禁止）
+3. **計算は導出層に集約**: ストリーク・CAGR等は `computed_metrics` にのみ書く
+4. **全値に来歴メタ**: source / confidence / as_of / collected_at（§1）。「足りない部分を常に把握」の物理的実体
+5. **履歴を消さない**: 財務・株価・スコアは年度別/日付別に積む（1行上書き禁止）
+6. **修正可能(C)と構造的不能(B/D)を区別**: C群は埋める導線を持つ、B/Dはマスター補填でなく結果補正(D2.7)とN+で扱う
 
 ### テーブル一覧と層の対応
 
-| 層 | テーブル | 粒度 | 役割 |
-|---|---|---|---|
-| 取得 | `stocks` | 1銘柄1行 | 銘柄マスター（上場日・設立日を含む） |
-| 取得 | `price_history` | 銘柄×日 | 調整後終値 |
-| 取得 | `dividend_events` | 銘柄×権利落ち日 | 配当イベント生データ |
-| 取得 | `dividend_annual` | 銘柄×会計年度 | 年間配当の正準系列 |
-| 取得 | `financial_snapshots` | 銘柄×会計年度 | 財務諸表スナップショット |
-| 取得 | `streak_overrides` | 1銘柄1行 | 公表値による手動補正 |
-| 導出 | `computed_metrics` | 1銘柄1行 | 全派生指標の唯一の出口 |
-| 評価 | `dividend_scores` | 銘柄×採点日 | スコア履歴 |
-| 評価 | `rule_versions` | 1ルール1行 | rules.yaml のバージョン管理 |
-| 出力 | `post_log` | 1投稿1行 | X投稿履歴（二重投稿防止） |
-| 運用 | `run_log` | 1ジョブ1行 | バッチ実行ログ |
-| 運用 | `schema_version` | 1行 | スキーマ世代 |
+| 層 | テーブル | 粒度 | 役割 | D2.x反映 |
+|---|---|---|---|---|
+| 取得 | `stocks` | 1銘柄1行 | 銘柄マスター＋**会計メタ** | 会計メタ追加・edinet_code導線 |
+| 取得 | `price_history` | 銘柄×日 | 調整後終値（**2000年〜**） | 2000遡及・ソース分担 |
+| 取得 | `dividend_events` | 銘柄×権利落ち日 | 配当イベント生データ | 変更なし |
+| 取得 | `dividend_annual` | 銘柄×会計年度 | 年間配当の正準系列 | 来歴メタ拡張 |
+| 取得 | `financial_snapshots` | 銘柄×会計年度 | 財務諸表（**J-Quants+EDINET**） | 入手難フィールド追加 |
+| 取得 | `result_overrides` | 銘柄×フィールド | **公表結果による補正（汎用）** | streak_overridesを一般化 |
+| 導出 | `computed_metrics` | 1銘柄1行 | 全派生指標の唯一の出口＋**claim別グレード** | グレード列追加 |
+| 評価 | `dividend_scores` | 銘柄×採点日 | スコア履歴 | 変更なし |
+| 評価 | `rule_versions` | 1ルール1行 | rules.yaml版管理 | 変更なし |
+| 出力 | `post_log` | 1投稿1行 | X投稿履歴 | 変更なし |
+| 運用 | `run_log` / `schema_version` | — | 実行ログ・世代 | 変更なし |
 
 ---
 
-## 1. `stocks` — 銘柄マスター
+## 1. 来歴メタ（全取得テーブル共通の規約）
 
-**役割**: 全上場普通株（約3,750）の不変・準不変情報。`listing_date`/`founded_date` が2000年問題の打ち切り判定に必須。
-**source**: JPX公式Excel（コード/名称/市場/業種）、kabutan（上場日・設立日）。
-**更新頻度**: 月次（マスター）、初回1回（上場日・設立日は不変）。
+旧実装の根本欠陥（欠損に気づけない）を断つ。**取得層の各テーブルは値カラムに対し以下を持つ**（粒度に応じカラム or 別正規化）:
 
-| カラム | 型 | 説明 |
+| メタ | 意味 | 例 |
 |---|---|---|
-| `code` | TEXT PK | 4桁証券コード |
-| `name` | TEXT | 銘柄名 |
-| `market` | TEXT | プライム/スタンダード/グロース/名証 等 |
-| `sector` | TEXT | 33業種 |
-| `edinet_code` | TEXT | EDINETコード（財務クロスチェック用） |
-| `listing_date` | TEXT | **上場年月日**（kabutan等）。打ち切り判定の独立シグナル。地雷7 |
-| `founded_date` | TEXT | 設立年月日（補助） |
-| `first_data_date` | TEXT | DB内最古データ日（**導出値**。単独では打ち切り判定不可） |
-| `is_active` | INTEGER | 1=現役。上場廃止は0 |
-| `updated_at` | TEXT | 更新時刻 |
+| `source` | 一次ソース | jquants / edinet / yfinance / haitoukin / ir / manual |
+| `confidence` | verified（照合済）/ present（未照合）/ review（乖離検知） | §D2 §5 |
+| `as_of` | 値が指す時点（決算期末・基準日・公表時点） | 2025-03-31 |
+| `collected_at` | 取得時刻（TTL・鮮度判定） | 2026-06-14T… |
 
-**インデックス**: `market`, `sector`。
-**地雷メモ**: `first_data_date` は「自分の持つデータの下限」であり「会社の年齢」ではない。`listing_date` と必ず併用する（旧実装は `listing_date` が0%で打ち切りに気づけなかった）。
+> **カバレッジ追跡は materialize しない**（D2.5 §5）。上記メタを持つ実データ行から**集計クエリで状態を導出**（present/missing/insufficient）。重くなったらD3後段でビュー/テーブル化を判断。
 
 ---
 
-## 2. `price_history` — 株価履歴
+## 2. `stocks` — 銘柄マスター＋会計メタ
+
+**役割**: 全上場普通株（約3,842）の不変・準不変情報＋FY正規化に要る会計メタ。
+**source**: JPX公式Excel（コード/名称/市場/業種）、**EDINETコードリスト（edinet_code/決算日/連結＝3,842件・実測取得済）**、kabutan（上場日）。
+
+| カラム | 型 | クラス | 説明 |
+|---|---|:--:|---|
+| `code` | TEXT PK | A | 4桁証券コード |
+| `name` | TEXT | A | 銘柄名 |
+| `market` | TEXT | A | プライム/スタンダード/グロース 等 |
+| `sector33` | TEXT | A | 33業種 |
+| `edinet_code` | TEXT | C→A | EDINETコード。**EDINETコードリストzipで即埋まる**（旧0%） |
+| `fiscal_period_end_month` | INT | A | 決算期末月。**コードリストの「決算日」由来**。FY正規化の基準（地雷2） |
+| `consolidated` | INT | A | 連結有無。コードリスト由来。指標を同一基準に |
+| `accounting_standard` | TEXT | C | JGAAP/IFRS/US。**EDINETパースのラベル辞書切替に必須**（IFRSは科目名が違う） |
+| `listing_date` | TEXT | **C(0%)** | 上場年月日（kabutan）。**打ち切り判定の独立シグナル**。要収集（地雷7） |
+| `founded_date` | TEXT | C | 設立年月日（補助） |
+| `first_data_date` | TEXT | 導出 | DB内最古データ日（**単独では打ち切り判定不可**） |
+| `is_active` | INT | A | 1=現役、0=上場廃止 |
+| `delisting_date` | TEXT | C | 上場廃止日（生存バイアス対策） |
+| `updated_at` | TEXT | — | 更新時刻 |
+
+**地雷メモ**: `first_data_date`≠会社年齢。`listing_date` と必ず併用（旧実装はlisting_date 0%で打ち切りに気づけなかった＝再構築のきっかけ）。
+
+---
+
+## 3. `price_history` — 株価履歴（2000年〜）
 
 **役割**: 調整後終値。配当利回り・PER・PBR・時価総額・モメンタムの原資。
-**source**: yfinance `yf.download`（将来J-Quants）。**更新頻度**: 日次（平日）。
+**source**: 直近=J-Quants `/equities/bars/daily`（**現契約は2024-03〜のみ**）、深い遡及=yfinance（**2000-01-04が下限**・実測）。**pre-2000は構造的に存在しない（クラスD）**。
 
 | カラム | 型 | 説明 |
 |---|---|---|
 | `code` | TEXT | 証券コード |
 | `date` | TEXT | 日付（YYYY-MM-DD） |
-| `close` | REAL | 調整後終値 |
+| `close_adj` | REAL | 調整後終値（yfinance AdjC / J-Quants AdjC） |
 | `volume` | INTEGER | 出来高 |
+| `source` | TEXT | jquants / yfinance |
 
 **PK**: (`code`, `date`)。
-**運用メモ**: 日次は最新2日分のみ取得して追記（全期間再取得しない）。yfinanceは2並列上限・バッチ間スリープ必須。
+**運用メモ**:
+- **初回は2000年まで遡及取得**（旧DBは2024-06〜しか無い＝収集不足。yfinanceで回復可）。日次は最新分のみ追記。
+- J-Quants現契約は2年窓のため、**長期株価はyfinanceが主、J-Quantsは直近の補完**という分担。
+- pre-2000の株価・PER/PBRは**取得不能を明示**（評価不能。捏造しない）。
 
 ---
 
-## 3. `dividend_events` — 配当イベント（生データ）
+## 4. `dividend_events` — 配当イベント（生データ）
 
-**役割**: 権利落ち日ベースの**実イベント**のみ。`dividend_annual` の events ソースを構築する原料。
-**source**: yfinance `Ticker.dividends`（分割調整済み、1999年9月以降）。**更新頻度**: 半年。
+**役割**: 権利落ち日ベースの実イベントのみ。`dividend_annual` の events ソースの原料。
+**source**: J-Quants（現契約 `/fins/dividend` は403のため）yfinance `Ticker.dividends`（1999年9月以降）。**更新頻度**: 半年。
 
 | カラム | 型 | 説明 |
 |---|---|---|
 | `code` | TEXT | 証券コード |
 | `ex_date` | TEXT | 権利落ち日 |
 | `amount` | REAL | 分割調整済み1株配当 |
-| `source` | TEXT | 既定 'yfinance' |
+| `source` | TEXT | yfinance 等 |
 
 **PK**: (`code`, `ex_date`)。
-**地雷メモ（最重要）**:
-- **合成レコードを入れてはならない**（地雷1）。「年間配当を期末日付の偽イベント」として入れると会計年度シームで偽の減配が発生する。年間値は `dividend_annual` に直接入れる
-- 同一日に複数回配当（特別配当）があるとPKで潰れる。必要ならPKに kind を足す
-- 1999年以前は存在しない → 長期ストリークは `dividend_annual` のバックフィルで補う
+**地雷メモ**: 合成レコード禁止（地雷1）。年間値は `dividend_annual` に直接入れる。1999年以前は存在しない→バックフィルで補う。
 
 ---
 
-## 4. `dividend_annual` — 会計年度別配当（正準系列）⭐
+## 5. `dividend_annual` — 会計年度別配当（正準系列）⭐
 
-**役割**: **ストリーク・配当CAGRはこのテーブルだけから計算する**。findexの正確性の心臓部。
-**source**: `events`（dividend_eventsから構築）/ `haitoukin`（2000年以前バックフィル）/ `ir`（各社IR）/ `manual`（手入力）。
-**更新頻度**: events は半年（再構築）、backfill系は随時。
+**役割**: **ストリーク・配当CAGRはこのテーブルだけから計算**。findexの心臓部。
+**source**: `events`（構築）/ `jquants`（fins/summary の DivAnn・現在〜約2年）/ `haitoukin`（2000年以前バックフィル）/ `ir` / `manual`。
 
 | カラム | 型 | 説明 |
 |---|---|---|
 | `code` | TEXT | 証券コード |
-| `fiscal_year` | INTEGER | **4月始まり会計年度**（地雷2）。`fy = year if month>=4 else year-1` |
-| `dps` | REAL | その年度の年間1株配当（分割調整済み） |
-| `source` | TEXT | 'events'\|'haitoukin'\|'ir'\|'manual' |
+| `fiscal_year` | INTEGER | **4月始まり会計年度**（地雷2） |
+| `dps` | REAL | 年間1株配当（分割調整済み） |
+| `source` | TEXT | events / jquants / haitoukin / ir / manual |
+| `confidence` | TEXT | verified / present / review |
+| `as_of` | TEXT | 公表/基準時点 |
 | `updated_at` | TEXT | 更新時刻 |
 
-**PK**: (`code`, `fiscal_year`)。**インデックス**: (`code`, `fiscal_year`)。
-**優先順位（同一年度で競合時）**: `manual` > `ir` > `haitoukin` > `events`（手動の確定値を機械再構築で潰さない）。
-**地雷メモ**:
-- 暦年でなく**会計年度**で集計（決算期変更でも壊れない。地雷2）
-- イベントの最初の会計年度は期中開始の可能性があるため**捨てる**（`first_complete_fy = min(events_fy)+1`。地雷1）。捨てた分はバックフィルで埋める
-- 分割調整基準がソース間で不一致な銘柄（NTT/SBG/電通総研）は境界異常チェックで弾き、override で対処（地雷3）
+**PK**: (`code`, `fiscal_year`)。
+**優先順位（競合時）**: `manual` > `ir` > `haitoukin` > `jquants` > `events`（手動の確定値を機械再構築で潰さない）。
+**地雷メモ**: 会計年度集計（地雷2）/ events初年度は期中の可能性で捨てる（地雷1）/ 分割不一致(NTT/SBG/電通総研)は境界異常チェックで弾きoverride（地雷3）。
 
 ---
 
-## 5. `streak_overrides` — 公表値オーバーライド
+## 6. `financial_snapshots` — 年度別財務（J-Quants + EDINET）
 
-**役割**: 機械計算と公表値の定義差（±1〜2年）を補正（地雷5）。**公表値 > 機械計算 のときだけ昇格**。
-**source**: ダイヤモンドZAi・みんかぶ・各社IR。**更新頻度**: 随時（手動）。
+**役割**: ROE・自己資本比率・FCF・ROIC・ネットキャッシュ等の原データを**年度別に履歴保持**。
+**source分担（D2.5実測）**:
+- **J-Quants `/fins/summary`**: 現在〜約2年の主要財務（売上/営業益/純益/EPS/総資産/自己資本/現金/CFO・CFI・CFF/発行株数/配当/予想）。1コールで潤沢。
+- **EDINET 有報XBRL（2008〜）**: 入手難の深いBS（投資有価証券・有利子負債・支払利息・流動資産・利益剰余金）。**会計基準別ラベル辞書でパース**。
 
-| カラム | 型 | 説明 |
-|---|---|---|
-| `code` | TEXT PK | 証券コード |
-| `growth_years` | INTEGER | 公表 連続増配年数（NULL=上書きしない） |
-| `nocut_years` | INTEGER | 公表 連続非減配年数（NULL=上書きしない） |
-| `as_of_fiscal_year` | INTEGER | 公表値の基準年度 |
-| `source_url` | TEXT | 出典URL |
-| `verified_at` | TEXT | 確認日時 |
-
-**地雷メモ**: 古い公表値で機械計算を**下げてはいけない**（昇格のみ）。合併銘柄（三菱HC・アステラス）の過去連続性はデータ上フィクションなので必ずoverrideで扱う。現在12銘柄登録済み。
-
----
-
-## 6. `financial_snapshots` — 年度別財務スナップショット
-
-**役割**: ROE・自己資本比率・FCF・EPS等の原データを**年度別に履歴保持**（旧実装は1行上書きで履歴が消えた）。
-**source**: yfinance `info`/`financials`/`balance_sheet`、EDINET（検証）。**更新頻度**: 四半期（TTL 90日）。
-
-| カラム | 型 | 説明 |
-|---|---|---|
-| `code`, `fiscal_year` | TEXT, INTEGER | PK |
-| `eps`, `bps`, `shares` | REAL | 1株指標・株数 |
-| `roe`, `operating_margin`, `equity_ratio`, `debt_to_equity`, `payout_ratio` | REAL | 収益性・健全性 |
-| `free_cashflow`, `operating_cashflow`, `capex` | REAL | キャッシュフロー（FCFカバレッジ用） |
-| `total_assets`, `stockholders_equity`, `retained_earnings` | REAL | BS項目（利益剰余金配当倍率用） |
-| `revenue`, `market_cap`, `beta` | REAL | 売上・時価総額・β |
-| `source` | TEXT | 既定 'yfinance' |
-| `fetched_at` | TEXT | 取得時刻（TTL判定用） |
+| カラム | 型 | クラス | source | 説明 |
+|---|---|:--:|---|---|
+| `code`, `fiscal_year` | TEXT,INT | — | — | PK |
+| `revenue`, `operating_income`, `net_income`, `eps`, `bps` | REAL | A | jquants | PL・1株（売上CAGR/営業益率/ROE/EPS成長） |
+| `shares_outstanding` | REAL | A | jquants | 時価総額・EPS |
+| `total_assets`, `equity_attributable` | REAL | A | jquants/edinet | 自己資本比率・ROE |
+| `operating_cf` | REAL | A | jquants(CFO) | FCF |
+| `capex` | REAL | **C(0%)** | **edinet** | **FCF=CFO−capex の鍵。旧0%＝FCF崩壊の主因** |
+| `cash_and_equivalents` | REAL | A | jquants | ネットキャッシュ |
+| `retained_earnings` | REAL | A | edinet | 利益剰余金配当倍率（実測99.5%） |
+| `current_assets`, `total_liabilities` | REAL | A/C | edinet | ネットキャッシュ |
+| `interest_bearing_debt` | REAL | C | edinet | 有利子負債比率・cost_of_debt |
+| `interest_expense` | REAL | C | edinet | **cost_of_debt算出**（ROIC-WACC） |
+| `investment_securities` | REAL | **C(不在)** | **edinet** | ネットキャッシュ×0.7。旧DBに無い→EDINETで取得 |
+| `effective_tax_rate` | REAL | C | edinet/導出 | ROIC NOPAT |
+| `beta` | REAL | A | **導出** | **旧DB95%有＝入手難ではない**（D2.6訂正）。株価×TOPIX回帰で自前算出 |
+| `market_cap` | REAL | A | 導出 | 株価×株数 |
+| `source`, `confidence`, `as_of`, `collected_at` | TEXT | — | — | 来歴メタ（§1） |
 
 **PK**: (`code`, `fiscal_year`)。
-**地雷メモ**: yfinance の info キーは不安定（EPSは dilutedEPS→trailingEps→forwardEps でフォールバック）。欠損多数を前提に、EDINETでクロスチェックする設計。
+**D2.6反映**: 旧低カバレッジの主因は ①capex 0% ②investment_securities不在 の**収集漏れ**（クラスC＝修正可能）。betaは入手難ではない（訂正）。
 
 ---
 
-## 7. `computed_metrics` — 派生指標（導出層の唯一の出口）⭐
+## 7. `result_overrides` — 結果補正（公表値オーバーライド・汎用）⭐ D2.7
 
-**役割**: 前段テーブルから計算した全派生指標を1銘柄1行（最新値）で保持。スコアラはここだけを読む。
-**source**: 導出層（`dividend_annual`+`streak_overrides`+`financial_snapshots`+`price_history`+`stocks`）。**更新頻度**: 価格由来は日次、財務由来は四半期、配当由来は半年（カラム別の `*_computed_at` で管理）。
+**役割**: マスターが取れない(B/D)が**結果だけ公表される**指標を、出典付きで補正。`streak_overrides`(12件)を**フィールド非依存に一般化**。
+**source**: ダイヤモンドZAi・各社IR・みんかぶ（**集計主体が明確なもののみ**）。
+
+| カラム | 型 | 説明 |
+|---|---|---|
+| `code` | TEXT | 証券コード |
+| `field` | TEXT | 補正対象（consecutive_dividend_growth_years 等）。**汎用化の鍵** |
+| `value` | REAL | 公表された結果値 |
+| `as_of_fiscal_year` | INTEGER | **その値が何年度時点か**（経年補正に必須） |
+| `source` / `source_url` | TEXT | 出典（信頼ソース限定） |
+| `definition_note` | TEXT | **定義差の根拠**（例「上場前から起算」＝最大の地雷対策） |
+| `confidence` | TEXT | verified（2ソース一致）/ single |
+| `verified_at` / `verified_by` | TEXT | 検証時刻・方法 |
+
+**PK**: (`code`, `field`)。
+**採用ポリシー（D2.7 §2.2）**: ①信頼ソース限定 ②**昇格のみ**（override≥機械計算）③採用時は当該指標の is_censored 解除（claim単位）④as_ofで経年補正（機械で確認できた近年分を加算）⑤重要銘柄は2ソースでverified。
+**対象の線引き**: 連続増配/非減配=✅、減配信頼性=🔶、CAGR=raw補填が本筋、**pre-2000株価/PER/PBR=対象外（結果が公表されない）**。
+
+---
+
+## 8. `computed_metrics` — 派生指標＋claim別グレード（導出層の出口）⭐
+
+**役割**: 前段から計算した全派生指標を1銘柄1行で保持。スコアラはここだけ読む。
+**source**: 導出層（dividend_annual + result_overrides + financial_snapshots + price_history + stocks）。
 
 | 区分 | カラム |
 |---|---|
 | 価格由来（日次） | `per`, `pbr`, `current_market_cap`, `div_yield`, `mix_coefficient`, `net_cash_per` |
-| 財務由来（四半期） | `equity_ratio`, `debt_to_equity`, `roe`, `operating_margin`, `eps_growth_5y`, `revenue_growth_5y_cagr`, `roic_minus_wacc`, `fcf_payout_coverage`, `retained_earnings_div_ratio`, `payout_ratio` |
-| 配当由来（半年） | `annual_div`, `consecutive_no_cut_years`, `consecutive_dividend_growth_years`, **`streak_is_censored`**, `dividend_growth_5y_cagr`, `dividend_growth_10y_cagr`, `dividend_reliability`, `dividend_cut_count_20y` |
+| 財務由来（四半期） | `equity_ratio`, `roe`, `operating_margin`, `eps_growth_5y`, `revenue_growth_5y_cagr`, `roic_minus_wacc`, `fcf_payout_coverage`, `retained_earnings_div_ratio`, `payout_ratio` |
+| 配当由来（半年） | `annual_div`, `consecutive_no_cut_years`, `consecutive_dividend_growth_years`, `dividend_growth_10y_cagr`, `dividend_reliability`, `dividend_cut_count_20y` |
+| **品質（D2.6/D2.7）** | `streak_is_censored`, **`grade_dividend`, `grade_valuation`, `grade_health`, `grade_capital`**（claim別 A〜D）, `identity_ok` |
+| 由来フラグ | 各指標の `*_source`（machine / override / censored）で「結果補正が効いたか」を記録 |
 | 更新時刻 | `price_computed_at`, `fin_computed_at`, `div_computed_at` |
 
 **PK**: `code`。
-**最重要カラム**: `streak_is_censored`（1=「N年以上」表示）。これが立っている銘柄を裸の数字で投稿してはならない（品質ゲートで担保）。
+**最重要**: `streak_is_censored`（N+表示）＋ **claim別グレード**（D2 §6・配当系Aでも資本効率系Dなど銘柄内で別評価）。グレードは前段の来歴メタから**導出**（materialize不要）。
 
 ---
 
-## 8. `dividend_scores` — スコア履歴
+## 9. `dividend_scores` / `rule_versions` / `post_log` / `run_log` / `schema_version`
 
-**役割**: 採点結果を日付別に積む（バックテスト・推移分析）。
-**source**: 評価層（`computed_metrics` + `rules.yaml`）。**更新頻度**: 日次（再スコアリング）。
-
-| カラム | 型 | 説明 |
+| テーブル | 役割 | 要点 |
 |---|---|---|
-| `code`, `scored_at` | TEXT | PK |
-| `rule_version_id` | INTEGER | `rule_versions.id` への参照 |
-| `total_score` | REAL | 100点換算の総合スコア |
-| `score_json` | TEXT | 指標ごとの内訳（JSON） |
+| `dividend_scores` | 採点結果を日付別に積む（バックテスト・推移） | PK(`code`,`scored_at`)、`rule_version_id`、`total_score`、`score_json` |
+| `rule_versions` | rules.yaml を SHA256 で版管理（再現性） | `id` AUTO、`rules_sha256` UNIQUE |
+| `post_log` | X投稿履歴。本文SHA256で30日窓の二重投稿防止 | `id` AUTO、`status`∈posted/failed/skipped |
+| `run_log` | バッチ実行記録 | `id` AUTO、`job`/`started_at`/`status` |
+| `schema_version` | スキーマ世代 | `version` PK |
 
-**PK**: (`code`, `scored_at`)。
-
----
-
-## 9. `rule_versions` / `post_log` / `run_log` / `schema_version`
-
-| テーブル | 役割 | 主キー/要点 |
-|---|---|---|
-| `rule_versions` | rules.yaml の SHA256 でルール改定を版管理。スコアの再現性を担保 | `id` AUTO、`rules_sha256` UNIQUE |
-| `post_log` | X投稿履歴。本文SHA256で30日窓の二重投稿防止 | `id` AUTO、`body_sha256`、`status`∈posted/failed/skipped |
-| `run_log` | 日次/半年次バッチの実行記録 | `id` AUTO、`job`/`started_at`/`status` |
-| `schema_version` | スキーマ世代（現在 v1） | `version` PK |
+> **Nullポリシー（D4で確定）**: 現 rules.yaml「None→生スコア0」はアンチパターン。**①欠損（減点）②正当な0（増配なし＝実値）③構造的不能（若い銘柄＝分母から除外）**を区別する。本モデルの来歴メタとグレードがその判定材料。
 
 ---
 
-## 10. 関連（参照グラフ）
+## 10. 参照グラフ
 
 ```
-stocks ──code──┬─< price_history
-               ├─< dividend_events ──build──> dividend_annual >── code ─┐
-               ├─< financial_snapshots                                  │
-               └─< streak_overrides ────────────────────────────────┐  │
-                                                                     ▼  ▼
-                                            computed_metrics (1銘柄1行・派生指標)
+stocks ──code──┬─< price_history (2000〜, jquants/yfinance)
+               ├─< dividend_events ──build──> dividend_annual >──┐
+               ├─< financial_snapshots (jquants+edinet)         │
+               └─< result_overrides (公表結果・汎用) ───────────┤
+                                                                ▼
+                              computed_metrics (派生指標＋claim別グレード)
+                                  機械計算 →(昇格のみ)result_override →(不足)N+
                                                      │
                                                      ▼
                             dividend_scores >── rule_version_id ──> rule_versions
@@ -217,4 +237,4 @@ stocks ──code──┬─< price_history
                                               post_log（投稿）
 ```
 
-外部キー制約は張らず（SQLite運用・移行容易性のため）、`code` で論理的に結合する。整合性は半年次の整合性チェックジョブで検証する。
+外部キーは張らず `code` で論理結合（SQLite・移行容易性）。整合性は半年次の整合性チェックジョブ＋D6照合（override vs 機械計算のギャップ検知）で担保。
