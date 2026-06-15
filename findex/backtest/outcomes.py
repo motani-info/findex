@@ -18,7 +18,6 @@ from ..derive.compute import NOCUT_EPS
 DEFAULT_GRID_START = 2008
 DEFAULT_GRID_END = 2020   # 2020+5=2025（前方5年が揃う上限）
 DEFAULT_HORIZONS = (3, 5)
-SPLIT_ARTIFACT_RATIO = 0.55  # 単年でこの比率未満への急落＋即復帰は分割単位不整合の疑い
 
 
 def as_of_grid(start: int = DEFAULT_GRID_START, end: int = DEFAULT_GRID_END,
@@ -84,15 +83,12 @@ def _forward_cut(dps: dict[int, float], y0: int, y1: int) -> int | None:
         if v >= prev * NOCUT_EPS:
             continue
         if i >= 2 and v >= series[i - 2][1] * NOCUT_EPS:
-            continue  # 直前スパイクからの復帰＝減配でない（後方文脈）
-        # 分割調整不整合ガード: 単年で前年の55%未満まで急落し、かつ翌値が前年水準に即復帰する
-        # V字は、配当の分割単位不整合の疑い（神戸物産÷6・沖縄セルラー÷2＝実際は増配継続）。
-        # JTのFY2021減配(154→140=91%・実減配)は閾値超で残す＝真の減配と区別する。
-        if v < prev * SPLIT_ARTIFACT_RATIO and i + 1 < len(series) \
-                and series[i + 1][1] >= prev * NOCUT_EPS:
-            continue
+            continue  # 直前スパイクからの復帰＝減配でない（特配スパイクが窓先頭の罠を回避）
         return 1  # 持続的な減配
     return 0
+    # 注: 配当の分割単位不整合/欠損レコードによる単年アーティファクト（神戸物産・沖縄セルラー）は
+    # **取得層 flag_dividend_anomalies で source=review に隔離**済み＝ここの系列(confidence!=review)
+    # には入らない。バックテスト側で再ガードしない（実減配を誤って消さないため・根因は1箇所で是正）。
 
 
 def compute_outcome(conn, code: str, as_of: str, horizon: int, dps: dict[int, float]) -> dict | None:

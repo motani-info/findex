@@ -19,17 +19,9 @@ def test_special_dividend_spike_at_window_start():
     assert _forward_cut(dps, 2012, 2016) == 0
 
 
-def test_split_artifact_excluded():
-    # 神戸物産型: 単年で前年の17%まで急落＋翌年に前年水準超へ復帰＝分割単位不整合
-    dps = {2006: 1.875, 2007: 0.9375, 2009: 0.15625, 2010: 1.25, 2011: 1.40625}
-    assert _forward_cut(dps, 2008, 2013) == 0
-    # 沖縄セルラー型: ÷2 の急落＋復帰
-    dps2 = {2006: 11.25, 2007: 15.0, 2008: 17.5, 2010: 9.375, 2011: 19.0, 2012: 19.25}
-    assert _forward_cut(dps2, 2008, 2013) == 0
-
-
-def test_real_modest_cut_kept_even_if_later_recovers():
-    # JT型: 154→140(91%・実減配)。後で188に増配しても閾値(55%)超なので真の減配として残す
+def test_real_cut_kept_even_if_later_recovers():
+    # JT型: 154→140の実減配。後で188に増配しても、2年文脈で復帰扱いされず真の減配として残す。
+    # （分割アーティファクトの除外は取得層 flag_dividend_anomalies の責務＝ここの系列には来ない）
     dps = {2018: 150, 2019: 154, 2020: 154, 2021: 140, 2022: 188}
     assert _forward_cut(dps, 2019, 2022) == 1
 

@@ -363,6 +363,7 @@ li{margin:.2em 0}
 <li><strong>EDINET会計基準別辞書</strong>: AccountingStandardsDEIで判別。IFRS=<code>jpigp_cor:*IFRS</code>/JGAAP=<code>jppfs_cor:*</code>、連結=ctxサフィックス無し。IFRSは投資有価証券/流動資産が構造的にinsufficient、<strong>US GAAP連結は構造化XBRL不在→grade_capitalフォールバック</strong></li>
 <li><strong>株価</strong>: yfinance<code>Close</code>=分割調整・配当未調整（YoCに正）。J-Quants突合で最大乖離<strong>0.000%</strong></li>
 <li><strong>配当</strong>: events(2000+)が信頼基盤。haitoukinは社により分割調整状態が不統一→接合で単位統一＋混線はreviewフラグ</li>
+<li><strong>配当の単年アーティファクト隔離（Step1・正確性の根因是正）</strong>: yfinance events系列に2種のアーティファクト（①半期払いで単年だけ1回しか取れず年合計が半額＝沖縄セルラー2010 ②yfinance単年誤値＝神戸物産2009=0.156/サンエー2006/PPIH2003）が混じり、連続年数・CAGR・YoC・バックテスト正解ラベルを汚す。<code>flag_dividend_anomalies</code>が<strong>払い回数の最頻値＋孤立性（翌年は最頻回数に復帰）</strong>と<strong>前年35%未満の急落</strong>の2精密シグナルで検出し<code>confidence=review</code>に隔離（下流は自動除外）。<strong>実減配（日産FY2022=5.0の値減配・危機の頻度低下）は弁別して残す</strong>＝過剰隔離で実シグナルを消さない。golden 18/18は不変（花王36等の連続増配は正確性維持）。根因を取得層1箇所で是正したのでバックテスト側の暫定ガードは撤去。</li>
 </ul>
 <h3 id="phase3">導出層(Phase3)の実データ確認サマリ</h3>
 <ul>

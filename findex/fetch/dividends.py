@@ -109,6 +109,7 @@ def build_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
             n_annual += 1
     conn.commit()
     n_review = cleanse_haitoukin_seam(conn, list(res.ok))
+    n_review += flag_dividend_anomalies(conn, list(res.ok))
     return {"ok": len(res.ok), "failed": len(res.failed), "no_dividend": no_div,
             "events": n_events, "annual_rows": n_annual, "review_flags": n_review,
             "failures": res.failed}
@@ -179,6 +180,84 @@ def cleanse_haitoukin_seam(conn, codes: list[str]) -> int:
     return n_review
 
 
+EXTREME_DROP_RATIO = 0.35   # 前年の35%未満への急落＝値そのものの異常（yfinance単年誤値）
+INCOMPLETE_DROP_RATIO = 0.65  # 半期欠落で年合計が目減りした疑いの上限
+RECOVER_EPS = 0.999
+
+
+def flag_dividend_anomalies(conn, codes: list[str]) -> int:
+    """events由来の単年アーティファクト（欠損/部分レコード・単年誤値）を confidence=review で隔離。
+
+    yfinanceのDividends系列には2種のアーティファクトが混じる（実データで確認）。**直後に前年水準へ
+    復帰するV字**を共通条件に、2つの精密シグナルで検出する:
+      ①**部分集計**: 半期/四半期払いの社で、ある年度が通常より少ない回数しか取り込めず年合計が
+        目減り（沖縄セルラー2010=9.375÷2・SPK2005=4.25÷2＝本来は2回払い）。→ 支払回数<その社の最頻回数
+        かつ DPS<前年65%。
+      ②**単年誤値**: 払い回数は正常だが値が前年の35%未満まで急落（神戸物産2009=0.156・サンエー2006=1.25）。
+    **実減配との弁別**: 日産FY2022=5.0（10→5の実減配・払い回数は通常通り・下落50%）は①②どちらにも
+    該当せず残す。確証主義: 捏造で埋めず review に隔離（下流は confidence!=review で自動除外）。
+    特配スパイク（花王FY2012=93・上振れ）は下落でないため対象外。手動/IR/ZAi(override)/haitoukinは触らない。
+    """
+    import collections
+
+    now = datetime.now().isoformat(timespec="seconds")
+    months = {
+        r[0]: (r[1] or 3)
+        for r in conn.execute(
+            f"SELECT code, fiscal_period_end_month FROM stocks WHERE code IN ({','.join('?' * len(codes))})",
+            codes,
+        )
+    }
+    n_flagged = 0
+    for code in codes:
+        series = conn.execute(
+            "SELECT fiscal_year, dps, source FROM dividend_annual "
+            "WHERE code=? AND confidence!='review' AND dps IS NOT NULL ORDER BY fiscal_year",
+            (code,),
+        ).fetchall()
+        if len(series) < 3:
+            continue
+        # その社の典型的な支払回数（最頻値）。半期=2/四半期=4 等。
+        fm = months.get(code, 3)
+        pay_counts: dict[int, int] = collections.Counter()
+        for ex_date, in conn.execute("SELECT ex_date FROM dividend_events WHERE code=?", (code,)):
+            pay_counts[fiscal_year_of(ex_date, fm)] += 1
+        modal = collections.Counter(pay_counts.values()).most_common(1)[0][0] if pay_counts else 1
+
+        for i in range(1, len(series) - 1):
+            fy, dps, source = series[i]
+            if source != "events":
+                continue  # 機械集計のeventsだけが疑い対象
+            prev = series[i - 1][1]
+            next_fy = series[i + 1][0]
+            if prev <= 0:
+                continue
+            # 共通: 直後（次の1〜2クリーン点）で前年水準へ復帰する一過性であること
+            recovered = any(
+                series[j][1] >= prev * RECOVER_EPS for j in range(i + 1, min(i + 3, len(series)))
+            )
+            if not recovered:
+                continue  # 復帰しない持続的下落＝実減配の可能性→隔離しない
+            # ①部分集計: 払い回数が最頻未満で年合計が目減り。ただし**孤立**（翌年は最頻回数に戻る）
+            #   こと＝単年の取りこぼし。複数年連続で回数減なら実減配の頻度低下→隔離しない（日産）。
+            incomplete = (
+                modal >= 2 and pay_counts.get(fy, 0) < modal
+                and pay_counts.get(next_fy, 0) >= modal
+                and dps < prev * INCOMPLETE_DROP_RATIO
+            )
+            # ②単年誤値: 払い回数は正常だが値が前年の35%未満（yfinance単年異常値）
+            extreme = dps < prev * EXTREME_DROP_RATIO
+            if incomplete or extreme:
+                conn.execute(
+                    "UPDATE dividend_annual SET confidence='review', updated_at=? "
+                    "WHERE code=? AND fiscal_year=?",
+                    (now, code, fy),
+                )
+                n_flagged += 1
+    conn.commit()
+    return n_flagged
+
+
 def rebuild_and_cleanse(conn, codes: list[str]) -> dict:
     """再取得せず、保存済み dividend_events から dividend_annual(events) を再構築＋洗浄。"""
     now = datetime.now().isoformat(timespec="seconds")
@@ -215,4 +294,5 @@ def rebuild_and_cleanse(conn, codes: list[str]) -> dict:
             n_annual += 1
     conn.commit()
     n_review = cleanse_haitoukin_seam(conn, codes)
+    n_review += flag_dividend_anomalies(conn, codes)
     return {"annual_rows": n_annual, "review_flags": n_review}
