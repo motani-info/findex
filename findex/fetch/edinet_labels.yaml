@@ -69,3 +69,27 @@ fields:
     mode: first
     jgaap: [jppfs_cor:Liabilities]
     ifrs:  [jpigp_cor:LiabilitiesIFRS]
+
+# 「主要な経営指標等の推移」＝最新有報1枚に5年分が同梱（Prior4..CurrentYear）。
+# 多年doc取得なしで5年史を得る。連結＝ctxサフィックス無し。基準別。
+summary_fields:
+  revenue:
+    ctx: duration
+    ifrs: jpcrp_cor:RevenueIFRSSummaryOfBusinessResults
+    jgaap: jpcrp_cor:NetSalesSummaryOfBusinessResults
+  net_income:
+    ctx: duration
+    ifrs: jpcrp_cor:ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults
+    jgaap: jpcrp_cor:ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults
+  eps:
+    ctx: duration
+    ifrs: jpcrp_cor:BasicEarningsLossPerShareIFRSSummaryOfBusinessResults
+    jgaap: jpcrp_cor:BasicEarningsLossPerShareSummaryOfBusinessResults
+  total_assets:
+    ctx: instant
+    ifrs: jpcrp_cor:TotalAssetsIFRSSummaryOfBusinessResults
+    jgaap: jpcrp_cor:TotalAssetsSummaryOfBusinessResults
+  equity_attributable:
+    ctx: instant
+    ifrs: jpcrp_cor:EquityAttributableToOwnersOfParentIFRSSummaryOfBusinessResults
+    jgaap: jpcrp_cor:NetAssetsSummaryOfBusinessResults

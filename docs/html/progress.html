@@ -89,6 +89,7 @@ li{margin:.2em 0}
 <a class="l3" href="#d2-2026-06-14">D2 第三者レビュー → 目的志向への是正（2026-06-14）</a>
 <a class="l2" href="#5-35">5. 実装フェーズの段取り（コホート35社で各フェーズ検証）</a>
 <a class="l3" href="#phase2">取得層(Phase2)の実データ確認サマリ</a>
+<a class="l3" href="#phase3">導出層(Phase3)の実データ確認サマリ</a>
 <a class="l2" href="#6">6. 既知のリスク・宿題</a>
 <a class="l3" href="#61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</a>
 <a class="l3" href="#62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
@@ -99,7 +100,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（取得層まで完了）</strong>/ <strong>次の一歩</strong>: Phase 3 導出層（ストリーク・YoC・DOE・status・claim別グレード）</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a/3-b完了・3-c着手）</strong>/ <strong>次の一歩</strong>: Phase 3-c 財務由来指標（ROE/自己資本比率/営業利益率/DOE/FCF/成長率）。直前にEDINET5年史バックフィル完了</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -325,7 +326,7 @@ li{margin:.2em 0}
 <td>3</td>
 <td>導出（status付き・YoC質ゲート・DOE・打ち切り合成・<strong>seam穴橋渡し</strong>）</td>
 <td>golden_streaks緑・status分布妥当</td>
-<td style="text-align: center;">⏭️ 次</td>
+<td style="text-align: center;">🟨 3-a/3-b完了・3-c着手</td>
 </tr>
 <tr>
 <td>4</td>
@@ -359,6 +360,12 @@ li{margin:.2em 0}
 <li><strong>EDINET会計基準別辞書</strong>: AccountingStandardsDEIで判別。IFRS=<code>jpigp_cor:*IFRS</code>/JGAAP=<code>jppfs_cor:*</code>、連結=ctxサフィックス無し。IFRSは投資有価証券/流動資産が構造的にinsufficient、<strong>US GAAP連結は構造化XBRL不在→grade_capitalフォールバック</strong></li>
 <li><strong>株価</strong>: yfinance<code>Close</code>=分割調整・配当未調整（YoCに正）。J-Quants突合で最大乖離<strong>0.000%</strong></li>
 <li><strong>配当</strong>: events(2000+)が信頼基盤。haitoukinは社により分割調整状態が不統一→接合で単位統一＋混線はreviewフラグ</li>
+</ul>
+<h3 id="phase3">導出層(Phase3)の実データ確認サマリ</h3>
+<ul>
+<li><strong>3-a ストリーク</strong>: 機械計算→result_override（昇格のみ）→N+ の合成順序。golden 18/18一致。決算変更/分割の変則年は機械が過小評価→公表値で昇格</li>
+<li><strong>3-b 配当由来指標</strong>: YoC・DPS倍率・CAGR・信頼性・減配回数。減配検出は「前年割れ かつ 2年前も割れ」で頑健化（花王FY2012スパイク復帰を誤検出しない）</li>
+<li><strong>3-c前バックフィル</strong>: 増配の質はEPS5年比較が前提。J-Quants約2年窓では縮退→<strong>有報「主要な経営指標等の推移」（最新1枚にPrior4..Current同梱）</strong>で5年史を取得。J-Quantsが直近2年・EDINET summaryが古い3年をCOALESCE補完。花王5年EPS=230.59/183.28/94.37/231.94/260.30で実証。US GAAPは5年史も構造化されず→insufficientのまま（捏造しない）</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>

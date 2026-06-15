@@ -50,7 +50,7 @@ def build_financials(conn, codes: list[str], *, resume: bool = True) -> dict:
         f"INSERT INTO financial_snapshots ({','.join(all_cols)}) VALUES ({placeholders}) "
         f"ON CONFLICT(code, fiscal_year) DO UPDATE SET {set_clause}"
     )
-    n_rows = n_deep = 0
+    n_rows = n_deep = n_summary = 0
     std_set = 0
     for code in codes:
         fy_list = jq.ok.get(code, [])
@@ -65,39 +65,56 @@ def build_financials(conn, codes: list[str], *, resume: bool = True) -> dict:
                          (std, now, code))
             std_set += 1
 
-        for fin in fy_list:
-            row = {c: fin.base.get(c) for c in base_cols}
-            source = "jquants"
-            # 最新年度に EDINET 深いBSをマージ
-            if erec and fin.fiscal_year == deep_fy:
-                for f in deep_cols:
-                    row[f] = erec.values.get(f)
-                source = "jquants+edinet"
-                n_deep += 1
-            else:
-                for f in deep_cols:
-                    row[f] = None
-            values = [code, fin.fiscal_year, *[row[c] for c in value_cols],
-                      source, "present", fin.period_end, now]
-            conn.execute(insert_sql, values)
-            n_rows += 1
+        # 年度別に行を集約してからマージ書き込み（J-Quants基礎→EDINET深BS→EDINET5年史）
+        rows: dict[int, dict] = {}
 
-        # EDINETの有報年度がJ-Quants実績に無い場合、深いBSのみの行を残す（捨てない）
-        jq_years = {f.fiscal_year for f in fy_list}
-        if erec and deep_fy and deep_fy not in jq_years:
-            row = {c: None for c in base_cols}
+        def _blank(src: str, as_of) -> dict:
+            r = {c: None for c in value_cols}
+            r["_source"], r["_as_of"] = src, as_of
+            return r
+
+        # 1) J-Quants 基礎財務（年次・確報）
+        for fin in fy_list:
+            r = _blank("jquants", fin.period_end)
+            for c in base_cols:
+                r[c] = fin.base.get(c)
+            rows[fin.fiscal_year] = r
+
+        # 2) EDINET 深いBS（最新有報年度のみ。J-Quants行があればマージ）
+        if erec and deep_fy:
+            r = rows.get(deep_fy)
+            if r is None:
+                r = _blank("edinet", erec.period_end)
+                rows[deep_fy] = r
             for f in deep_cols:
-                row[f] = erec.values.get(f)
-            values = [code, deep_fy, *[row[c] for c in value_cols],
-                      "edinet", "present", erec.period_end, now]
+                r[f] = erec.values.get(f)
+            if r["_source"] == "jquants":
+                r["_source"] = "jquants+edinet"
+            n_deep += 1
+
+        # 3) EDINET「主要な経営指標等の推移」5年史（COALESCE: 既存(J-Quants)を優先し欠損のみ補完）
+        if erec and erec.summary:
+            for fy, svals in erec.summary.items():
+                r = rows.get(fy)
+                if r is None:
+                    r = _blank("edinet_summary", erec.period_end)
+                    rows[fy] = r
+                    n_summary += 1
+                for f, v in svals.items():
+                    if r.get(f) is None:
+                        r[f] = v
+
+        for fy, r in sorted(rows.items()):
+            values = [code, fy, *[r.get(c) for c in value_cols],
+                      r["_source"], "present", r["_as_of"], now]
             conn.execute(insert_sql, values)
             n_rows += 1
-            n_deep += 1
     conn.commit()
     return {
         "jq": jq.summary,
         "edinet": ed.summary,
         "snapshot_rows": n_rows,
         "rows_with_deep": n_deep,
+        "rows_from_summary": n_summary,
         "accounting_standard_set": std_set,
     }

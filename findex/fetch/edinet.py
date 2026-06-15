@@ -31,8 +31,21 @@ CONSOLIDATED_CTX = {
     "duration": "CurrentYearDuration",
 }
 
+# 「主要な経営指標等の推移」5年史のコンテキスト接頭辞→当年からの遡り年数。
+# 連結＝サフィックス無し（_NonConsolidatedMember 等は除外）。
+SUMMARY_CTX_OFFSETS = {
+    "CurrentYear": 0,
+    "Prior1Year": 1,
+    "Prior2Year": 2,
+    "Prior3Year": 3,
+    "Prior4Year": 4,
+}
+
 # EDINET財務項目 → financial_snapshots カラム（深いBSのみ。PL/CFはJ-Quants主）
 DEEP_FIELDS = list(_LABELS["fields"].keys())
+
+
+SUMMARY_FIELDS = list(_LABELS.get("summary_fields", {}).keys())
 
 
 @dataclass
@@ -45,6 +58,7 @@ class EdinetRecord:
     accounting_standard: str | None = None  # jgaap/ifrs/us
     values: dict[str, float | None] = field(default_factory=dict)
     status: dict[str, str] = field(default_factory=dict)  # field→ok/missing/insufficient/censored
+    summary: dict[int, dict] = field(default_factory=dict)  # {fiscal_year: {field: val}} 5年史
 
 
 def _filing_windows(fy_end_month: int) -> list[tuple[date, date]]:
@@ -164,6 +178,66 @@ def extract_fields(records: list[dict], std: str) -> tuple[dict, dict]:
     return values, status
 
 
+def _summary_index(records: list[dict], suffix: str = "") -> dict[tuple[str, str], float]:
+    """(要素ID, コンテキストID) → 値。summary用 Current/Prior1-4 の Instant/Duration。
+
+    suffix="" は連結（サフィックス無し）、"_NonConsolidatedMember" は単体。
+    """
+    valid = set()
+    for base in SUMMARY_CTX_OFFSETS:
+        valid.add(base + "Instant" + suffix)
+        valid.add(base + "Duration" + suffix)
+    idx: dict[tuple[str, str], float] = {}
+    for r in records:
+        ctx = r.get("コンテキストID", "")
+        if ctx not in valid:
+            continue
+        v = (r.get("値") or "").replace(",", "").strip()
+        if v in ("", "-", "－"):
+            continue
+        try:
+            idx[(r.get("要素ID", ""), ctx)] = float(v)
+        except ValueError:
+            continue
+    return idx
+
+
+def _extract_summary_with(records, std, current_fy, suffix):
+    idx = _summary_index(records, suffix)
+    out: dict[int, dict] = {}
+    for base, offset in SUMMARY_CTX_OFFSETS.items():
+        fy = current_fy - offset
+        year_vals: dict[str, float] = {}
+        for fname, spec in _LABELS["summary_fields"].items():
+            eid = spec.get(std)
+            if not eid:
+                continue
+            ctx = base + ("Instant" if spec.get("ctx") == "instant" else "Duration") + suffix
+            if (eid, ctx) in idx:
+                year_vals[fname] = idx[(eid, ctx)]
+        if year_vals:
+            out[fy] = year_vals
+    return out
+
+
+def extract_summary(records: list[dict], std: str | None, current_fy: int | None) -> dict[int, dict]:
+    """「主要な経営指標等の推移」から5年史 {fiscal_year: {field: val}} を抽出。
+
+    最新有報1枚に Prior4..CurrentYear が同梱。当年=current_fy として遡る。連結優先。
+    連結が一切無い会社は単体決算のみ（連結未作成）＝J-Quantsも単体を使う → 単体にフォールバック。
+    US GAAP/基準不明/当年不明は空（捏造しない）。基準移行企業で旧基準年が別タグでも、
+    基準をまたいだEPS接合は比較性を壊すのでしない（不足年は insufficient のまま＝正直）。
+    """
+    if not std or std == "us" or current_fy is None:
+        return {}
+    if not _LABELS.get("summary_fields"):
+        return {}
+    out = _extract_summary_with(records, std, current_fy, "")
+    if not out:  # 連結皆無＝単体決算のみの会社
+        out = _extract_summary_with(records, std, current_fy, "_NonConsolidatedMember")
+    return out
+
+
 class EdinetFetcher(RateLimitedFetcher[EdinetRecord]):
     name = "edinet_xbrl"
     policy = FetchPolicy(batch_size=20, sleep_between_batches=3.0, sleep_between_items=0.3, max_retries=4)
@@ -189,4 +263,5 @@ class EdinetFetcher(RateLimitedFetcher[EdinetRecord]):
         if period_end:
             rec.fiscal_year = int(period_end[:4])
         rec.values, rec.status = extract_fields(records, rec.accounting_standard)
+        rec.summary = extract_summary(records, rec.accounting_standard, rec.fiscal_year)
         return rec
