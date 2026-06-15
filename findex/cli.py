@@ -133,6 +133,30 @@ def prices_cmd(codes, cohort, no_resume) -> None:
     )
 
 
+@main.command("dividends")
+@subset_options
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def dividends_cmd(codes, cohort, no_resume) -> None:
+    """配当イベント再取得→dividend_annual(events)＋能動洗浄（Phase2-e）。"""
+    from .db import connect
+    from .fetch.dividends import build_dividends
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        return
+    conn = connect()
+    try:
+        stats = build_dividends(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] dividends: ok={stats['ok']} 無配={stats['no_dividend']} "
+        f"events={stats['events']:,} annual={stats['annual_rows']} "
+        f"洗浄フラグ(review)={stats['review_flags']} failed={stats['failed']}"
+    )
+
+
 @main.command("financials")
 @subset_options
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
