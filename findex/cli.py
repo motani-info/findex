@@ -181,6 +181,32 @@ def financials_cmd(codes, cohort, no_resume) -> None:
     )
 
 
+@main.command("derive")
+@subset_options
+@click.option("--what", default="streaks", help="導出対象（streaks 等）")
+def derive_cmd(codes, cohort, what) -> None:
+    """導出層: 前段テーブル→computed_metrics（Phase3）。"""
+    from .db import connect
+    from .derive.compute import build_streaks
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        if what == "streaks":
+            stats = build_streaks(conn, target)
+            console.print(
+                f"[green]✓[/green] derive streaks: rows={stats['rows']} "
+                f"打ち切り(N+)={stats['censored']} override昇格={stats['overridden']}"
+            )
+        else:
+            console.print(f"[red]未対応: {what}[/red]")
+    finally:
+        conn.close()
+
+
 @main.command("rebuild-dividends")
 @subset_options
 def rebuild_dividends_cmd(codes, cohort) -> None:

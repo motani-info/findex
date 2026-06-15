@@ -7,6 +7,7 @@ price/financial/events配当は移行せず再取得（D7 §7・IMPLEMENTATION-P
 """
 from __future__ import annotations
 
+import csv
 import sqlite3
 from datetime import datetime
 
@@ -38,6 +39,42 @@ def migrate_dividend_annual(conn, codes: list[str] | None = None) -> int:
             ON CONFLICT(code, fiscal_year) DO NOTHING
             """,
             (r["code"], r["fiscal_year"], r["dps"], r["source"], now),
+        )
+        n += 1
+    conn.commit()
+    return n
+
+
+def load_zai_overrides(conn, codes: list[str] | None = None) -> int:
+    """golden_streaks_zai（zai公表の連続増配年数）を result_overrides に投入（D2.7）。
+
+    旧 streak_overrides(12件) と同じzai記事が源で、その上位集合（19件）。**昇格のみ**の
+    合成規則により、機械計算が一致する銘柄(KDDI等)には無影響。決算変更/分割アーティファクトで
+    機械計算が壊れる銘柄(花王/ユニチャーム/三菱HC)を公表値で昇格させる。
+    定義差（小林製薬=上場前から起算）は definition_note に残す。
+    """
+    now = datetime.now().isoformat(timespec="seconds")
+    rows = list(csv.DictReader(config.GOLDEN_STREAKS.open(encoding="utf-8")))
+    if codes:
+        cs = set(codes)
+        rows = [r for r in rows if r["code"].strip() in cs]
+    notes = {"4967": "上場前から起算（定義差・zai）", "4452": "3月→12月決算変更2012で機械計算困難"}
+    n = 0
+    for r in rows:
+        code = r["code"].strip()
+        val = r.get("published_growth_years", "").strip()
+        if not val:
+            continue
+        conn.execute(
+            """INSERT INTO result_overrides
+                 (code, field, value, as_of_fiscal_year, source, source_url,
+                  definition_note, confidence, verified_at, verified_by)
+               VALUES (?, 'consecutive_dividend_growth_years', ?, 2025, 'zai', ?, ?, 'single', ?, 'golden_zai')
+               ON CONFLICT(code, field) DO UPDATE SET
+                 value=excluded.value, source='zai', source_url=excluded.source_url,
+                 definition_note=COALESCE(excluded.definition_note, result_overrides.definition_note),
+                 verified_at=excluded.verified_at""",
+            (code, float(val), r.get("source", "").strip(), notes.get(code), now),
         )
         n += 1
     conn.commit()
