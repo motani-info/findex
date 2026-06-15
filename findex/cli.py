@@ -345,6 +345,32 @@ def score_cmd(codes, cohort, top) -> None:
     )
 
 
+@main.command("backtest")
+@subset_options
+@click.option("--what", default="outcomes", help="バックテスト対象（outcomes/...）")
+def backtest_cmd(codes, cohort, what) -> None:
+    """バックテスト（D8）: PIT入力→前方アウトカム→メトリクス（Phase5.5）。"""
+    from .db import connect
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        if what in ("all", "outcomes"):
+            from .backtest.outcomes import build_outcomes
+
+            o = build_outcomes(conn, target)
+            console.print(
+                f"[green]✓[/green] outcomes: rows={o['rows']} "
+                f"as_of={o['grid'][0]}〜{o['grid'][1]} horizons={o['horizons']} "
+                f"減配[無={o['cut_dist'][0]}/有={o['cut_dist'][1]}]"
+            )
+    finally:
+        conn.close()
+
+
 @main.command("rank")
 @click.option("--top", default=30, help="表示件数")
 @click.option("--market", default=None)

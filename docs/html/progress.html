@@ -91,6 +91,7 @@ li{margin:.2em 0}
 <a class="l3" href="#phase2">取得層(Phase2)の実データ確認サマリ</a>
 <a class="l3" href="#phase3">導出層(Phase3)の実データ確認サマリ</a>
 <a class="l3" href="#phase4v4">評価層(Phase4・v4)の実データ確認サマリ</a>
+<a class="l3" href="#phase55d8">バックテスト(Phase5.5・D8)の実データ確認サマリ</a>
 <a class="l2" href="#6">6. 既知のリスク・宿題</a>
 <a class="l3" href="#61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</a>
 <a class="l3" href="#62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
@@ -339,7 +340,7 @@ li{margin:.2em 0}
 <td>backtest</td>
 <td><strong>モデル検証</strong>（PIT・生存バイアス排除・前方アウトカム・重みv5較正）</td>
 <td>スコアが前方アウトカムと相関</td>
-<td style="text-align: center;">⬜</td>
+<td style="text-align: center;">🟨 5.5-a 前方アウトカム完了・5.5-b PITスコア/5.5-c メトリクス残</td>
 </tr>
 <tr>
 <td>5</td>
@@ -379,6 +380,13 @@ li{margin:.2em 0}
 <li><strong>v4較正</strong>: ①10年CAGR廃止→YoC(取得利回り5年)新設＋<strong>質ゲート</strong>(dividend_quality で×1.0sound/×0.5payout_driven/×0.3cyclical)＋DOE新設 ②自己資本比率80%→70%・ROE20%→15% ③営業利益率を<strong>業種相対</strong>(sector33内パーセンタイル・母数min_sector_n=4未満は絶対閾値フォールバック) ④動的入れ替え(large_cap≥1兆/financialでroic→利益剰余金倍率・net_cash_per→ミックス係数・金融は自己資本比率除外)</li>
 <li><strong>発見＆是正した実装バグ</strong>: <code>consecutive_no_cut_years</code>（最高重み2.5の核心指標）に<strong>status未付与</strong>で全銘柄が採点から除外されていた→<code>compute_streaks_for_code</code>で連続非減配にもstatus(ok/censored)を付与。<code>build_streaks</code>はstatus_jsonを上書き（merge でない）ため<code>--what all</code>で先頭実行が前提（単独runは他statusを消す）。</li>
 <li><strong>コホート採点</strong>: n_scored=11〜15が大半（フルデータ社）。ランキングは高配当ツールとして妥当（配当良質なリース/アセットライト＝みずほリース90.7/USS87/SPK80.6が上位、成長/無配のソニー・SBG・メルカリが下位）。<strong>薄いデータinflationを実観測</strong>: クレディセゾン7指標のみで93.6点1位だがグレードC/C/C＝設計通り「歯止めはスコアでなくグレード（score×grade で判断）」。n_scored列で透明化。<strong>重みは旧PJ継承の手づけ→前方アウトカム較正はPhase5.5バックテスト(D8→v5)</strong></li>
+</ul>
+<h3 id="phase55d8">バックテスト(Phase5.5・D8)の実データ確認サマリ</h3>
+<ul>
+<li><strong>5.5-a 前方アウトカム（完了）</strong>: as_of から前方N年の「実際に起きたこと」＝正解ラベルを <code>backtest_outcomes</code> に算出。<strong>純粋に前方データのみ依存（look-ahead無し）</strong>。fwd_div_cut（減配回避＝第一アウトカム）/fwd_dps_cagr（増配実現）/fwd_total_return（価格＋受取配当）/fwd_max_dd（危機耐性）。as_ofグリッド=各年6月末2008〜2020・horizon3/5。<code>findex backtest --cohort --what outcomes</code></li>
+<li><strong>減配検出の頑健化（2つの罠を実データで是正）</strong>: ①<strong>特配スパイクが窓先頭</strong>（花王FY2012=93特配で窓開始）→前方窓に<strong>2年の後方文脈を含めて</strong>判定し誤検出回避 ②<strong>配当の分割単位不整合</strong>（神戸物産2009=0.156÷6・沖縄セルラー2010=9.375÷2＝実際は増配継続）→単年で前年の55%未満への急落＋翌年に前年水準へ即復帰するV字は分割アーティファクトと見なし除外。<strong>JTのFY2021実減配(154→140=91%)は閾値超で真の減配として残す</strong>＝アーティファクトと実減配を弁別。</li>
+<li><strong>コホート検証</strong>: 減配42/884窓(4.75%)が全て危機期/既知の減配者に集中＝日産14(2008危機+Ghosn/COVID・前方TR-0.53/最大DD-0.70)・JT8(FY2021高配当の罠)・ソニー8・キヤノン8(COVID)・ロート4(リーマン)。連続増配の常連(KDDI/アステラス/花王)は減配0＝正解ラベルとして妥当。</li>
+<li>⚠<strong>全銘柄バックテストの前提条件（未充足）</strong>: ①<code>delisting_date</code>収集（生存バイアス排除・現状コホートは現役のみ）②配当の分割単位正規化（上記アーティファクトの上流是正）。コホートは配線検証用。</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>
