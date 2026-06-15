@@ -87,10 +87,11 @@ li{margin:.2em 0}
 <a class="l2" href="#4">4. 重要な意思決定の履歴</a>
 <a class="l3" href="#2026-06-15">設計完結後の第三者レビュー（2026-06-15）</a>
 <a class="l3" href="#d2-2026-06-14">D2 第三者レビュー → 目的志向への是正（2026-06-14）</a>
-<a class="l2" href="#5-go">5. 実装フェーズの段取り（GO後に着手・現状は凍結）</a>
+<a class="l2" href="#5-35">5. 実装フェーズの段取り（コホート35社で各フェーズ検証）</a>
+<a class="l3" href="#phase2">取得層(Phase2)の実データ確認サマリ</a>
 <a class="l2" href="#6">6. 既知のリスク・宿題</a>
-<a class="l3" href="#61">6.1 設計で解決済み・実装待ち（🟩）</a>
-<a class="l3" href="#62">6.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
+<a class="l3" href="#61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</a>
+<a class="l3" href="#62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
 <a class="l2" href="#7-23">7. 分析切り口カタログ（柱2/柱3の蓄積）</a>
 <a class="l2" href="#8">8. レビューの入口</a></div>
 </nav>
@@ -98,7 +99,10 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>設計フェーズ完結＋第三者レビュー是正済（D1〜D8）</strong>/ <strong>次の一歩</strong>: 実装フェーズの方針決め（移行→fetch→derive→score→<strong>backtest</strong>→verify→出力）。GO待ち</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（取得層まで完了）</strong>/ <strong>次の一歩</strong>: Phase 3 導出層（ストリーク・YoC・DOE・status・claim別グレード）</p>
+<blockquote>
+<p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
+</blockquote>
 <hr />
 <h2 id="1">1. ひとことサマリ</h2>
 <p>findex v2 は <strong>ゼロから設計し直し中</strong>。旧実装（<code>back_findex</code>）はデータ品質が破綻していたため切り離した。
@@ -230,20 +234,20 @@ li{margin:.2em 0}
 <tr>
 <td>柱1</td>
 <td>正確なデータ基盤（全銘柄・必要データ＋充足把握）</td>
-<td>🟩 D2枠組み＋D2.5実測でソース確定（J-Quants/EDINET/yfinance/kabutan）。D3でモデル化済</td>
-<td>🟥 凍結</td>
+<td>🟩 D2枠組み＋D2.5実測でソース確定。D3でモデル化済</td>
+<td>🟨 <strong>取得層実装済（Phase0-2）</strong>。マスター3,734社・財務(J-Quants+EDINET)・株価2000遡及・配当。コホート35社で検証済。導出/評価/出力はこれから</td>
 </tr>
 <tr>
 <td>柱2</td>
 <td>進化する独自指標による多角評価</td>
-<td>🟩 D4仕様化＋D4.5較正v4＋<strong>D8でモデル検証(重みv5較正)</strong>まで設計済（rules.yamlは実装で更新）</td>
-<td>🟥 凍結（rules.yaml は旧資産）</td>
+<td>🟩 D4仕様化＋D4.5較正v4＋<strong>D8でモデル検証(重みv5較正)</strong>まで設計済</td>
+<td>🟥 未着手（Phase3導出層＝次）</td>
 </tr>
 <tr>
 <td>柱3</td>
 <td>Xユーザーの興味を引く切り口での発信</td>
 <td>🟩 D5で戦略化済（140字突破=画像主役・テーマ体系・品質ゲート連動・出力=Xメイン＋HTML生成）</td>
-<td>🟥 凍結（Playwright方式・骨格あり・Phase6）</td>
+<td>🟥 未着手（Playwright方式・骨格あり・Phase6）</td>
 </tr>
 </tbody>
 </table>
@@ -287,103 +291,110 @@ li{margin:.2em 0}
 </table>
 <p>詳細は <a href="project-log.html">プロジェクトログ</a>。</p>
 <hr />
-<h2 id="5-go">5. 実装フェーズの段取り（GO後に着手・現状は凍結）</h2>
-<p>詳細は <a href="implementation-plan.html">実装フェーズ計画</a>。各フェーズ末は<strong>コホート38社検証</strong>で区切る。</p>
+<h2 id="5-35">5. 実装フェーズの段取り（コホート35社で各フェーズ検証）</h2>
+<p>詳細は <a href="implementation-plan.html">実装フェーズ計画</a>。各フェーズ末は<strong>コホート35社を実データ検証</strong>で区切る。</p>
 <table>
 <thead>
 <tr>
 <th>Phase</th>
 <th>内容</th>
 <th>ゲート</th>
+<th style="text-align: center;">状態</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0</td>
-<td>スキーマ再生成（D3）</td>
+<td>スキーマ再生成（D3・18テーブル）</td>
 <td>全Dのテーブル定義と一致</td>
+<td style="text-align: center;">✅ <code>b060f3e</code></td>
 </tr>
 <tr>
 <td>1</td>
-<td>マスター＋移行（ユニバース確定・delisting・edinet_code・listing_date・旧DB能動洗浄）</td>
+<td>マスター＋移行（普通株3,734・edinet_code/会計メタ・listing_date・haitoukin/override移行）</td>
 <td>コホートのstocks完備</td>
+<td style="text-align: center;">✅ <code>9ddc7b9</code></td>
 </tr>
 <tr>
 <td>2</td>
-<td>取得層（<strong>EDINET早期スパイク</strong>・株価2000遡及＋検証・財務J-Quants＋EDINET）</td>
+<td>取得層（EDINET基準別辞書・株価2000遡及＋J-Quants突合・財務J-Quants＋EDINET・配当＋能動洗浄）</td>
 <td>status妥当・EDINETパース成功率が閾値以上</td>
+<td style="text-align: center;">✅ <code>df10526</code>〜<code>3e320f2</code></td>
 </tr>
 <tr>
 <td>3</td>
-<td>導出（status付き・YoC質ゲート・DOE・打ち切り合成）</td>
+<td>導出（status付き・YoC質ゲート・DOE・打ち切り合成・<strong>seam穴橋渡し</strong>）</td>
 <td>golden_streaks緑・status分布妥当</td>
+<td style="text-align: center;">⏭️ 次</td>
 </tr>
 <tr>
 <td>4</td>
 <td>採点（v4 status-based・動的分母・業種相対）</td>
 <td>スコア説明可能</td>
+<td style="text-align: center;">⬜</td>
 </tr>
 <tr>
 <td>backtest</td>
 <td><strong>モデル検証</strong>（PIT・生存バイアス排除・前方アウトカム・重みv5較正）</td>
 <td>スコアが前方アウトカムと相関</td>
+<td style="text-align: center;">⬜</td>
 </tr>
 <tr>
 <td>5</td>
 <td>検証（findex verify・全銘柄スキャン1回）</td>
 <td>verify緑・全銘柄ランキング生成</td>
+<td style="text-align: center;">⬜</td>
 </tr>
 <tr>
 <td>6</td>
 <td>出力（HTML生成＋X発信・claim内ランキング主）</td>
 <td>サイト生成＋品質ゲート通過の投稿</td>
+<td style="text-align: center;">⬜</td>
 </tr>
 </tbody>
 </table>
-<p><strong>移行で必ず救う再現困難データ</strong>: <code>dividend_annual</code>(source!='events') と <code>result_overrides</code>(旧streak_overrides変換)。price/financialは移行せず再取得。配当は yfinance1999+ で能動洗浄・照合。</p>
+<p><strong>移行で救った再現困難データ（実施済）</strong>: <code>dividend_annual</code>(haitoukin 622) と <code>result_overrides</code>(旧streak_overrides 12)。price/financial/eventsは再取得。配当は yfinance events で再構築＋haitoukin接合を能動洗浄。</p>
+<h3 id="phase2">取得層(Phase2)の実データ確認サマリ</h3>
+<ul>
+<li><strong>EDINET会計基準別辞書</strong>: AccountingStandardsDEIで判別。IFRS=<code>jpigp_cor:*IFRS</code>/JGAAP=<code>jppfs_cor:*</code>、連結=ctxサフィックス無し。IFRSは投資有価証券/流動資産が構造的にinsufficient、<strong>US GAAP連結は構造化XBRL不在→grade_capitalフォールバック</strong></li>
+<li><strong>株価</strong>: yfinance<code>Close</code>=分割調整・配当未調整（YoCに正）。J-Quants突合で最大乖離<strong>0.000%</strong></li>
+<li><strong>配当</strong>: events(2000+)が信頼基盤。haitoukinは社により分割調整状態が不統一→接合で単位統一＋混線はreviewフラグ</li>
+</ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>
 <p>設計凍結中なので「未解決の設計課題」と「設計で解決済み・実装待ち」を区別する。</p>
-<h3 id="61">6.1 設計で解決済み・実装待ち（🟩）</h3>
+<h3 id="61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</h3>
 <table>
 <thead>
 <tr>
 <th>項目</th>
-<th>対処（設計上の所在）</th>
+<th>結果</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>edinet_code</code> 投入（旧0%）</td>
-<td>EDINETコードリストで即3,842件（D2.5）・Phase1</td>
+<td><code>edinet_code</code>・会計メタ投入（旧0%）</td>
+<td>EDINETコードリストzipで3,842件・コホート100%（Phase1）</td>
 </tr>
 <tr>
-<td><code>listing_date</code> 全銘柄取得（打ち切り判定の鍵・旧0%）</td>
-<td>kabutan（D3/実装計画Phase1）</td>
-</tr>
-<tr>
-<td><code>capex</code> 取得（FCFの真のボトルネック・旧0%）</td>
-<td>EDINET CF（D2.5/D3/Phase2・※EDINETパース依存）</td>
-</tr>
-<tr>
-<td><code>investment_securities</code>（yfinance不在）</td>
-<td>EDINET有報（D2.5実証/Phase2・※パース依存）</td>
-</tr>
-<tr>
-<td>Nullポリシー「None→0点」アンチパターン</td>
-<td>D4で5状態status-basedに再設計済・実装待ち</td>
-</tr>
-<tr>
-<td>旧DB（223MB）からの移行</td>
-<td>D7移行フロー設計済＋yfinance1999+で能動洗浄・照合（design-review #7）</td>
+<td><code>capex</code>・<code>investment_securities</code>（旧0%/不在）</td>
+<td>EDINET有報XBRL・JGAAP/IFRS取得（コホートcapex 21/35）。IFRSは構造的にinsufficient・US連結は取得不能でgrade_capitalフォールバック</td>
 </tr>
 <tr>
 <td>株価2000遡及（旧は2024-06〜のみ）</td>
-<td>yfinance再取得（D2.5/Phase2）</td>
+<td>yfinance<code>Close</code>(分割調整)で回復・J-Quants突合0.000%（Phase2-d）</td>
+</tr>
+<tr>
+<td>旧DBからの移行</td>
+<td>haitoukin配当622・override12を移行（Phase1）。events再取得＋接合の能動洗浄（Phase2-e）</td>
+</tr>
+<tr>
+<td><code>listing_date</code>（旧0%・打ち切り判定の鍵）</td>
+<td><strong>設計のkabutanはJS化で静的取得不可</strong> → yfinance firstTradeDate主（床バンドはNULL）。kabutan補完(Playwright)は <code>listing_date IS NULL</code> が対象＝後続</td>
 </tr>
 </tbody>
 </table>
-<h3 id="62">6.2 未解決の設計リスク・新規宿題（🟨＝要注視 / 🟥＝実装バグ）</h3>
+<h3 id="62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</h3>
 <table>
 <thead>
 <tr>
@@ -393,36 +404,43 @@ li{margin:.2em 0}
 </thead>
 <tbody>
 <tr>
-<td><strong>EDINET会計基準別XBRLパース</strong></td>
-<td>🟨 <strong>実装最大の工数リスク</strong>。1社(KDDI)実証どまり・IFRS空振り既知→早期スパイク＋パース成功率ゲート＋基準別辞書を独立検証（D6 §4.1/Phase2・design-review #4）</td>
-</tr>
-<tr>
 <td><strong>モデル（重み）が無検証</strong></td>
-<td>🟨 重みは旧PJ手づけで予測力未実証＝最大の盲点→<strong>D8バックテストで前方アウトカム較正→v5</strong>（Phase5.5・design-review #1）</td>
+<td>🟨 最大の盲点。重みは旧PJ手づけ→<strong>D8バックテストで前方アウトカム較正→v5</strong>（Phase5.5・design-review #1）</td>
 </tr>
 <tr>
-<td><strong>yfinance過去株価(2000-2024)の検証手段なし</strong></td>
-<td>🟨 YoC・バックテストの背骨だがgolden源なし→複数ソース突合・分割イベント独立検証・外れ値・信頼度上限（D6 §3.4・design-review #3）</td>
+<td><strong>配当接合の単年seam穴</strong></td>
+<td>🟨 haitoukin/events接合で一部銘柄に単年欠損（リンナイFY2001等）→Phase3ストリークで橋渡し</td>
+</tr>
+<tr>
+<td><strong>配当のpre-2000 review銘柄</strong></td>
+<td>🟨 合併等で接合が不整合（ユニチャーム/イオン等）はconfidence=review→左打ち切り/override/N+で扱う</td>
 </tr>
 <tr>
 <td><strong><code>delisting_date</code> 収集</strong></td>
-<td>🟨 新規宿題。生存バイアス排除＝D8バックテストの前提条件・クラスC（Phase1・design-review #8）</td>
+<td>🟨 コホートは全現役でNULL（正）。上場廃止銘柄のbackfillは未（生存バイアス排除＝D8前提・design-review #8）</td>
+</tr>
+<tr>
+<td><strong>listing_date NULL床のkabutan補完</strong></td>
+<td>🟨 yfinance床に張り付く古参は真値不明のまま（Playwright補完が後続）</td>
+</tr>
+<tr>
+<td><strong>EDINET/yfinanceの全銘柄スキャン実時間</strong></td>
+<td>🟨 EDINETは提出日日次スキャンで1社あたり重い。全3,734社は数時間規模→運用設計（実装計画§4）</td>
 </tr>
 <tr>
 <td><strong>X自動化の脆さ/ToS</strong></td>
-<td>🟨 出力チャネルが最脆→HTML生成兼用（自前サイト）＋手動承認フォールバック＋コンプラ（D5/Phase6・design-review #6）</td>
-</tr>
-<tr>
-<td><strong>ユニバース確定・運用設計</strong></td>
-<td>🟨 普通株抽出で件数固定（charter §2）／実行環境・フルスキャン実時間・通知手段（実装計画 §4・design-review #9）</td>
+<td>🟨 HTML生成兼用＋手動承認フォールバック（D5/Phase6・design-review #6）</td>
 </tr>
 <tr>
 <td><code>streaks.py</code> ギャップ中断の打ち切り未検知</td>
-<td>🟥 既知の実装バグ・凍結解除後に修正（Phase3）</td>
+<td>🟥 既知の実装バグ・Phase3で修正</td>
 </tr>
 </tbody>
 </table>
-<p>凡例: 🟩設計で解決・実装待ち / 🟨未解決リスク・要注視 / 🟥実装バグ</p>
+<blockquote>
+<p><strong>取得層で実証済みに格下げした旧リスク</strong>: EDINET会計基準別パース（🟨→IFRS/JGAAP成立・US fallbackを実証）／yfinance株価検証（🟨→J-Quants突合0.000%）。</p>
+</blockquote>
+<p>凡例: ✅実装で解決 / 🟨未解決リスク・要注視 / 🟥実装バグ</p>
 <hr />
 <h2 id="7-23">7. 分析切り口カタログ（柱2/柱3の蓄積）</h2>
 <p>有望と検証できた「切り口」を <code>docs/design/analysis-angles.md</code>（<a href="analysis-angles.html">analysis-angles</a>）に蓄積する。

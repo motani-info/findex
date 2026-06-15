@@ -87,7 +87,8 @@ li{margin:.2em 0}
 <a class="l3" href="#22-26">2.2 プロダクト/読者（#2・#6）</a>
 <a class="l3" href="#23-374">2.3 データ品質の検証強化（#3・#7・#4）</a>
 <a class="l3" href="#24-589">2.4 整合性（#5・#8・#9）</a>
-<a class="l2" href="#3">3. これによる設計フェーズの更新</a></div>
+<a class="l2" href="#3">3. これによる設計フェーズの更新</a>
+<a class="l2" href="#4-phase0-22026-06-15">4. 実装での検証結果（Phase0-2・2026-06-15）</a></div>
 </nav>
 <main>
   <div class="badge">★ Review</div>
@@ -244,4 +245,44 @@ li{margin:.2em 0}
 <li><strong>改訂</strong>: charter（ユニバース・モデル検証原則）/ D4（比較可能性・重みのバックテスト較正）/ D4.5（v4は暫定・v5はバックテスト較正）/ D5（読者・差別化・出力・コンプラ）/ D6（株価検証・旧DB照合・EDINETゲート）/ D7（バックテスト工程・移行照合・HTML生成）/ D3（themes/post_queue畳み込み・backtestテーブル・ユニバース）/ 実装計画（EDINETスパイク・バックテストPhase・運用）。</li>
 <li>実装は引き続き凍結。本レビューは設計の質を上げる工程。</li>
 </ul>
+<hr />
+<h2 id="4-phase0-22026-06-15">4. 実装での検証結果（Phase0-2・2026-06-15）</h2>
+<p>実装凍結解除後、取得層までで各指摘を実データで確認。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>指摘</th>
+<th>実装での結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>yfinance株価の検証手段なし</td>
+<td>✅ <strong>J-Quants×yfinance突合で最大乖離0.000%</strong>。<code>close_adj</code>は分割のみ調整の<code>Close</code>（"Adj Close"=配当込みは不採用）。外れ値検知も実装</td>
+</tr>
+<tr>
+<td>4</td>
+<td>EDINETパースが最大リスク</td>
+<td>✅ <strong>基準別辞書を実証</strong>（IFRS/JGAAP成立）。<code>AccountingStandardsDEI</code>で判別、連結ctx限定。<strong>IFRSは投資有価証券/流動資産が構造的insufficient</strong>、<strong>US GAAP連結は構造化XBRL不在→grade_capitalフォールバック</strong>。提出日日次スキャンで旧バグ是正</td>
+</tr>
+<tr>
+<td>7</td>
+<td>旧DB配当の能動洗浄</td>
+<td>🟨 <strong>「重複年照合」だけでは不足を発見</strong>。haitoukinの分割調整状態が社により不統一→接合で単位統一＋混線はreviewフラグに強化。一部に単年seam穴（Phase3で橋渡し）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>ユニバース定義・生存バイアス</td>
+<td>✅ 普通株=内国株式<strong>3,734社</strong>で確定（ETF/REIT/外国株/出資証券除外）。🟨 <code>delisting_date</code>の上場廃止銘柄backfillは未着手</td>
+</tr>
+<tr>
+<td>—</td>
+<td>listing_date 取得（実装計画Phase1）</td>
+<td>🟨 <strong>設計のkabutanはJS化で静的取得不可</strong> → yfinance firstTradeDate主（床バンドNULL）＋kabutan(Playwright)補完を後続に</td>
+</tr>
+</tbody>
+</table>
+<p><strong>実装の教訓</strong>: 設計で潰したつもりのリスクも、実データで叩くと前提のズレ（kabutan取得不可・床バンド・配当単位不整合・予想開示混入）が出る。各サブフェーズでコホート35社を検証してから進める方式が奏功（「実データが神」）。</p>
 </main></div></body></html>

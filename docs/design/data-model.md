@@ -63,7 +63,7 @@
 | `fiscal_period_end_month` | INT | A | 決算期末月。**コードリストの「決算日」由来**。FY正規化の基準（地雷2） |
 | `consolidated` | INT | A | 連結有無。コードリスト由来。指標を同一基準に |
 | `accounting_standard` | TEXT | C | JGAAP/IFRS/US。**EDINETパースのラベル辞書切替に必須**（IFRSは科目名が違う） |
-| `listing_date` | TEXT | **C(0%)** | 上場年月日（kabutan）。**打ち切り判定の独立シグナル**。要収集（地雷7） |
+| `listing_date` | TEXT | **C(0%)** | 上場年月日。**打ち切り判定の独立シグナル**（地雷7）。**【実装FB 2026-06-15】kabutanは全面JSレンダリングで静的取得不可** → yfinance `firstTradeDate` を主とする。yfinance国内株のデータ床は**2000-2001年初のバンド**（実測: 2000-01-04/2001-01-01/2001-01-04）で、床以前/元日はNULL（=≤2001・真値不明）。**非NULL=床より後の実取引日=確証ある真値**。床NULLの古参は kabutan(Playwright) 補完が対象 |
 | `founded_date` | TEXT | C | 設立年月日（補助） |
 | `first_data_date` | TEXT | 導出 | DB内最古データ日（**単独では打ち切り判定不可**） |
 | `is_active` | INT | A | 1=現役、0=上場廃止 |
@@ -83,7 +83,7 @@
 |---|---|---|
 | `code` | TEXT | 証券コード |
 | `date` | TEXT | 日付（YYYY-MM-DD） |
-| `close_adj` | REAL | 調整後終値（yfinance AdjC / J-Quants AdjC） |
+| `close_adj` | REAL | **分割調整済み・配当未調整**の終値。**【実装FB 2026-06-15】yfinance の "Adj Close" は配当込み調整でYoC/PERを歪めるため不採用**。yfinance `Close`(auto_adjust=False)＝分割のみ調整（NTT 25:1分割の前後で連続を実証）を採る。J-Quants `AdjC` と最大乖離0.000%で一致 |
 | `volume` | INTEGER | 出来高 |
 | `source` | TEXT | jquants / yfinance |
 
@@ -130,6 +130,8 @@
 **PK**: (`code`, `fiscal_year`)。
 **優先順位（競合時）**: `manual` > `ir` > `haitoukin` > `jquants` > `events`（手動の確定値を機械再構築で潰さない）。
 **地雷メモ**: 会計年度集計（地雷2）/ events初年度は期中の可能性で捨てる（地雷1）/ 分割不一致(NTT/SBG/電通総研)は境界異常チェックで弾きoverride（地雷3）。
+> **【実装FB 2026-06-15】地雷1は条件化が必要**: 初年度を無条件ドロップすると**完全な初年度まで消す**（花王FY2000=10+12の2回払いを削除し接合に穴）。→ 初年度の支払回数が次年度より少ない時だけ「部分的」とみなし除外。
+> **【実装FB】haitoukin↔events接合の単位整合（能動洗浄 #7）**: haitoukinの分割調整状態は**社により不統一**（リンナイは未調整・花王は調整済を実証）。接合年で「生/分割係数で除算」の2仮説をevents側トレンドと突合し整合する方を採用。どちらも不整合（合併等＝KDDI/ユニチャーム/イオン）は`confidence=review`にして左打ち切り/override/N+で扱う（捏造しない）。重複年の単純照合だけでは単位ズレを取り逃す。
 
 ---
 
@@ -161,6 +163,13 @@
 
 **PK**: (`code`, `fiscal_year`)。
 **D2.6反映**: 旧低カバレッジの主因は ①capex 0% ②investment_securities不在 の**収集漏れ**（クラスC＝修正可能）。betaは入手難ではない（訂正）。
+
+> **【実装FB 2026-06-15】EDINET会計基準別パース（design-review #4を実証）**:
+> - 基準判別は `jpdei_cor:AccountingStandardsDEI`（IFRS / US GAAP / Japan GAAP）。要素IDは IFRS=`jpigp_cor:*IFRS` / JGAAP=`jppfs_cor:*`。**連結＝コンテキストがサフィックス無し**(CurrentYearInstant/Duration)のものだけ採る（`_NonConsolidatedMember`等は除外）。辞書は `findex/fetch/edinet_labels.yaml`（YAML版管理）。
+> - **IFRSは investment_securities/current_assets が構造的に単独タグ無し**（その他金融資産に統合・流動非流動区分が任意）→ 欠損でなく `insufficient`。
+> - **US GAAP連結は構造化XBRLに出ない**（出るのは非連結＝親会社JGAAP）→ 全項目 `censored` → **grade_capital フォールバック**（少数なので許容）。
+> - 有報docIDは**提出日を日次スキャン**（締切=期末+3ヶ月の窓）。月末だけ見る旧実装のバグを是正。
+> - **5状態status は financial_snapshots では持たず生値NULL保持**。導出層で accounting_standard とラベル辞書から ok/missing/insufficient/censored を再構成（D3原則：snapshotsは生値）。
 
 ---
 

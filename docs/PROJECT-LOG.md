@@ -5,6 +5,44 @@
 
 ---
 
+## 実装フェーズ前半 — Phase 0〜2（取得層まで）（2026-06-15）
+
+設計完結＋レビュー是正の後、ユーザーGOで**実装凍結を解除**。各サブフェーズで**検証コホート（外れ値・難ケース35社）を実データで叩いてから次へ**進める方式（[[feedback_findex_verify_with_real_data]]「実データが神」）。コホートは旧28社（ストリーク中心）にIFRS/US基準・無配・減配・金融大型を足して35社に拡張。
+
+### 到達したこと（コミット）
+| Phase | 内容 | commit |
+|---|---|---|
+| 0 | D3スキーマ全面再生成（18テーブル）＋コホート拡張 | `b060f3e` |
+| 1 | マスター3,734社（普通株=内国株式のみ）・EDINET会計メタ・旧DB移行（haitoukin配当622/override12）・上場日 | `9ddc7b9` |
+| 2-a | EDINET会計基準別ラベル辞書（YAML版管理・design-review #4） | `df10526` |
+| 2-c | financial_snapshots（J-Quants基礎＋EDINET深いBS） | `ba50b10` |
+| 2-d | 株価2000遡及（yfinance分割調整Close） | `cf2d7cc` |
+| 2-e | 配当イベント再取得・年度集計・能動洗浄 | `bf62106` |
+| 2-e追補 | 配当接合の単位統一(A)・FY2000穴解消(B) | `3e320f2` |
+
+コホートカバレッジ: 株価214,606行・財務72行・配当963行・会計基準100%・テスト22 passed。
+
+### ⚠️ 実データ検証で捕捉・是正した罠（naiveなら見逃す・最重要の学び）
+| # | 罠 | 実データでの発覚 | 是正 |
+|---|---|---|---|
+| 1 | yfinance上場日の**データ床はバンド**（単一値でない） | 古参（栗田/ユニチャーム/小林）を`2001-01-04`＝真の上場日と誤認 | 床カットオフ(2001-01-04)＋元日判定でNULL化。真値は床より後の実取引日のみ |
+| 2 | `EarnForecastRevision`が`CurPerType=FY`で混入しSales空 | イオン/メルカリに空財務行 | `DocType`に`FinancialStatements`含み Sales有のみ採用 |
+| 3 | EDINET有報年度＞J-Quants実績窓で深いBSが宙に浮く | イオンFY2026 | 深いBSのみ行を残す |
+| 4 | yfinance`Adj Close`は**配当込み**でYoC/PERを歪める | NTT 25:1分割で`Close`が分割のみ調整と判明 | `close_adj`に`Close`採用（`Adj Close`不使用） |
+| 5 | 配当の**分割単位不整合**（haitoukin当時株数 × events分割調整済） | KDDI haitoukin FY1999=3.0 vs events1.49（間の分割が未調整。実は連続） | 接合で「生/分割除算」2仮説を突合し整合する方を採用、混線はreviewフラグ |
+| 6 | 地雷1の**無条件初年度ドロップ**が完全な年まで削除 | 花王FY2000(=10+12)が消え接合に穴 | 初年度の支払回数が次年度より少ない時のみ除外→花王1989-2025連続 |
+
+### 設計と実態のズレ（設計書にFB済み）
+- **listing_date**: 設計はkabutan名指しだが**kabutanは全面JSレンダリングで静的取得不可**（Yahoo/IRBANK/みんかぶ同様）。→ yfinance firstTradeDate主（2000-2001床はNULL）＋ kabutan(Playwright)補完。ユーザー承認済
+- **price close_adj**: 設計は"AdjC"だが配当込みはYoCを歪める → 分割のみ調整の`Close`に訂正
+- **EDINET会計基準パース**: AccountingStandardsDEIで基準判別。**IFRSはinvestment_securities/current_assetsが構造的に単独タグ無し→insufficient**（欠損でなく該当なし）。**US GAAP連結は構造化XBRLに出ない→全項目censored→grade_capitalフォールバック**（design-review #4を実証）
+- **能動洗浄(#7)**: 「重複年の照合」だけでは接合の単位ズレを取り逃す（重複年ゼロのため）→ 分割正規化＋接合連続性で検査する方式に強化
+
+### 次フェーズ
+**Phase 3（導出層）**: ストリーク（result_overrides昇格→N+・**単年seam穴の橋渡し**＝リンナイFY2001等）・YoC＋増配の質・DOE・5状態status・**claim別グレード**を `computed_metrics` に。`streaks.py`ギャップ打ち切りバグもここで修正。
+
+---
+
 ## Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）
 
 ### このフェーズで到達したこと

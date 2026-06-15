@@ -80,14 +80,19 @@ li{margin:.2em 0}
 <a class="" href="data-model.html">テーブル定義（データモデル）</a>
 <a class="" href="data-workflow.html">データワークフロー</a>
 <a class="" href="pre2000-data.html">2000年問題（データ完全性の一事例）</a></div>
-  <div class="toc"><a class="l2" href="#phase-1-2026-06-14">Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）</a>
-<a class="l3" href="#_1">このフェーズで到達したこと</a>
-<a class="l3" href="#_2">定款（最上位制約・不変）</a>
-<a class="l3" href="#_3">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</a>
-<a class="l3" href="#_4">確定した設計判断</a>
+  <div class="toc"><a class="l2" href="#phase-022026-06-15">実装フェーズ前半 — Phase 0〜2（取得層まで）（2026-06-15）</a>
+<a class="l3" href="#_1">到達したこと（コミット）</a>
+<a class="l3" href="#naive">⚠️ 実データ検証で捕捉・是正した罠（naiveなら見逃す・最重要の学び）</a>
+<a class="l3" href="#fb">設計と実態のズレ（設計書にFB済み）</a>
+<a class="l3" href="#_2">次フェーズ</a>
+<a class="l2" href="#phase-1-2026-06-14">Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）</a>
+<a class="l3" href="#_3">このフェーズで到達したこと</a>
+<a class="l3" href="#_4">定款（最上位制約・不変）</a>
+<a class="l3" href="#_5">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</a>
+<a class="l3" href="#_6">確定した設計判断</a>
 <a class="l3" href="#phase-1-docshtml-html">成果物（Phase 1 で作成、docs/html/ でHTML閲覧可）</a>
-<a class="l3" href="#_5">⚠️ 既存コードの注意（凍結中）</a>
-<a class="l3" href="#_6">現在地と次フェーズ</a></div>
+<a class="l3" href="#_7">⚠️ 既存コードの注意（凍結中）</a>
+<a class="l3" href="#_8">現在地と次フェーズ</a></div>
 </nav>
 <main>
   <div class="badge">Log</div>
@@ -95,15 +100,124 @@ li{margin:.2em 0}
 <p>セッションをまたいで文脈を失わないための公式記録。<strong>新しい作業を始める前に必ず本書とノーススター（<a href="charter.html">00-charter-and-data-integrity.md</a>）を読むこと。</strong>
 フェーズが終わるごとに追記する（上に新しいフェーズを積む）。</p>
 <hr />
+<h2 id="phase-022026-06-15">実装フェーズ前半 — Phase 0〜2（取得層まで）（2026-06-15）</h2>
+<p>設計完結＋レビュー是正の後、ユーザーGOで<strong>実装凍結を解除</strong>。各サブフェーズで<strong>検証コホート（外れ値・難ケース35社）を実データで叩いてから次へ</strong>進める方式（[[feedback_findex_verify_with_real_data]]「実データが神」）。コホートは旧28社（ストリーク中心）にIFRS/US基準・無配・減配・金融大型を足して35社に拡張。</p>
+<h3 id="_1">到達したこと（コミット）</h3>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>内容</th>
+<th>commit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>D3スキーマ全面再生成（18テーブル）＋コホート拡張</td>
+<td><code>b060f3e</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>マスター3,734社（普通株=内国株式のみ）・EDINET会計メタ・旧DB移行（haitoukin配当622/override12）・上場日</td>
+<td><code>9ddc7b9</code></td>
+</tr>
+<tr>
+<td>2-a</td>
+<td>EDINET会計基準別ラベル辞書（YAML版管理・design-review #4）</td>
+<td><code>df10526</code></td>
+</tr>
+<tr>
+<td>2-c</td>
+<td>financial_snapshots（J-Quants基礎＋EDINET深いBS）</td>
+<td><code>ba50b10</code></td>
+</tr>
+<tr>
+<td>2-d</td>
+<td>株価2000遡及（yfinance分割調整Close）</td>
+<td><code>cf2d7cc</code></td>
+</tr>
+<tr>
+<td>2-e</td>
+<td>配当イベント再取得・年度集計・能動洗浄</td>
+<td><code>bf62106</code></td>
+</tr>
+<tr>
+<td>2-e追補</td>
+<td>配当接合の単位統一(A)・FY2000穴解消(B)</td>
+<td><code>3e320f2</code></td>
+</tr>
+</tbody>
+</table>
+<p>コホートカバレッジ: 株価214,606行・財務72行・配当963行・会計基準100%・テスト22 passed。</p>
+<h3 id="naive">⚠️ 実データ検証で捕捉・是正した罠（naiveなら見逃す・最重要の学び）</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>罠</th>
+<th>実データでの発覚</th>
+<th>是正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>yfinance上場日の<strong>データ床はバンド</strong>（単一値でない）</td>
+<td>古参（栗田/ユニチャーム/小林）を<code>2001-01-04</code>＝真の上場日と誤認</td>
+<td>床カットオフ(2001-01-04)＋元日判定でNULL化。真値は床より後の実取引日のみ</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>EarnForecastRevision</code>が<code>CurPerType=FY</code>で混入しSales空</td>
+<td>イオン/メルカリに空財務行</td>
+<td><code>DocType</code>に<code>FinancialStatements</code>含み Sales有のみ採用</td>
+</tr>
+<tr>
+<td>3</td>
+<td>EDINET有報年度＞J-Quants実績窓で深いBSが宙に浮く</td>
+<td>イオンFY2026</td>
+<td>深いBSのみ行を残す</td>
+</tr>
+<tr>
+<td>4</td>
+<td>yfinance<code>Adj Close</code>は<strong>配当込み</strong>でYoC/PERを歪める</td>
+<td>NTT 25:1分割で<code>Close</code>が分割のみ調整と判明</td>
+<td><code>close_adj</code>に<code>Close</code>採用（<code>Adj Close</code>不使用）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>配当の<strong>分割単位不整合</strong>（haitoukin当時株数 × events分割調整済）</td>
+<td>KDDI haitoukin FY1999=3.0 vs events1.49（間の分割が未調整。実は連続）</td>
+<td>接合で「生/分割除算」2仮説を突合し整合する方を採用、混線はreviewフラグ</td>
+</tr>
+<tr>
+<td>6</td>
+<td>地雷1の<strong>無条件初年度ドロップ</strong>が完全な年まで削除</td>
+<td>花王FY2000(=10+12)が消え接合に穴</td>
+<td>初年度の支払回数が次年度より少ない時のみ除外→花王1989-2025連続</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fb">設計と実態のズレ（設計書にFB済み）</h3>
+<ul>
+<li><strong>listing_date</strong>: 設計はkabutan名指しだが<strong>kabutanは全面JSレンダリングで静的取得不可</strong>（Yahoo/IRBANK/みんかぶ同様）。→ yfinance firstTradeDate主（2000-2001床はNULL）＋ kabutan(Playwright)補完。ユーザー承認済</li>
+<li><strong>price close_adj</strong>: 設計は"AdjC"だが配当込みはYoCを歪める → 分割のみ調整の<code>Close</code>に訂正</li>
+<li><strong>EDINET会計基準パース</strong>: AccountingStandardsDEIで基準判別。<strong>IFRSはinvestment_securities/current_assetsが構造的に単独タグ無し→insufficient</strong>（欠損でなく該当なし）。<strong>US GAAP連結は構造化XBRLに出ない→全項目censored→grade_capitalフォールバック</strong>（design-review #4を実証）</li>
+<li><strong>能動洗浄(#7)</strong>: 「重複年の照合」だけでは接合の単位ズレを取り逃す（重複年ゼロのため）→ 分割正規化＋接合連続性で検査する方式に強化</li>
+</ul>
+<h3 id="_2">次フェーズ</h3>
+<p><strong>Phase 3（導出層）</strong>: ストリーク（result_overrides昇格→N+・<strong>単年seam穴の橋渡し</strong>＝リンナイFY2001等）・YoC＋増配の質・DOE・5状態status・<strong>claim別グレード</strong>を <code>computed_metrics</code> に。<code>streaks.py</code>ギャップ打ち切りバグもここで修正。</p>
+<hr />
 <h2 id="phase-1-2026-06-14">Phase 1 — 設計フェーズ：定款の確立と軌道修正（2026-06-14）</h2>
-<h3 id="_1">このフェーズで到達したこと</h3>
+<h3 id="_3">このフェーズで到達したこと</h3>
 <ul>
 <li>findex v2 を<strong>ゼロから設計し直す</strong>方針を確立（旧実装 <code>../back_findex</code> は切り離し、参照元としてのみ使う）</li>
 <li><strong>定款（サービスのコアコンセプト）</strong>を明文化し、データ完全性を土台とするアーキテクチャを確立</li>
 <li>設計の途中で<strong>重大な誤解が発生し、ユーザー指摘により是正</strong>（下記「犯した過ちと是正」が本フェーズ最大の学び）</li>
 <li>成果物はすべて markdown + HTML（<code>uv run python scripts/build_docs_html.py</code> で再生成、<code>docs/html/</code> でレビュー）</li>
 </ul>
-<h3 id="_2">定款（最上位制約・不変）</h3>
+<h3 id="_4">定款（最上位制約・不変）</h3>
 <blockquote>
 <p>あらゆる上場株式について、<strong>必要なデータを正確に保持し、足りない部分を常に把握できる</strong>ことを土台に、
 <strong>独自指標（進化し続ける指標群）</strong>で多角的に分析し、Xユーザーの興味を引く切り口で投稿し続ける。</p>
@@ -114,7 +228,7 @@ li{margin:.2em 0}
 <li>柱3 Xユーザーの興味を引く切り口での発信</li>
 <li>土台原則: <strong>正確でないデータは「無価値」でなく「有害」。確証を持てない数字は分析にも投稿にも一切流さない。</strong></li>
 </ul>
-<h3 id="_3">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</h3>
+<h3 id="_5">⚠️ 犯した過ちと是正（最重要・繰り返さないこと）</h3>
 <table>
 <thead>
 <tr>
@@ -169,7 +283,7 @@ li{margin:.2em 0}
 旧PJの切り口をなぞると、ユーザーが新findexを立ち上げた目的（旧設計の前提のまま進む誤りを断つこと）そのものを裏切る。
 常に <a href="charter.html">ノーススター</a> を正本とし、問題を一領域に狭めない。</p>
 </blockquote>
-<h3 id="_4">確定した設計判断</h3>
+<h3 id="_6">確定した設計判断</h3>
 <ul>
 <li><strong>データソース</strong>: 一次情報（EDINET=財務XBRL / J-Quants=株価・配当 / JPX=マスター / kabutan=上場日 / 各社IR）を主に。<strong>yfinance はフォールバックに格下げ</strong></li>
 <li><strong>設計の出発点はデータディクショナリ</strong>（収集すべきデータの完全定義）。ソース選定はそれを満たす手段</li>
@@ -188,11 +302,11 @@ li{margin:.2em 0}
 <li><code>data/verification_cohort.csv</code> / <code>data/golden_streaks_zai_20260601.csv</code> — 検証データ</li>
 <li><code>scripts/build_docs_html.py</code> — md→HTMLビルダー</li>
 </ul>
-<h3 id="_5">⚠️ 既存コードの注意（凍結中）</h3>
+<h3 id="_7">⚠️ 既存コードの注意（凍結中）</h3>
 <p><code>findex/</code> 配下に雛形コード（schema.sql / streaks.py / fetch基盤 / CLI / tests）が存在するが、
 これは<strong>軌道修正（定款確立）より前に書かれ、狭い設計（配当中心）を部分的に体現している</strong>。
 <strong>設計確定（D2以降）まで凍結。流用する際は必ずノーススターと突合してから</strong>。盲目的に使わない。</p>
-<h3 id="_6">現在地と次フェーズ</h3>
+<h3 id="_8">現在地と次フェーズ</h3>
 <ul>
 <li>状態: <strong>設計フェーズ・実装凍結</strong>。D1（ノーススター）完了、<strong>D2 改訂済み（目的志向バイアス是正を反映）</strong></li>
 <li>D2 成果物: <code>docs/design/02-data-integrity-framework.md</code> — データディクショナリ（識別/会計メタ/株価/配当/財務PL・BS・CF・資本コスト）、ソース階層、照合、カバレッジ状態、claim単位グレード、期間充足、品質ゲート。入手難フィールド（investment_securities/beta/cost_of_debt）を低カバレッジ要因として特定</li>
