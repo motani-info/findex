@@ -113,16 +113,26 @@ def listing_cmd(codes, cohort, no_resume) -> None:
 @main.command("prices")
 @subset_options
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
-def prices_cmd(codes, cohort, no_resume) -> None:
+@click.option("--benchmark", is_flag=True, help="市場ベンチマーク(日経225)のみ取得（beta用）")
+def prices_cmd(codes, cohort, no_resume, benchmark) -> None:
     """株価履歴を2000年遡及で取得（yfinance分割調整Close）（Phase2-d）。"""
     from .db import connect
-    from .fetch.prices import build_prices
+    from .fetch.prices import build_prices, fetch_benchmark
+
+    conn = connect()
+    if benchmark:
+        try:
+            b = fetch_benchmark(conn)
+            console.print(f"[green]✓[/green] benchmark N225: 行={b['rows']:,} [{b['first']}〜{b['last']}]")
+        finally:
+            conn.close()
+        return
 
     target = _resolve_codes(codes, cohort)
     if not target:
+        conn.close()
         console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
         return
-    conn = connect()
     try:
         stats = build_prices(conn, target, resume=not no_resume)
     finally:
@@ -183,14 +193,17 @@ def financials_cmd(codes, cohort, no_resume) -> None:
 
 @main.command("derive")
 @subset_options
-@click.option("--what", default="all", help="導出対象（all/streaks/dividends/financials/prices）")
+@click.option("--what", default="all",
+              help="導出対象（all/streaks/dividends/financials/prices/beta/roic）")
 def derive_cmd(codes, cohort, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
     from .derive.compute import (
+        build_beta,
         build_dividend_metrics,
         build_financial_metrics,
         build_price_metrics,
+        build_roic,
         build_streaks,
     )
 
@@ -226,6 +239,15 @@ def derive_cmd(codes, cohort, what) -> None:
                 f"PER={oc['per']} PBR={oc['pbr']} 時価総額={oc['current_market_cap']} "
                 f"配当利回り={oc['div_yield']} ミックス={oc['mix_coefficient']} ネットキャッシュPER={oc['net_cash_per']}"
             )
+        if what in ("all", "beta"):
+            b = build_beta(conn, target)
+            console.print(
+                f"[green]✓[/green] beta: rows={b['rows']} "
+                f"中央値={b['median']} 範囲=[{b['min']}, {b['max']}]"
+            )
+        if what in ("all", "roic"):
+            r = build_roic(conn, target)
+            console.print(f"[green]✓[/green] roic: rows={r['rows']} ROIC−WACC算出={r['ok']}")
     finally:
         conn.close()
 

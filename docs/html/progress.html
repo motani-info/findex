@@ -100,7 +100,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a〜3-d完了）</strong>/ <strong>次の一歩</strong>: beta算出（株価×TOPIX回帰）→ROIC−WACC活性化、続いてPhase 3-e（5状態status確定＋claim別グレード組立）</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a〜3-d＋beta＋ROIC−WACC完了）</strong>/ <strong>次の一歩</strong>: Phase 3-e（5状態status確定＋claim別グレード組立＝computed_metrics最終出口）</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -367,7 +367,9 @@ li{margin:.2em 0}
 <li><strong>3-b 配当由来指標</strong>: YoC・DPS倍率・CAGR・信頼性・減配回数。減配検出は「前年割れ かつ 2年前も割れ」で頑健化（花王FY2012スパイク復帰を誤検出しない）</li>
 <li><strong>3-c前バックフィル</strong>: 増配の質はEPS5年比較が前提。J-Quants約2年窓では縮退→<strong>有報「主要な経営指標等の推移」（最新1枚にPrior4..Current同梱）</strong>で5年史を取得。J-Quantsが直近2年・EDINET summaryが古い3年をCOALESCE補完。花王5年EPS=230.59/183.28/94.37/231.94/260.30で実証。US GAAPは5年史も構造化されず→insufficientのまま（捏造しない）</li>
 <li><strong>3-c 財務由来指標（11指標の生値＋5状態status）</strong>: ROE/自己資本比率/D/E/営業益率/配当性向/DOE/EPS成長/売上CAGR/FCFカバ/利剰配当倍率/ROIC−WACC。点指標は最新<strong>J-Quants確報</strong>をアンカー（5年史の薄いorphan行を掴まない）、深いBS（有利子負債/利益剰余金/capex）は各フィールド最新非NULLを独立取得、成長は5年史CAGR。コホート35社status分布: equity_ratio/roe=35ok、営業益率31ok（残=銀行/持株/IFRS営業益欠落・正当）、EPS成長28ok・売上CAGR30ok、FCFカバ22ok。<strong>確証主義の実証</strong>: ①<strong>IFRS有利子負債は企業独自拡張タグ</strong>（NTT=ShortTermDebt/ソニー=Borrowings系）で完全抽出不可→標準BondsAndBorrowingsが在る社のみok・無ければ<strong>insufficient</strong>（NTT/SBGをD/E=0と偽装しない）。zero_legit(無借金)はJGAAP（標準タクソノミ信頼可）限定。②売上/capexの要素IDが業種で分裂（営業収益・固定資産取得・有形無形合算）→標準タグのみフォールバック鎖化（イオン/日産/高島屋回復、ソニー独自拡張はinsufficient）。③ROIC−WACCは市場値/beta（価格層）依存→現状insufficient。④<strong>EDINET日次スキャンは一過性失敗でデータを黙って取りこぼす</strong>（find_latest_docが例外握り潰し）＝Phase2 robustness課題（全銘柄runでは再取得/検証が必須）</li>
-<li><strong>3-d 価格由来指標（6指標）</strong>: PER=価格/EPS・PBR=価格/BPS・時価総額=価格×株数・配当利回り=DPS/価格・ミックス係数=PER×PBR・ネットキャッシュPER。最新終値×最新J-Quants確報の1株/株数。コホート34/35ok（日産=赤字でPER系insufficient・クレディセゾン=J-Quants基礎データ無でPBR/時価missing・メルカリ=無配で利回missing＝全て正当）。実値も妥当（花王PER23.4/PBR2.59、JT時価12兆、メルカリPBR6.2成長株プレミアム）。<strong>beta（株価×TOPIX回帰）はTOPIX未取得で別タスク→ROIC−WACC活性化の前提</strong></li>
+<li><strong>3-d 価格由来指標（6指標）</strong>: PER=価格/EPS・PBR=価格/BPS・時価総額=価格×株数・配当利回り=DPS/価格・ミックス係数=PER×PBR・ネットキャッシュPER。最新終値×最新J-Quants確報の1株/株数。コホート34/35ok（日産=赤字でPER系insufficient・クレディセゾン=J-Quants基礎データ無でPBR/時価missing・メルカリ=無配で利回missing＝全て正当）。実値も妥当（花王PER23.4/PBR2.59、JT時価12兆、メルカリPBR6.2成長株プレミアム）。</li>
+<li><strong>beta（株価×日経225回帰）</strong>: 週次5年リターン回帰 beta=Cov/Var。市場=日経225（^N225→price_history code 'N225'。<strong>TOPIX指数は無料取得不可・TOPIX連動ETF1306は2026-03の1:10分割未調整で分散膨張→不可</strong>。指数は分割/配当なくクリーン）。月次60点はノイズ過大（神戸物産-0.29）→週次260点で是正。検証: SBG1.72/ソニー0.93/日産0.89/銀行0.72（高beta景気敏感）、JT0.28/花王0.21（低betaディフェンシブ）＝相対順位正確。<code>findex prices --benchmark</code>でN225取得、<code>derive --what beta</code>。</li>
+<li><strong>ROIC−WACC活性化（beta後段）</strong>: NOPAT=営業利益×(1−税率)、投下資本=自己資本(簿価)+有利子負債、ROIC=NOPAT/投下資本。CAPM Re=Rf+beta×ERP、Rd=支払利息/有利子負債（取れねば2%）、WACC=(E/V)Re+(D/V)Rd(1−税率)・E=時価総額。<strong>定数 Rf=0.01/ERP=0.06/実効税率=0.30 をモジュール定数で明示</strong>（個別未抽出のため固定）。<strong>確証主義の連鎖</strong>: 有利子負債が信頼抽出できない社（IFRS拡張タグ＝NTT/ソニー/ユニチャーム/ニトリ）はD/E insufficientを連鎖してROICもinsufficient（偽値を出さない）、無借金JGAAPはD=0で算出可、営業利益不在の銀行/持株（MUFG/SBG/クレディセゾン）も算出不能。コホート26/35ok。実値の経済的妥当性: アセットライト高ROIC（USS14.97%/神戸物産13.86%/電通総研12.48%）が上位、資本集約/苦戦（ガス0.9%/武田-0.4%/日産-1.1%/アステラス-1.8%）が下位＝直感と一致。<code>derive --what roic</code>。<code>--what all</code>順序=streaks→dividends→financials→prices→beta→roic</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>

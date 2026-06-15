@@ -56,6 +56,28 @@ class PriceFetcher(RateLimitedFetcher[dict]):
         return super().is_rate_limit(exc) or "too many requests" in msg
 
 
+def fetch_benchmark(conn) -> dict:
+    """市場ベンチマーク=日経225(^N225)を price_history に code 'N225' で格納。
+
+    beta算出の市場指数。TOPIX指数は無料取得不可、TOPIX連動ETF(1306)は分割未調整で不可
+    （指数は分割/配当が無くクリーン）。yfinance Close をそのまま採る。
+    """
+    h = yf.Ticker("^N225").history(period="max", auto_adjust=False)
+    h = h[["Close"]].dropna()
+    h = h[h["Close"] > 0]
+    rows = [("N225", idx.date().isoformat(), float(c), None, "yfinance")
+            for idx, c in zip(h.index, h["Close"])]
+    conn.executemany(
+        """INSERT INTO price_history (code, date, close_adj, volume, source)
+           VALUES (?,?,?,?,?)
+           ON CONFLICT(code, date) DO UPDATE SET close_adj=excluded.close_adj, source=excluded.source""",
+        rows,
+    )
+    conn.commit()
+    return {"rows": len(rows), "first": rows[0][1] if rows else None,
+            "last": rows[-1][1] if rows else None}
+
+
 def build_prices(conn, codes: list[str], *, resume: bool = True) -> dict:
     res = PriceFetcher(conn).run(codes, resume=resume)
     total_rows = sum(r["rows"] for r in res.ok.values())

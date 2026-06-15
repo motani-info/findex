@@ -305,6 +305,27 @@ _FIN_COLS = [
 ]
 
 
+def _resolve_ibd(equity, ibd, deep_ran: bool, std: str | None):
+    """有利子負債の採用値とstatus（D/E・ROICで共有）。
+
+    ibd在り(>0)=ok。ibd==0=zero_legit。ibd無しは基準で分岐:
+      JGAAP（標準タクソノミで信頼可）＝深いBS抽出済なら債務タグ皆無=無借金 zero_legit。
+      IFRS/US（独自拡張で完全抽出不可）＝insufficient（部分値/0を出さず捏造を避ける）。
+    返り値: (採用負債D, status)。okはD=ibd, zero_legitはD=0, それ以外はD=None。
+    """
+    if not (equity and equity > 0):
+        return None, "missing"
+    if ibd is not None and ibd > 0:
+        return ibd, "ok"
+    if ibd == 0:
+        return 0.0, "zero_legit"
+    if not deep_ran:
+        return None, "missing"  # 抽出未実行（EDINETなし/US連結不在）
+    if std == "jgaap":
+        return 0.0, "zero_legit"  # 無借金
+    return None, "insufficient"  # IFRS拡張タグで信頼抽出不可
+
+
 def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     """財務由来指標（D4.5）の生値＋5状態status。採点はPhase4。
 
@@ -347,21 +368,12 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     else:
         status["equity_ratio"] = "missing"
 
-    # 有利子負債比率。ibd在り=ok。ibd無しは基準で分岐:
-    #   JGAAP（標準タクソノミで信頼可）＝深いBS抽出済なら債務タグ皆無=無借金 zero_legit。
-    #   IFRS/US（独自拡張で完全抽出不可）＝insufficient（部分値/0を出さず捏造を避ける）。
-    if not (equity and equity > 0):
-        status["debt_to_equity"] = "missing"
-    elif ibd is not None and ibd > 0:
-        out["debt_to_equity"], status["debt_to_equity"] = round(ibd / equity, 6), "ok"
-    elif ibd == 0:
-        out["debt_to_equity"], status["debt_to_equity"] = 0.0, "zero_legit"
-    elif not deep_ran:
-        status["debt_to_equity"] = "missing"  # 抽出未実行（EDINETなし/US連結不在）
-    elif std == "jgaap":
-        out["debt_to_equity"], status["debt_to_equity"] = 0.0, "zero_legit"  # 無借金
-    else:
-        status["debt_to_equity"] = "insufficient"  # IFRS拡張タグで信頼抽出不可
+    # 有利子負債比率（ibd採用判定は _resolve_ibd に集約＝ROICと共有）
+    ibd_used, status["debt_to_equity"] = _resolve_ibd(equity, ibd, deep_ran, std)
+    if status["debt_to_equity"] == "ok":
+        out["debt_to_equity"] = round(ibd_used / equity, 6)
+    elif status["debt_to_equity"] == "zero_legit":
+        out["debt_to_equity"] = 0.0
 
     # ROE
     if net_income is not None and equity and equity > 0:
@@ -415,7 +427,7 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     else:
         status["fcf_payout_coverage"] = "missing"
 
-    # ROIC−WACC（市場値/beta/実効税率＝価格層依存。現状未算出）
+    # ROIC−WACC（市場値/beta依存＝build_roicで後追い算出。財務単独runではinsufficient）
     status["roic_minus_wacc"] = "insufficient"
 
     # 成長（EDINET5年史バックフィルで前提が揃った）
@@ -452,6 +464,176 @@ def build_financial_metrics(conn, codes: list[str]) -> dict:
         n += 1
     conn.commit()
     return {"rows": n, "ok_counts": ok_counts}
+
+
+# 市場ベンチマーク=日経225指数(^N225→code 'N225')。TOPIX指数は無料取得不可、TOPIX連動ETF
+# (1306)は分割アーティファクト（2026-03の1:10分割が未調整）で分散膨張→不可。指数は分割/配当
+# が無くクリーン、Nikkeiは広範市場代理として標準的（TOPIXと相関≒0.95）。
+BENCHMARK_CODE = "N225"
+
+
+def _weekly_closes(conn, code: str, start_iso: str) -> dict[str, float]:
+    """週次終値 {YYYY-Www: close}（各週の最終営業日。昇順で上書き＝最後が週末）。"""
+    rows = conn.execute(
+        "SELECT date, close_adj FROM price_history WHERE code=? AND date>=? AND close_adj>0 "
+        "ORDER BY date",
+        (code, start_iso),
+    ).fetchall()
+    by_week: dict[str, float] = {}
+    for d, c in rows:
+        y, w, _ = date.fromisoformat(d).isocalendar()
+        by_week[f"{y}-W{w:02d}"] = c
+    return by_week
+
+
+def compute_beta(conn, code: str, *, years: int = 5, min_points: int = 100) -> float | None:
+    """週次リターン回帰の beta = Cov(銘柄, 市場)/Var(市場)。市場=日経225(N225)。
+
+    週次5年(~260点)＝月次より頑健（月次60点は特異変動でノイズ過大）。点が min_points
+    未満（上場浅い等）は算出しない（捏造しない）→ insufficient。
+    """
+    start = f"{date.today().year - years}-{date.today().month:02d}-01"
+    s = _weekly_closes(conn, code, start)
+    m = _weekly_closes(conn, BENCHMARK_CODE, start)
+    weeks = sorted(set(s) & set(m))
+    sr: list[float] = []
+    mr: list[float] = []
+    for i in range(1, len(weeks)):
+        p0, p1 = s[weeks[i - 1]], s[weeks[i]]
+        q0, q1 = m[weeks[i - 1]], m[weeks[i]]
+        if p0 > 0 and q0 > 0:
+            sr.append(p1 / p0 - 1)
+            mr.append(q1 / q0 - 1)
+    n = len(mr)
+    if n < min_points:
+        return None
+    mm = sum(mr) / n
+    ms = sum(sr) / n
+    var = sum((x - mm) ** 2 for x in mr) / n
+    if var <= 0:
+        return None
+    cov = sum((mr[i] - mm) * (sr[i] - ms) for i in range(n)) / n
+    return round(cov / var, 4)
+
+
+def build_beta(conn, codes: list[str]) -> dict:
+    """beta を算出し financial_snapshots の最新年度行に格納。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    n = 0
+    vals: list[float] = []
+    for code in codes:
+        b = compute_beta(conn, code)
+        if b is None:
+            continue
+        fy = conn.execute(
+            "SELECT MAX(fiscal_year) FROM financial_snapshots WHERE code=?", (code,)
+        ).fetchone()[0]
+        if fy is None:
+            continue
+        conn.execute(
+            "UPDATE financial_snapshots SET beta=?, collected_at=? WHERE code=? AND fiscal_year=?",
+            (b, now, code, fy),
+        )
+        n += 1
+        vals.append(b)
+    conn.commit()
+    vals.sort()
+    med = vals[len(vals) // 2] if vals else None
+    return {"rows": n, "median": med, "min": vals[0] if vals else None,
+            "max": vals[-1] if vals else None}
+
+
+# ROIC−WACC 定数（個別未抽出のため固定。実効税率は法定実効税率近似、Rf=10年国債近似、
+# ERP=日本市場の株式リスクプレミアム長期平均近似）。値はモジュール定数として明示。
+ROIC_RF = 0.01           # リスクフリーレート
+ROIC_ERP = 0.06          # 株式リスクプレミアム（CAPM: Re=Rf+beta×ERP）
+ROIC_TAX = 0.30          # 実効税率（NOPAT・税後負債コスト）
+ROIC_RD_FALLBACK = 0.02  # 支払利息/有利子負債が取れない場合の負債コスト
+ROIC_RD_MAX = 0.20       # Rdの正気域上限（外れ値はfallbackに倒す）
+ROIC_BOUND = 0.5         # 結果の正気域（外れ値は出さない＝insufficient）
+
+
+def compute_roic_for_code(conn, code: str):
+    """ROIC−WACC（生値, status）。beta・時価総額（価格層）が揃ってから算出。
+
+    NOPAT=営業利益×(1−税率)、投下資本=自己資本(簿価)+有利子負債D、ROIC=NOPAT/投下資本。
+    CAPM Re=Rf+beta×ERP。Rd=支払利息/D（取れねばfallback2%）。WACC=(E/V)Re+(D/V)Rd(1−税率)、
+    E=時価総額,V=E+D。**有利子負債が信頼抽出できない社（IFRS拡張タグ等）はD/E insufficientを
+    連鎖してROICもinsufficient**（偽値を出さない）。無借金JGAAPはD=0で算出可。
+    """
+    core = conn.execute(
+        "SELECT operating_income, equity_attributable FROM financial_snapshots "
+        "WHERE code=? AND net_income IS NOT NULL "
+        "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+    if not core:
+        return None, "missing"
+    op_income, equity = core
+    if op_income is None or not (equity and equity > 0):
+        return None, "insufficient"  # 銀行/持株等で営業利益不在→ROIC算出不能
+
+    ibd = _latest_nonnull(conn, code, "interest_bearing_debt")
+    deep_ran = (
+        _latest_nonnull(conn, code, "retained_earnings") is not None
+        or _latest_nonnull(conn, code, "capex") is not None
+        or _latest_nonnull(conn, code, "total_liabilities") is not None
+    )
+    std = conn.execute("SELECT accounting_standard FROM stocks WHERE code=?", (code,)).fetchone()
+    std = std[0] if std else None
+    debt, de_status = _resolve_ibd(equity, ibd, deep_ran, std)
+    if de_status not in ("ok", "zero_legit"):
+        return None, "insufficient"  # 有利子負債が信頼抽出不可→連鎖insufficient
+    # debt = ibd(ok) or 0.0(zero_legit=無借金)
+
+    beta = _latest_nonnull(conn, code, "beta")
+    if beta is None:
+        return None, "insufficient"  # 上場浅い等でbeta算出不能
+    mc = conn.execute("SELECT current_market_cap FROM computed_metrics WHERE code=?", (code,)).fetchone()
+    market_cap = mc[0] if mc and mc[0] else None
+    if not market_cap or market_cap <= 0:
+        return None, "insufficient"
+
+    # Rd=支払利息/有利子負債（D>0かつ実値在りのみ。外れ値・無借金はfallback/不使用）
+    ie = _latest_nonnull(conn, code, "interest_expense")
+    if debt and debt > 0 and ie is not None and ie >= 0:
+        rd = ie / debt
+        if not (0 <= rd < ROIC_RD_MAX):
+            rd = ROIC_RD_FALLBACK
+    else:
+        rd = ROIC_RD_FALLBACK
+
+    nopat = op_income * (1 - ROIC_TAX)
+    invested = equity + debt  # 簿価投下資本
+    roic = nopat / invested
+    re = ROIC_RF + beta * ROIC_ERP
+    e, d = market_cap, debt  # WACCの重みは市場値
+    v = e + d
+    wacc = (e / v) * re + (d / v) * rd * (1 - ROIC_TAX)
+    val = roic - wacc
+    if not (-ROIC_BOUND < val < ROIC_BOUND):
+        return None, "insufficient"  # 外れ値（基準アーティファクト）→出さない
+    return round(val, 6), "ok"
+
+
+def build_roic(conn, codes: list[str]) -> dict:
+    """ROIC−WACC を算出し computed_metrics に上書き（beta・価格指標の後段）。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    n = ok = 0
+    for code in codes:
+        if not conn.execute("SELECT 1 FROM computed_metrics WHERE code=?", (code,)).fetchone():
+            continue  # 財務指標が無い銘柄はスキップ（行を作らない）
+        val, st = compute_roic_for_code(conn, code)
+        status_json = _merge_json(conn, code, "status_json", {"roic_minus_wacc": st})
+        conn.execute(
+            "UPDATE computed_metrics SET roic_minus_wacc=?, status_json=?, fin_computed_at=? WHERE code=?",
+            (val, status_json, now, code),
+        )
+        n += 1
+        if val is not None:
+            ok += 1
+    conn.commit()
+    return {"rows": n, "ok": ok}
 
 
 def _latest_price(conn, code: str):
