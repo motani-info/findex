@@ -183,11 +183,16 @@ def financials_cmd(codes, cohort, no_resume) -> None:
 
 @main.command("derive")
 @subset_options
-@click.option("--what", default="all", help="導出対象（all/streaks/dividends/financials）")
+@click.option("--what", default="all", help="導出対象（all/streaks/dividends/financials/prices）")
 def derive_cmd(codes, cohort, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
-    from .derive.compute import build_dividend_metrics, build_financial_metrics, build_streaks
+    from .derive.compute import (
+        build_dividend_metrics,
+        build_financial_metrics,
+        build_price_metrics,
+        build_streaks,
+    )
 
     target = _resolve_codes(codes, cohort)
     if not target:
@@ -212,6 +217,14 @@ def derive_cmd(codes, cohort, what) -> None:
                 f"ROE={oc['roe']} 自己資本比率={oc['equity_ratio']} 営業益率={oc['operating_margin']} "
                 f"EPS成長={oc['eps_growth_5y']} 売上CAGR={oc['revenue_growth_5y_cagr']} "
                 f"DOE={oc['doe']} FCFカバ={oc['fcf_payout_coverage']}"
+            )
+        if what in ("all", "prices"):
+            p = build_price_metrics(conn, target)
+            oc = p["ok_counts"]
+            console.print(
+                f"[green]✓[/green] prices: rows={p['rows']} "
+                f"PER={oc['per']} PBR={oc['pbr']} 時価総額={oc['current_market_cap']} "
+                f"配当利回り={oc['div_yield']} ミックス={oc['mix_coefficient']} ネットキャッシュPER={oc['net_cash_per']}"
             )
     finally:
         conn.close()

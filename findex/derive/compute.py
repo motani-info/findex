@@ -454,6 +454,128 @@ def build_financial_metrics(conn, codes: list[str]) -> dict:
     return {"rows": n, "ok_counts": ok_counts}
 
 
+def _latest_price(conn, code: str):
+    """(date, close_adj) 最新の終値。"""
+    return conn.execute(
+        "SELECT date, close_adj FROM price_history WHERE code=? AND close_adj>0 "
+        "ORDER BY date DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+
+
+_PRICE_COLS = ["per", "pbr", "current_market_cap", "div_yield", "mix_coefficient", "net_cash_per"]
+
+
+def compute_price_metrics_for_code(conn, code: str) -> dict | None:
+    """価格由来指標（D4.5）の生値＋5状態status。最新終値×最新J-Quants確報の1株/株数。
+
+    PER=価格/EPS・PBR=価格/BPS・時価総額=価格×株数・配当利回り=DPS/価格・
+    ミックス係数=PER×PBR・ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。
+    赤字(EPS≤0)はPER算出不能=insufficient（捏造しない）。
+    """
+    pr = _latest_price(conn, code)
+    if not pr:
+        return None
+    price_date, price = pr
+    fin = conn.execute(
+        "SELECT eps, bps, shares_outstanding, total_assets, equity_attributable, "
+        "cash_and_equivalents FROM financial_snapshots "
+        "WHERE code=? AND net_income IS NOT NULL "
+        "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+    if not fin:
+        return None
+    eps, bps, shares, total_assets, equity, cash = fin
+    dps = _latest_dps(conn, code)
+
+    out: dict = {c: None for c in _PRICE_COLS}
+    status: dict[str, str] = {}
+
+    # PER（赤字は算出不能）
+    if eps is None:
+        status["per"] = "missing"
+    elif eps <= 0:
+        status["per"] = "insufficient"
+    else:
+        out["per"], status["per"] = round(price / eps, 4), "ok"
+
+    # PBR（債務超過は算出不能）
+    if bps is None:
+        status["pbr"] = "missing"
+    elif bps <= 0:
+        status["pbr"] = "insufficient"
+    else:
+        out["pbr"], status["pbr"] = round(price / bps, 4), "ok"
+
+    # 時価総額
+    mcap = None
+    if shares and shares > 0:
+        mcap = price * shares
+        out["current_market_cap"], status["current_market_cap"] = mcap, "ok"
+    else:
+        status["current_market_cap"] = "missing"
+
+    # 配当利回り（無配=zero_legit・異常高は外れ値insufficient）
+    if dps == 0:
+        out["div_yield"], status["div_yield"] = 0.0, "zero_legit"
+    elif dps is not None and price > 0:
+        y = dps / price
+        if 0 < y <= 0.30:
+            out["div_yield"], status["div_yield"] = round(y, 6), "ok"
+        else:
+            status["div_yield"] = "insufficient"
+    else:
+        status["div_yield"] = "missing"
+
+    # ミックス係数 = PER×PBR（両方ok時のみ）
+    if out["per"] is not None and out["pbr"] is not None:
+        out["mix_coefficient"], status["mix_coefficient"] = round(out["per"] * out["pbr"], 4), "ok"
+    else:
+        status["mix_coefficient"] = "insufficient"
+
+    # ネットキャッシュPER = PER×(1−ネットキャッシュ/時価総額)。ネットキャッシュ=現金−総負債
+    if (out["per"] is not None and mcap and mcap > 0 and cash is not None
+            and total_assets is not None and equity is not None):
+        net_cash = cash - (total_assets - equity)
+        r = out["per"] * (1 - net_cash / mcap)
+        if -500 < r < 500:
+            out["net_cash_per"], status["net_cash_per"] = round(r, 4), "ok"
+        else:
+            status["net_cash_per"] = "insufficient"
+    else:
+        status["net_cash_per"] = "insufficient" if out["per"] is None else "missing"
+
+    out["_status"] = status
+    out["_price_date"] = price_date
+    return out
+
+
+def build_price_metrics(conn, codes: list[str]) -> dict:
+    now = datetime.now().isoformat(timespec="seconds")
+    n = 0
+    ok_counts: dict[str, int] = {c: 0 for c in _PRICE_COLS}
+    set_clause = ",".join(f"{c}=excluded.{c}" for c in _PRICE_COLS)
+    insert_sql = (
+        f"INSERT INTO computed_metrics (code,{','.join(_PRICE_COLS)},status_json,price_computed_at) "
+        f"VALUES (?,{','.join('?' * len(_PRICE_COLS))},?,?) "
+        f"ON CONFLICT(code) DO UPDATE SET {set_clause},"
+        f"status_json=excluded.status_json,price_computed_at=excluded.price_computed_at"
+    )
+    for code in codes:
+        d = compute_price_metrics_for_code(conn, code)
+        if not d:
+            continue
+        status_json = _merge_json(conn, code, "status_json", d.pop("_status"))
+        conn.execute(insert_sql, (code, *[d[c] for c in _PRICE_COLS], status_json, now))
+        for c in _PRICE_COLS:
+            if d[c] is not None:
+                ok_counts[c] += 1
+        n += 1
+    conn.commit()
+    return {"rows": n, "ok_counts": ok_counts}
+
+
 def build_streaks(conn, codes: list[str]) -> dict:
     """コホート/指定銘柄のストリークを computed_metrics に upsert。"""
     now = datetime.now().isoformat(timespec="seconds")
