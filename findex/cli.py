@@ -376,6 +376,14 @@ def backtest_cmd(codes, cohort, what) -> None:
                 f"as_of={o['grid'][0]}〜{o['grid'][1]} horizons={o['horizons']} "
                 f"減配[無={o['cut_dist'][0]}/有={o['cut_dist'][1]}]"
             )
+        if what in ("all", "pit"):
+            from .backtest.pit import build_pit_scores
+
+            p = build_pit_scores(conn, target)
+            console.print(
+                f"[green]✓[/green] pit: run_id={p['run_id']} PITスコア={p['scores']} "
+                f"as_of点={p['as_of_points']}"
+            )
     finally:
         conn.close()
 

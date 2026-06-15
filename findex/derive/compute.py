@@ -496,13 +496,16 @@ def _weekly_closes(conn, code: str, start_iso: str) -> dict[str, float]:
     return by_week
 
 
-def compute_beta(conn, code: str, *, years: int = 5, min_points: int = 100) -> float | None:
+def compute_beta(conn, code: str, *, years: int = 5, min_points: int = 100,
+                 as_of: str | None = None) -> float | None:
     """週次リターン回帰の beta = Cov(銘柄, 市場)/Var(市場)。市場=日経225(N225)。
 
     週次5年(~260点)＝月次より頑健（月次60点は特異変動でノイズ過大）。点が min_points
     未満（上場浅い等）は算出しない（捏造しない）→ insufficient。
+    as_of 指定時はその時点までの株価で回帰（PITバックテスト用・look-ahead排除）。
     """
-    start = f"{date.today().year - years}-{date.today().month:02d}-01"
+    ref = date.fromisoformat(as_of) if as_of else date.today()
+    start = f"{ref.year - years}-{ref.month:02d}-01"
     s = _weekly_closes(conn, code, start)
     m = _weekly_closes(conn, BENCHMARK_CODE, start)
     weeks = sorted(set(s) & set(m))
@@ -526,13 +529,13 @@ def compute_beta(conn, code: str, *, years: int = 5, min_points: int = 100) -> f
     return round(cov / var, 4)
 
 
-def build_beta(conn, codes: list[str]) -> dict:
-    """beta を算出し financial_snapshots の最新年度行に格納。"""
+def build_beta(conn, codes: list[str], *, as_of: str | None = None) -> dict:
+    """beta を算出し financial_snapshots の最新年度行に格納。as_of でPIT回帰。"""
     now = datetime.now().isoformat(timespec="seconds")
     n = 0
     vals: list[float] = []
     for code in codes:
-        b = compute_beta(conn, code)
+        b = compute_beta(conn, code, as_of=as_of)
         if b is None:
             continue
         fy = conn.execute(
