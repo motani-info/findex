@@ -183,11 +183,11 @@ def financials_cmd(codes, cohort, no_resume) -> None:
 
 @main.command("derive")
 @subset_options
-@click.option("--what", default="streaks", help="導出対象（streaks 等）")
+@click.option("--what", default="all", help="導出対象（all/streaks/dividends）")
 def derive_cmd(codes, cohort, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
-    from .derive.compute import build_streaks
+    from .derive.compute import build_dividend_metrics, build_streaks
 
     target = _resolve_codes(codes, cohort)
     if not target:
@@ -195,14 +195,15 @@ def derive_cmd(codes, cohort, what) -> None:
         return
     conn = connect()
     try:
-        if what == "streaks":
-            stats = build_streaks(conn, target)
+        if what in ("all", "streaks"):
+            s = build_streaks(conn, target)
             console.print(
-                f"[green]✓[/green] derive streaks: rows={stats['rows']} "
-                f"打ち切り(N+)={stats['censored']} override昇格={stats['overridden']}"
+                f"[green]✓[/green] streaks: rows={s['rows']} 打ち切り(N+)={s['censored']} "
+                f"override昇格={s['overridden']}"
             )
-        else:
-            console.print(f"[red]未対応: {what}[/red]")
+        if what in ("all", "dividends"):
+            d = build_dividend_metrics(conn, target)
+            console.print(f"[green]✓[/green] dividends: rows={d['rows']} 増配の質={d['quality_dist']}")
     finally:
         conn.close()
 
