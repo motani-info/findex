@@ -194,7 +194,7 @@ def financials_cmd(codes, cohort, no_resume) -> None:
 @main.command("derive")
 @subset_options
 @click.option("--what", default="all",
-              help="導出対象（all/streaks/dividends/financials/prices/beta/roic）")
+              help="導出対象（all/streaks/dividends/financials/prices/beta/roic/grades）")
 def derive_cmd(codes, cohort, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
@@ -202,6 +202,7 @@ def derive_cmd(codes, cohort, what) -> None:
         build_beta,
         build_dividend_metrics,
         build_financial_metrics,
+        build_grades,
         build_price_metrics,
         build_roic,
         build_streaks,
@@ -248,6 +249,15 @@ def derive_cmd(codes, cohort, what) -> None:
         if what in ("all", "roic"):
             r = build_roic(conn, target)
             console.print(f"[green]✓[/green] roic: rows={r['rows']} ROIC−WACC算出={r['ok']}")
+        if what in ("all", "grades"):
+            g = build_grades(conn, target)
+            id_ = g["identity"]
+            for claim, d in g["dist"].items():
+                console.print(f"[green]✓[/green] {claim}: {d}")
+            console.print(
+                f"[green]✓[/green] identity_ok: 一致={id_['ok']} 不一致={id_['mismatch']} "
+                f"判定不能={id_['na']}（rows={g['rows']}）"
+            )
     finally:
         conn.close()
 

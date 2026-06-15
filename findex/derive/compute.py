@@ -758,6 +758,98 @@ def build_price_metrics(conn, codes: list[str]) -> dict:
     return {"rows": n, "ok_counts": ok_counts}
 
 
+# ══ Phase3-e: claim別グレード＋恒等式チェック（導出層の最終出口） ══════════════
+# 主張(claim)ごとに依存指標(status_jsonキー)集合を持ち、その充足度でA〜Dを付ける（D2 §6.2）。
+#   core=その主張に必須の指標、extra=期間充足/補助（欠けてもCにはしない＝B止まり）。
+# A=core全ok＋extra充足、B=core全okだがextraにcensored/insufficient/missing、
+# C=core一部insufficient/missing（評価不能・投稿しない）、D=coreが一つも算出されず（対象外）。
+_GRADE_CLAIMS = {
+    "grade_dividend": {  # 配当系（dps系列＋listing_date依存）
+        "core": ["dividend_reliability"],
+        "extra": ["consecutive_dividend_growth_years", "yield_on_cost_5y", "dividend_quality"],
+    },
+    "grade_valuation": {  # バリュ系（close_adj/eps/bps/shares依存）
+        "core": ["per", "pbr"],
+        "extra": ["div_yield", "mix_coefficient", "net_cash_per"],
+    },
+    "grade_health": {  # 財務系（equity/total_assets/net_income依存）
+        "core": ["equity_ratio", "roe", "operating_margin"],
+        "extra": ["debt_to_equity", "eps_growth_5y", "revenue_growth_5y_cagr", "payout_ratio"],
+    },
+    "grade_capital": {  # 資本効率系（capex/beta/cost_of_debt依存＝入手難）
+        "core": ["roic_minus_wacc", "fcf_payout_coverage"],
+        "extra": ["doe", "retained_earnings_div_ratio"],
+    },
+}
+_OK_STATUS = ("ok", "zero_legit")  # 「present以上」＝採用可
+IDENTITY_TOL = 0.15  # 恒等式 DOE≒ROE×payout の許容相対誤差（EPS=希薄化/期中平均株数の差を吸収）
+
+
+def _grade_claim(status: dict, core: list[str], extra: list[str]) -> str:
+    """1主張のグレード（A〜D）。core/extra の status から判定。
+
+    D=core全てが未算出/欠損（missing/None＝構造的に対象外。無配の配当系/銀行の財務系等）、
+    A/B=core全てok/zero_legit、C=それ以外（insufficient混在＝データは在るが評価不能）。
+    insufficient（抽出を試みたが信頼不可）と missing（そもそも無い）を区別する。
+    """
+    core_st = [status.get(k) for k in core]
+    absent = [s for s in core_st if s is None or s == "missing"]
+    if len(absent) == len(core_st):
+        return "D"  # core が一つも算出されず（構造的に対象外）
+    if all(s in _OK_STATUS for s in core_st):
+        extra_st = [status.get(k) for k in extra]
+        if any(s in ("censored", "insufficient", "missing") for s in extra_st):
+            return "B"  # 採用可だが期間不足/補助欠落の注記付き
+        return "A"
+    return "C"  # core に insufficient/欠損が混在＝評価不能（投稿しない）
+
+
+def _identity_ok(doe, roe, payout, status: dict) -> int | None:
+    """恒等式 DOE ≈ ROE × payout_ratio のクロスチェック（3指標とも ok のときのみ）。
+
+    DOE=配当総額/自己資本、ROE×payout=(純益/自己資本)×(DPS/EPS)。net_income≒EPS×株数 かつ
+    配当総額≒DPS×株数 なら一致する。乖離は per-share と総額の不整合/株数ズレを検出（品質監査）。
+    判定不能（いずれかが ok でない）は NULL。
+    """
+    if not all(status.get(k) == "ok" for k in ("doe", "roe", "payout_ratio")):
+        return None
+    if doe is None or roe is None or payout is None:
+        return None
+    expected = roe * payout
+    denom = max(abs(doe), abs(expected), 1e-9)
+    return 1 if abs(doe - expected) / denom <= IDENTITY_TOL else 0
+
+
+def build_grades(conn, codes: list[str]) -> dict:
+    """claim別グレード＋identity_ok を確定（全指標導出の後＝最終出口）。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    n = 0
+    dist: dict[str, dict[str, int]] = {g: {} for g in _GRADE_CLAIMS}
+    id_counts = {"ok": 0, "mismatch": 0, "na": 0}
+    for code in codes:
+        row = conn.execute(
+            "SELECT status_json, doe, roe, payout_ratio FROM computed_metrics WHERE code=?",
+            (code,),
+        ).fetchone()
+        if not row:
+            continue
+        status = json.loads(row[0]) if row[0] else {}
+        grades = {g: _grade_claim(status, s["core"], s["extra"]) for g, s in _GRADE_CLAIMS.items()}
+        iok = _identity_ok(row[1], row[2], row[3], status)
+        conn.execute(
+            "UPDATE computed_metrics SET grade_dividend=?, grade_valuation=?, grade_health=?, "
+            "grade_capital=?, identity_ok=?, fin_computed_at=? WHERE code=?",
+            (grades["grade_dividend"], grades["grade_valuation"], grades["grade_health"],
+             grades["grade_capital"], iok, now, code),
+        )
+        n += 1
+        for g, v in grades.items():
+            dist[g][v] = dist[g].get(v, 0) + 1
+        id_counts["na" if iok is None else "ok" if iok == 1 else "mismatch"] += 1
+    conn.commit()
+    return {"rows": n, "dist": dist, "identity": id_counts}
+
+
 def build_streaks(conn, codes: list[str]) -> dict:
     """コホート/指定銘柄のストリークを computed_metrics に upsert。"""
     now = datetime.now().isoformat(timespec="seconds")

@@ -100,7 +100,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a〜3-d＋beta＋ROIC−WACC完了）</strong>/ <strong>次の一歩</strong>: Phase 3-e（5状態status確定＋claim別グレード組立＝computed_metrics最終出口）</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3完了＝3-a〜3-e＋beta＋ROIC−WACC）</strong>/ <strong>次の一歩</strong>: Phase 4 採点（v4 status-based・動的分母・業種相対・実績フォールバック）</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -324,9 +324,9 @@ li{margin:.2em 0}
 </tr>
 <tr>
 <td>3</td>
-<td>導出（status付き・YoC質ゲート・DOE・打ち切り合成・<strong>seam穴橋渡し</strong>）</td>
+<td>導出（status付き・YoC質ゲート・DOE・打ち切り合成・beta/ROIC・claim別グレード）</td>
 <td>golden_streaks緑・status分布妥当</td>
-<td style="text-align: center;">🟨 3-a〜3-d完了・beta/3-e残</td>
+<td style="text-align: center;">✅ <code>0d9f432</code>＋3-e</td>
 </tr>
 <tr>
 <td>4</td>
@@ -369,7 +369,8 @@ li{margin:.2em 0}
 <li><strong>3-c 財務由来指標（11指標の生値＋5状態status）</strong>: ROE/自己資本比率/D/E/営業益率/配当性向/DOE/EPS成長/売上CAGR/FCFカバ/利剰配当倍率/ROIC−WACC。点指標は最新<strong>J-Quants確報</strong>をアンカー（5年史の薄いorphan行を掴まない）、深いBS（有利子負債/利益剰余金/capex）は各フィールド最新非NULLを独立取得、成長は5年史CAGR。コホート35社status分布: equity_ratio/roe=35ok、営業益率31ok（残=銀行/持株/IFRS営業益欠落・正当）、EPS成長28ok・売上CAGR30ok、FCFカバ22ok。<strong>確証主義の実証</strong>: ①<strong>IFRS有利子負債は企業独自拡張タグ</strong>（NTT=ShortTermDebt/ソニー=Borrowings系）で完全抽出不可→標準BondsAndBorrowingsが在る社のみok・無ければ<strong>insufficient</strong>（NTT/SBGをD/E=0と偽装しない）。zero_legit(無借金)はJGAAP（標準タクソノミ信頼可）限定。②売上/capexの要素IDが業種で分裂（営業収益・固定資産取得・有形無形合算）→標準タグのみフォールバック鎖化（イオン/日産/高島屋回復、ソニー独自拡張はinsufficient）。③ROIC−WACCは市場値/beta（価格層）依存→現状insufficient。④<strong>EDINET日次スキャンは一過性失敗でデータを黙って取りこぼす</strong>（find_latest_docが例外握り潰し）＝Phase2 robustness課題（全銘柄runでは再取得/検証が必須）</li>
 <li><strong>3-d 価格由来指標（6指標）</strong>: PER=価格/EPS・PBR=価格/BPS・時価総額=価格×株数・配当利回り=DPS/価格・ミックス係数=PER×PBR・ネットキャッシュPER。最新終値×最新J-Quants確報の1株/株数。コホート34/35ok（日産=赤字でPER系insufficient・クレディセゾン=J-Quants基礎データ無でPBR/時価missing・メルカリ=無配で利回missing＝全て正当）。実値も妥当（花王PER23.4/PBR2.59、JT時価12兆、メルカリPBR6.2成長株プレミアム）。</li>
 <li><strong>beta（株価×日経225回帰）</strong>: 週次5年リターン回帰 beta=Cov/Var。市場=日経225（^N225→price_history code 'N225'。<strong>TOPIX指数は無料取得不可・TOPIX連動ETF1306は2026-03の1:10分割未調整で分散膨張→不可</strong>。指数は分割/配当なくクリーン）。月次60点はノイズ過大（神戸物産-0.29）→週次260点で是正。検証: SBG1.72/ソニー0.93/日産0.89/銀行0.72（高beta景気敏感）、JT0.28/花王0.21（低betaディフェンシブ）＝相対順位正確。<code>findex prices --benchmark</code>でN225取得、<code>derive --what beta</code>。</li>
-<li><strong>ROIC−WACC活性化（beta後段）</strong>: NOPAT=営業利益×(1−税率)、投下資本=自己資本(簿価)+有利子負債、ROIC=NOPAT/投下資本。CAPM Re=Rf+beta×ERP、Rd=支払利息/有利子負債（取れねば2%）、WACC=(E/V)Re+(D/V)Rd(1−税率)・E=時価総額。<strong>定数 Rf=0.01/ERP=0.06/実効税率=0.30 をモジュール定数で明示</strong>（個別未抽出のため固定）。<strong>確証主義の連鎖</strong>: 有利子負債が信頼抽出できない社（IFRS拡張タグ＝NTT/ソニー/ユニチャーム/ニトリ）はD/E insufficientを連鎖してROICもinsufficient（偽値を出さない）、無借金JGAAPはD=0で算出可、営業利益不在の銀行/持株（MUFG/SBG/クレディセゾン）も算出不能。コホート26/35ok。実値の経済的妥当性: アセットライト高ROIC（USS14.97%/神戸物産13.86%/電通総研12.48%）が上位、資本集約/苦戦（ガス0.9%/武田-0.4%/日産-1.1%/アステラス-1.8%）が下位＝直感と一致。<code>derive --what roic</code>。<code>--what all</code>順序=streaks→dividends→financials→prices→beta→roic</li>
+<li><strong>ROIC−WACC活性化（beta後段）</strong>: NOPAT=営業利益×(1−税率)、投下資本=自己資本(簿価)+有利子負債、ROIC=NOPAT/投下資本。CAPM Re=Rf+beta×ERP、Rd=支払利息/有利子負債（取れねば2%）、WACC=(E/V)Re+(D/V)Rd(1−税率)・E=時価総額。<strong>定数 Rf=0.01/ERP=0.06/実効税率=0.30 をモジュール定数で明示</strong>（個別未抽出のため固定）。<strong>確証主義の連鎖</strong>: 有利子負債が信頼抽出できない社（IFRS拡張タグ＝NTT/ソニー/ユニチャーム/ニトリ）はD/E insufficientを連鎖してROICもinsufficient（偽値を出さない）、無借金JGAAPはD=0で算出可、営業利益不在の銀行/持株（MUFG/SBG/クレディセゾン）も算出不能。コホート26/35ok。実値の経済的妥当性: アセットライト高ROIC（USS14.97%/神戸物産13.86%/電通総研12.48%）が上位、資本集約/苦戦（ガス0.9%/武田-0.4%/日産-1.1%/アステラス-1.8%）が下位＝直感と一致。<code>derive --what roic</code>。<code>--what all</code>順序=streaks→dividends→financials→prices→beta→roic→grades</li>
+<li><strong>3-e claim別グレード＋恒等式チェック（導出層の最終出口）</strong>: 主張(claim)ごとに依存指標(status_jsonキー)集合でA〜Dを付ける（D2 §6.2）。core=必須/extra=期間充足・補助。<strong>A</strong>=core全ok＋extra充足、<strong>B</strong>=core全okだがextraにcensored(N+)/insufficient/missing、<strong>C</strong>=core一部insufficient/missing（評価不能＝投稿しない）、<strong>D</strong>=coreが一つも算出されず（無配の配当系・該当データ皆無＝構造的対象外）。insufficient(抽出を試みたが信頼不可)と missing(そもそも無い)を区別。4claim=配当系/バリュ系/財務系/資本効率系(入手難)。コホート分布: 配当 A28/B6/D1（D=メルカリ無配）、バリュ A32/C2(クレディセゾンJ-Quants基礎無・日産赤字)/B1(メルカリ無配)、財務 A21/B10/C4（C=営業益率欠落の銀行/持株/IFRS：MUFG/SBG/クレディセゾン/ユニチャーム）、資本効率 A21/C14（入手難claimらしくIFRS拡張・銀行/持株・リースがC）。営業利益率はhealthのcoreに据える（銀行の自己資本比率は構造的に低く誤解を招くため、汎用比率だけで健全性Aを与えない保守判断）。<strong>identity_ok=恒等式 DOE≒ROE×payout のクロスチェック</strong>（3指標とも ok のとき・許容誤差15%）: 一致30/不一致2/判定不能3。不一致=キヤノン(純益/EPS×株数=0.677)・神戸物産(0.809)＝<strong>自己株式多で per-share(期中平均・自己株除く)と総額(期末発行株数)の基準差を実検出</strong>＝品質監査として機能。<code>derive --what grades</code></li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>
