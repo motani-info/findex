@@ -43,6 +43,9 @@ fields:
       - jppfs_cor:BondsPayable
       - jppfs_cor:CurrentPortionOfBonds
       - jppfs_cor:CommercialPapersLiabilities
+    # IFRSの有利子負債は社により独自拡張タグ（NTT=ShortTermDebt/LongTermDebt、ソニー=Borrowings系
+    # で一部のみ標準）が多く、固定辞書では完全・信頼抽出が不可。標準のBondsAndBorrowingsを採れる社
+    # （花王/JT等）のみ採り、採れない社は導出層で insufficient とする（部分値や0を出さない＝捏造回避）。
     ifrs:
       - jpigp_cor:BondsAndBorrowingsCLIFRS
       - jpigp_cor:BondsAndBorrowingsNCLIFRS
@@ -55,6 +58,8 @@ fields:
       - jppfs_cor:PurchaseOfPropertyPlantAndEquipmentInvCF
       - jppfs_cor:PaymentsForPurchaseOfPropertyPlantAndEquipmentInvCF
       - jppfs_cor:PurchaseOfPropertyPlantAndEquipment
+      - jppfs_cor:PurchaseOfPropertyPlantAndEquipmentAndIntangibleAssetsInvCF  # 有形＋無形（高島屋等）
+      - jppfs_cor:PurchaseOfNoncurrentAssetsInvCF   # 「固定資産の取得」（PP&E限定が無い社・イオン/日産等）
     ifrs:
       - jpigp_cor:PurchaseOfPropertyPlantAndEquipmentInvCFIFRS
 
@@ -72,24 +77,33 @@ fields:
 
 # 「主要な経営指標等の推移」＝最新有報1枚に5年分が同梱（Prior4..CurrentYear）。
 # 多年doc取得なしで5年史を得る。連結＝ctxサフィックス無し。基準別。
+# 各値はフォールバック鎖（最初に在る要素IDを採る）。売上は業種で売上高/営業収益が分かれる
+# （小売・通信・サービス=営業収益）ため複数候補。標準タグに無い社（ソニーの独自拡張等）は
+# insufficientのまま（捏造しない）。
 summary_fields:
   revenue:
     ctx: duration
-    ifrs: jpcrp_cor:RevenueIFRSSummaryOfBusinessResults
-    jgaap: jpcrp_cor:NetSalesSummaryOfBusinessResults
+    ifrs:
+      - jpcrp_cor:RevenueIFRSSummaryOfBusinessResults
+      - jpcrp_cor:NetSalesAndOperatingRevenue2IFRSSummaryOfBusinessResults
+      - jpcrp_cor:OperatingRevenue1IFRSSummaryOfBusinessResults
+    jgaap:
+      - jpcrp_cor:NetSalesSummaryOfBusinessResults
+      - jpcrp_cor:OperatingRevenue1SummaryOfBusinessResults
+      - jpcrp_cor:OperatingRevenue2SummaryOfBusinessResults
   net_income:
     ctx: duration
-    ifrs: jpcrp_cor:ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults
-    jgaap: jpcrp_cor:ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults
+    ifrs: [jpcrp_cor:ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults]
+    jgaap: [jpcrp_cor:ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults]
   eps:
     ctx: duration
-    ifrs: jpcrp_cor:BasicEarningsLossPerShareIFRSSummaryOfBusinessResults
-    jgaap: jpcrp_cor:BasicEarningsLossPerShareSummaryOfBusinessResults
+    ifrs: [jpcrp_cor:BasicEarningsLossPerShareIFRSSummaryOfBusinessResults]
+    jgaap: [jpcrp_cor:BasicEarningsLossPerShareSummaryOfBusinessResults]
   total_assets:
     ctx: instant
-    ifrs: jpcrp_cor:TotalAssetsIFRSSummaryOfBusinessResults
-    jgaap: jpcrp_cor:TotalAssetsSummaryOfBusinessResults
+    ifrs: [jpcrp_cor:TotalAssetsIFRSSummaryOfBusinessResults]
+    jgaap: [jpcrp_cor:TotalAssetsSummaryOfBusinessResults]
   equity_attributable:
     ctx: instant
-    ifrs: jpcrp_cor:EquityAttributableToOwnersOfParentIFRSSummaryOfBusinessResults
-    jgaap: jpcrp_cor:NetAssetsSummaryOfBusinessResults
+    ifrs: [jpcrp_cor:EquityAttributableToOwnersOfParentIFRSSummaryOfBusinessResults]
+    jgaap: [jpcrp_cor:NetAssetsSummaryOfBusinessResults]

@@ -209,12 +209,14 @@ def _extract_summary_with(records, std, current_fy, suffix):
         fy = current_fy - offset
         year_vals: dict[str, float] = {}
         for fname, spec in _LABELS["summary_fields"].items():
-            eid = spec.get(std)
-            if not eid:
-                continue
+            cands = spec.get(std) or []
+            if isinstance(cands, str):
+                cands = [cands]
             ctx = base + ("Instant" if spec.get("ctx") == "instant" else "Duration") + suffix
-            if (eid, ctx) in idx:
-                year_vals[fname] = idx[(eid, ctx)]
+            for eid in cands:  # フォールバック鎖: 最初に在る要素IDを採る
+                if (eid, ctx) in idx:
+                    year_vals[fname] = idx[(eid, ctx)]
+                    break
         if year_vals:
             out[fy] = year_vals
     return out

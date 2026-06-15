@@ -183,11 +183,11 @@ def financials_cmd(codes, cohort, no_resume) -> None:
 
 @main.command("derive")
 @subset_options
-@click.option("--what", default="all", help="導出対象（all/streaks/dividends）")
+@click.option("--what", default="all", help="導出対象（all/streaks/dividends/financials）")
 def derive_cmd(codes, cohort, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
-    from .derive.compute import build_dividend_metrics, build_streaks
+    from .derive.compute import build_dividend_metrics, build_financial_metrics, build_streaks
 
     target = _resolve_codes(codes, cohort)
     if not target:
@@ -204,6 +204,15 @@ def derive_cmd(codes, cohort, what) -> None:
         if what in ("all", "dividends"):
             d = build_dividend_metrics(conn, target)
             console.print(f"[green]✓[/green] dividends: rows={d['rows']} 増配の質={d['quality_dist']}")
+        if what in ("all", "financials"):
+            f = build_financial_metrics(conn, target)
+            oc = f["ok_counts"]
+            console.print(
+                f"[green]✓[/green] financials: rows={f['rows']} "
+                f"ROE={oc['roe']} 自己資本比率={oc['equity_ratio']} 営業益率={oc['operating_margin']} "
+                f"EPS成長={oc['eps_growth_5y']} 売上CAGR={oc['revenue_growth_5y_cagr']} "
+                f"DOE={oc['doe']} FCFカバ={oc['fcf_payout_coverage']}"
+            )
     finally:
         conn.close()
 

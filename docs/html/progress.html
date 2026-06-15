@@ -100,7 +100,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a/3-b完了・3-c着手）</strong>/ <strong>次の一歩</strong>: Phase 3-c 財務由来指標（ROE/自己資本比率/営業利益率/DOE/FCF/成長率）。直前にEDINET5年史バックフィル完了</p>
+<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3-a/3-b/3-c完了）</strong>/ <strong>次の一歩</strong>: Phase 3-d 価格由来指標（PER/PBR/配当利回り/時価総額/ネットキャッシュ）。3-cで財務由来11指標＋5状態statusを実装・コホート検証済</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -326,7 +326,7 @@ li{margin:.2em 0}
 <td>3</td>
 <td>導出（status付き・YoC質ゲート・DOE・打ち切り合成・<strong>seam穴橋渡し</strong>）</td>
 <td>golden_streaks緑・status分布妥当</td>
-<td style="text-align: center;">🟨 3-a/3-b完了・3-c着手</td>
+<td style="text-align: center;">🟨 3-a/3-b/3-c完了・3-d次</td>
 </tr>
 <tr>
 <td>4</td>
@@ -366,6 +366,7 @@ li{margin:.2em 0}
 <li><strong>3-a ストリーク</strong>: 機械計算→result_override（昇格のみ）→N+ の合成順序。golden 18/18一致。決算変更/分割の変則年は機械が過小評価→公表値で昇格</li>
 <li><strong>3-b 配当由来指標</strong>: YoC・DPS倍率・CAGR・信頼性・減配回数。減配検出は「前年割れ かつ 2年前も割れ」で頑健化（花王FY2012スパイク復帰を誤検出しない）</li>
 <li><strong>3-c前バックフィル</strong>: 増配の質はEPS5年比較が前提。J-Quants約2年窓では縮退→<strong>有報「主要な経営指標等の推移」（最新1枚にPrior4..Current同梱）</strong>で5年史を取得。J-Quantsが直近2年・EDINET summaryが古い3年をCOALESCE補完。花王5年EPS=230.59/183.28/94.37/231.94/260.30で実証。US GAAPは5年史も構造化されず→insufficientのまま（捏造しない）</li>
+<li><strong>3-c 財務由来指標（11指標の生値＋5状態status）</strong>: ROE/自己資本比率/D/E/営業益率/配当性向/DOE/EPS成長/売上CAGR/FCFカバ/利剰配当倍率/ROIC−WACC。点指標は最新<strong>J-Quants確報</strong>をアンカー（5年史の薄いorphan行を掴まない）、深いBS（有利子負債/利益剰余金/capex）は各フィールド最新非NULLを独立取得、成長は5年史CAGR。コホート35社status分布: equity_ratio/roe=35ok、営業益率31ok（残=銀行/持株/IFRS営業益欠落・正当）、EPS成長28ok・売上CAGR30ok、FCFカバ22ok。<strong>確証主義の実証</strong>: ①<strong>IFRS有利子負債は企業独自拡張タグ</strong>（NTT=ShortTermDebt/ソニー=Borrowings系）で完全抽出不可→標準BondsAndBorrowingsが在る社のみok・無ければ<strong>insufficient</strong>（NTT/SBGをD/E=0と偽装しない）。zero_legit(無借金)はJGAAP（標準タクソノミ信頼可）限定。②売上/capexの要素IDが業種で分裂（営業収益・固定資産取得・有形無形合算）→標準タグのみフォールバック鎖化（イオン/日産/高島屋回復、ソニー独自拡張はinsufficient）。③ROIC−WACCは市場値/beta（価格層）依存→現状insufficient。④<strong>EDINET日次スキャンは一過性失敗でデータを黙って取りこぼす</strong>（find_latest_docが例外握り潰し）＝Phase2 robustness課題（全銘柄runでは再取得/検証が必須）</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>

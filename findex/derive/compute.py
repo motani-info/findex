@@ -252,6 +252,208 @@ def build_dividend_metrics(conn, codes: list[str]) -> dict:
     return {"rows": n, "quality_dist": qdist}
 
 
+def _fin_series(conn, code: str, column: str):
+    return conn.execute(
+        f"SELECT fiscal_year, {column} FROM financial_snapshots "
+        f"WHERE code=? AND {column} IS NOT NULL ORDER BY fiscal_year",
+        (code,),
+    ).fetchall()
+
+
+def _cagr_5y(rows, *, min_span: int = 4, bound: float = 0.5):
+    """(値, status)。5年CAGR。基準負/ゼロ・スパン不足・外れ値は insufficient（捏造しない）。"""
+    if len(rows) < 2:
+        return None, "insufficient"
+    now_fy, v_now = rows[-1]
+    then_fy = now_fy - 5
+    cand = [(fy, v) for fy, v in rows if fy <= then_fy]
+    used_fy, v_old = cand[-1] if cand else rows[0]
+    span = now_fy - used_fy
+    if span < min_span:
+        return None, "insufficient"  # 5年成長に満たない（構造的）
+    if v_old <= 0 or v_now <= 0:
+        return None, "insufficient"  # 負/ゼロ基準は成長率算出不能
+    raw = (v_now / v_old) ** (1 / span) - 1
+    if not (-bound < raw < bound):
+        return None, "insufficient"  # 外れ値（基準年アーティファクト）→出さない
+    return round(raw, 6), "ok"
+
+
+def _latest_nonnull(conn, code: str, column: str) -> float | None:
+    """そのフィールドの最新の非NULL値（深いBSはEDINET最新有報年にのみ在るため）。"""
+    r = conn.execute(
+        f"SELECT {column} FROM financial_snapshots WHERE code=? AND {column} IS NOT NULL "
+        f"ORDER BY fiscal_year DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+    return r[0] if r else None
+
+
+def _latest_dps(conn, code: str) -> float | None:
+    r = conn.execute(
+        "SELECT dps FROM dividend_annual WHERE code=? AND confidence!='review' "
+        "ORDER BY fiscal_year DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+    return r[0] if r else None
+
+
+_FIN_COLS = [
+    "equity_ratio", "debt_to_equity", "roe", "operating_margin",
+    "eps_growth_5y", "revenue_growth_5y_cagr", "roic_minus_wacc",
+    "fcf_payout_coverage", "retained_earnings_div_ratio", "payout_ratio", "doe",
+]
+
+
+def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
+    """財務由来指標（D4.5）の生値＋5状態status。採点はPhase4。
+
+    点指標は最新の実績年度（net_income在り＝J-Quants確報）から。成長は5年史（EDINET補完）から。
+    roic_minus_wacc は市場値/beta（価格層）依存→現状 insufficient。
+    """
+    # 点指標(PL/CF/株数)は最新の**J-Quants確報**をアンカー（完全な行）。EDINET5年史が当年に
+    # net_incomeだけ埋めた薄いorphan行（営業利益・株数を欠く）を掴まないよう jquants 優先。
+    core = conn.execute(
+        "SELECT fiscal_year, revenue, operating_income, net_income, eps, total_assets, "
+        "equity_attributable, operating_cf, shares_outstanding FROM financial_snapshots "
+        "WHERE code=? AND net_income IS NOT NULL "
+        "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
+        (code,),
+    ).fetchone()
+    if not core:
+        return None
+    (fy, revenue, op_income, net_income, eps, total_assets, equity, op_cf, shares) = core
+    # 深いBS(有利子負債/利益剰余金/capex)はEDINET最新有報年（アンカーと別年のことがある）に
+    # 在る。各フィールド独立に「最新の非NULL値」を採る（最新BSスナップショット）。
+    capex = _latest_nonnull(conn, code, "capex")
+    retained = _latest_nonnull(conn, code, "retained_earnings")
+    ibd = _latest_nonnull(conn, code, "interest_bearing_debt")
+    # 深いBS抽出が走ったか（債務タグ皆無=無借金 と 抽出未実行=取得不能 を区別する材料）
+    deep_ran = (retained is not None) or (capex is not None) or \
+        (_latest_nonnull(conn, code, "total_liabilities") is not None)
+    std = conn.execute(
+        "SELECT accounting_standard FROM stocks WHERE code=?", (code,)
+    ).fetchone()
+    std = std[0] if std else None
+    dps = _latest_dps(conn, code)
+    div_total = dps * shares if (dps is not None and shares) else None
+
+    out: dict = {c: None for c in _FIN_COLS}
+    status: dict[str, str] = {}
+
+    # 自己資本比率
+    if equity is not None and total_assets and total_assets > 0:
+        out["equity_ratio"], status["equity_ratio"] = round(equity / total_assets, 6), "ok"
+    else:
+        status["equity_ratio"] = "missing"
+
+    # 有利子負債比率。ibd在り=ok。ibd無しは基準で分岐:
+    #   JGAAP（標準タクソノミで信頼可）＝深いBS抽出済なら債務タグ皆無=無借金 zero_legit。
+    #   IFRS/US（独自拡張で完全抽出不可）＝insufficient（部分値/0を出さず捏造を避ける）。
+    if not (equity and equity > 0):
+        status["debt_to_equity"] = "missing"
+    elif ibd is not None and ibd > 0:
+        out["debt_to_equity"], status["debt_to_equity"] = round(ibd / equity, 6), "ok"
+    elif ibd == 0:
+        out["debt_to_equity"], status["debt_to_equity"] = 0.0, "zero_legit"
+    elif not deep_ran:
+        status["debt_to_equity"] = "missing"  # 抽出未実行（EDINETなし/US連結不在）
+    elif std == "jgaap":
+        out["debt_to_equity"], status["debt_to_equity"] = 0.0, "zero_legit"  # 無借金
+    else:
+        status["debt_to_equity"] = "insufficient"  # IFRS拡張タグで信頼抽出不可
+
+    # ROE
+    if net_income is not None and equity and equity > 0:
+        out["roe"], status["roe"] = round(net_income / equity, 6), "ok"
+    else:
+        status["roe"] = "missing"
+
+    # 営業利益率
+    if op_income is not None and revenue and revenue > 0:
+        out["operating_margin"], status["operating_margin"] = round(op_income / revenue, 6), "ok"
+    else:
+        status["operating_margin"] = "missing"
+
+    # 配当性向 = DPS/EPS（赤字は算出不能=insufficient）
+    if dps == 0:
+        out["payout_ratio"], status["payout_ratio"] = 0.0, "zero_legit"
+    elif dps is not None and eps and eps > 0:
+        out["payout_ratio"], status["payout_ratio"] = round(dps / eps, 6), "ok"
+    elif eps is not None and eps <= 0:
+        status["payout_ratio"] = "insufficient"
+    else:
+        status["payout_ratio"] = "missing"
+
+    # DOE = 年間配当総額÷自己資本（独立算出＝ROE×配当性向の恒等式材料）
+    if div_total is not None and equity and equity > 0:
+        out["doe"], status["doe"] = round(div_total / equity, 6), "ok"
+    else:
+        status["doe"] = "missing"
+
+    # 利益剰余金配当倍率（US連結はretained取得不能→insufficient）
+    if retained is None:
+        status["retained_earnings_div_ratio"] = "insufficient"
+    elif div_total and div_total > 0 and retained > 0:
+        r = retained / div_total
+        if 0 < r < 1000:
+            out["retained_earnings_div_ratio"], status["retained_earnings_div_ratio"] = round(r, 4), "ok"
+        else:
+            status["retained_earnings_div_ratio"] = "insufficient"
+    else:
+        status["retained_earnings_div_ratio"] = "missing"
+
+    # FCF配当カバレッジ = (CFO−capex)/配当総額（capex無=insufficient。負FCFも実シグナルで保持）
+    if op_cf is None or capex is None:
+        status["fcf_payout_coverage"] = "insufficient"
+    elif div_total and div_total > 0:
+        r = (op_cf - capex) / div_total
+        if -100 < r < 100:
+            out["fcf_payout_coverage"], status["fcf_payout_coverage"] = round(r, 4), "ok"
+        else:
+            status["fcf_payout_coverage"] = "insufficient"
+    else:
+        status["fcf_payout_coverage"] = "missing"
+
+    # ROIC−WACC（市場値/beta/実効税率＝価格層依存。現状未算出）
+    status["roic_minus_wacc"] = "insufficient"
+
+    # 成長（EDINET5年史バックフィルで前提が揃った）
+    out["eps_growth_5y"], status["eps_growth_5y"] = _cagr_5y(_fin_series(conn, code, "eps"))
+    out["revenue_growth_5y_cagr"], status["revenue_growth_5y_cagr"] = _cagr_5y(
+        _fin_series(conn, code, "revenue")
+    )
+
+    out["_status"] = status
+    out["_fy"] = fy
+    return out
+
+
+def build_financial_metrics(conn, codes: list[str]) -> dict:
+    now = datetime.now().isoformat(timespec="seconds")
+    n = 0
+    ok_counts: dict[str, int] = {c: 0 for c in _FIN_COLS}
+    set_clause = ",".join(f"{c}=excluded.{c}" for c in _FIN_COLS)
+    insert_sql = (
+        f"INSERT INTO computed_metrics (code,{','.join(_FIN_COLS)},status_json,fin_computed_at) "
+        f"VALUES (?,{','.join('?' * len(_FIN_COLS))},?,?) "
+        f"ON CONFLICT(code) DO UPDATE SET {set_clause},"
+        f"status_json=excluded.status_json,fin_computed_at=excluded.fin_computed_at"
+    )
+    for code in codes:
+        d = compute_financial_metrics_for_code(conn, code)
+        if not d:
+            continue
+        status_json = _merge_json(conn, code, "status_json", d.pop("_status"))
+        conn.execute(insert_sql, (code, *[d[c] for c in _FIN_COLS], status_json, now))
+        for c in _FIN_COLS:
+            if d[c] is not None:
+                ok_counts[c] += 1
+        n += 1
+    conn.commit()
+    return {"rows": n, "ok_counts": ok_counts}
+
+
 def build_streaks(conn, codes: list[str]) -> dict:
     """コホート/指定銘柄のストリークを computed_metrics に upsert。"""
     now = datetime.now().isoformat(timespec="seconds")
