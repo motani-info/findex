@@ -1,0 +1,71 @@
+# EDINET有報XBRL 会計基準別ラベル辞書（design-review #4）。実データスパイクで策定。
+# 連結＝コンテキストがサフィックス無し(CurrentYearInstant/Duration)のものだけ採る。
+# mode: first=フォールバック鎖の最初に在る値 / sum=候補のうち在るものを合算。
+# ctx: instant=時点(BS) / duration=期間(PL・CF)。
+# 空リスト=その基準では構造的に単独タグ無し→status=insufficient（捏造しない）。
+# US GAAPは連結が構造化XBRLに出ない（実証）→ us_unavailable=true で全項目フォールバック。
+
+# AccountingStandardsDEI の値 → 内部基準キー
+standards:
+  "Japan GAAP": jgaap
+  "IFRS": ifrs
+  "US GAAP": us
+
+# US GAAP連結は構造化されないため、深いBS抽出は不可（grade_capitalフォールバック）
+us_unavailable: true
+
+fields:
+  retained_earnings:
+    ctx: instant
+    mode: first
+    jgaap: [jppfs_cor:RetainedEarnings]
+    ifrs:  [jpigp_cor:RetainedEarningsIFRS]
+
+  investment_securities:
+    ctx: instant
+    mode: first
+    jgaap: [jppfs_cor:InvestmentSecurities]
+    ifrs:  []   # IFRSは「その他の金融資産」に統合され単独タグ無し
+
+  interest_expense:
+    ctx: duration
+    mode: first
+    jgaap: [jppfs_cor:InterestExpensesNOE, jppfs_cor:InterestExpensesOpeCF]
+    ifrs:  [jpigp_cor:InterestExpensesIFRS, jpigp_cor:InterestExpensesOpeCFIFRS]
+
+  interest_bearing_debt:
+    ctx: instant
+    mode: sum
+    jgaap:
+      - jppfs_cor:ShortTermLoansPayable
+      - jppfs_cor:CurrentPortionOfLongTermLoansPayable
+      - jppfs_cor:LongTermLoansPayable
+      - jppfs_cor:BondsPayable
+      - jppfs_cor:CurrentPortionOfBonds
+      - jppfs_cor:CommercialPapersLiabilities
+    ifrs:
+      - jpigp_cor:BondsAndBorrowingsCLIFRS
+      - jpigp_cor:BondsAndBorrowingsNCLIFRS
+
+  capex:
+    ctx: duration
+    mode: first
+    abs: true   # CF流出は負値→絶対値
+    jgaap:
+      - jppfs_cor:PurchaseOfPropertyPlantAndEquipmentInvCF
+      - jppfs_cor:PaymentsForPurchaseOfPropertyPlantAndEquipmentInvCF
+      - jppfs_cor:PurchaseOfPropertyPlantAndEquipment
+    ifrs:
+      - jpigp_cor:PurchaseOfPropertyPlantAndEquipmentInvCFIFRS
+
+  current_assets:
+    ctx: instant
+    mode: first
+    jgaap: [jppfs_cor:CurrentAssets]
+    ifrs:  []   # IFRSは流動/非流動区分が任意
+
+  total_liabilities:
+    ctx: instant
+    mode: first
+    jgaap: [jppfs_cor:Liabilities]
+    ifrs:  [jpigp_cor:LiabilitiesIFRS]

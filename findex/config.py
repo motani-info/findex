@@ -33,6 +33,10 @@ GOLDEN_STREAKS = DATA_DIR / "golden_streaks_zai_20260601.csv"
 # 2000年問題の下限band（この年以前で始まる系列は左打ち切りを疑う）。docs/design/pre2000-data.md
 DATA_FLOOR_YEAR = 2002
 
+# APIキー（.env 由来。findex/.env は back_findex/.env のコピー＝gitignore済）
+JQUANTS_API_KEY = os.environ.get("JQUANTS_API_KEY", "")
+EDINET_API_KEY = os.environ.get("EDINET_API_KEY", "")
+
 
 def ensure_dirs() -> None:
     for d in (FINDEX_HOME, DB_PATH.parent, BACKUP_DIR, CHECKPOINT_DIR):
