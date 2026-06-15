@@ -110,6 +110,29 @@ def listing_cmd(codes, cohort, no_resume) -> None:
     )
 
 
+@main.command("prices")
+@subset_options
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def prices_cmd(codes, cohort, no_resume) -> None:
+    """株価履歴を2000年遡及で取得（yfinance分割調整Close）（Phase2-d）。"""
+    from .db import connect
+    from .fetch.prices import build_prices
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        return
+    conn = connect()
+    try:
+        stats = build_prices(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] prices: ok={stats['ok']} failed={stats['failed']} "
+        f"行={stats['rows']:,} 外れ値={stats['outliers']}"
+    )
+
+
 @main.command("financials")
 @subset_options
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
