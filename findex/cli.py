@@ -110,6 +110,30 @@ def listing_cmd(codes, cohort, no_resume) -> None:
     )
 
 
+@main.command("financials")
+@subset_options
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def financials_cmd(codes, cohort, no_resume) -> None:
+    """financial_snapshots を構築（J-Quants基礎＋EDINET深いBS）（Phase2-c）。"""
+    from .db import connect
+    from .fetch.financials import build_financials
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        return
+    conn = connect()
+    try:
+        stats = build_financials(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] financials: J-Quants[{stats['jq']}] EDINET[{stats['edinet']}] "
+        f"行={stats['snapshot_rows']} 深いBS付={stats['rows_with_deep']} "
+        f"会計基準設定={stats['accounting_standard_set']}"
+    )
+
+
 @main.command("migrate")
 @subset_options
 def migrate_cmd(codes, cohort) -> None:
