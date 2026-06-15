@@ -67,6 +67,66 @@ def cohort_cmd() -> None:
     console.print(table)
 
 
+@main.command("master")
+@subset_options
+def master_cmd(codes, cohort) -> None:
+    """stocks をJPX一覧＋EDINETコードリストから構築（Phase1）。"""
+    from .db import connect
+    from .fetch.master import build_stocks
+
+    target = _resolve_codes(codes, cohort)
+    conn = connect()
+    try:
+        stats = build_stocks(conn, target)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] master: universe={stats['universe']} "
+        f"new={stats['inserted']} upd={stats['updated']} "
+        f"(EDINET会計メタ {stats['edinet_meta_codes']}件)"
+    )
+
+
+@main.command("listing")
+@subset_options
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def listing_cmd(codes, cohort, no_resume) -> None:
+    """上場日(listing_date)をyfinanceで取得（Phase1・打ち切り判定の鍵）。"""
+    from .db import connect
+    from .fetch.listing import update_listing
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください（全銘柄は重いので明示）[/red]")
+        return
+    conn = connect()
+    try:
+        stats = update_listing(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] listing: 真の上場日={stats['true_listing_dates']} "
+        f"床(≤2000・補完待ち)={stats['floor_unknown']} failed={stats['failed']}"
+    )
+
+
+@main.command("migrate")
+@subset_options
+def migrate_cmd(codes, cohort) -> None:
+    """旧DBから再現困難なデータを移行（haitoukin配当・override）（Phase1）。"""
+    from .db import connect
+    from .migrate import migrate_dividend_annual, migrate_overrides
+
+    target = _resolve_codes(codes, cohort)
+    conn = connect()
+    try:
+        n_div = migrate_dividend_annual(conn, target)
+        n_ovr = migrate_overrides(conn, target)
+    finally:
+        conn.close()
+    console.print(f"[green]✓[/green] migrate: dividend_annual(non-events)={n_div} overrides={n_ovr}")
+
+
 @main.command("update")
 @subset_options
 @click.option("--quarterly", is_flag=True, help="四半期: 財務諸表を更新")
