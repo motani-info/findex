@@ -90,6 +90,7 @@ li{margin:.2em 0}
 <a class="l2" href="#5-35">5. 実装フェーズの段取り（コホート35社で各フェーズ検証）</a>
 <a class="l3" href="#phase2">取得層(Phase2)の実データ確認サマリ</a>
 <a class="l3" href="#phase3">導出層(Phase3)の実データ確認サマリ</a>
+<a class="l3" href="#phase4v4">評価層(Phase4・v4)の実データ確認サマリ</a>
 <a class="l2" href="#6">6. 既知のリスク・宿題</a>
 <a class="l3" href="#61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</a>
 <a class="l3" href="#62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
@@ -100,7 +101,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-15 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（導出層Phase3完了＝3-a〜3-e＋beta＋ROIC−WACC）</strong>/ <strong>次の一歩</strong>: Phase 4 採点（v4 status-based・動的分母・業種相対・実績フォールバック）</p>
+<p><strong>最終更新</strong>: 2026-06-16 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（Phase4 採点v4 完了）</strong>/ <strong>次の一歩</strong>: Phase 5.5 バックテスト（D8・PIT・前方アウトカム・重みv5較正）→ Phase 5 検証（findex verify・全銘柄スキャン）</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -330,9 +331,9 @@ li{margin:.2em 0}
 </tr>
 <tr>
 <td>4</td>
-<td>採点（v4 status-based・動的分母・業種相対）</td>
+<td>採点（v4 status-based・動的分母・業種相対・YoC質ゲート・動的入れ替え）</td>
 <td>スコア説明可能</td>
-<td style="text-align: center;">⬜</td>
+<td style="text-align: center;">✅ コホート採点</td>
 </tr>
 <tr>
 <td>backtest</td>
@@ -371,6 +372,13 @@ li{margin:.2em 0}
 <li><strong>beta（株価×日経225回帰）</strong>: 週次5年リターン回帰 beta=Cov/Var。市場=日経225（^N225→price_history code 'N225'。<strong>TOPIX指数は無料取得不可・TOPIX連動ETF1306は2026-03の1:10分割未調整で分散膨張→不可</strong>。指数は分割/配当なくクリーン）。月次60点はノイズ過大（神戸物産-0.29）→週次260点で是正。検証: SBG1.72/ソニー0.93/日産0.89/銀行0.72（高beta景気敏感）、JT0.28/花王0.21（低betaディフェンシブ）＝相対順位正確。<code>findex prices --benchmark</code>でN225取得、<code>derive --what beta</code>。</li>
 <li><strong>ROIC−WACC活性化（beta後段）</strong>: NOPAT=営業利益×(1−税率)、投下資本=自己資本(簿価)+有利子負債、ROIC=NOPAT/投下資本。CAPM Re=Rf+beta×ERP、Rd=支払利息/有利子負債（取れねば2%）、WACC=(E/V)Re+(D/V)Rd(1−税率)・E=時価総額。<strong>定数 Rf=0.01/ERP=0.06/実効税率=0.30 をモジュール定数で明示</strong>（個別未抽出のため固定）。<strong>確証主義の連鎖</strong>: 有利子負債が信頼抽出できない社（IFRS拡張タグ＝NTT/ソニー/ユニチャーム/ニトリ）はD/E insufficientを連鎖してROICもinsufficient（偽値を出さない）、無借金JGAAPはD=0で算出可、営業利益不在の銀行/持株（MUFG/SBG/クレディセゾン）も算出不能。コホート26/35ok。実値の経済的妥当性: アセットライト高ROIC（USS14.97%/神戸物産13.86%/電通総研12.48%）が上位、資本集約/苦戦（ガス0.9%/武田-0.4%/日産-1.1%/アステラス-1.8%）が下位＝直感と一致。<code>derive --what roic</code>。<code>--what all</code>順序=streaks→dividends→financials→prices→beta→roic→grades</li>
 <li><strong>3-e claim別グレード＋恒等式チェック（導出層の最終出口）</strong>: 主張(claim)ごとに依存指標(status_jsonキー)集合でA〜Dを付ける（D2 §6.2）。core=必須/extra=期間充足・補助。<strong>A</strong>=core全ok＋extra充足、<strong>B</strong>=core全okだがextraにcensored(N+)/insufficient/missing、<strong>C</strong>=core一部insufficient/missing（評価不能＝投稿しない）、<strong>D</strong>=coreが一つも算出されず（無配の配当系・該当データ皆無＝構造的対象外）。insufficient(抽出を試みたが信頼不可)と missing(そもそも無い)を区別。4claim=配当系/バリュ系/財務系/資本効率系(入手難)。コホート分布: 配当 A28/B6/D1（D=メルカリ無配）、バリュ A32/C2(クレディセゾンJ-Quants基礎無・日産赤字)/B1(メルカリ無配)、財務 A21/B10/C4（C=営業益率欠落の銀行/持株/IFRS：MUFG/SBG/クレディセゾン/ユニチャーム）、資本効率 A21/C14（入手難claimらしくIFRS拡張・銀行/持株・リースがC）。営業利益率はhealthのcoreに据える（銀行の自己資本比率は構造的に低く誤解を招くため、汎用比率だけで健全性Aを与えない保守判断）。<strong>identity_ok=恒等式 DOE≒ROE×payout のクロスチェック</strong>（3指標とも ok のとき・許容誤差15%）: 一致30/不一致2/判定不能3。不一致=キヤノン(純益/EPS×株数=0.677)・神戸物産(0.809)＝<strong>自己株式多で per-share(期中平均・自己株除く)と総額(期末発行株数)の基準差を実検出</strong>＝品質監査として機能。<code>derive --what grades</code></li>
+</ul>
+<h3 id="phase4v4">評価層(Phase4・v4)の実データ確認サマリ</h3>
+<ul>
+<li><strong>status_based 動的分母（D4 §1の核心）</strong>: ok/zero_legit のみ分子・分母に算入。missing/insufficient/censored は両方から除外（持っていないデータで罰しない）。旧v3「None→0点・分母に残す」アンチパターンを是正。スコアは <code>dividend_scores</code>、ルールは <code>rule_versions</code>(SHA256版管理)。<code>findex score --cohort</code></li>
+<li><strong>v4較正</strong>: ①10年CAGR廃止→YoC(取得利回り5年)新設＋<strong>質ゲート</strong>(dividend_quality で×1.0sound/×0.5payout_driven/×0.3cyclical)＋DOE新設 ②自己資本比率80%→70%・ROE20%→15% ③営業利益率を<strong>業種相対</strong>(sector33内パーセンタイル・母数min_sector_n=4未満は絶対閾値フォールバック) ④動的入れ替え(large_cap≥1兆/financialでroic→利益剰余金倍率・net_cash_per→ミックス係数・金融は自己資本比率除外)</li>
+<li><strong>発見＆是正した実装バグ</strong>: <code>consecutive_no_cut_years</code>（最高重み2.5の核心指標）に<strong>status未付与</strong>で全銘柄が採点から除外されていた→<code>compute_streaks_for_code</code>で連続非減配にもstatus(ok/censored)を付与。<code>build_streaks</code>はstatus_jsonを上書き（merge でない）ため<code>--what all</code>で先頭実行が前提（単独runは他statusを消す）。</li>
+<li><strong>コホート採点</strong>: n_scored=11〜15が大半（フルデータ社）。ランキングは高配当ツールとして妥当（配当良質なリース/アセットライト＝みずほリース90.7/USS87/SPK80.6が上位、成長/無配のソニー・SBG・メルカリが下位）。<strong>薄いデータinflationを実観測</strong>: クレディセゾン7指標のみで93.6点1位だがグレードC/C/C＝設計通り「歯止めはスコアでなくグレード（score×grade で判断）」。n_scored列で透明化。<strong>重みは旧PJ継承の手づけ→前方アウトカム較正はPhase5.5バックテスト(D8→v5)</strong></li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>

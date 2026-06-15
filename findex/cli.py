@@ -312,6 +312,39 @@ def update_cmd(codes, cohort, quarterly, dividends, no_resume) -> None:
     console.print("[dim]取得層は骨格段階です（fetch.* を実装中）。[/dim]")
 
 
+@main.command("score")
+@subset_options
+@click.option("--top", default=30, help="表示件数")
+def score_cmd(codes, cohort, top) -> None:
+    """評価層: computed_metrics を v4 ルールで採点→dividend_scores（Phase4）。"""
+    from .db import connect
+    from .score.engine import build_scores
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+    names = {c.code: c.name for c in load_cohort()}
+    conn = connect()
+    try:
+        res = build_scores(conn, target)
+    finally:
+        conn.close()
+    table = Table(title=f"v4スコア（{res['version_tag']} / {res['rows']}社）")
+    for col in ("#", "code", "name", "score", "配当", "バリュ", "財務", "資本", "指標数"):
+        table.add_column(col, overflow="fold")
+    for i, r in enumerate(res["ranking"][:top], 1):
+        table.add_row(
+            str(i), r["code"], names.get(r["code"], "")[:12], f"{r['total']:.1f}",
+            r["grade_dividend"] or "—", r["grade_valuation"] or "—",
+            r["grade_health"] or "—", r["grade_capital"] or "—", str(r["n_scored"]),
+        )
+    console.print(table)
+    console.print(
+        f"[dim]rule_version_id={res['rule_version_id']} scored_at={res['scored_at']}[/dim]"
+    )
+
+
 @main.command("rank")
 @click.option("--top", default=30, help="表示件数")
 @click.option("--market", default=None)
@@ -320,8 +353,8 @@ def update_cmd(codes, cohort, quarterly, dividends, no_resume) -> None:
 @click.option("--min-no-cut", type=int, default=None)
 @click.option("--out", type=click.Path(), default=None, help="CSV出力先")
 def rank_cmd(top, market, sector, min_yield, min_no_cut, out) -> None:
-    """スコアランキングを表示する。"""
-    console.print("[dim]評価層は骨格段階です（score.* を実装中）。[/dim]")
+    """保存済みスコアからランキングを表示する。"""
+    console.print("[dim]rank は dividend_scores の表示専用（score で採点後に使用）。実装中。[/dim]")
 
 
 @main.command("check")

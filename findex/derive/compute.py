@@ -59,13 +59,21 @@ def compute_streaks_for_code(conn, code: str) -> dict:
         return "censored" if censored else "machine"
 
     g_src = src(final.growth_years, machine.growth_years, machine.is_censored)
+    nc_src = "override" if (ov_nc is not None and final.nocut_years > machine.nocut_years) \
+        else ("censored" if final.is_censored else "machine")
+    streak_st = "censored" if final.is_censored else "ok"
     return {
         "consecutive_dividend_growth_years": final.growth_years,
         "consecutive_no_cut_years": final.nocut_years,
         "streak_is_censored": 1 if final.is_censored else 0,
-        "_source": {"consecutive_dividend_growth_years": g_src},
+        "_source": {
+            "consecutive_dividend_growth_years": g_src,
+            "consecutive_no_cut_years": nc_src,
+        },
         "_status": {
-            "consecutive_dividend_growth_years": "censored" if final.is_censored else "ok",
+            # 連続非減配/増配とも打ち切り(N+)なら裸の数字で採点しない＝censored（採点層で分母除外）
+            "consecutive_dividend_growth_years": streak_st,
+            "consecutive_no_cut_years": streak_st,
         },
         "_no_data": not annual,
     }
