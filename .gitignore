@@ -14,3 +14,5 @@ __pycache__/
 .checkpoints/
 # data/ の参照CSV（検証コホート・golden）は追跡する
 !data/*.csv
+# 生成レポート（findex report で再生成可能・日付スタンプで差分ノイズになる）
+docs/html/report.html

@@ -92,6 +92,7 @@ li{margin:.2em 0}
 <a class="l3" href="#phase3">導出層(Phase3)の実データ確認サマリ</a>
 <a class="l3" href="#phase4v4">評価層(Phase4・v4)の実データ確認サマリ</a>
 <a class="l3" href="#phase55d8">バックテスト(Phase5.5・D8)の実データ確認サマリ</a>
+<a class="l3" href="#phase6mvp">出力(Phase6)のMVP — パイプライン端から端まで貫通</a>
 <a class="l2" href="#6">6. 既知のリスク・宿題</a>
 <a class="l3" href="#61-phase0-2">6.1 実装で解決済み（✅・Phase0-2で実データ確認）</a>
 <a class="l3" href="#62">6.2 未解決リスク・宿題（🟨＝要注視 / 🟥＝実装バグ）</a>
@@ -352,7 +353,7 @@ li{margin:.2em 0}
 <td>6</td>
 <td>出力（HTML生成＋X発信・claim内ランキング主）</td>
 <td>サイト生成＋品質ゲート通過の投稿</td>
-<td style="text-align: center;">⬜</td>
+<td style="text-align: center;">🟨 MVP HTMLレポート完了・X発信は残</td>
 </tr>
 </tbody>
 </table>
@@ -387,6 +388,12 @@ li{margin:.2em 0}
 <li><strong>減配検出の頑健化（2つの罠を実データで是正）</strong>: ①<strong>特配スパイクが窓先頭</strong>（花王FY2012=93特配で窓開始）→前方窓に<strong>2年の後方文脈を含めて</strong>判定し誤検出回避 ②<strong>配当の分割単位不整合</strong>（神戸物産2009=0.156÷6・沖縄セルラー2010=9.375÷2＝実際は増配継続）→単年で前年の55%未満への急落＋翌年に前年水準へ即復帰するV字は分割アーティファクトと見なし除外。<strong>JTのFY2021実減配(154→140=91%)は閾値超で真の減配として残す</strong>＝アーティファクトと実減配を弁別。</li>
 <li><strong>コホート検証</strong>: 減配42/884窓(4.75%)が全て危機期/既知の減配者に集中＝日産14(2008危機+Ghosn/COVID・前方TR-0.53/最大DD-0.70)・JT8(FY2021高配当の罠)・ソニー8・キヤノン8(COVID)・ロート4(リーマン)。連続増配の常連(KDDI/アステラス/花王)は減配0＝正解ラベルとして妥当。</li>
 <li>⚠<strong>全銘柄バックテストの前提条件（未充足）</strong>: ①<code>delisting_date</code>収集（生存バイアス排除・現状コホートは現役のみ）②配当の分割単位正規化（上記アーティファクトの上流是正）。コホートは配線検証用。</li>
+</ul>
+<h3 id="phase6mvp">出力(Phase6)のMVP — パイプライン端から端まで貫通</h3>
+<ul>
+<li><strong>MVP HTMLレポート（完了）</strong>: <code>findex/post/report.py</code>＋<code>findex report --cohort</code>→<code>docs/html/report.html</code>。<strong>柱3で初の触れる成果物</strong>。設計の安全弁D2 §6.5（完璧主義を待たず確信できるclaimから出力）を実装。<strong>品質ゲートを実装で遵守</strong>: status=ok/zero_legitの数字だけ表示（他は「—」）・連続年数の打ち切りは「N年以上」（花王36→16事故の再発防止）・ZAi公表override由来は出典バッジ・claim別グレード併示・免責必須・数字は全てDB由来。</li>
+<li><strong>2部構成</strong>: ①連続増配・非減配ランキング（配当claim grade≠Dを連続増配年数で降順。花王36年[ZAi公表]がトップ＝再構築の動機だった連続増配の正確性を実証）②v4総合スコア（参考・4グレード併示）。②には<strong>暫定の明示注記</strong>（重み手づけ・バックテスト未完・薄いデータは指標数少でスコア上振れ→歯止めはグレード）。クレディセゾン7指標93.6点1位がC/C/C/7で透明に可視化。</li>
+<li>ローカルHTML一級化（D5）＝X障害時の受け皿・自前サイト・投稿画像の母体。生成物はgitignore（再生成可能）。</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>

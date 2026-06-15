@@ -390,6 +390,31 @@ def check_cmd(codes) -> None:
     console.print(f"[dim]check {', '.join(codes)} — 骨格段階[/dim]")
 
 
+@main.command("report")
+@subset_options
+@click.option("--out", type=click.Path(), default=None, help="出力HTMLパス（既定: docs/html/report.html）")
+def report_cmd(codes, cohort, out) -> None:
+    """検証済みデータから閲覧可能なHTMLレポートを生成（MVP出力・品質ゲート遵守）。"""
+    from pathlib import Path
+
+    from .db import connect
+    from .post.report import write_report
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        res = write_report(conn, target, Path(out) if out else None)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] report: {res['stocks']}社 → {res['path']} ({res['bytes']:,} bytes)"
+    )
+    console.print(f"[dim]open {res['path']}[/dim]")
+
+
 @main.command("post")
 @click.argument("theme")
 @click.option("--dry-run", is_flag=True, help="品質ゲート＋生成のみ（投稿しない）")
