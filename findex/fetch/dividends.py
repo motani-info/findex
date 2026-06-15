@@ -24,6 +24,27 @@ def fiscal_year_of(ex_date_iso: str, fiscal_end_month: int) -> int:
     return y + 1 if m > fiscal_end_month else y
 
 
+def aggregate_events(events: list[tuple[str, float]], fiscal_month: int) -> dict[int, float]:
+    """配当イベント→会計年度別合算。**部分的な初年度のみ**を捨てる（地雷1を条件化）。
+
+    旧実装は初年度を無条件ドロップ→花王FY2000(=10+12の完全な年)まで消し接合に穴が空いた。
+    初年度の支払回数が次年度より少ない時だけ「期中＝部分的」とみなして捨てる。
+    """
+    fy_sum: dict[int, float] = {}
+    fy_cnt: dict[int, int] = {}
+    for ex, amt in events:
+        fy = fiscal_year_of(ex, fiscal_month)
+        fy_sum[fy] = fy_sum.get(fy, 0.0) + amt
+        fy_cnt[fy] = fy_cnt.get(fy, 0) + 1
+    if not fy_sum:
+        return {}
+    fys = sorted(fy_sum)
+    first = fys[0]
+    if len(fys) > 1 and fy_cnt[first] < fy_cnt[fys[1]]:
+        del fy_sum[first]  # 部分的な初年度のみ捨てる
+    return fy_sum
+
+
 class DividendFetcher(RateLimitedFetcher[list]):
     name = "dividends_yfinance"
     policy = FetchPolicy(batch_size=50, sleep_between_batches=2.0, sleep_between_items=0.3, max_retries=4)
@@ -72,40 +93,126 @@ def build_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
         )
         n_events += len(events)
 
-        # 2) 会計年度別に合算（地雷2）
-        fy_sum: dict[int, float] = {}
-        for ex, amt in events:
-            fy = fiscal_year_of(ex, months.get(code, 3))
-            fy_sum[fy] = fy_sum.get(fy, 0.0) + amt
-        if not fy_sum:
-            continue
-        first_fy = min(fy_sum)  # 初年度は期中の可能性で捨てる（地雷1）
-
-        # 3) 能動洗浄: 既存haitoukin(pre2000)との接合/重複照合（#7）
+        # 2) 会計年度別に合算（地雷2・部分初年度のみ除外）
+        fy_sum = aggregate_events(events, months.get(code, 3))
         for fy, dps in sorted(fy_sum.items()):
-            if fy == first_fy:
-                continue
-            row = conn.execute(
-                "SELECT dps, source FROM dividend_annual WHERE code=? AND fiscal_year=?", (code, fy)
-            ).fetchone()
-            confidence = "present"
-            if row and row[1] == "haitoukin" and row[0]:
-                rel = abs(dps - row[0]) / row[0] if row[0] else 0
-                if rel > 0.10:  # 10%超の乖離=要確認
-                    confidence = "review"
-                    n_review += 1
             # 優先度: events は最弱。既存が上位ソースなら上書きしない
             if _existing_priority(conn, code, fy) > SOURCE_PRIORITY["events"]:
                 continue
             conn.execute(
                 """INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, as_of, updated_at)
-                   VALUES (?,?,?, 'events', ?, NULL, ?)
+                   VALUES (?,?,?, 'events', 'present', NULL, ?)
                    ON CONFLICT(code, fiscal_year) DO UPDATE SET
-                     dps=excluded.dps, source='events', confidence=excluded.confidence, updated_at=excluded.updated_at""",
-                (code, fy, dps, confidence, now),
+                     dps=excluded.dps, source='events', confidence='present', updated_at=excluded.updated_at""",
+                (code, fy, dps, now),
             )
             n_annual += 1
     conn.commit()
+    n_review = cleanse_haitoukin_seam(conn, list(res.ok))
     return {"ok": len(res.ok), "failed": len(res.failed), "no_dividend": no_div,
             "events": n_events, "annual_rows": n_annual, "review_flags": n_review,
             "failures": res.failed}
+
+
+def cleanse_haitoukin_seam(conn, codes: list[str]) -> int:
+    """能動洗浄（#7）: haitoukin(pre2000)を分割でevents単位に整合させる。
+
+    haitoukinの分割調整状態は社により不統一（実証: リンナイは未調整・花王は調整済）。
+    接合年で「生」と「分割係数で除算」の2仮説を比較し、events側トレンドに整合する方を採用。
+    どちらも整合しなければ confidence=review（捏造せず気づける状態にする）。
+    """
+    import yfinance as yf
+
+    now = datetime.now().isoformat(timespec="seconds")
+    n_review = 0
+    for code in codes:
+        hai = conn.execute(
+            "SELECT fiscal_year, dps FROM dividend_annual WHERE code=? AND source='haitoukin' ORDER BY fiscal_year",
+            (code,),
+        ).fetchall()
+        if not hai:
+            continue
+        # events側の最初の確かな値（接合の参照）
+        ev = conn.execute(
+            "SELECT fiscal_year, dps FROM dividend_annual WHERE code=? AND source='events' ORDER BY fiscal_year LIMIT 1",
+            (code,),
+        ).fetchone()
+        if not ev:
+            continue
+        ev_fy, ev_dps = ev
+        last_hy, last_hv = hai[-1]
+        try:
+            splits = yf.Ticker(f"{code}.T").splits
+        except Exception:
+            splits = None
+        factor = 1.0
+        if splits is not None and len(splits):
+            for idx, v in splits.items():
+                if idx.year > last_hy:  # haitoukin最終年より後の分割
+                    factor *= float(v)
+        gap = max(ev_fy - last_hy, 1)
+        # 1年あたり許容: 0.6〜1.8倍/年（増配/微減の現実的レンジ）
+        def per_year(ratio):
+            return ratio ** (1.0 / gap)
+        raw_ratio = (last_hv / ev_dps) if ev_dps else 0
+        adj_ratio = (last_hv / factor / ev_dps) if (ev_dps and factor) else 0
+        raw_ok = 0.55 <= per_year(raw_ratio) <= 1.8 if raw_ratio > 0 else False
+        adj_ok = 0.55 <= per_year(adj_ratio) <= 1.8 if adj_ratio > 0 else False
+        if adj_ok and factor > 1 and not raw_ok:
+            # 分割未調整 → 全haitoukin行を分割調整して単位統一
+            for fy, dps in hai:
+                conn.execute(
+                    "UPDATE dividend_annual SET dps=?, confidence='present', updated_at=? WHERE code=? AND fiscal_year=?",
+                    (dps / factor, now, code, fy),
+                )
+        elif raw_ok:
+            pass  # 既に整合（調整不要）
+        else:
+            # どちらも不整合（合併等）→ review（pre2000は左打ち切り/override/N+で扱う）
+            for fy, _ in hai:
+                conn.execute(
+                    "UPDATE dividend_annual SET confidence='review', updated_at=? WHERE code=? AND fiscal_year=?",
+                    (now, code, fy),
+                )
+            n_review += 1
+    conn.commit()
+    return n_review
+
+
+def rebuild_and_cleanse(conn, codes: list[str]) -> dict:
+    """再取得せず、保存済み dividend_events から dividend_annual(events) を再構築＋洗浄。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    months = {
+        r[0]: (r[1] or 3)
+        for r in conn.execute(
+            f"SELECT code, fiscal_period_end_month FROM stocks WHERE code IN ({','.join('?' * len(codes))})",
+            codes,
+        )
+    }
+    n_annual = 0
+    for code in codes:
+        events = [
+            (r[0], r[1])
+            for r in conn.execute(
+                "SELECT ex_date, amount FROM dividend_events WHERE code=? ORDER BY ex_date", (code,)
+            )
+        ]
+        if not events:
+            continue
+        # 既存events行を作り直す前に消す（地雷1条件化で年構成が変わるため）
+        conn.execute("DELETE FROM dividend_annual WHERE code=? AND source='events'", (code,))
+        fy_sum = aggregate_events(events, months.get(code, 3))
+        for fy, dps in sorted(fy_sum.items()):
+            if _existing_priority(conn, code, fy) > SOURCE_PRIORITY["events"]:
+                continue
+            conn.execute(
+                """INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, as_of, updated_at)
+                   VALUES (?,?,?, 'events', 'present', NULL, ?)
+                   ON CONFLICT(code, fiscal_year) DO UPDATE SET
+                     dps=excluded.dps, source='events', confidence='present', updated_at=excluded.updated_at""",
+                (code, fy, dps, now),
+            )
+            n_annual += 1
+    conn.commit()
+    n_review = cleanse_haitoukin_seam(conn, codes)
+    return {"annual_rows": n_annual, "review_flags": n_review}

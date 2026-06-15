@@ -181,6 +181,25 @@ def financials_cmd(codes, cohort, no_resume) -> None:
     )
 
 
+@main.command("rebuild-dividends")
+@subset_options
+def rebuild_dividends_cmd(codes, cohort) -> None:
+    """保存済みevents から dividend_annual を再構築＋haitoukin接合洗浄（再取得なし）。"""
+    from .db import connect
+    from .fetch.dividends import rebuild_and_cleanse
+
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        stats = rebuild_and_cleanse(conn, target)
+    finally:
+        conn.close()
+    console.print(f"[green]✓[/green] rebuild: annual={stats['annual_rows']} review={stats['review_flags']}")
+
+
 @main.command("migrate")
 @subset_options
 def migrate_cmd(codes, cohort) -> None:
