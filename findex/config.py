@@ -33,6 +33,10 @@ GOLDEN_STREAKS = DATA_DIR / "golden_streaks_zai_20260601.csv"
 # 2000年問題の下限band（この年以前で始まる系列は左打ち切りを疑う）。docs/design/pre2000-data.md
 DATA_FLOOR_YEAR = 2002
 
+# yfinance株価・配当eventsが網羅的になる開始年。この年以降に上場した銘柄は IPO以降の
+# 配当履歴を完全に保持できる＝データ下限による打ち切り(N+)の対象外（真の上場日が前提）。
+PRICE_DATA_START_YEAR = 2000
+
 # APIキー（.env 由来。findex/.env は back_findex/.env のコピー＝gitignore済）
 JQUANTS_API_KEY = os.environ.get("JQUANTS_API_KEY", "")
 EDINET_API_KEY = os.environ.get("EDINET_API_KEY", "")

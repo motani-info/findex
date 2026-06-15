@@ -44,6 +44,19 @@ def test_not_censored_for_true_post2000_ipo():
     assert r.is_censored is False
 
 
+def test_ipo_era_gap_not_censored():
+    # IPO世代(2000上場)で初配当が下限band(2002)＝IPO→初配当の空白。全履歴保持＝打ち切りでない
+    # （電通総研型: 上場2000-11・初配当2002）。上場<最古年 でも 上場>=2000 なら非打ち切り。
+    r = compute_streaks(_series(2002, list(range(10, 35))), listing_year=2000)
+    assert r.is_censored is False
+
+
+def test_pre2000_lister_still_censored():
+    # 1999上場（網羅開始2000より前）で系列が下限band始まり → 1999配当の欠落を疑い打ち切り
+    r = compute_streaks(_series(2000, list(range(10, 35))), listing_year=1999)
+    assert r.is_censored is True
+
+
 def test_override_promotes_only_when_larger():
     # 機械計算26年だが公表36年 → 36に昇格、打ち切り解除（花王）
     r = compute_streaks(

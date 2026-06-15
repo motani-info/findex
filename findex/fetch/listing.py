@@ -64,6 +64,98 @@ class ListingFetcher(RateLimitedFetcher[ListingInfo]):
         return super().is_rate_limit(exc) or "too many requests" in msg
 
 
+# ── Yahoo!ファイナンス(日本)プロフィール: 真の上場年月日＋設立年月日 ──────────
+# yfinanceの firstTradeDate は国内株で2000-2001床に張り付き古い銘柄の真値を欠く。
+# Yahoo!JPプロフィールは「上場年月日」を一次に近い形で持つ（花王=1949年5月＝年月のみ等も）。
+# これを真値ソースとし、yfinance床NULLを置き換える。設立年月日も founded_date に補完。
+_YAHOO_UA = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+    "Accept-Language": "ja,en;q=0.9",
+}
+_JP_DATE_RE = r"([0-9]{4})年([0-9]{1,2})月(?:([0-9]{1,2})日)?"
+
+
+def parse_jp_date(s: str | None) -> str | None:
+    """『1994年10月27日』『1949年5月』→ ISO日付。日が無ければ01日（古い上場は年月のみ）。"""
+    if not s:
+        return None
+    import re
+
+    m = re.search(_JP_DATE_RE, s)
+    if not m:
+        return None
+    y, mo, d = int(m.group(1)), int(m.group(2)), int(m.group(3) or 1)
+    return f"{y:04d}-{mo:02d}-{d:02d}"
+
+
+@dataclass
+class YahooListingInfo:
+    code: str
+    listing_date: str | None        # 真の上場日（年月のみは01日）
+    founded_date: str | None        # 設立年月日
+    source: str
+
+
+class YahooListingFetcher(RateLimitedFetcher[YahooListingInfo]):
+    name = "listing_yahoo"
+    policy = FetchPolicy(batch_size=50, sleep_between_batches=3.0, sleep_between_items=0.8, max_retries=4)
+
+    def fetch_one(self, code: str) -> YahooListingInfo:
+        import re
+
+        import requests
+        from bs4 import BeautifulSoup
+
+        url = f"https://finance.yahoo.co.jp/quote/{code}.T/profile"
+        r = requests.get(url, headers=_YAHOO_UA, timeout=20)
+        r.raise_for_status()
+        text = BeautifulSoup(r.text, "html.parser").get_text("|", strip=True)
+
+        def grab(label: str) -> str | None:
+            m = re.search(rf"{label}[|]?\s*{_JP_DATE_RE}", text)
+            return parse_jp_date(m.group(0)) if m else None
+
+        return YahooListingInfo(code, grab("上場年月日"), grab("設立年月日"), "yahoo_profile")
+
+    def is_rate_limit(self, exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return super().is_rate_limit(exc) or "429" in msg or "too many" in msg
+
+
+def update_listing_yahoo(conn, codes: list[str], *, resume: bool = True) -> dict:
+    """Yahoo!JPプロフィールで真の上場日＋設立日を取得し stocks に格納（yfinance床を置換）。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    res = YahooListingFetcher().run(codes, resume=resume)
+    listing_set = founded_set = corrected = both_null = 0
+    for code, info in res.ok.items():
+        old = conn.execute("SELECT listing_date FROM stocks WHERE code=?", (code,)).fetchone()
+        old_ld = old[0] if old else None
+        if info.listing_date:
+            conn.execute(
+                "UPDATE stocks SET listing_date=?, updated_at=? WHERE code=?",
+                (info.listing_date, now, code),
+            )
+            listing_set += 1
+            if old_ld and old_ld[:7] != info.listing_date[:7]:
+                corrected += 1  # yfinance床/旧値と年月が違う＝訂正
+        if info.founded_date:
+            conn.execute(
+                "UPDATE stocks SET founded_date=?, updated_at=? WHERE code=?",
+                (info.founded_date, now, code),
+            )
+            founded_set += 1
+        if not info.listing_date and not info.founded_date:
+            both_null += 1
+    conn.commit()
+    return {
+        "ok": len(res.ok), "failed": len(res.failed),
+        "listing_set": listing_set, "founded_set": founded_set,
+        "corrected_from_old": corrected, "both_null": both_null,
+        "failures": res.failed,
+    }
+
+
 def update_listing(conn, codes: list[str], *, resume: bool = True) -> dict:
     """yfinanceで listing_date を取得し stocks にupsert（NULL床は据え置き）。"""
     from datetime import datetime as _dt

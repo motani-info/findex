@@ -35,6 +35,7 @@ def compute_streaks(
     *,
     listing_year: int | None = None,
     data_floor_year: int = 2002,
+    data_start_year: int = 2000,
     drop_in_progress_year: int | None = None,
     override: StreakOverride | None = None,
 ) -> StreakResult:
@@ -70,8 +71,13 @@ def compute_streaks(
         # 上場日が無ければ安全側: 下限band到達は打ち切り扱い。
         is_censored = reaches_floor
     else:
-        # 上場日があれば確定判定: 上場が最古年より前なら真に欠落（打ち切り）。
-        is_censored = reaches_floor and (listing_year < earliest_year)
+        # 上場日があれば確定判定。打ち切り＝「データ下限より前に既に公開・配当していた履歴の欠落」。
+        # ①上場が最古配当年より前（公開時点で既に配当があったはず）かつ
+        # ②上場がデータ網羅開始年(2000)より前（IPO以降を完全保持できない世代）の両方が必要。
+        # IPO世代(>=2000上場)は IPO→初配当の空白があっても全履歴を保持＝打ち切りでない（電通総研2000上場/初配当2002）。
+        is_censored = (
+            reaches_floor and listing_year < earliest_year and listing_year < data_start_year
+        )
 
     # --- 公表値オーバーライド（公表 > 機械計算 のときだけ昇格）---
     if override is not None:

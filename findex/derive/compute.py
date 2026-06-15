@@ -44,9 +44,11 @@ def compute_streaks_for_code(conn, code: str) -> dict:
     ov_nc = _override(conn, code, "consecutive_no_cut_years")
 
     machine = compute_streaks(annual, listing_year=listing_year,
-                              data_floor_year=config.DATA_FLOOR_YEAR)
+                              data_floor_year=config.DATA_FLOOR_YEAR,
+                              data_start_year=config.PRICE_DATA_START_YEAR)
     final = compute_streaks(
         annual, listing_year=listing_year, data_floor_year=config.DATA_FLOOR_YEAR,
+        data_start_year=config.PRICE_DATA_START_YEAR,
         override=StreakOverride(
             growth_years=int(ov_g) if ov_g is not None else None,
             nocut_years=int(ov_nc) if ov_nc is not None else None,

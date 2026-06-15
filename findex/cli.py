@@ -90,10 +90,12 @@ def master_cmd(codes, cohort) -> None:
 @main.command("listing")
 @subset_options
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
-def listing_cmd(codes, cohort, no_resume) -> None:
-    """上場日(listing_date)をyfinanceで取得（Phase1・打ち切り判定の鍵）。"""
+@click.option("--source", type=click.Choice(["yfinance", "yahoo"]), default="yahoo",
+              help="上場日ソース（yahoo=真値・設立日も補完／yfinance=床判定）")
+def listing_cmd(codes, cohort, no_resume, source) -> None:
+    """上場日(listing_date)を取得（打ち切り判定の鍵）。既定=Yahoo!JP真値。"""
     from .db import connect
-    from .fetch.listing import update_listing
+    from .fetch.listing import update_listing, update_listing_yahoo
 
     target = _resolve_codes(codes, cohort)
     if not target:
@@ -101,13 +103,20 @@ def listing_cmd(codes, cohort, no_resume) -> None:
         return
     conn = connect()
     try:
-        stats = update_listing(conn, target, resume=not no_resume)
+        if source == "yahoo":
+            s = update_listing_yahoo(conn, target, resume=not no_resume)
+            console.print(
+                f"[green]✓[/green] listing(Yahoo): 上場日={s['listing_set']} 設立日={s['founded_set']} "
+                f"旧値訂正={s['corrected_from_old']} 両方不明={s['both_null']} failed={s['failed']}"
+            )
+        else:
+            s = update_listing(conn, target, resume=not no_resume)
+            console.print(
+                f"[green]✓[/green] listing(yfinance): 真の上場日={s['true_listing_dates']} "
+                f"床(≤2000・補完待ち)={s['floor_unknown']} failed={s['failed']}"
+            )
     finally:
         conn.close()
-    console.print(
-        f"[green]✓[/green] listing: 真の上場日={stats['true_listing_dates']} "
-        f"床(≤2000・補完待ち)={stats['floor_unknown']} failed={stats['failed']}"
-    )
 
 
 @main.command("prices")
