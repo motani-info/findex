@@ -125,14 +125,20 @@ def find_latest_doc(edinet_code: str, fy_end_month: int) -> tuple[str | None, st
 
     窓内の全日を clean にスキャンして見つからなければ (None, None)。途中で
     一過性失敗が解消しなければ EdinetScanError を送出し、空との断定を避ける。
+
+    **走査は窓内を締切側(hi)から lo へ逆順**。有報は提出締切の直前に集中するため、
+    前方(lo)からだと十数日ぶん無駄打ちしてからヒットする。1つの提出窓に同一企業の
+    有報(docTypeCode=120)は1枚しか無いので、走査方向を変えても**返る docID は不変**・
+    速くなるだけ（結果同一を実データcohortで実証済み）。窓の順序(最新期→前期)は維持
+    するので「最新の有報」を返す性質も不変。
     """
     for lo, hi in _filing_windows(fy_end_month):
-        d = lo
-        while d <= hi:
+        d = hi
+        while d >= lo:
             hit = _scan_one_date(d, edinet_code)
             if hit:
                 return hit
-            d += timedelta(days=1)
+            d -= timedelta(days=1)
     return None, None
 
 
