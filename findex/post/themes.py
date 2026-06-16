@@ -274,6 +274,197 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
             "claims": claims, "gates": _gates(body, n)}
 
 
+def _yen(v):
+    if v is None:
+        return '<span class="muted">—</span>'
+    if v >= 1e12:
+        return f"{v / 1e12:.2f}兆円"
+    return f"{v / 1e8:.0f}億円"
+
+
+# 列種別 → セル描画。r は fetch_rows の1行。
+def _cell(r: dict, key: str, kind: str) -> str:
+    if kind == "streak_g":
+        return _streak_cell(r["g_years"], r["censored"], r["g_src"])
+    if kind == "streak_nc":
+        return _streak_cell(r["nc_years"], r["censored"], r["nc_src"])
+    v = r.get(key)
+    if kind == "pct":
+        return _pct(v)
+    if kind == "num":
+        return _num(v)
+    if kind == "x":
+        return _num(v, "倍")
+    if kind == "x2":
+        return _num(v, "倍", 2)
+    if kind == "grade":
+        return _grade_chip(v)
+    if kind == "quality":
+        return _q_jp(v)
+    if kind == "yen":
+        return _yen(v)
+    if kind == "int":
+        return str(int(v)) if v is not None else '<span class="muted">—</span>'
+    return '<span class="muted">—</span>'
+
+
+def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, columns,
+                   eligible, sort_key, reverse=True, claim_keys, foot_extra=""):
+    """宣言的ランキングテーマの共通実装。columns=[(見出し, key, kind), ...]。
+
+    先頭3列（#/コード/銘柄）は自動。eligible=行フィルタ, sort_key=並べ替えキー。
+    fetch_rows が status ゲート済み（確証データのみ値を持つ）ので、ここは整形のみ。
+    """
+    rows = fetch_rows(conn, codes)
+    elig = [r for r in rows if eligible(r)]
+    elig.sort(key=sort_key, reverse=reverse)
+    n = min(top_n, len(elig))
+    body = body_fn(n)
+    head = ["#", "@コード", "@銘柄", *[c[0] for c in columns]]
+    trs = []
+    for i, r in enumerate(elig[:top_n], 1):
+        cells = "".join(f"<td>{_cell(r, key, kind)}</td>" for _, key, kind in columns)
+        trs.append(
+            f'<tr><td>{i}</td><td class="l">{r["code"]}</td>'
+            f'<td class="l">{r["name"]}</td>{cells}</tr>'
+        )
+    claims = [{"code": r["code"], "name": r["name"], **{k: r.get(k) for k in claim_keys}}
+              for r in elig[:top_n]]
+    return {"theme": theme, "body": body,
+            "image_html": _rank_card(title, subtitle, head, trs, foot_extra),
+            "claims": claims, "gates": _gates(body, n)}
+
+
+# ── 宣言的テーマ定義（label, builder） ───────────────────────────────
+# 各 spec は _ranking_theme へ渡す kwargs。THEMES へ functools.partial で登録。
+_SPECS: dict[str, dict] = {
+    "no_cut": dict(
+        title="連続非減配ランキング", subtitle="減配なしで配当を守り続けた年数",
+        body_fn=lambda n: ('"増やす"より、まず"減らさない"。\n'
+                           f"連続非減配ランキング🛡️ トップ{n}\n"
+                           "不況でも配当を守った銘柄。\n#日本株 #高配当株 #配当"),
+        columns=[("連続非減配", "nc_years", "streak_nc"), ("連続増配", "g_years", "streak_g"),
+                 ("減配信頼性", "rel", "num"), ("増配の質", "quality", "quality"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["nc_years"] is not None,
+        sort_key=lambda r: (r["nc_years"] or -1, r["g_years"] or -1),
+        claim_keys=["nc_years", "gd"]),
+    "long_growth": dict(
+        title="長期増配の王様（10年以上）", subtitle="連続増配10年以上",
+        body_fn=lambda n: ('一過性でなく、10年以上"続く"増配。\n'
+                           f"長期増配の王様ランキング👑 トップ{n}\n"
+                           "時間が証明した配当力。\n#日本株 #増配株 #高配当"),
+        columns=[("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
+                 ("増配率5年", "dpc5", "pct"), ("YoC(5年)", "yoc", "pct"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and (r["g_years"] or 0) >= 10,
+        sort_key=lambda r: r["g_years"] or -1, claim_keys=["g_years", "gd"]),
+    "growth_room": dict(
+        title="増配余力（配当性向が低い）", subtitle="配当性向が低い＝増配の伸びしろ",
+        body_fn=lambda n: ("配当性向が低い＝まだ増やせる。\n"
+                           f"増配余力ランキング💪 トップ{n}\n"
+                           "無理なく増配を続けられる株。\n#日本株 #増配株 #高配当"),
+        columns=[("配当性向", "payout_ratio", "pct"), ("連続増配", "g_years", "streak_g"),
+                 ("増配率5年", "dpc5", "pct"), ("FCFカバ", "fcf_payout_coverage", "x"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] in ("A", "B") and r["payout_ratio"] is not None
+        and 0 < r["payout_ratio"] < 0.4 and r["g_years"] is not None,
+        sort_key=lambda r: r["payout_ratio"], reverse=False, claim_keys=["payout_ratio", "gd"]),
+    "fcf_coverage": dict(
+        title="FCF配当カバレッジ", subtitle="稼ぐ現金で配当を何倍まかなえるか",
+        body_fn=lambda n: ('配当は利益でなく"現金"で見る。\n'
+                           f"FCF配当カバレッジ🔄 トップ{n}\n"
+                           "稼ぐ現金で配当を何倍払えるか。\n#日本株 #高配当株 #配当"),
+        columns=[("FCFカバ", "fcf_payout_coverage", "x"), ("配当性向", "payout_ratio", "pct"),
+                 ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["fcf_payout_coverage"] is not None,
+        sort_key=lambda r: r["fcf_payout_coverage"] or -1, claim_keys=["fcf_payout_coverage", "gd"]),
+    "high_roe_growth": dict(
+        title="高ROE×増配", subtitle="稼ぐ力と増配の両立",
+        body_fn=lambda n: ('配当だけでなく"稼ぐ力"も。\n'
+                           f"高ROE×増配ランキング💹 トップ{n}\n"
+                           "ROEと増配を両立する優良株。\n#日本株 #増配株 #ROE"),
+        columns=[("ROE", "roe", "pct"), ("連続増配", "g_years", "streak_g"),
+                 ("営業益率", "operating_margin", "pct"), ("財務grade", "gh", "grade"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["roe"] is not None and r["g_years"] is not None,
+        sort_key=lambda r: r["roe"] or -1, claim_keys=["roe", "gd"]),
+    "total_score": dict(
+        title="findex 配当総合スコア", subtitle="配当/バリュー/財務/資本の総合評価(v4)",
+        body_fn=lambda n: ("配当・割安・財務・資本を総合評価。\n"
+                           f"findex総合スコアランキング📊 トップ{n}\n"
+                           "多角指標で選ぶ配当株。\n#日本株 #高配当株 #配当"),
+        columns=[("総合", "total", "num"), ("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
+                 ("財務", "gh", "grade"), ("資本", "gc", "grade"), ("指標数", "n_scored", "int")],
+        eligible=lambda r: r["total"] is not None,
+        sort_key=lambda r: r["total"] or -1, claim_keys=["total", "gd"]),
+    "high_yield": dict(
+        title="高利回り（3.5%以上）", subtitle="配当利回り3.5%以上",
+        body_fn=lambda n: ("まずは利回りで選ぶなら。\n"
+                           f"高配当利回りランキング💰 トップ{n}\n"
+                           "利回り3.5%以上＋継続性も併示。\n#日本株 #高配当株 #配当"),
+        columns=[("配当利回り", "dy", "pct"), ("配当性向", "payout_ratio", "pct"),
+                 ("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["dy"] is not None and r["dy"] >= 0.035,
+        sort_key=lambda r: r["dy"] or -1, claim_keys=["dy", "gd"]),
+    "low_pbr_yield": dict(
+        title="割安高配当（PBR1倍以下）", subtitle="PBR1倍以下×高利回り",
+        body_fn=lambda n: ('"資産より安い"高配当。\n'
+                           f"割安高配当ランキング🔍 トップ{n}\n"
+                           "PBR1倍以下で利回りも高い株。\n#日本株 #割安株 #高配当"),
+        columns=[("PBR", "pbr", "x2"), ("配当利回り", "dy", "pct"), ("PER", "per", "x"),
+                 ("財務grade", "gh", "grade"), ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
+        and r["dy"] is not None,
+        sort_key=lambda r: r["dy"] or -1, claim_keys=["pbr", "dy", "gd"]),
+    "large_cap": dict(
+        title="大型優良配当（時価総額1兆円超）", subtitle="時価総額1兆円超×配当gradeA/B",
+        body_fn=lambda n: ("大型で安定、それでも配当が育つ。\n"
+                           f"大型優良配当ランキング🏢 トップ{n}\n"
+                           "時価総額1兆円超の安定高配当。\n#日本株 #高配当株 #大型株"),
+        columns=[("時価総額", "current_market_cap", "yen"), ("配当利回り", "dy", "pct"),
+                 ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
+        and r["current_market_cap"] >= 1e12,
+        sort_key=lambda r: r["current_market_cap"] or -1, claim_keys=["current_market_cap", "gd"]),
+    "small_value": dict(
+        title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
+        body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"
+                           f"小型割安配当ランキング💎 トップ{n}\n"
+                           "時価総額1000億未満・PBR1倍以下。\n#日本株 #割安株 #小型株"),
+        columns=[("時価総額", "current_market_cap", "yen"), ("PBR", "pbr", "x2"),
+                 ("配当利回り", "dy", "pct"), ("財務grade", "gh", "grade"),
+                 ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["current_market_cap"] is not None
+        and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1,
+        sort_key=lambda r: r["dy"] or -1, claim_keys=["current_market_cap", "pbr", "gd"]),
+    "roic_spread": dict(
+        title="価値創造（ROIC−WACC）", subtitle="資本コストを超えて稼ぐ企業",
+        body_fn=lambda n: ("資本コストを超えて稼げているか。\n"
+                           f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
+                           "本当の意味で儲かる会社。\n#日本株 #ROIC #バリュー株"),
+        columns=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("ROE", "roe", "pct"),
+                 ("営業益率", "operating_margin", "pct"), ("資本grade", "gc", "grade")],
+        eligible=lambda r: r["roic_minus_wacc"] is not None and r["roic_minus_wacc"] > 0,
+        sort_key=lambda r: r["roic_minus_wacc"] or -1, claim_keys=["roic_minus_wacc", "gc"]),
+    "doe_king": dict(
+        title="DOE（株主資本配当率）", subtitle="利益が薄くても株主資本に対し報いる力",
+        body_fn=lambda n: ("利益が振れても、還元はブレない。\n"
+                           f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
+                           "安定還元の本命指標。\n#日本株 #高配当株 #配当"),
+        columns=[("DOE", "doe", "pct"), ("配当利回り", "dy", "pct"),
+                 ("自己資本比率", "equity_ratio", "pct"), ("配当grade", "gd", "grade")],
+        eligible=lambda r: r["gd"] != "D" and r["doe"] is not None,
+        sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
+}
+
+
+def _make_theme(name: str):
+    spec = _SPECS[name]
+    return lambda conn, codes, top_n=10: _ranking_theme(conn, codes, top_n, theme=name, **spec)
+
+
 # テーマ名 → ビルダー
 THEMES = {
     "streak": build_streak_ranking,
@@ -281,4 +472,5 @@ THEMES = {
     "div_growth": build_div_growth,
     "value_quality": build_value_quality,
     "net_cash": build_net_cash,
+    **{name: _make_theme(name) for name in _SPECS},
 }
