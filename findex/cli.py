@@ -457,13 +457,20 @@ def progress_cmd(name) -> None:
         except Exception as e:
             console.print(f"[red]{f.name} 読込失敗: {e}[/red]")
             continue
-        state = "[green]実行中[/green]" if p.get("running") else "[yellow]停止[/yellow]"
         # 最終更新からの経過（停止判定の補助）
         try:
             age = (_dt.now() - _dt.fromisoformat(p["updated_at"])).total_seconds()
             age_s = f"{int(age)}秒前" if age < 120 else f"{int(age / 60)}分前"
         except Exception:
+            age = None
             age_s = "?"
+        # running=True でも更新が古ければプロセス死亡（kill -9 等で finally 未実行）の疑い
+        if p.get("running") and (age is None or age > 120):
+            state = "[red]応答なし(停止疑い)[/red]"
+        elif p.get("running"):
+            state = "[green]実行中[/green]"
+        else:
+            state = "[yellow]停止[/yellow]"
         eta = p.get("eta_sec")
         eta_s = (f"{eta // 60}分{eta % 60}秒" if eta else "—") if eta is not None else "?"
         console.print(
