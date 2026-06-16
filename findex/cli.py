@@ -26,11 +26,31 @@ def _resolve_codes(codes: str | None, cohort: bool) -> list[str] | None:
     return None
 
 
+def _resolve_target(codes: str | None, cohort: bool, all_codes: bool) -> list[str] | None:
+    """--codes / --cohort / --all から対象を決める。--all は stocks 全件（重い・明示用）。"""
+    if all_codes:
+        from .db import connect
+
+        c = connect()
+        try:
+            t = [r[0] for r in c.execute("SELECT code FROM stocks ORDER BY code").fetchall()]
+        finally:
+            c.close()
+        console.print(f"[yellow]全銘柄モード[/yellow]: {len(t)}社（resume可・完全性ゲートで未取得は再取得対象に残る）")
+        return t
+    return _resolve_codes(codes, cohort)
+
+
 # 取得系コマンド共通のオプション
 def subset_options(f):
     f = click.option("--codes", default=None, help="カンマ区切りの銘柄（例: 7203,9433）")(f)
     f = click.option("--cohort", is_flag=True, help="検証コホート（約30社）のみ対象にする")(f)
     return f
+
+
+def all_option(f):
+    return click.option("--all", "all_codes", is_flag=True,
+                        help="全銘柄（stocks 全件）を対象にする（重いので明示）")(f)
 
 
 @click.group()
@@ -128,9 +148,10 @@ def listing_cmd(codes, cohort, all_codes, no_resume, source) -> None:
 
 @main.command("prices")
 @subset_options
+@all_option
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
 @click.option("--benchmark", is_flag=True, help="市場ベンチマーク(日経225)のみ取得（beta用）")
-def prices_cmd(codes, cohort, no_resume, benchmark) -> None:
+def prices_cmd(codes, cohort, all_codes, no_resume, benchmark) -> None:
     """株価履歴を2000年遡及で取得（yfinance分割調整Close）（Phase2-d）。"""
     from .db import connect
     from .fetch.prices import build_prices, fetch_benchmark
@@ -144,10 +165,10 @@ def prices_cmd(codes, cohort, no_resume, benchmark) -> None:
             conn.close()
         return
 
-    target = _resolve_codes(codes, cohort)
+    target = _resolve_target(codes, cohort, all_codes)
     if not target:
         conn.close()
-        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください（全銘柄は重い）[/red]")
         return
     try:
         stats = build_prices(conn, target, resume=not no_resume)
@@ -161,15 +182,16 @@ def prices_cmd(codes, cohort, no_resume, benchmark) -> None:
 
 @main.command("dividends")
 @subset_options
+@all_option
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
-def dividends_cmd(codes, cohort, no_resume) -> None:
+def dividends_cmd(codes, cohort, all_codes, no_resume) -> None:
     """配当イベント再取得→dividend_annual(events)＋能動洗浄（Phase2-e）。"""
     from .db import connect
     from .fetch.dividends import build_dividends
 
-    target = _resolve_codes(codes, cohort)
+    target = _resolve_target(codes, cohort, all_codes)
     if not target:
-        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください（全銘柄は重い）[/red]")
         return
     conn = connect()
     try:
@@ -185,15 +207,16 @@ def dividends_cmd(codes, cohort, no_resume) -> None:
 
 @main.command("financials")
 @subset_options
+@all_option
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
-def financials_cmd(codes, cohort, no_resume) -> None:
+def financials_cmd(codes, cohort, all_codes, no_resume) -> None:
     """financial_snapshots を構築（J-Quants基礎＋EDINET深いBS）（Phase2-c）。"""
     from .db import connect
     from .fetch.financials import build_financials
 
-    target = _resolve_codes(codes, cohort)
+    target = _resolve_target(codes, cohort, all_codes)
     if not target:
-        console.print("[red]--codes か --cohort を指定してください（全銘柄は重い）[/red]")
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください（全銘柄は重い）[/red]")
         return
     conn = connect()
     try:
