@@ -83,20 +83,31 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
     except Exception:
         pass
 
+    # status ゲートを通して露出する生値メトリクス（テーマ拡張の共通入口）
+    _GATED = (
+        "div_yield", "yield_on_cost_5y", "yield_on_cost_10y", "dividend_reliability",
+        "dividend_multiple", "dividend_growth_5y_cagr", "dividend_growth_10y_cagr",
+        "per", "pbr", "net_cash_per", "current_market_cap", "mix_coefficient",
+        "roe", "equity_ratio", "operating_margin", "payout_ratio", "doe",
+        "debt_to_equity", "eps_growth_5y", "revenue_growth_5y_cagr",
+        "roic_minus_wacc", "fcf_payout_coverage", "retained_earnings_div_ratio", "annual_div",
+    )
+    _RAW = (
+        "consecutive_dividend_growth_years", "consecutive_no_cut_years", "streak_is_censored",
+        "dividend_quality", "dividend_cut_count_20y",
+        "grade_dividend", "grade_valuation", "grade_health", "grade_capital",
+    )
+    sel_cols = ("source_json", "status_json", *_RAW, *_GATED)
+    select_sql = f"SELECT {', '.join(sel_cols)} FROM computed_metrics WHERE code=?"
+
     rows = []
     for code in codes:
-        m = conn.execute(
-            "SELECT consecutive_dividend_growth_years, consecutive_no_cut_years, streak_is_censored, "
-            "source_json, status_json, grade_dividend, grade_valuation, grade_health, grade_capital, "
-            "dividend_quality, yield_on_cost_5y, div_yield, dividend_reliability, dividend_cut_count_20y "
-            "FROM computed_metrics WHERE code=?", (code,)
-        ).fetchone()
+        m = conn.execute(select_sql, (code,)).fetchone()
         if not m:
             continue
-        (g_years, nc_years, censored, src_json, st_json, gd, gv, gh, gc,
-         quality, yoc, dy, rel, cuts) = m
-        src = json.loads(src_json) if src_json else {}
-        status = json.loads(st_json) if st_json else {}
+        rec = dict(zip(sel_cols, m))
+        src = json.loads(rec["source_json"]) if rec["source_json"] else {}
+        status = json.loads(rec["status_json"]) if rec["status_json"] else {}
         # 採点（v4総合スコア・参考）
         sc = conn.execute(
             "SELECT total_score, score_json FROM dividend_scores WHERE code=? ORDER BY scored_at DESC LIMIT 1",
@@ -104,19 +115,32 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
         ).fetchone()
         total = sc[0] if sc else None
         n_scored = json.loads(sc[1]).get("n_scored") if sc and sc[1] else None
-        rows.append({
+
+        out = {
             "code": code, "name": names.get(code, ""),
-            "g_years": g_years, "nc_years": nc_years, "censored": bool(censored),
+            "g_years": rec["consecutive_dividend_growth_years"],
+            "nc_years": rec["consecutive_no_cut_years"],
+            "censored": bool(rec["streak_is_censored"]),
             "g_src": src.get("consecutive_dividend_growth_years"),
             "nc_src": src.get("consecutive_no_cut_years"),
-            "gd": gd, "gv": gv, "gh": gh, "gc": gc,
-            "quality": quality if status.get("dividend_quality") in _OK else None,
-            "yoc": _val({"yield_on_cost_5y": yoc}, status, "yield_on_cost_5y"),
-            "dy": dy if status.get("div_yield") in _OK else None,
+            "gd": rec["grade_dividend"], "gv": rec["grade_valuation"],
+            "gh": rec["grade_health"], "gc": rec["grade_capital"],
+            "quality": rec["dividend_quality"] if status.get("dividend_quality") in _OK else None,
             "dy_zero": status.get("div_yield") == "zero_legit",
-            "rel": rel if status.get("dividend_reliability") in _OK else None,
-            "cuts": cuts, "total": total, "n_scored": n_scored,
-        })
+            "cuts": rec["dividend_cut_count_20y"],
+            "total": total, "n_scored": n_scored,
+        }
+        # status=ok/zero_legit のときだけ生値を載せる（確証なき数字は出さない）
+        for f in _GATED:
+            out[f] = _val(rec, status, f)
+        # 既存テーマ互換の短い別名
+        out["yoc"] = out["yield_on_cost_5y"]
+        out["yoc10"] = out["yield_on_cost_10y"]
+        out["dy"] = out["div_yield"]
+        out["rel"] = out["dividend_reliability"]
+        out["dpc5"] = out["dividend_growth_5y_cagr"]
+        out["dpc10"] = out["dividend_growth_10y_cagr"]
+        rows.append(out)
     return rows
 
 

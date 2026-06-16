@@ -202,6 +202,12 @@ def compute_dividend_metrics_for_code(conn, code: str) -> dict | None:
         if p10 and p10 > 0:
             yoc_10y = annual_div / p10
     status["yield_on_cost_5y"] = "ok" if yoc_5y is not None else "insufficient"
+    # 算出できた値にだけ ok を付与（None=データ不足=insufficient）。status未付与だと
+    # 表示層(fetch_rows)が「確証なし」として一律 — に倒れる（div_growth等のテーマが全滅）。
+    status["yield_on_cost_10y"] = "ok" if yoc_10y is not None else "insufficient"
+    status["dividend_multiple"] = "ok" if dps_mult is not None else "insufficient"
+    status["dividend_growth_5y_cagr"] = "ok" if cagr_5y is not None else "insufficient"
+    status["dividend_growth_10y_cagr"] = "ok" if cagr_10y is not None else "insufficient"
 
     return {
         "annual_div": annual_div,

@@ -120,7 +120,165 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
     }
 
 
+def _num(v, suffix="", digits=1):
+    return f"{v:.{digits}f}{suffix}" if v is not None else '<span class="muted">—</span>'
+
+
+def _q_jp(quality):
+    return _QUALITY_JP.get(quality, '<span class="muted">—</span>') if quality else '<span class="muted">—</span>'
+
+
+_FOOT = ('情報提供であり投資助言ではありません。数値はfindexデータベース由来（status=okの'
+         '確証データのみ／確証なき項目は「—」）。連続年数の打ち切りは「N年以上」。')
+
+
+def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list[str],
+               foot_extra: str = "") -> str:
+    """汎用ランキングカード（ダークテーマ・画像化用）。head_cells と body_rows<tr> を流し込む。"""
+    today = date.today().isoformat()
+    ths = "".join(
+        f'<th class="l">{h[1:]}</th>' if h.startswith("@") else f"<th>{h}</th>"
+        for h in head_cells
+    )
+    return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
+<div class="card">
+<div class="brand">findex</div>
+<h1>{title}</h1>
+<div class="cap">検証済みデータ（status=ok）／生成 {today}・{subtitle}</div>
+<table><thead><tr>{ths}</tr></thead><tbody>
+{chr(10).join(body_rows)}
+</tbody></table>
+<div class="foot">{foot_extra}{_FOOT}</div>
+</div>"""
+
+
+def _gates(body: str, n: int, **extra) -> dict:
+    wl = weighted_len(body)
+    return {
+        "status_ok_only": True, "censored_as_n_plus": True, "grade_shown": True,
+        "eligible_count": n, "body_weighted_len": wl, "body_within_limit": wl <= 140,
+        "passed": n > 0 and wl <= 140, **extra,
+    }
+
+
+def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
+    """高配当×安全: 利回り高 かつ 配当gradeA/B かつ 減配信頼性が算出済み（罠高配当を除く）。"""
+    rows = fetch_rows(conn, codes)
+    elig = [r for r in rows if r["dy"] is not None and r["gd"] in ("A", "B") and r["rel"] is not None]
+    elig.sort(key=lambda r: r["dy"], reverse=True)
+    n = min(top_n, len(elig))
+    body = ('"高利回り=危険"とは限らない。\n'
+            f"減配しにくい高配当ランキング💰 トップ{n}\n"
+            "利回り×継続性×財務の質で選別。\n"
+            "#日本株 #高配当株 #配当")
+    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "連続非減配", "増配の質", "配当grade"]
+    trs = []
+    for i, r in enumerate(elig[:top_n], 1):
+        trs.append(
+            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
+            f'<td>{_pct(r["dy"])}</td><td>{_pct(r["yoc"])}</td><td>{_num(r["rel"])}</td>'
+            f'<td>{_streak_cell(r["nc_years"], r["censored"], r["nc_src"])}</td>'
+            f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
+        )
+    claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
+               "dividend_reliability": r["rel"], "grade_dividend": r["gd"]} for r in elig[:top_n]]
+    return {"theme": "high_yield_safe", "body": body,
+            "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
+                                     head, trs, "減配信頼性=過去の非減配度。"),
+            "claims": claims, "gates": _gates(body, n)}
+
+
+def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
+    """増配スピード: 5年増配率(CAGR)上位（配当claimあり）。"""
+    rows = fetch_rows(conn, codes)
+    elig = [r for r in rows if r["dpc5"] is not None and r["gd"] != "D"]
+    elig.sort(key=lambda r: r["dpc5"], reverse=True)
+    n = min(top_n, len(elig))
+    body = ('配当は"今の利回り"より"増える速さ"。\n'
+            f"5年増配率(CAGR)ランキング📈 トップ{n}\n"
+            "黙って持つほど利回りが育つ株。\n"
+            "#日本株 #増配株 #高配当")
+    head = ["#", "@コード", "@銘柄", "増配率5年", "増配率10年", "連続増配", "YoC(5年)", "増配の質", "配当grade"]
+    trs = []
+    for i, r in enumerate(elig[:top_n], 1):
+        trs.append(
+            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
+            f'<td>{_pct(r["dpc5"])}</td><td>{_pct(r["dpc10"])}</td>'
+            f'<td>{_streak_cell(r["g_years"], r["censored"], r["g_src"])}</td>'
+            f'<td>{_pct(r["yoc"])}</td><td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
+        )
+    claims = [{"code": r["code"], "name": r["name"], "dividend_growth_5y_cagr": r["dpc5"],
+               "grade_dividend": r["gd"]} for r in elig[:top_n]]
+    return {"theme": "div_growth", "body": body,
+            "image_html": _rank_card("増配スピード（5年CAGR）ランキング", "CAGR=年平均成長率",
+                                     head, trs),
+            "claims": claims, "gates": _gates(body, n)}
+
+
+def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
+    """割安×優良: PBR<1 かつ 財務gradeA/B かつ ROE算出済み。質を伴う割安。"""
+    rows = fetch_rows(conn, codes)
+    elig = [r for r in rows if r["pbr"] is not None and r["pbr"] < 1
+            and r["gh"] in ("A", "B") and r["roe"] is not None]
+    elig.sort(key=lambda r: r["roe"], reverse=True)
+    n = min(top_n, len(elig))
+    body = ("PBR1倍割れ=万年割安、とは限らない。\n"
+            f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
+            "ROEと財務健全性で選別。\n"
+            "#日本株 #割安株 #バリュー株")
+    head = ["#", "@コード", "@銘柄", "PBR", "PER", "ROE", "自己資本比率", "財務grade", "バリューgrade"]
+    trs = []
+    for i, r in enumerate(elig[:top_n], 1):
+        trs.append(
+            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
+            f'<td>{_num(r["pbr"], "倍", 2)}</td><td>{_num(r["per"], "倍")}</td>'
+            f'<td>{_pct(r["roe"])}</td><td>{_pct(r["equity_ratio"])}</td>'
+            f'<td>{_grade_chip(r["gh"])}</td><td>{_grade_chip(r["gv"])}</td></tr>'
+        )
+    claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
+               "grade_health": r["gh"]} for r in elig[:top_n]]
+    return {"theme": "value_quality", "body": body,
+            "image_html": _rank_card("割安×優良（PBR1倍割れの質）ランキング", "PBR<1かつ財務健全",
+                                     head, trs),
+            "claims": claims, "gates": _gates(body, n)}
+
+
+def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
+    """ネットキャッシュ潤沢: 実質PER(ネットキャッシュ控除)が低い順。表面より割安。"""
+    rows = fetch_rows(conn, codes)
+    # ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。net_cash_per<per ⟺ ネットキャッシュ>0
+    # ＝真に現金潤沢（純負債銘柄を「潤沢」と誤ラベルしない・定款の正確性）。
+    elig = [r for r in rows if r["net_cash_per"] is not None and r["per"] is not None
+            and r["per"] > 0 and r["net_cash_per"] < r["per"]]
+    elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
+    n = min(top_n, len(elig))
+    body = ('現金を引くと"実質PER"はもっと安い。\n'
+            f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
+            '表面より割安な"実質バリュー"。\n'
+            "#日本株 #割安株 #バリュー株")
+    head = ["#", "@コード", "@銘柄", "実質PER", "表面PER", "PBR", "自己資本比率", "財務grade"]
+    trs = []
+    for i, r in enumerate(elig[:top_n], 1):
+        trs.append(
+            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
+            f'<td>{_num(r["net_cash_per"], "倍")}</td><td>{_num(r["per"], "倍")}</td>'
+            f'<td>{_num(r["pbr"], "倍", 2)}</td><td>{_pct(r["equity_ratio"])}</td>'
+            f'<td>{_grade_chip(r["gh"])}</td></tr>'
+        )
+    claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
+               "per": r["per"], "grade_health": r["gh"]} for r in elig[:top_n]]
+    return {"theme": "net_cash", "body": body,
+            "image_html": _rank_card("ネットキャッシュ潤沢（実質PER）ランキング",
+                                     "実質PER=現金控除後の割安度", head, trs,
+                                     "実質PER=（時価総額−ネットキャッシュ）÷利益。"),
+            "claims": claims, "gates": _gates(body, n)}
+
+
 # テーマ名 → ビルダー
 THEMES = {
     "streak": build_streak_ranking,
+    "high_yield_safe": build_high_yield_safe,
+    "div_growth": build_div_growth,
+    "value_quality": build_value_quality,
+    "net_cash": build_net_cash,
 }
