@@ -232,9 +232,10 @@ def financials_cmd(codes, cohort, all_codes, no_resume) -> None:
 
 @main.command("derive")
 @subset_options
+@all_option
 @click.option("--what", default="all",
               help="導出対象（all/streaks/dividends/financials/prices/beta/roic/grades）")
-def derive_cmd(codes, cohort, what) -> None:
+def derive_cmd(codes, cohort, all_codes, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
     from .derive.compute import (
@@ -247,9 +248,9 @@ def derive_cmd(codes, cohort, what) -> None:
         build_streaks,
     )
 
-    target = _resolve_codes(codes, cohort)
+    target = _resolve_target(codes, cohort, all_codes)
     if not target:
-        console.print("[red]--codes か --cohort を指定してください[/red]")
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
         return
     conn = connect()
     try:
@@ -353,20 +354,22 @@ def update_cmd(codes, cohort, quarterly, dividends, no_resume) -> None:
 
 @main.command("score")
 @subset_options
+@all_option
 @click.option("--top", default=30, help="表示件数")
-def score_cmd(codes, cohort, top) -> None:
+def score_cmd(codes, cohort, all_codes, top) -> None:
     """評価層: computed_metrics を v4 ルールで採点→dividend_scores（Phase4）。"""
     from .db import connect
     from .score.engine import build_scores
 
-    target = _resolve_codes(codes, cohort)
+    target = _resolve_target(codes, cohort, all_codes)
     if not target:
-        console.print("[red]--codes か --cohort を指定してください[/red]")
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
         return
-    names = {c.code: c.name for c in load_cohort()}
     conn = connect()
     try:
         res = build_scores(conn, target)
+        # 銘柄名は stocks マスターから（全銘柄対応。cohort 35社限定だと非コホート社が空欄になる）
+        names = dict(conn.execute("SELECT code, name FROM stocks").fetchall())
     finally:
         conn.close()
     table = Table(title=f"v4スコア（{res['version_tag']} / {res['rows']}社）")

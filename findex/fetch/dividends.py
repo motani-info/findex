@@ -69,7 +69,67 @@ def _existing_priority(conn, code: str, fy: int) -> int:
     return SOURCE_PRIORITY.get(row[0], 0) if row else 0
 
 
+class _DividendsBuilder(RateLimitedFetcher[dict]):
+    """1銘柄＝yfinance配当取得→dividend_events/annual書込→commit を fetch_one で完結。
+
+    **resume安全性の要**: 旧実装は DividendFetcher().run() を全件回してから末尾でまとめて
+    書いていた。途中で落ちて resume すると取得済み銘柄は checkpoint で skip され、in-memory
+    結果が無いため annual/events に**行が書かれず・再取得もされない silent gap** が生じた
+    （financials と同型・定款のsilent-drop禁止に違反）。本実装は fetch_one 内で書込・commit
+    まで終え、base.run() が **commit 後にのみ checkpoint を刻む**。空配当([])は正規の無配と
+    して done を刻む（再取得しない）／空history は DividendFetcher 側で RateLimitError＝再取得。
+    """
+
+    name = "dividends_yfinance"
+    policy = FetchPolicy(batch_size=50, sleep_between_batches=2.0, sleep_between_items=0.3,
+                         max_retries=4)
+
+    def __init__(self, conn, months, now):
+        self.conn = conn
+        self.months = months
+        self.now = now
+        self.df = DividendFetcher()
+        self.n_events = self.n_annual = self.no_div = 0
+
+    def is_rate_limit(self, exc: Exception) -> bool:
+        return self.df.is_rate_limit(exc)
+
+    def fetch_one(self, code: str) -> dict:
+        events = self.df.fetch_one(code)   # 空history は RateLimitError → _fetch_with_retry が再取得
+        try:
+            if not events:
+                self.no_div += 1
+            else:
+                # 1) dividend_events 生データ
+                self.conn.executemany(
+                    """INSERT INTO dividend_events (code, ex_date, amount, source) VALUES (?,?,?, 'yfinance')
+                       ON CONFLICT(code, ex_date) DO UPDATE SET amount=excluded.amount""",
+                    [(code, ex, amt) for ex, amt in events],
+                )
+                self.n_events += len(events)
+                # 2) 会計年度別に合算（地雷2・部分初年度のみ除外）
+                fy_sum = aggregate_events(events, self.months.get(code, 3))
+                for fy, dps in sorted(fy_sum.items()):
+                    # 優先度: events は最弱。既存が上位ソースなら上書きしない
+                    if _existing_priority(self.conn, code, fy) > SOURCE_PRIORITY["events"]:
+                        continue
+                    self.conn.execute(
+                        """INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, as_of, updated_at)
+                           VALUES (?,?,?, 'events', 'present', NULL, ?)
+                           ON CONFLICT(code, fiscal_year) DO UPDATE SET
+                             dps=excluded.dps, source='events', confidence='present', updated_at=excluded.updated_at""",
+                        (code, fy, dps, self.now),
+                    )
+                    self.n_annual += 1
+            self.conn.commit()        # ← ここまで終えてから base.run が checkpoint を刻む
+        except Exception:
+            self.conn.rollback()
+            raise
+        return {"code": code, "events": len(events)}
+
+
 def build_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
+    """dividend_events/annual を resume 安全に構築（per-stock 書込→commit→checkpoint）。"""
     now = datetime.now().isoformat(timespec="seconds")
     months = {
         r[0]: (r[1] or 3)
@@ -78,40 +138,13 @@ def build_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
             codes,
         )
     }
-    res = DividendFetcher().run(codes, resume=resume)
-
-    n_events = n_annual = n_review = no_div = 0
-    for code, events in res.ok.items():
-        if not events:
-            no_div += 1
-            continue
-        # 1) dividend_events 生データ
-        conn.executemany(
-            """INSERT INTO dividend_events (code, ex_date, amount, source) VALUES (?,?,?, 'yfinance')
-               ON CONFLICT(code, ex_date) DO UPDATE SET amount=excluded.amount""",
-            [(code, ex, amt) for ex, amt in events],
-        )
-        n_events += len(events)
-
-        # 2) 会計年度別に合算（地雷2・部分初年度のみ除外）
-        fy_sum = aggregate_events(events, months.get(code, 3))
-        for fy, dps in sorted(fy_sum.items()):
-            # 優先度: events は最弱。既存が上位ソースなら上書きしない
-            if _existing_priority(conn, code, fy) > SOURCE_PRIORITY["events"]:
-                continue
-            conn.execute(
-                """INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, as_of, updated_at)
-                   VALUES (?,?,?, 'events', 'present', NULL, ?)
-                   ON CONFLICT(code, fiscal_year) DO UPDATE SET
-                     dps=excluded.dps, source='events', confidence='present', updated_at=excluded.updated_at""",
-                (code, fy, dps, now),
-            )
-            n_annual += 1
-    conn.commit()
-    n_review = cleanse_haitoukin_seam(conn, list(res.ok))
-    n_review += flag_dividend_anomalies(conn, list(res.ok))
-    return {"ok": len(res.ok), "failed": len(res.failed), "no_dividend": no_div,
-            "events": n_events, "annual_rows": n_annual, "review_flags": n_review,
+    builder = _DividendsBuilder(conn, months, now)
+    res = builder.run(codes, resume=resume)
+    # 能動洗浄は全codes対象（DB依存・冪等。resumeでも漏れなく走らせる）
+    n_review = cleanse_haitoukin_seam(conn, codes)
+    n_review += flag_dividend_anomalies(conn, codes)
+    return {"ok": len(res.ok), "failed": len(res.failed), "no_dividend": builder.no_div,
+            "events": builder.n_events, "annual_rows": builder.n_annual, "review_flags": n_review,
             "failures": res.failed}
 
 
