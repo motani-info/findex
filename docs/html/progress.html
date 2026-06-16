@@ -88,6 +88,8 @@ li{margin:.2em 0}
 <a class="l3" href="#2026-06-15">設計完結後の第三者レビュー（2026-06-15）</a>
 <a class="l3" href="#d2-2026-06-14">D2 第三者レビュー → 目的志向への是正（2026-06-14）</a>
 <a class="l2" href="#5-35">5. 実装フェーズの段取り（コホート35社で各フェーズ検証）</a>
+<a class="l3" href="#55-f1-f5-2026-06-16">5.5 基盤整備（全銘柄洗替の前提・F1-F5完了 2026-06-16）</a>
+<a class="l3" href="#part2">★Part2 全データ洗替（次セッションで実行）</a>
 <a class="l3" href="#phase2">取得層(Phase2)の実データ確認サマリ</a>
 <a class="l3" href="#phase3">導出層(Phase3)の実データ確認サマリ</a>
 <a class="l3" href="#phase4v4">評価層(Phase4・v4)の実データ確認サマリ</a>
@@ -105,8 +107,9 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-16 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（Phase6 出力本番化に着手・X投稿draft完了）</strong>/ <strong>次の一歩</strong>: X実投稿の有効化（<code>.env</code>認証＋セッション保存→<code>--publish</code>）／看板テーマ（目標逆算シミュレーション）／全銘柄スキャン（Step4・統計力）</p>
+<p><strong>最終更新</strong>: 2026-06-16 / <strong>現在フェーズ</strong>: <strong>基盤整備完了（F1-F5）→ 全データ洗替の準備が整った</strong>/ <strong>次の一歩</strong>: Part2 全データ洗替の実行（master→listing --all→prices→financials→dividends→derive --what all→score→verify）。<strong>出力本番化は凍結</strong>（コホート35社では本番化不可とユーザー判断・洗替後に再開）</p>
 <blockquote>
+<p><strong>★2026-06-16 戦略転換（ユーザー判断）</strong>: 「このデータ量で本番化は無理。しっかり基盤を整えたうえで全データ洗替しよう。アウトプットはその後でOK」。→ 出力/X発信（Phase6）を凍結し、順序を反転して <strong>基盤整備 → 全銘柄洗替</strong> を正攻法で実施。基盤整備6課題のうち F1-F5 を完了（下記§5.5）。Part2（実際の3734洗替）は次セッションで実行。</p>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
 <hr />
@@ -349,17 +352,33 @@ li{margin:.2em 0}
 <td>5</td>
 <td>検証（findex verify・全銘柄スキャン1回）</td>
 <td>verify緑・全銘柄ランキング生成</td>
-<td style="text-align: center;">⬜</td>
+<td style="text-align: center;">🟨 <strong>verify実装完了(F5)</strong>・全銘柄スキャンはPart2</td>
 </tr>
 <tr>
 <td>6</td>
 <td>出力（HTML生成＋X発信・claim内ランキング主）</td>
 <td>サイト生成＋品質ゲート通過の投稿</td>
-<td style="text-align: center;">🟨 MVP HTMLレポート完了・<strong>X投稿draft(連続増配テーマ)完了</strong>・実投稿(--publish)は残</td>
+<td style="text-align: center;">🟨 MVP HTMLレポート＋X投稿draft完了・<strong>凍結中</strong>（洗替後に再開）</td>
 </tr>
 </tbody>
 </table>
 <p><strong>移行で救った再現困難データ（実施済）</strong>: <code>dividend_annual</code>(haitoukin 622) と <code>result_overrides</code>(旧streak_overrides 12)。price/financial/eventsは再取得。配当は yfinance events で再構築＋haitoukin接合を能動洗浄。</p>
+<h3 id="55-f1-f5-2026-06-16">5.5 基盤整備（全銘柄洗替の前提・F1-F5完了 2026-06-16）</h3>
+<p>全銘柄スキャンの致命傷＝「黙ってデータを落とす」系を、コホートで顕在化する前に潰した。
+- <strong>F1 取得の完全性ゲート</strong> (<code>base.py is_complete</code>): 「例外なし＝done」で空/部分データを黙ってチェックポイントに刻む欠陥を是正。Falseなら failed に回し done を刻まない＝resumeで再取得。コミット<code>c5a377c</code>
+- <strong>F2 EDINET robustness</strong> (<code>edinet.py</code>): <code>find_latest_doc</code> が「真に書類無し(clean)」と「一過性失敗で見落とし」を弁別。<code>_scan_one_date</code> がリトライ、解消しなければ <code>EdinetScanError</code>（空と断定しない）。EdinetFetcherはバックオフ対象にし尽きれば再取得。コミット<code>c5a377c</code>
+- <strong>F3 streaks 歯抜け区別（E1是正）</strong> (<code>streaks.py</code>): <code>_streak</code> が中断理由(gap/cut/start)を返し、データ欠落(gap)中断は censored（N年以上）に。<strong>実データで FY2000-2001 の系統的 seam穴を可視化</strong>（コホート censored 3→13・新規10は全て実在の歯抜け）。override(golden)は is_censored=False 維持＝<strong>golden 18/18不変</strong>。コミット<code>3c6deb0</code>
+- <strong>F4 listing 全銘柄対応</strong> (<code>listing.py</code>/<code>cli.py</code>): <code>listing --all</code>（3734明示）＋ YahooListingFetcher の完全性ゲート（both-null=パース失敗疑い→再取得）。非コホート12社で実検証（日立1949/トヨタ1949/ファストリ1994等正値・failed0）。コミット<code>369d78b</code>
+- <strong>F5 findex verify（検収）</strong> (<code>verify.py</code>): 洗替結果を読み取り専用で点検＝カバレッジ/golden整合/seam穴/review率/status分布。コホートで golden 18/18整合✓・FY2000接合穴9社・review6社を確認。コミット<code>ef912f5</code>
+- <strong>テスト</strong>: 計76緑（基盤整備で+11: robustness5/streaks2/verify4）。</p>
+<h3 id="part2">★Part2 全データ洗替（次セッションで実行）</h3>
+<p>F1-F5 で基盤が固まった。実行パイプライン（各段 checkpoint・resume・verify検収）:</p>
+<div class="codehilite" style="background: #f8f8f8"><pre style="line-height: 125%;"><span></span><code>master(3734) → listing --all(全Yahoo・数時間) → prices(2000遡及+N225)
+  → financials(J-Quants+EDINET ★最重・F2で堅牢化) → dividends(+異常洗浄)
+  → derive --what all → score → verify --all(検収・未充足は再fetch)
+</code></pre></div>
+
+<p><strong>残る正確性課題（洗替中に効く）</strong>: E2 配当seam穴(FY2000接合)の上流是正＝F3が穴を残しても正直化するが、根治は接合修復。E3 pre-2000 review接合。動かない制約: A1生存バイアス(廃止株無料不可)・A2財務深度5年(財務系バックテスト不能)。</p>
 <h3 id="phase2">取得層(Phase2)の実データ確認サマリ</h3>
 <ul>
 <li><strong>EDINET会計基準別辞書</strong>: AccountingStandardsDEIで判別。IFRS=<code>jpigp_cor:*IFRS</code>/JGAAP=<code>jppfs_cor:*</code>、連結=ctxサフィックス無し。IFRSは投資有価証券/流動資産が構造的にinsufficient、<strong>US GAAP連結は構造化XBRL不在→grade_capitalフォールバック</strong></li>
