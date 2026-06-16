@@ -94,6 +94,16 @@ class RateLimitedFetcher(Generic[T]):
         msg = str(exc).lower()
         return "429" in msg or "rate limit" in msg or "too many requests" in msg
 
+    def is_complete(self, code: str, result: T) -> bool:
+        """取得結果を done として確定してよい完全性を持つか（完全性ゲート・F1）。
+
+        False を返すと ok でなく failed に回し、**チェックポイントに done を刻まない**。
+        ＝次回 resume で再取得される。「例外を投げなかった＝成功」では空/部分データを
+        黙って done 扱いしてしまう（silent-drop）ため、フェッチャは必須フィールドの
+        充足をここで宣言する。デフォルトは True（不完全を例外で表すフェッチャ向け）。
+        """
+        return True
+
     def _sleep(self, seconds: float) -> None:
         if seconds > 0:
             time.sleep(seconds)
@@ -120,8 +130,14 @@ class RateLimitedFetcher(Generic[T]):
         for bi, batch in enumerate(batches):
             for code in batch:
                 try:
-                    ok[code] = self._fetch_with_retry(code)
-                    ckpt.mark(code)
+                    result = self._fetch_with_retry(code)
+                    if self.is_complete(code, result):
+                        ok[code] = result
+                        ckpt.mark(code)          # 完全なときだけ done を刻む
+                    else:
+                        # 完全性ゲート不通過＝空/部分データ。done にせず再取得対象に残す。
+                        failed[code] = "incomplete (completeness gate)"
+                        log.warning("[%s] %s incomplete — 再取得対象", self.name, code)
                 except Exception as exc:  # noqa: BLE001 — 1銘柄の失敗で全体を止めない
                     failed[code] = str(exc)
                     log.warning("[%s] %s failed: %s", self.name, code, exc)

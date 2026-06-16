@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import io
+import time
 import zipfile
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
@@ -21,6 +22,15 @@ import yaml
 
 from .. import config
 from .base import FetchPolicy, RateLimitedFetcher, RateLimitError
+
+
+class EdinetScanError(Exception):
+    """提出書類の日次スキャンが一過性失敗で不完全だった（再取得対象）。
+
+    「対象書類が真に存在しない（clean な空）」と「ネットワーク等の一過性失敗で
+    見落とした可能性がある」を弁別するための例外。後者を None で握り潰すと、
+    base.py が done を刻んで二度と再取得しない＝silent-drop になる。
+    """
 
 BASE = "https://api.edinet-fsa.go.jp/api/v2"
 _LABELS_PATH = Path(__file__).parent / "edinet_labels.yaml"
@@ -80,28 +90,48 @@ def _request(url: str, params: dict, timeout: int = 30) -> requests.Response:
     return r
 
 
+def _scan_one_date(d: date, edinet_code: str) -> tuple[str, str | None] | None:
+    """指定日の提出一覧から対象有報を探す。見つかれば (docID, periodEnd)、無ければ None。
+
+    一過性失敗は数回リトライ。リトライ尽きても失敗なら EdinetScanError を送出する
+    （その日を「空」とは断定できない＝silent-drop を防ぐ）。
+    """
+    for attempt in range(3):
+        try:
+            r = _request(
+                f"{BASE}/documents.json",
+                {"date": d.isoformat(), "type": 2, "Subscription-Key": config.EDINET_API_KEY},
+                timeout=15,
+            )
+            for doc in r.json().get("results", []):
+                if (
+                    doc.get("edinetCode") == edinet_code
+                    and doc.get("docTypeCode") == "120"
+                    and doc.get("csvFlag") == "1"
+                ):
+                    return doc["docID"], doc.get("periodEnd")
+            return None  # clean: その日に対象書類は無い
+        except RateLimitError:
+            raise
+        except Exception:
+            if attempt == 2:
+                raise EdinetScanError(f"{edinet_code} {d.isoformat()} スキャン失敗（再取得対象）")
+            time.sleep(1.0 * (attempt + 1))
+    return None  # 到達しない（型のため）
+
+
 def find_latest_doc(edinet_code: str, fy_end_month: int) -> tuple[str | None, str | None]:
-    """最新の有価証券報告書(docTypeCode=120,csvFlag=1) docID と periodEnd を返す。"""
+    """最新の有価証券報告書(docTypeCode=120,csvFlag=1) docID と periodEnd を返す。
+
+    窓内の全日を clean にスキャンして見つからなければ (None, None)。途中で
+    一過性失敗が解消しなければ EdinetScanError を送出し、空との断定を避ける。
+    """
     for lo, hi in _filing_windows(fy_end_month):
         d = lo
         while d <= hi:
-            try:
-                r = _request(
-                    f"{BASE}/documents.json",
-                    {"date": d.isoformat(), "type": 2, "Subscription-Key": config.EDINET_API_KEY},
-                    timeout=15,
-                )
-                for doc in r.json().get("results", []):
-                    if (
-                        doc.get("edinetCode") == edinet_code
-                        and doc.get("docTypeCode") == "120"
-                        and doc.get("csvFlag") == "1"
-                    ):
-                        return doc["docID"], doc.get("periodEnd")
-            except RateLimitError:
-                raise
-            except Exception:
-                pass
+            hit = _scan_one_date(d, edinet_code)
+            if hit:
+                return hit
             d += timedelta(days=1)
     return None, None
 
@@ -247,6 +277,12 @@ class EdinetFetcher(RateLimitedFetcher[EdinetRecord]):
     def __init__(self, code_to_edinet: dict[str, str], code_to_month: dict[str, int]):
         self.c2e = code_to_edinet
         self.c2m = code_to_month
+
+    def is_rate_limit(self, exc: Exception) -> bool:
+        """リトライ（指数バックオフ）対象か。レート制限に加え、一過性スキャン失敗も
+        リトライ対象とする（EDINETの一時的不調を即failedにせず吸収）。リトライ尽きれば
+        failed＝done を刻まず次回 resume で再取得＝silent-drop を防ぐ。"""
+        return isinstance(exc, EdinetScanError) or super().is_rate_limit(exc)
 
     def fetch_one(self, code: str) -> EdinetRecord:
         ec = self.c2e.get(code)
