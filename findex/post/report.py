@@ -70,8 +70,12 @@ def _streak_cell(years, censored, source):
 _QUALITY_JP = {"sound": "EPS牽引", "payout_driven": "性向拡大", "cyclical": "一過性"}
 
 
-def build_report(conn, codes: list[str]) -> str:
-    """検証済みコホート/指定銘柄の配当レポートHTMLを生成。"""
+def fetch_rows(conn, codes: list[str]) -> list[dict]:
+    """検証済みデータから表示用の行dictを取得（品質ゲートの単一実装）。
+
+    status=ok/zero_legit のフィールドだけ値を持たせ、それ以外は None（下流は「—」表示）。
+    report.py と themes.py が同じゲートを共有するための共通入口。
+    """
     names = {}
     try:
         from ..cohort import load_cohort
@@ -113,6 +117,12 @@ def build_report(conn, codes: list[str]) -> str:
             "rel": rel if status.get("dividend_reliability") in _OK else None,
             "cuts": cuts, "total": total, "n_scored": n_scored,
         })
+    return rows
+
+
+def build_report(conn, codes: list[str]) -> str:
+    """検証済みコホート/指定銘柄の配当レポートHTMLを生成。"""
+    rows = fetch_rows(conn, codes)
 
     # 配当ランキング: 配当claimのある銘柄(grade_dividend != D)を連続増配年数で降順
     div_rows = [r for r in rows if r["gd"] != "D"]

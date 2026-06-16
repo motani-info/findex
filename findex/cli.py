@@ -434,10 +434,59 @@ def report_cmd(codes, cohort, out) -> None:
 
 @main.command("post")
 @click.argument("theme")
-@click.option("--dry-run", is_flag=True, help="品質ゲート＋生成のみ（投稿しない）")
-def post_cmd(theme, dry_run) -> None:
-    """X投稿（Playwright）。品質ゲートを通らなければ拒否。"""
-    console.print(f"[dim]post {theme} dry_run={dry_run} — 骨格段階（post.* を実装中）[/dim]")
+@subset_options
+@click.option("--top", type=int, default=10, help="ランキング上位N（既定10）")
+@click.option("--publish", is_flag=True, help="実際にXへ投稿する（既定はdraftのみ）")
+def post_cmd(theme, codes, cohort, top, publish) -> None:
+    """X投稿（Playwright・画像主役型）。既定はdraft生成のみ・--publishで実投稿。
+
+    品質ゲート（status=ok / N+表示 / 出典 / グレード併示 / 140字）を通らなければ拒否。
+    """
+    from pathlib import Path
+
+    from .db import connect
+    from .post.image import render_html_to_png
+    from .post.themes import THEMES
+
+    builder = THEMES.get(theme)
+    if builder is None:
+        console.print(f"[red]未知のテーマ: {theme}[/red] （利用可能: {', '.join(THEMES)}）")
+        return
+    target = _resolve_codes(codes, cohort)
+    if not target:
+        console.print("[red]--codes か --cohort を指定してください[/red]")
+        return
+
+    conn = connect()
+    try:
+        post = builder(conn, target, top_n=top)
+    finally:
+        conn.close()
+
+    gates = post["gates"]
+    console.print(f"[bold]theme[/bold]: {post['theme']} ・ 対象 {len(target)}社 → 該当 {gates['eligible_count']}社")
+    console.print(f"[bold]本文[/bold]（{gates['body_weighted_len']}/140字）:\n{post['body']}")
+    console.print("[bold]品質ゲート[/bold]: " + "  ".join(
+        f"{'[green]✓[/green]' if v else '[red]✗[/red]'}{k}" if isinstance(v, bool) else f"{k}={v}"
+        for k, v in gates.items()
+    ))
+
+    if not gates["passed"]:
+        console.print("[red]✗ 品質ゲート不通過 — 投稿しません（沈黙は許容・誤発信は不可）[/red]")
+        return
+
+    img_path = config.PROJECT_ROOT / "docs" / "html" / f"post_{theme}.png"
+    render_html_to_png(post["image_html"], img_path)
+    console.print(f"[green]✓[/green] 画像生成: {img_path}")
+
+    if not publish:
+        console.print("[yellow]draft（投稿せず）[/yellow] — 内容を確認し、問題なければ [bold]--publish[/bold] で投稿します。")
+        console.print(f"[dim]使用claim {len(post['claims'])}件（事後監査用・status/source付き）[/dim]")
+        return
+
+    from .post.poster import post_to_x
+    ok = post_to_x(post["body"], images=[Path(img_path)])
+    console.print("[green]✓ 投稿完了[/green]" if ok else "[red]✗ 投稿失敗[/red]")
 
 
 if __name__ == "__main__":

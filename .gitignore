@@ -16,3 +16,6 @@ __pycache__/
 !data/*.csv
 # 生成レポート（findex report で再生成可能・日付スタンプで差分ノイズになる）
 docs/html/report.html
+
+# 投稿画像（findex post で再生成可能・バイナリ）
+docs/html/post_*.png

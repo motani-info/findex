@@ -105,7 +105,7 @@ li{margin:.2em 0}
   <div class="badge">★ Progress</div>
   <h1 id="findex">findex 進捗ダッシュボード</h1>
 <p>プロジェクト全体の現在地・残作業・計画を一望するページ。<strong>設計が動くたびに更新する</strong>（正本の状態は各設計書、本ページはその要約）。</p>
-<p><strong>最終更新</strong>: 2026-06-16 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（Phase4 採点v4 完了）</strong>/ <strong>次の一歩</strong>: Phase 5.5 バックテスト（D8・PIT・前方アウトカム・重みv5較正）→ Phase 5 検証（findex verify・全銘柄スキャン）</p>
+<p><strong>最終更新</strong>: 2026-06-16 / <strong>現在フェーズ</strong>: <strong>実装フェーズ進行中（Phase6 出力本番化に着手・X投稿draft完了）</strong>/ <strong>次の一歩</strong>: X実投稿の有効化（<code>.env</code>認証＋セッション保存→<code>--publish</code>）／看板テーマ（目標逆算シミュレーション）／全銘柄スキャン（Step4・統計力）</p>
 <blockquote>
 <p>2026-06-15にユーザーGOで<strong>実装凍結を解除</strong>。Phase 0（スキーマ）・Phase 1（マスター）・Phase 2（取得層：EDINET会計基準別辞書／J-Quants財務／株価2000遡及／配当）が完了。各サブで<strong>検証コホート35社を実データで検証してから次へ</strong>進める方式。詳細は <a href="project-log.html">プロジェクトログ</a> 冒頭。</p>
 </blockquote>
@@ -355,7 +355,7 @@ li{margin:.2em 0}
 <td>6</td>
 <td>出力（HTML生成＋X発信・claim内ランキング主）</td>
 <td>サイト生成＋品質ゲート通過の投稿</td>
-<td style="text-align: center;">🟨 MVP HTMLレポート完了・X発信は残</td>
+<td style="text-align: center;">🟨 MVP HTMLレポート完了・<strong>X投稿draft(連続増配テーマ)完了</strong>・実投稿(--publish)は残</td>
 </tr>
 </tbody>
 </table>
@@ -398,6 +398,7 @@ li{margin:.2em 0}
 <li><strong>MVP HTMLレポート（完了）</strong>: <code>findex/post/report.py</code>＋<code>findex report --cohort</code>→<code>docs/html/report.html</code>。<strong>柱3で初の触れる成果物</strong>。設計の安全弁D2 §6.5（完璧主義を待たず確信できるclaimから出力）を実装。<strong>品質ゲートを実装で遵守</strong>: status=ok/zero_legitの数字だけ表示（他は「—」）・連続年数の打ち切りは「N年以上」（花王36→16事故の再発防止）・ZAi公表override由来は出典バッジ・claim別グレード併示・免責必須・数字は全てDB由来。</li>
 <li><strong>2部構成</strong>: ①連続増配・非減配ランキング（配当claim grade≠Dを連続増配年数で降順。花王36年[ZAi公表]がトップ＝再構築の動機だった連続増配の正確性を実証）②v4総合スコア（参考・4グレード併示）。②には<strong>暫定の明示注記</strong>（重み手づけ・バックテスト未完・薄いデータは指標数少でスコア上振れ→歯止めはグレード）。クレディセゾン7指標93.6点1位がC/C/C/7で透明に可視化。</li>
 <li>ローカルHTML一級化（D5）＝X障害時の受け皿・自前サイト・投稿画像の母体。生成物はgitignore（再生成可能）。</li>
+<li><strong>X投稿draft（Phase6 MVP段階1・完了）</strong>: <code>findex post streak [--cohort] [--top N] [--publish]</code>。D5 §8の「1テーマ・手動承認付き」を実装。<strong>既定はdraft</strong>（本文＋画像PNG生成＋品質ゲート判定のみ・投稿しない）、<code>--publish</code>で実投稿。構成=<code>post/themes.py</code>（テーマ生成・本文≤140字加重・claim事後監査）＋<code>post/image.py</code>（HTML→PNG・Playwright headless要素スクショ）＋<code>post/poster.py</code>（旧x_posterベース＋<strong>画像添付対応</strong>を新規追加・セッション再利用<code>~/.findex/x_session.json</code>）。<strong>品質ゲートを実コードで実装</strong>: status_ok_only（fetch_rowsがstatus=okのみ値・report.pyと共有の単一実装）/censored_as_n_plus（打ち切りは「N年以上」）/source_cited（ZAi公表バッジ）/grade_shown（claim別grade併示）/body_within_limit（加重140字・<strong>初版192字は本文超過でゲートが正しくブロック</strong>→126字に短縮）。<code>passed=False</code>なら投稿拒否（沈黙は許容・誤発信は不可）。画像=ダーク固定テーマのランキングカード（花王36年[ZAi公表]・三菱HCキャピタル27年以上[N+]等が品質ゲート通り表示）。テスト3追加（weighted_len/本文140字回帰/テーゼ含有）で計65緑。実投稿は<code>.env</code>のX認証＋ユーザーGO後。</li>
 </ul>
 <hr />
 <h2 id="6">6. 既知のリスク・宿題</h2>
