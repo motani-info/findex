@@ -438,6 +438,52 @@ def report_cmd(codes, cohort, out) -> None:
     console.print(f"[dim]open {res['path']}[/dim]")
 
 
+@main.command("verify")
+@subset_options
+@click.option("--all", "all_codes", is_flag=True, help="全銘柄（stocks 全件）を検収対象にする")
+def verify_cmd(codes, cohort, all_codes) -> None:
+    """洗替の検収（読み取り専用）。カバレッジ・golden整合・seam穴・review率・status分布。"""
+    from .db import connect
+    from .verify import run_verify
+
+    conn = connect()
+    try:
+        if all_codes:
+            target = None  # None = 全universe
+        else:
+            target = _resolve_codes(codes, cohort)
+            if not target:
+                console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
+                return
+        rep = run_verify(conn, target)
+    finally:
+        conn.close()
+
+    cov = rep["coverage"]
+    t = cov["total"]
+    tbl = Table(title=f"カバレッジ（{t}社）", show_header=True)
+    tbl.add_column("層"); tbl.add_column("揃った社数", justify="right"); tbl.add_column("率", justify="right")
+    for k in ("listing_date", "price_history", "financial_snapshots", "dividend_annual", "computed_metrics"):
+        n = cov[k]
+        tbl.add_row(k, str(n), f"{n / t * 100:.1f}%" if t else "—")
+    console.print(tbl)
+
+    g = rep["golden"]
+    mark = "[green]✓[/green]" if rep["golden_ok"] else "[red]✗[/red]"
+    console.print(f"{mark} golden整合: 検査{g['checked']} 一致{g['matched']} 不整合{len(g['mismatches'])}")
+    for mm in g["mismatches"][:10]:
+        console.print(f"   [red]✗[/red] {mm['code']}: 公表{mm['published']} > 導出{mm['derived']}")
+
+    sm = rep["seam"]
+    console.print(
+        f"配当seam穴: 配当あり{sm['codes_with_dividends']}社 / 歯抜けあり{sm['codes_with_gaps']}社 "
+        f"（FY2000接合穴{sm['fy2000_seam']}社） 多い欠落年={sm['top_gap_years']}"
+    )
+    rv = rep["review"]
+    console.print(f"review隔離: {rv['codes_with_review']}社 / {rv['review_rows']}行（単年アーティファクト）")
+    console.print(f"status分布: {rep['status_dist']}")
+
+
 @main.command("post")
 @click.argument("theme")
 @subset_options
