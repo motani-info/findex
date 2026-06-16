@@ -14,6 +14,7 @@ import logging
 import random
 import time
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Generic, Iterable, TypeVar
 
@@ -122,30 +123,73 @@ class RateLimitedFetcher(Generic[T]):
         skipped = [c for c in codes if c in ckpt.done]
         ok: dict[str, T] = {}
         failed: dict[str, str] = {}
+        started = time.time()
+        last_error = ""
 
         bs = self.policy.batch_size
         batches = [todo[i : i + bs] for i in range(0, len(todo), bs)]
         log.info("[%s] %d codes (%d skipped) in %d batches", self.name, len(todo), len(skipped), len(batches))
+        self._write_progress(len(todo), len(skipped), 0, 0, started, "", running=True)
 
-        for bi, batch in enumerate(batches):
-            for code in batch:
-                try:
-                    result = self._fetch_with_retry(code)
-                    if self.is_complete(code, result):
-                        ok[code] = result
-                        ckpt.mark(code)          # 完全なときだけ done を刻む
-                    else:
-                        # 完全性ゲート不通過＝空/部分データ。done にせず再取得対象に残す。
-                        failed[code] = "incomplete (completeness gate)"
-                        log.warning("[%s] %s incomplete — 再取得対象", self.name, code)
-                except Exception as exc:  # noqa: BLE001 — 1銘柄の失敗で全体を止めない
-                    failed[code] = str(exc)
-                    log.warning("[%s] %s failed: %s", self.name, code, exc)
-                self._sleep(self.policy.sleep_between_items)
-            if bi < len(batches) - 1:
-                self._sleep(self.policy.sleep_between_batches)
+        try:
+            for bi, batch in enumerate(batches):
+                for code in batch:
+                    try:
+                        result = self._fetch_with_retry(code)
+                        if self.is_complete(code, result):
+                            ok[code] = result
+                            ckpt.mark(code)          # 完全なときだけ done を刻む
+                        else:
+                            # 完全性ゲート不通過＝空/部分データ。done にせず再取得対象に残す。
+                            failed[code] = "incomplete (completeness gate)"
+                            last_error = f"{code}: incomplete"
+                            log.warning("[%s] %s incomplete — 再取得対象", self.name, code)
+                    except Exception as exc:  # noqa: BLE001 — 1銘柄の失敗で全体を止めない
+                        failed[code] = str(exc)
+                        last_error = f"{code}: {exc}"
+                        log.warning("[%s] %s failed: %s", self.name, code, exc)
+                    # 進捗を逐次書き出す（背景実行を `findex progress` で確認できる）
+                    self._write_progress(len(todo), len(skipped), len(ok), len(failed),
+                                         started, last_error, running=True)
+                    self._sleep(self.policy.sleep_between_items)
+                if bi < len(batches) - 1:
+                    self._sleep(self.policy.sleep_between_batches)
+        finally:
+            # 想定外の中断でも「実行中でない」状態を残す（途中経過は保持）
+            self._write_progress(len(todo), len(skipped), len(ok), len(failed),
+                                 started, last_error, running=False)
 
         return FetchResult(ok=ok, failed=failed, skipped=skipped)
+
+    def _write_progress(self, todo: int, skipped: int, ok: int, failed: int,
+                        started: float, last_error: str, *, running: bool) -> None:
+        """進捗を {name}.progress.json に書き出す。AIを介さず CLI で確認できる軽量ファイル。"""
+        path = config.CHECKPOINT_DIR / f"{self.name}.progress.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        processed = ok + failed
+        elapsed = max(time.time() - started, 1e-6)
+        rate = processed / elapsed  # 件/秒
+        remaining = max(todo - processed, 0)
+        eta = round(remaining / rate) if rate > 0 and remaining else (0 if not remaining else None)
+        total = todo + skipped
+        done_overall = skipped + processed
+        path.write_text(json.dumps({
+            "name": self.name,
+            "running": running,
+            "total": total,                 # 全対象（resume済 + 今回分）
+            "done_overall": done_overall,    # 全体の完了数（resume済含む）
+            "percent": round(done_overall / total * 100, 1) if total else 100.0,
+            "this_run_todo": todo,
+            "processed": processed,
+            "ok": ok,
+            "failed": failed,
+            "skipped_resume": skipped,
+            "rate_per_min": round(rate * 60, 1),
+            "elapsed_sec": round(elapsed),
+            "eta_sec": eta,
+            "last_error": last_error[:300],
+            "updated_at": datetime.now().isoformat(timespec="seconds"),
+        }, ensure_ascii=False), encoding="utf-8")
 
     def _fetch_with_retry(self, code: str) -> T:
         attempt = 0

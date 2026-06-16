@@ -438,6 +438,43 @@ def report_cmd(codes, cohort, out) -> None:
     console.print(f"[dim]open {res['path']}[/dim]")
 
 
+@main.command("progress")
+@click.argument("name", required=False)
+def progress_cmd(name) -> None:
+    """背景実行中の取得進捗を表示（{name}.progress.json を読む・AI不要で確認できる）。"""
+    import json as _json
+    from datetime import datetime as _dt
+
+    d = config.CHECKPOINT_DIR
+    files = sorted(d.glob(f"{name}.progress.json" if name else "*.progress.json"))
+    if not files:
+        console.print(f"[dim]進捗ファイルなし（{d}）[/dim]")
+        return
+    for f in files:
+        try:
+            p = _json.loads(f.read_text(encoding="utf-8"))
+        except Exception as e:
+            console.print(f"[red]{f.name} 読込失敗: {e}[/red]")
+            continue
+        state = "[green]実行中[/green]" if p.get("running") else "[yellow]停止[/yellow]"
+        # 最終更新からの経過（停止判定の補助）
+        try:
+            age = (_dt.now() - _dt.fromisoformat(p["updated_at"])).total_seconds()
+            age_s = f"{int(age)}秒前" if age < 120 else f"{int(age / 60)}分前"
+        except Exception:
+            age_s = "?"
+        eta = p.get("eta_sec")
+        eta_s = (f"{eta // 60}分{eta % 60}秒" if eta else "—") if eta is not None else "?"
+        console.print(
+            f"[bold]{p['name']}[/bold] {state}  "
+            f"{p['done_overall']}/{p['total']} ({p['percent']}%)  "
+            f"ok={p['ok']} failed={p['failed']} 再開skip={p['skipped_resume']}  "
+            f"{p['rate_per_min']}件/分 ETA{eta_s}  更新{age_s}"
+        )
+        if p.get("last_error"):
+            console.print(f"   [dim]最新エラー: {p['last_error']}[/dim]")
+
+
 @main.command("verify")
 @subset_options
 @click.option("--all", "all_codes", is_flag=True, help="全銘柄（stocks 全件）を検収対象にする")
