@@ -38,6 +38,9 @@ class FetchPolicy:
     backoff_base: float = 2.0      # backoff = base ** attempt
     backoff_cap: float = 120.0     # 1回の待機上限（秒）
     jitter: float = 0.3            # ±30% のゆらぎ
+    # サーキットブレーカー: 連続failureがこの数に達したら run を中断する。
+    # ブロック/サーバ障害で全件叩き続ける事故（IPブロック）を防ぐ。0で無効。
+    max_consecutive_failures: int = 50
 
 
 class Checkpoint:
@@ -125,34 +128,49 @@ class RateLimitedFetcher(Generic[T]):
         failed: dict[str, str] = {}
         started = time.time()
         last_error = ""
+        consecutive_failures = 0
+        breaker = self.policy.max_consecutive_failures
 
         bs = self.policy.batch_size
         batches = [todo[i : i + bs] for i in range(0, len(todo), bs)]
         log.info("[%s] %d codes (%d skipped) in %d batches", self.name, len(todo), len(skipped), len(batches))
         self._write_progress(len(todo), len(skipped), 0, 0, started, "", running=True)
 
+        aborted = False
         try:
             for bi, batch in enumerate(batches):
+                if aborted:
+                    break
                 for code in batch:
                     try:
                         result = self._fetch_with_retry(code)
                         if self.is_complete(code, result):
                             ok[code] = result
                             ckpt.mark(code)          # 完全なときだけ done を刻む
+                            consecutive_failures = 0
                         else:
                             # 完全性ゲート不通過＝空/部分データ。done にせず再取得対象に残す。
                             failed[code] = "incomplete (completeness gate)"
                             last_error = f"{code}: incomplete"
+                            consecutive_failures += 1
                             log.warning("[%s] %s incomplete — 再取得対象", self.name, code)
                     except Exception as exc:  # noqa: BLE001 — 1銘柄の失敗で全体を止めない
                         failed[code] = str(exc)
                         last_error = f"{code}: {exc}"
+                        consecutive_failures += 1
                         log.warning("[%s] %s failed: %s", self.name, code, exc)
                     # 進捗を逐次書き出す（背景実行を `findex progress` で確認できる）
                     self._write_progress(len(todo), len(skipped), len(ok), len(failed),
                                          started, last_error, running=True)
+                    # サーキットブレーカー: 連続失敗が続く＝ブロック/障害。叩き続けず中断（resume可能）。
+                    if breaker and consecutive_failures >= breaker:
+                        last_error = (f"CIRCUIT BREAKER: {consecutive_failures}連続失敗で中断"
+                                      f"（ブロック/障害の疑い・原因解消後に resume 再実行）/ {last_error}")
+                        log.error("[%s] %s", self.name, last_error)
+                        aborted = True
+                        break
                     self._sleep(self.policy.sleep_between_items)
-                if bi < len(batches) - 1:
+                if not aborted and bi < len(batches) - 1:
                     self._sleep(self.policy.sleep_between_batches)
         finally:
             # 想定外の中断でも「実行中でない」状態を残す（途中経過は保持）

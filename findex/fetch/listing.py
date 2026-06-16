@@ -120,7 +120,11 @@ class YahooListingFetcher(RateLimitedFetcher[YahooListingInfo]):
 
     def is_rate_limit(self, exc: Exception) -> bool:
         msg = str(exc).lower()
-        return super().is_rate_limit(exc) or "429" in msg or "too many" in msg
+        # Yahoo!JP はレート超過時に 5xx のブロックページを返す（実証: 大量取得で 500 多発）。
+        # 429/too many に加え 5xx もバックオフ対象にし、無防備に叩き続けない。
+        return (super().is_rate_limit(exc) or "429" in msg or "too many" in msg
+                or "500 server error" in msg or "502" in msg or "503" in msg
+                or "internal server error" in msg)
 
     def is_complete(self, code: str, result: "YahooListingInfo") -> bool:
         """完全性ゲート(F1): 上場日・設立日とも取れなければ done を刻まない。
@@ -171,7 +175,7 @@ def update_listing(conn, codes: list[str], *, resume: bool = True) -> dict:
 
     now = _dt.now().isoformat(timespec="seconds")
     res = ListingFetcher().run(codes, resume=resume)
-    true_dates = floor = 0
+    true_dates = floor = preserved = 0
     for code, info in res.ok.items():
         if info.listing_date:
             conn.execute(
@@ -180,17 +184,22 @@ def update_listing(conn, codes: list[str], *, resume: bool = True) -> dict:
             )
             true_dates += 1
         else:
-            # ≤2001床・真値不明（kabutan補完待ち）。誤値が残らぬよう明示的にNULLへ
-            conn.execute(
-                "UPDATE stocks SET listing_date=NULL, updated_at=? WHERE code=?",
-                (now, code),
-            )
-            floor += 1
+            # ≤2001床・真値不明。**既存の真値(Yahoo 上場年月日等)があれば温存**し、
+            # 無い場合のみ NULL のまま（誤値を残さない）。床値で良い値を潰さない。
+            old = conn.execute("SELECT listing_date FROM stocks WHERE code=?", (code,)).fetchone()
+            if old and old[0]:
+                preserved += 1  # 既存の真値を温存（yfinance床で上書きしない）
+            else:
+                conn.execute(
+                    "UPDATE stocks SET listing_date=NULL, updated_at=? WHERE code=?", (now, code)
+                )
+                floor += 1
     conn.commit()
     return {
         "ok": len(res.ok),
         "failed": len(res.failed),
         "true_listing_dates": true_dates,
-        "floor_unknown": floor,  # listing_date IS NULL のまま（補完対象）
+        "floor_unknown": floor,      # listing_date IS NULL のまま（補完対象）
+        "preserved_existing": preserved,  # 既存真値を床で潰さず温存
         "failures": res.failed,
     }

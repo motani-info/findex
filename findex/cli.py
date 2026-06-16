@@ -119,7 +119,8 @@ def listing_cmd(codes, cohort, all_codes, no_resume, source) -> None:
             s = update_listing(conn, target, resume=not no_resume)
             console.print(
                 f"[green]✓[/green] listing(yfinance): 真の上場日={s['true_listing_dates']} "
-                f"床(≤2000・補完待ち)={s['floor_unknown']} failed={s['failed']}"
+                f"床(≤2000・補完待ち)={s['floor_unknown']} 既存温存={s['preserved_existing']} "
+                f"failed={s['failed']}"
             )
     finally:
         conn.close()

@@ -1,9 +1,10 @@
-"""取得層の silent-drop 退治の回帰テスト（基盤整備 F1/F2）。
+"""取得層の silent-drop 退治の回帰テスト（基盤整備 F1/F2＋サーキットブレーカー）。
 
 F1: 完全性ゲート＝空/部分データは done を刻まず再取得対象に残す。
 F2: EDINET 日次スキャンの一過性失敗を「空」と断定せず EdinetScanError で再取得対象に。
 """
 import datetime as dt
+import json
 
 import pytest
 
@@ -22,6 +23,30 @@ class _FakeFetcher(RateLimitedFetcher):
 
     def is_complete(self, code, result):
         return result["value"] is not None
+
+
+class _AlwaysFail(RateLimitedFetcher):
+    """全件失敗するフェッチャ（ブロック/障害を模す）。"""
+    name = "always_fail"
+
+    def fetch_one(self, code):
+        raise RuntimeError("500 Server Error")
+
+
+def test_circuit_breaker_aborts(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "CHECKPOINT_DIR", tmp_path)
+    f = _AlwaysFail()
+    f.policy.sleep_between_items = 0
+    f.policy.sleep_between_batches = 0
+    f.policy.max_retries = 0
+    f.policy.max_consecutive_failures = 5   # 5連続失敗で中断
+    res = f.run([str(i) for i in range(100)])
+    # 100件中、ブレーカーで早期中断＝全件は処理しない（ブロック中の無駄叩きを止める）
+    assert len(res.failed) <= 6
+    assert len(res.ok) == 0
+    prog = json.loads((tmp_path / "always_fail.progress.json").read_text())
+    assert "CIRCUIT BREAKER" in prog["last_error"]
+    assert prog["running"] is False
 
 
 def test_f1_incomplete_not_checkpointed(tmp_path, monkeypatch):
