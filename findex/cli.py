@@ -465,6 +465,35 @@ def report_cmd(codes, cohort, out) -> None:
     console.print(f"[dim]open {res['path']}[/dim]")
 
 
+@main.command("post-gallery")
+@subset_options
+@all_option
+@click.option("--out", type=click.Path(), default=None, help="出力HTMLパス（既定: docs/html/posts.html）")
+def post_gallery_cmd(codes, cohort, all_codes, out) -> None:
+    """全投稿テーマを1ページで常時閲覧できるギャラリーHTMLを生成（本文コピー＋カード保存）。"""
+    from pathlib import Path
+
+    from .db import connect
+    from .post.themes import build_gallery_html
+
+    target = _resolve_target(codes, cohort, all_codes)
+    if not target:
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
+        return
+    scope = "全銘柄" if all_codes else ("cohort" if cohort else f"{len(target)}社")
+    conn = connect()
+    try:
+        res = build_gallery_html(conn, target, scope_label=f"対象 {scope}（{len(target)}社）")
+    finally:
+        conn.close()
+    path = Path(out) if out else (config.PROJECT_ROOT / "docs" / "html" / "posts.html")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(res["html"], encoding="utf-8")
+    console.print(f"[green]✓[/green] post-gallery: {res['themes']}テーマ → {path} "
+                  f"({len(res['html']):,} bytes)")
+    console.print(f"[dim]open {path}[/dim]")
+
+
 @main.command("progress")
 @click.argument("name", required=False)
 def progress_cmd(name) -> None:

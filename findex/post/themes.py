@@ -474,3 +474,89 @@ THEMES = {
     "net_cash": build_net_cash,
     **{name: _make_theme(name) for name in _SPECS},
 }
+
+
+# ── 投稿ギャラリーHTML（全テーマを1ページで常時閲覧・本文コピー＋カード保存用）──────
+_GALLERY_CSS = _CARD_CSS + """
+body{background:var(--bg);padding:0}
+.wrap{max-width:1040px;margin:0 auto;padding:34px 20px 90px}
+.wrap h1{font-size:25px;margin:.1em 0 .1em}
+.meta{color:var(--muted);font-size:13px;margin:.2em 0 8px}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 8px}
+.toc a{font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--line);
+border-radius:999px;padding:3px 10px}
+.toc a:hover{border-color:var(--accent);color:var(--accent)}
+.theme{margin:34px 0 0;border-top:1px solid var(--line);padding-top:22px}
+.theme-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.theme-head .slug{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent2);
+background:var(--th);padding:3px 9px;border-radius:6px}
+.copy{font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);
+color:var(--ink);border-radius:6px;padding:4px 11px}
+.copy:hover{border-color:var(--accent)}
+.copy.done{border-color:var(--accent2);color:var(--accent2)}
+.hook{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+padding:12px 14px;margin:0 0 14px;font-size:14px;line-height:1.85}
+.hooklen{color:var(--muted);font-size:11px;margin-left:6px}
+.cardwrap{overflow-x:auto}
+"""
+
+_GALLERY_JS = """
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click', function(){
+    navigator.clipboard.writeText(b.dataset.body).then(function(){
+      b.classList.add('done'); var t=b.textContent; b.textContent='コピー済み ✓';
+      setTimeout(function(){b.textContent=t; b.classList.remove('done');}, 1500);
+    });
+  });
+});
+"""
+
+
+def _esc_attr(s: str) -> str:
+    return (s.replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace("\n", "&#10;"))
+
+
+def _card_only(image_html: str) -> str:
+    """テーマの image_html（独立doc）から <div class="card">…</div> 本体だけ取り出す。"""
+    i = image_html.find('<div class="card">')
+    return image_html[i:] if i >= 0 else image_html
+
+
+def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict:
+    """全テーマを1ページに並べた投稿ギャラリーHTMLを生成（本文コピー＋カード保存）。
+
+    品質ゲート不通過のテーマは載せない（誤発信しない＝沈黙は許容）。
+    """
+    today = date.today().isoformat()
+    sections, toc, shown = [], [], 0
+    for name, fn in THEMES.items():
+        post = fn(conn, codes, top_n=10)
+        g = post["gates"]
+        if not g["passed"]:
+            continue
+        shown += 1
+        toc.append(f'<a href="#{name}">{name}</a>')
+        sections.append(
+            f'<section class="theme" id="{name}">'
+            f'<div class="theme-head"><span class="slug">{name}</span>'
+            f'<button class="copy" data-body="{_esc_attr(post["body"])}">本文をコピー</button>'
+            f'<span class="hooklen">{g["body_weighted_len"]}/140字・該当{g["eligible_count"]}社</span></div>'
+            f'<div class="hook">{post["body"].replace(chr(10), "<br>")}</div>'
+            f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
+            f'</section>'
+        )
+    html = (
+        '<!doctype html><html lang="ja"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<title>findex 投稿テーマ一覧</title>'
+        f'<style>{_GALLERY_CSS}</style></head><body><div class="wrap">'
+        '<h1>findex 投稿テーマ一覧</h1>'
+        f'<p class="meta">{scope_label}／生成 {today}／{shown}テーマ。'
+        '各テーマの「本文をコピー」→カードを画像保存して投稿。'
+        '数値は検証済み（status=ok）・打ち切りは「N年以上」・確証なき項目は「—」。</p>'
+        f'<nav class="toc">{"".join(toc)}</nav>'
+        f'{"".join(sections)}'
+        '</div><script>' + _GALLERY_JS + '</script></body></html>'
+    )
+    return {"html": html, "themes": shown}

@@ -19,3 +19,6 @@ docs/html/report.html
 
 # 投稿画像（findex post で再生成可能・バイナリ）
 docs/html/post_*.png
+
+# 生成物: 投稿ギャラリー（データ由来・再生成可）
+docs/html/posts.html
