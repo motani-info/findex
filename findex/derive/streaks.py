@@ -60,8 +60,8 @@ def compute_streaks(
     earliest_year = series[0][0]
     latest_year = series[-1][0]
 
-    growth_years, growth_start = _streak(series, kind="growth")
-    nocut_years, nocut_start = _streak(series, kind="nocut")
+    growth_years, growth_start, growth_reason = _streak(series, kind="growth")
+    nocut_years, nocut_start, nocut_reason = _streak(series, kind="nocut")
 
     # --- 打ち切り判定 ---
     # ストリークが系列先頭まで遡って切れている（= 開始年が最古年と一致）かつ
@@ -78,6 +78,12 @@ def compute_streaks(
         is_censored = (
             reaches_floor and listing_year < earliest_year and listing_year < data_start_year
         )
+
+    # --- 歯抜け（データ欠落）による中断も打ち切り（F3・地雷4の是正）---
+    # 連続が「実減配(cut)」でなく「年度の歯抜け(gap)」で切れた場合、それはデータ欠落であり
+    # 真の連続年数はこれ以上。確定値「N年」と言い切らず censored（N年以上）にする。
+    if "gap" in (growth_reason, nocut_reason):
+        is_censored = True
 
     # --- 公表値オーバーライド（公表 > 機械計算 のときだけ昇格）---
     if override is not None:
@@ -97,27 +103,36 @@ def compute_streaks(
     )
 
 
-def _streak(series: list[tuple[int, float]], *, kind: str) -> tuple[int, int | None]:
-    """末尾から遡って連続年数とその開始年度を返す。歯抜け（年度不連続）で打ち切る。"""
+def _streak(series: list[tuple[int, float]], *, kind: str) -> tuple[int, int | None, str]:
+    """末尾から遡って連続年数・開始年度・中断理由を返す。
+
+    中断理由（reason）で「データ欠落」と「実減配」を弁別する（F3）:
+      - "gap"   : 年度の歯抜け（データ欠落）で中断。真の連続はこれ以上＝下流で censored。
+      - "cut"   : 実減配/非増配で中断（確定の連続終了）。
+      - "start" : 系列先頭まで遡れた（左打ち切りは floor 判定に委譲）。
+    """
     if not series:
-        return 0, None
+        return 0, None, "start"
 
     years = 0
     start_year = series[-1][0]
+    reason = "start"
     for i in range(len(series) - 1, 0, -1):
         cur_fy, cur_dps = series[i]
         prev_fy, prev_dps = series[i - 1]
-        if cur_fy - prev_fy != 1:  # 歯抜け → ここで打ち切り（地雷4）
+        if cur_fy - prev_fy != 1:  # 歯抜け＝データ欠落（地雷4）。確定の終了ではない。
+            reason = "gap"
             break
         if kind == "growth":
             ok = cur_dps > prev_dps * GROWTH_MARGIN
         else:  # nocut
             ok = cur_dps >= prev_dps * NOCUT_MARGIN
         if not ok:
+            reason = "cut"
             break
         years += 1
         start_year = prev_fy
-    return years, start_year
+    return years, start_year, reason
 
 
 def format_years(years: int, is_censored: bool) -> str:

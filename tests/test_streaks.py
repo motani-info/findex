@@ -25,10 +25,21 @@ def test_dividend_cut_breaks_streak():
 
 
 def test_gap_breaks_streak():
-    # 2013年が欠落（歯抜け）→ 打ち切り（地雷4）
+    # 2013年が欠落（歯抜け）→ 中断（地雷4）
     series = [(2010, 10), (2011, 11), (2012, 12), (2014, 13), (2015, 14)]
     r = compute_streaks(series, listing_year=2008)
     assert r.growth_years == 1  # 13→14 のみ（2012-2014はギャップ）
+    # F3: 歯抜けはデータ欠落＝真の連続はこれ以上。確定値で言い切らず censored（N年以上）。
+    assert r.is_censored is True
+    assert format_years(r.growth_years, r.is_censored).endswith("年以上")
+
+
+def test_real_cut_is_not_censored():
+    # F3 の対照: 実減配で切れた連続は確定値（N年）。歯抜けでないので censored にしない。
+    r = compute_streaks(_series(2010, [10, 11, 12, 8, 9, 10]), listing_year=2008)
+    assert r.growth_years == 2 and r.nocut_years == 2
+    assert r.is_censored is False
+    assert format_years(r.growth_years, r.is_censored) == "2年"
 
 
 def test_censored_when_listed_before_data_floor():
