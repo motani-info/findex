@@ -76,3 +76,15 @@ def test_f2_scan_error_is_retryable():
     f = edinet.EdinetFetcher({}, {})
     assert f.is_rate_limit(edinet.EdinetScanError("x")) is True
     assert f.is_rate_limit(ValueError("other")) is False
+
+
+# --- F4: listing 完全性ゲート（HTTP200の空応答を再取得対象に） ----------------
+def test_f4_listing_both_null_is_incomplete():
+    from findex.fetch.listing import YahooListingFetcher, YahooListingInfo
+
+    f = YahooListingFetcher()
+    # 上場日・設立日とも取れない＝パース失敗の疑い→ done を刻まない（再取得対象）
+    assert f.is_complete("9999", YahooListingInfo("9999", None, None, "yahoo_profile")) is False
+    # どちらか取れていれば完全（done 確定）
+    assert f.is_complete("9999", YahooListingInfo("9999", "1949-05-01", None, "yahoo_profile")) is True
+    assert f.is_complete("9999", YahooListingInfo("9999", None, "1920-02-01", "yahoo_profile")) is True

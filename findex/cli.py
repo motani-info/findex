@@ -89,19 +89,25 @@ def master_cmd(codes, cohort) -> None:
 
 @main.command("listing")
 @subset_options
+@click.option("--all", "all_codes", is_flag=True, help="全銘柄（stocks 全件）を対象にする（重いスクレイプを明示）")
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
 @click.option("--source", type=click.Choice(["yfinance", "yahoo"]), default="yahoo",
               help="上場日ソース（yahoo=真値・設立日も補完／yfinance=床判定）")
-def listing_cmd(codes, cohort, no_resume, source) -> None:
+def listing_cmd(codes, cohort, all_codes, no_resume, source) -> None:
     """上場日(listing_date)を取得（打ち切り判定の鍵）。既定=Yahoo!JP真値。"""
     from .db import connect
     from .fetch.listing import update_listing, update_listing_yahoo
 
-    target = _resolve_codes(codes, cohort)
-    if not target:
-        console.print("[red]--codes か --cohort を指定してください（全銘柄は重いので明示）[/red]")
-        return
     conn = connect()
+    if all_codes:
+        target = [r[0] for r in conn.execute("SELECT code FROM stocks ORDER BY code").fetchall()]
+        console.print(f"[yellow]全銘柄モード[/yellow]: {len(target)}社（resume可・完全性ゲートで未取得は再取得対象に残る）")
+    else:
+        target = _resolve_codes(codes, cohort)
+    if not target:
+        conn.close()
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください（全銘柄は重いので明示）[/red]")
+        return
     try:
         if source == "yahoo":
             s = update_listing_yahoo(conn, target, resume=not no_resume)

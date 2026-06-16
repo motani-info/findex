@@ -122,6 +122,15 @@ class YahooListingFetcher(RateLimitedFetcher[YahooListingInfo]):
         msg = str(exc).lower()
         return super().is_rate_limit(exc) or "429" in msg or "too many" in msg
 
+    def is_complete(self, code: str, result: "YahooListingInfo") -> bool:
+        """完全性ゲート(F1): 上場日・設立日とも取れなければ done を刻まない。
+
+        実会社のプロフィールは上場年月日か設立年月日を必ず持つ。両方 None は
+        ソフトブロック/ページ構造変化/JS化などのパース失敗の可能性が高い→再取得対象に
+        残す（HTTP200の空応答を黙って done 扱いする silent-drop を防ぐ）。恒久的に
+        両方Nullなら verify が未充足として surface する。"""
+        return bool(result.listing_date or result.founded_date)
+
 
 def update_listing_yahoo(conn, codes: list[str], *, resume: bool = True) -> dict:
     """Yahoo!JPプロフィールで真の上場日＋設立日を取得し stocks に格納（yfinance床を置換）。"""
