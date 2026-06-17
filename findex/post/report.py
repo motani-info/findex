@@ -76,12 +76,9 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
     status=ok/zero_legit のフィールドだけ値を持たせ、それ以外は None（下流は「—」表示）。
     report.py と themes.py が同じゲートを共有するための共通入口。
     """
-    names = {}
-    try:
-        from ..cohort import load_cohort
-        names = {c.code: c.name for c in load_cohort()}
-    except Exception:
-        pass
+    # 銘柄名は stocks マスター（全3,734社）から引く。旧実装は load_cohort()(35社) からしか
+    # 引いておらず、全銘柄ギャラリーで非コホート銘柄の name が空欄になる局所バグだった（doc 09 §1.A）。
+    names = dict(conn.execute("SELECT code, name FROM stocks").fetchall())
 
     # status ゲートを通して露出する生値メトリクス（テーマ拡張の共通入口）
     _GATED = (

@@ -392,7 +392,7 @@ def score_cmd(codes, cohort, all_codes, top) -> None:
 
 @main.command("backtest")
 @subset_options
-@click.option("--what", default="outcomes", help="バックテスト対象（outcomes/...）")
+@click.option("--what", default="outcomes", help="バックテスト対象（outcomes/pit/metrics/all）")
 def backtest_cmd(codes, cohort, what) -> None:
     """バックテスト（D8）: PIT入力→前方アウトカム→メトリクス（Phase5.5）。"""
     from .db import connect
@@ -419,6 +419,14 @@ def backtest_cmd(codes, cohort, what) -> None:
             console.print(
                 f"[green]✓[/green] pit: run_id={p['run_id']} PITスコア={p['scores']} "
                 f"as_of点={p['as_of_points']}"
+            )
+        if what in ("all", "metrics"):
+            from .backtest.metrics import build_metrics
+
+            m = build_metrics(conn)
+            console.print(
+                f"[green]✓[/green] metrics: run_id={m['run_id']} メトリクス={m['rows']}件 "
+                f"信号のある指標={m['signal_indicators'] or '—'}"
             )
     finally:
         conn.close()

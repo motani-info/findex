@@ -16,6 +16,45 @@ from .streaks import StreakOverride, compute_streaks
 
 NOCUT_EPS = 0.999  # 非減配判定マージン（streaks と整合）
 
+# ── スケール露出データ品質ゲート（doc 09）────────────────────────────────
+# 小サンプル(コホート35社)では出なかった外れ値が全3,734社で status=ok を素通りし、
+# テーマの sort が外れ値を最上位へ押し上げる問題への是正。derive層（単一ゲート）で直す。
+
+# B 鮮度: 最新株価年から見て直近の配当実績がこの年数を超えて古ければ「現役利回りでない」
+# とみなし div_yield/YoC を stale 化（廃配・休配を現役利回りから排除。3070=2018で止まり→stale）。
+DIVIDEND_RECENCY_YEARS = 3
+
+# C サニティ: status=ok のまま出てはいけない経済的レンジ外の値。範囲外は suspect 化。
+# 閾値は全3,710社の実分布から較正（p99の外側の明確な外れ値のみ落とす・doc 09 §2）:
+#   div_yield p99=7.2%→≤12% / |roe| p99=131%→≤100% / per p99=221→≤200 /
+#   pbr p99=15.9→≤20 / cagr5y p99=64%→≤65%
+SANITY_MAX_DIV_YIELD = 0.12
+SANITY_MAX_ABS_ROE = 1.0
+SANITY_MAX_PER = 200.0
+SANITY_MAX_PBR = 20.0
+SANITY_MAX_CAGR_5Y = 0.65
+
+
+def _last_dividend_fy(conn, code: str) -> int | None:
+    """直近の配当実績（review隔離除く）会計年度。無配/未取得は None。"""
+    r = conn.execute(
+        "SELECT MAX(fiscal_year) FROM dividend_annual WHERE code=? AND confidence!='review'",
+        (code,),
+    ).fetchone()
+    return r[0] if r and r[0] is not None else None
+
+
+def _dividend_is_stale(conn, code: str, ref_year: int | None) -> bool:
+    """ref_year（最新株価年）から見て直近配当が DIVIDEND_RECENCY_YEARS 年超前なら True。
+
+    廃配・休配銘柄を「現役利回り」算出から排除する（doc 09 §1.B）。配当実績が無い/年不明
+    のときは False（無配は zero_legit、未取得は missing で別途扱う＝鮮度の問題ではない）。
+    """
+    last_fy = _last_dividend_fy(conn, code)
+    if last_fy is None or ref_year is None:
+        return False
+    return (ref_year - last_fy) > DIVIDEND_RECENCY_YEARS
+
 
 def _listing_year(conn, code: str) -> int | None:
     r = conn.execute("SELECT listing_date FROM stocks WHERE code=?", (code,)).fetchone()
@@ -193,20 +232,35 @@ def compute_dividend_metrics_for_code(conn, code: str) -> dict | None:
         "SELECT MAX(date) FROM price_history WHERE code=?", (code,)
     ).fetchone()[0]
     yoc_5y = yoc_10y = None
+    stale = False
     if latest_price_date:
         y = int(latest_price_date[:4])
+        stale = _dividend_is_stale(conn, code, y)
         p5 = _price_on_or_before(conn, code, f"{y - 5}-12-31")
         p10 = _price_on_or_before(conn, code, f"{y - 10}-12-31")
         if p5 and p5 > 0:
             yoc_5y = annual_div / p5
         if p10 and p10 > 0:
             yoc_10y = annual_div / p10
-    status["yield_on_cost_5y"] = "ok" if yoc_5y is not None else "insufficient"
-    # 算出できた値にだけ ok を付与（None=データ不足=insufficient）。status未付与だと
-    # 表示層(fetch_rows)が「確証なし」として一律 — に倒れる（div_growth等のテーマが全滅）。
-    status["yield_on_cost_10y"] = "ok" if yoc_10y is not None else "insufficient"
+    # 廃配・休配（配当が DIVIDEND_RECENCY_YEARS 年超前で止まる）の YoC は「現役の取得利回り」
+    # ではない＝stale。値は持たせず採点・表示から外す（doc 09 §1.B）。
+    if stale:
+        yoc_5y = yoc_10y = None
+        status["yield_on_cost_5y"] = status["yield_on_cost_10y"] = "stale"
+    else:
+        status["yield_on_cost_5y"] = "ok" if yoc_5y is not None else "insufficient"
+        # 算出できた値にだけ ok を付与（None=データ不足=insufficient）。status未付与だと
+        # 表示層(fetch_rows)が「確証なし」として一律 — に倒れる（div_growth等のテーマが全滅）。
+        status["yield_on_cost_10y"] = "ok" if yoc_10y is not None else "insufficient"
     status["dividend_multiple"] = "ok" if dps_mult is not None else "insufficient"
-    status["dividend_growth_5y_cagr"] = "ok" if cagr_5y is not None else "insufficient"
+    # cagr5y は復配・低基底からの増配で外れ値化する（p99=64%）。サニティ範囲外は suspect・doc 09 §1.C
+    if cagr_5y is None:
+        status["dividend_growth_5y_cagr"] = "insufficient"
+    elif cagr_5y > SANITY_MAX_CAGR_5Y:
+        cagr_5y = None
+        status["dividend_growth_5y_cagr"] = "suspect"
+    else:
+        status["dividend_growth_5y_cagr"] = "ok"
     status["dividend_growth_10y_cagr"] = "ok" if cagr_10y is not None else "insufficient"
 
     return {
@@ -391,9 +445,13 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     elif status["debt_to_equity"] == "zero_legit":
         out["debt_to_equity"] = 0.0
 
-    # ROE
+    # ROE（微小/負の自己資本で分母が崩壊し |roe|>100% になる外れ値は suspect・doc 09 §1.C）
     if net_income is not None and equity and equity > 0:
-        out["roe"], status["roe"] = round(net_income / equity, 6), "ok"
+        roe = round(net_income / equity, 6)
+        if abs(roe) > SANITY_MAX_ABS_ROE:
+            status["roe"] = "suspect"
+        else:
+            out["roe"], status["roe"] = roe, "ok"
     else:
         status["roe"] = "missing"
 
@@ -689,25 +747,34 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
         return None
     eps, bps, shares, total_assets, equity, cash = fin
     dps = _latest_dps(conn, code)
+    stale = _dividend_is_stale(conn, code, int(price_date[:4]))
 
     out: dict = {c: None for c in _PRICE_COLS}
     status: dict[str, str] = {}
 
-    # PER（赤字は算出不能）
+    # PER（赤字は算出不能・薄利益で per>200 は外れ値 suspect・doc 09 §1.C）
     if eps is None:
         status["per"] = "missing"
     elif eps <= 0:
         status["per"] = "insufficient"
     else:
-        out["per"], status["per"] = round(price / eps, 4), "ok"
+        per = round(price / eps, 4)
+        if per > SANITY_MAX_PER:
+            status["per"] = "suspect"
+        else:
+            out["per"], status["per"] = per, "ok"
 
-    # PBR（債務超過は算出不能）
+    # PBR（債務超過は算出不能・pbr>20 は外れ値 suspect）
     if bps is None:
         status["pbr"] = "missing"
     elif bps <= 0:
         status["pbr"] = "insufficient"
     else:
-        out["pbr"], status["pbr"] = round(price / bps, 4), "ok"
+        pbr = round(price / bps, 4)
+        if pbr > SANITY_MAX_PBR:
+            status["pbr"] = "suspect"
+        else:
+            out["pbr"], status["pbr"] = pbr, "ok"
 
     # 時価総額
     mcap = None
@@ -717,15 +784,19 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     else:
         status["current_market_cap"] = "missing"
 
-    # 配当利回り（無配=zero_legit・異常高は外れ値insufficient）
+    # 配当利回り（無配=zero_legit / 廃配休配=stale / 範囲外=suspect）
     if dps == 0:
         out["div_yield"], status["div_yield"] = 0.0, "zero_legit"
     elif dps is not None and price > 0:
         y = dps / price
-        if 0 < y <= 0.30:
-            out["div_yield"], status["div_yield"] = round(y, 6), "ok"
+        if stale:
+            status["div_yield"] = "stale"          # 配当が DIVIDEND_RECENCY_YEARS 年超前で停止（現役利回りでない）
+        elif y <= 0:
+            status["div_yield"] = "missing"
+        elif y > SANITY_MAX_DIV_YIELD:
+            status["div_yield"] = "suspect"         # サニティ範囲外（廃配/特配/株価瞬間値の疑い）
         else:
-            status["div_yield"] = "insufficient"
+            out["div_yield"], status["div_yield"] = round(y, 6), "ok"
     else:
         status["div_yield"] = "missing"
 

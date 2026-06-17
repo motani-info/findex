@@ -24,6 +24,33 @@ def weighted_len(s: str) -> int:
     return n
 
 
+# 薄データ閾値（doc 09 §2-4）: 採点指標数 n_scored がこれ未満の銘柄は動的分母が薄く、
+# 少数の幸運な指標で順位が上振れする（report.py も警告）。全3,710社の n_scored 分布の
+# 左裾（1-7=425社/11.5%）を除外。golden18社は全て n_scored≥11 で不変・配当claim銘柄への
+# 巻き込みも13社のみ（実測）。全銘柄スケールでの順位信頼性ゲート。
+MIN_N_SCORED = 8
+
+
+def _sufficient(r: dict) -> bool:
+    """薄データ銘柄を除外（順位信頼性ゲート）。n_scored が閾値未満なら全テーマで対象外。"""
+    ns = r.get("n_scored")
+    return ns is not None and ns >= MIN_N_SCORED
+
+
+# 配当利回りフロア（doc 09 §5・2026-06-17 ユーザー判断）: テーマの看板に応じた段階的フロア。
+# 「高配当/増配を謳うテーマに低・無配当が上位に来る」FBへの是正。バリュー/資本効率テーマ
+# （value_quality/net_cash/roic_spread）は利回りが主旨でないため適用しない。
+YIELD_FLOOR_HIGH = 0.03      # 高配当系（"高配当"の名に値する水準）
+YIELD_FLOOR_DIV = 0.02       # 増配・配当系（無配・ほぼ無配の見かけ倒しを排除）
+YIELD_FLOOR_STREAK = 0.015   # 連続/質系（増配アリストクラットを残す＝花王2.5%/小林1.9%は通過）
+
+
+def _yield_ok(r: dict, floor: float) -> bool:
+    """現配当利回りがフロア以上か。stale/suspect/missing（dy=None）は不通過＝低・無配を排除。"""
+    dy = r.get("dy")
+    return dy is not None and dy >= floor
+
+
 # 画像カードは固定ダークテーマ（スクショは prefers-color-scheme を当てにできない）
 _CARD_CSS = _CSS + """
 body{background:transparent;padding:0}
@@ -89,7 +116,8 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
     """連続増配ランキング投稿（本文＋画像HTML＋claim＋ゲート）を組み立てる。"""
     rows = fetch_rows(conn, codes)
     # ゲート: 配当claimがある(grade≠D)かつ連続増配年数が算出済みの銘柄のみ
-    elig = [r for r in rows if r["gd"] != "D" and r["g_years"] is not None]
+    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_STREAK)
+            and r["gd"] != "D" and r["g_years"] is not None]
     elig.sort(key=lambda r: (r["g_years"] or -1, r["nc_years"] or -1), reverse=True)
     has_override = any(r["g_src"] == "override" or r["nc_src"] == "override" for r in elig[:top_n])
 
@@ -209,7 +237,7 @@ def _gates(body: str, n: int, **extra) -> dict:
 def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     """高配当×安全: 利回り高 かつ 配当gradeA/B かつ 減配信頼性が算出済み（罠高配当を除く）。"""
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if r["dy"] is not None and r["gd"] in ("A", "B") and r["rel"] is not None]
+    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_HIGH) and r["gd"] in ("A", "B") and r["rel"] is not None]
     elig.sort(key=lambda r: r["dy"], reverse=True)
     n = min(top_n, len(elig))
     body = ('"高利回り=危険"とは限らない。\n'
@@ -238,7 +266,7 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
 def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     """増配スピード: 5年増配率(CAGR)上位（配当claimあり）。"""
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if r["dpc5"] is not None and r["gd"] != "D"]
+    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV) and r["dpc5"] is not None and r["gd"] != "D"]
     elig.sort(key=lambda r: r["dpc5"], reverse=True)
     n = min(top_n, len(elig))
     body = ('配当は"今の利回り"より"増える速さ"。\n'
@@ -269,7 +297,7 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
 def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     """割安×優良: PBR<1 かつ 財務gradeA/B かつ ROE算出済み。質を伴う割安。"""
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if r["pbr"] is not None and r["pbr"] < 1
+    elig = [r for r in rows if _sufficient(r) and r["pbr"] is not None and r["pbr"] < 1
             and r["gh"] in ("A", "B") and r["roe"] is not None]
     elig.sort(key=lambda r: r["roe"], reverse=True)
     n = min(top_n, len(elig))
@@ -301,7 +329,7 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     rows = fetch_rows(conn, codes)
     # ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。net_cash_per<per ⟺ ネットキャッシュ>0
     # ＝真に現金潤沢（純負債銘柄を「潤沢」と誤ラベルしない・定款の正確性）。
-    elig = [r for r in rows if r["net_cash_per"] is not None and r["per"] is not None
+    elig = [r for r in rows if _sufficient(r) and r["net_cash_per"] is not None and r["per"] is not None
             and r["per"] > 0 and r["net_cash_per"] < r["per"]]
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
@@ -372,7 +400,7 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, colum
     fetch_rows が status ゲート済み（確証データのみ値を持つ）ので、ここは整形のみ。
     """
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if eligible(r)]
+    elig = [r for r in rows if _sufficient(r) and eligible(r)]
     elig.sort(key=sort_key, reverse=reverse)
     n = min(top_n, len(elig))
     body = body_fn(n)
@@ -404,7 +432,7 @@ _SPECS: dict[str, dict] = {
         columns=[("連続非減配", "nc_years", "streak_nc"), ("連続増配", "g_years", "streak_g"),
                  ("減配信頼性", "rel", "num"), ("増配の質", "quality", "quality"),
                  ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and r["nc_years"] is not None,
+        eligible=lambda r: r["gd"] != "D" and r["nc_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: (r["nc_years"] or -1, r["g_years"] or -1),
         claim_keys=["nc_years", "gd"]),
     "long_growth": dict(
@@ -415,7 +443,7 @@ _SPECS: dict[str, dict] = {
         columns=[("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
                  ("増配率5年", "dpc5", "pct"), ("YoC(5年)", "yoc", "pct"),
                  ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and (r["g_years"] or 0) >= 10,
+        eligible=lambda r: r["gd"] != "D" and (r["g_years"] or 0) >= 10 and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["g_years"] or -1, claim_keys=["g_years", "gd"]),
     "growth_room": dict(
         title="増配余力（配当性向が低い）", subtitle="配当性向が低い＝増配の伸びしろ",
@@ -426,7 +454,7 @@ _SPECS: dict[str, dict] = {
                  ("増配率5年", "dpc5", "pct"), ("FCFカバ", "fcf_payout_coverage", "x"),
                  ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] in ("A", "B") and r["payout_ratio"] is not None
-        and 0 < r["payout_ratio"] < 0.4 and r["g_years"] is not None,
+        and 0 < r["payout_ratio"] < 0.4 and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["payout_ratio"], reverse=False, claim_keys=["payout_ratio", "gd"]),
     "fcf_coverage": dict(
         title="FCF配当カバレッジ", subtitle="稼ぐ現金で配当を何倍まかなえるか",
@@ -435,7 +463,7 @@ _SPECS: dict[str, dict] = {
                            "稼ぐ現金で配当を何倍払えるか。\n#日本株 #高配当株 #配当"),
         columns=[("FCFカバ", "fcf_payout_coverage", "x"), ("配当性向", "payout_ratio", "pct"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and r["fcf_payout_coverage"] is not None,
+        eligible=lambda r: r["gd"] != "D" and r["fcf_payout_coverage"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["fcf_payout_coverage"] or -1, claim_keys=["fcf_payout_coverage", "gd"]),
     "high_roe_growth": dict(
         title="高ROE×増配", subtitle="稼ぐ力と増配の両立",
@@ -445,7 +473,7 @@ _SPECS: dict[str, dict] = {
         columns=[("ROE", "roe", "pct"), ("連続増配", "g_years", "streak_g"),
                  ("営業益率", "operating_margin", "pct"), ("財務grade", "gh", "grade"),
                  ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and r["roe"] is not None and r["g_years"] is not None,
+        eligible=lambda r: r["gd"] != "D" and r["roe"] is not None and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["roe"] or -1, claim_keys=["roe", "gd"]),
     "total_score": dict(
         title="findex 配当総合スコア", subtitle="配当/バリュー/財務/資本の総合評価(v4)",
@@ -454,7 +482,7 @@ _SPECS: dict[str, dict] = {
                            "多角指標で選ぶ配当株。\n#日本株 #高配当株 #配当"),
         columns=[("総合", "total", "num"), ("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
                  ("財務", "gh", "grade"), ("資本", "gc", "grade"), ("指標数", "n_scored", "int")],
-        eligible=lambda r: r["total"] is not None,
+        eligible=lambda r: r["total"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["total"] or -1, claim_keys=["total", "gd"]),
     "high_yield": dict(
         title="高利回り（3.5%以上）", subtitle="配当利回り3.5%以上",
@@ -474,7 +502,7 @@ _SPECS: dict[str, dict] = {
         columns=[("PBR", "pbr", "x2"), ("配当利回り", "dy", "pct"), ("PER", "per", "x"),
                  ("財務grade", "gh", "grade"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
-        and r["dy"] is not None,
+        and _yield_ok(r, YIELD_FLOOR_HIGH),
         sort_key=lambda r: r["dy"] or -1, claim_keys=["pbr", "dy", "gd"]),
     "large_cap": dict(
         title="大型優良配当（時価総額1兆円超）", subtitle="時価総額1兆円超×配当gradeA/B",
@@ -484,7 +512,7 @@ _SPECS: dict[str, dict] = {
         columns=[("時価総額", "current_market_cap", "yen"), ("配当利回り", "dy", "pct"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
-        and r["current_market_cap"] >= 1e12,
+        and r["current_market_cap"] >= 1e12 and _yield_ok(r, YIELD_FLOOR_HIGH),
         sort_key=lambda r: r["current_market_cap"] or -1, claim_keys=["current_market_cap", "gd"]),
     "small_value": dict(
         title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
@@ -495,7 +523,8 @@ _SPECS: dict[str, dict] = {
                  ("配当利回り", "dy", "pct"), ("財務grade", "gh", "grade"),
                  ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["current_market_cap"] is not None
-        and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1,
+        and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1
+        and _yield_ok(r, YIELD_FLOOR_HIGH),
         sort_key=lambda r: r["dy"] or -1, claim_keys=["current_market_cap", "pbr", "gd"]),
     "roic_spread": dict(
         title="価値創造（ROIC−WACC）", subtitle="資本コストを超えて稼ぐ企業",
@@ -513,7 +542,7 @@ _SPECS: dict[str, dict] = {
                            "安定還元の本命指標。\n#日本株 #高配当株 #配当"),
         columns=[("DOE", "doe", "pct"), ("配当利回り", "dy", "pct"),
                  ("自己資本比率", "equity_ratio", "pct"), ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and r["doe"] is not None,
+        eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
 }
 
