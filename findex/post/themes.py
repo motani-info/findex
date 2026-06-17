@@ -34,6 +34,13 @@ border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
 .card table{margin:0}
 .foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.5}
+/* 順位強調（1〜3位の銘柄名を金銀銅＋太字） */
+.nm{font-weight:800}
+.r1{color:#d4a017}.r2{color:#8b96a6}.r3{color:#c0763a}
+/* 単位で10超の数値を強調 */
+.hot{color:var(--accent2);font-weight:800;background:rgba(126,224,192,.12);
+border-radius:5px;padding:1px 5px}
+@media (prefers-color-scheme:light){.hot{background:rgba(15,157,119,.10)}}
 """
 
 
@@ -49,30 +56,31 @@ def _streak_body(n: int) -> str:
 
 def _ranking_card_html(rows: list[dict], top_n: int, has_override: bool) -> str:
     today = date.today().isoformat()
+    shown = rows[:top_n]
     body = []
-    for i, r in enumerate(rows[:top_n], 1):
-        q = _QUALITY_JP.get(r["quality"], "—") if r["quality"] else "—"
+    for i, r in enumerate(shown, 1):
+        q = _q_jp(r["quality"])
         rel = f'{r["rel"]:.1f}' if r["rel"] is not None else '<span class="muted">—</span>'
         body.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
-            f'<td>{_streak_cell(r["g_years"], r["censored"], r["g_src"])}</td>'
-            f'<td>{_streak_cell(r["nc_years"], r["censored"], r["nc_src"])}</td>'
-            f'<td>{rel}</td><td>{q}</td><td>{_pct(r["yoc"])}</td>'
+            f'<tr>{_row_prefix(i, r)}'
+            f'<td>{_streak_td(r, "g")}</td><td>{_streak_td(r, "nc")}</td>'
+            f'<td>{rel}</td><td>{q}</td>'
+            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
             f'<td>{_grade_chip(r["gd"])}</td></tr>'
         )
-    src_note = ' <span class="src">ZAi公表</span>=ダイヤモンドZAi集計の公表値。' if has_override else ""
+    zai_note = _ZAI_FOOT if _has_override(shown) else ""
     return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
 <div class="card">
 <div class="brand">findex</div>
 <h1>連続増配・連続非減配ランキング</h1>
 <div class="cap">検証済みデータ（status=ok）／打ち切りは「N年以上」と正直表示／生成 {today}</div>
 <table><thead><tr>
-<th>#</th><th class="l">コード</th><th class="l">銘柄</th><th>連続増配</th><th>連続非減配</th>
+<th>#</th><th class="l">コード</th><th class="l">銘柄</th><th>配当利回り</th><th>連続増配</th><th>連続非減配</th>
 <th>減配信頼性</th><th>増配の質</th><th>YoC(5年)</th><th>配当grade</th>
 </tr></thead><tbody>
 {chr(10).join(body)}
 </tbody></table>
-<div class="foot">減配信頼性 1.0=過去20年無減配／増配の質 EPS牽引=健全・性向拡大・一過性。{src_note}
+<div class="foot">減配信頼性 1.0=過去20年無減配／増配の質 EPS牽引=健全・性向拡大・一過性。{zai_note}
 　情報提供であり投資助言ではありません。数値はfindexデータベース由来（status=okのみ）。</div>
 </div>"""
 
@@ -131,6 +139,43 @@ def _q_jp(quality):
 _FOOT = ('情報提供であり投資助言ではありません。数値はfindexデータベース由来（status=okの'
          '確証データのみ／確証なき項目は「—」）。連続年数の打ち切りは「N年以上」。')
 
+# ZAi公表値を採用した連続増配年数がある場合の出典脚注（セル内バッジは置かず脚注で一括明示）
+_ZAI_FOOT = '連続増配年数の一部はダイヤモンドZAi集計の公表値を採用（機械計算より長い場合のみ昇格）。'
+
+_MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
+
+
+def _has_override(rows: list[dict]) -> bool:
+    return any(r.get("g_src") == "override" or r.get("nc_src") == "override" for r in rows)
+
+
+def _hot(rendered: str, v, thr: float = 10.0) -> str:
+    """単位で thr を超える数値を強調（v は表示単位での実数。利回り%・倍率・年数）。"""
+    return f'<span class="hot">{rendered}</span>' if v is not None and v > thr else rendered
+
+
+def _name_td(i: int, name: str) -> str:
+    """順位別に銘柄名を強調（1〜3位は金銀銅＋太字色）。"""
+    return f'<td class="l nm r{i}">{_MEDAL[i]} {name}</td>' if i in _MEDAL else f'<td class="l">{name}</td>'
+
+
+def _dy_td(r: dict) -> str:
+    """全テーマ共通の配当利回り列（銘柄の直後）。10%超は強調。"""
+    dy = r.get("dy")
+    return f'<td>{_hot(_pct(dy), None if dy is None else dy * 100)}</td>'
+
+
+def _streak_td(r: dict, which: str) -> str:
+    """連続年数セル（ZAi出典バッジは置かず脚注で一括明示）。確定値が10年超なら強調。"""
+    yrs = r["g_years"] if which == "g" else r["nc_years"]
+    cell = _streak_cell(yrs, r["censored"], None)
+    return _hot(cell, yrs) if (yrs is not None and not r["censored"]) else cell
+
+
+def _row_prefix(i: int, r: dict) -> str:
+    """全テーマ共通の行頭: 順位 / コード / 銘柄(順位強調) / 配当利回り。"""
+    return f'<td>{i}</td><td class="l">{r["code"]}</td>{_name_td(i, r["name"])}{_dy_td(r)}'
+
 
 def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list[str],
                foot_extra: str = "") -> str:
@@ -172,19 +217,21 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
             "利回り×継続性×財務の質で選別。\n"
             "#日本株 #高配当株 #配当")
     head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "連続非減配", "増配の質", "配当grade"]
+    shown = elig[:top_n]
     trs = []
-    for i, r in enumerate(elig[:top_n], 1):
+    for i, r in enumerate(shown, 1):
         trs.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
-            f'<td>{_pct(r["dy"])}</td><td>{_pct(r["yoc"])}</td><td>{_num(r["rel"])}</td>'
-            f'<td>{_streak_cell(r["nc_years"], r["censored"], r["nc_src"])}</td>'
+            f'<tr>{_row_prefix(i, r)}'
+            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
+            f'<td>{_num(r["rel"])}</td><td>{_streak_td(r, "nc")}</td>'
             f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
         )
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
-               "dividend_reliability": r["rel"], "grade_dividend": r["gd"]} for r in elig[:top_n]]
+               "dividend_reliability": r["rel"], "grade_dividend": r["gd"]} for r in shown]
+    foot = "減配信頼性=過去の非減配度。" + (_ZAI_FOOT if _has_override(shown) else "")
     return {"theme": "high_yield_safe", "body": body,
             "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
-                                     head, trs, "減配信頼性=過去の非減配度。"),
+                                     head, trs, foot),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -198,20 +245,24 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
             f"5年増配率(CAGR)ランキング📈 トップ{n}\n"
             "黙って持つほど利回りが育つ株。\n"
             "#日本株 #増配株 #高配当")
-    head = ["#", "@コード", "@銘柄", "増配率5年", "増配率10年", "連続増配", "YoC(5年)", "増配の質", "配当grade"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", "増配率5年", "増配率10年", "連続増配", "YoC(5年)", "増配の質", "配当grade"]
+    shown = elig[:top_n]
     trs = []
-    for i, r in enumerate(elig[:top_n], 1):
+    for i, r in enumerate(shown, 1):
         trs.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
-            f'<td>{_pct(r["dpc5"])}</td><td>{_pct(r["dpc10"])}</td>'
-            f'<td>{_streak_cell(r["g_years"], r["censored"], r["g_src"])}</td>'
-            f'<td>{_pct(r["yoc"])}</td><td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
+            f'<tr>{_row_prefix(i, r)}'
+            f'<td>{_hot(_pct(r["dpc5"]), None if r["dpc5"] is None else r["dpc5"] * 100)}</td>'
+            f'<td>{_hot(_pct(r["dpc10"]), None if r["dpc10"] is None else r["dpc10"] * 100)}</td>'
+            f'<td>{_streak_td(r, "g")}</td>'
+            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
+            f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
         )
     claims = [{"code": r["code"], "name": r["name"], "dividend_growth_5y_cagr": r["dpc5"],
-               "grade_dividend": r["gd"]} for r in elig[:top_n]]
+               "grade_dividend": r["gd"]} for r in shown]
+    foot = _ZAI_FOOT if _has_override(shown) else ""
     return {"theme": "div_growth", "body": body,
             "image_html": _rank_card("増配スピード（5年CAGR）ランキング", "CAGR=年平均成長率",
-                                     head, trs),
+                                     head, trs, foot),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -226,17 +277,19 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
             f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
             "ROEと財務健全性で選別。\n"
             "#日本株 #割安株 #バリュー株")
-    head = ["#", "@コード", "@銘柄", "PBR", "PER", "ROE", "自己資本比率", "財務grade", "バリューgrade"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", "PBR", "PER", "ROE", "自己資本比率", "財務grade", "バリューgrade"]
+    shown = elig[:top_n]
     trs = []
-    for i, r in enumerate(elig[:top_n], 1):
+    for i, r in enumerate(shown, 1):
         trs.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
-            f'<td>{_num(r["pbr"], "倍", 2)}</td><td>{_num(r["per"], "倍")}</td>'
-            f'<td>{_pct(r["roe"])}</td><td>{_pct(r["equity_ratio"])}</td>'
+            f'<tr>{_row_prefix(i, r)}'
+            f'<td>{_hot(_num(r["pbr"], "倍", 2), r["pbr"])}</td><td>{_hot(_num(r["per"], "倍"), r["per"])}</td>'
+            f'<td>{_hot(_pct(r["roe"]), None if r["roe"] is None else r["roe"] * 100)}</td>'
+            f'<td>{_hot(_pct(r["equity_ratio"]), None if r["equity_ratio"] is None else r["equity_ratio"] * 100)}</td>'
             f'<td>{_grade_chip(r["gh"])}</td><td>{_grade_chip(r["gv"])}</td></tr>'
         )
     claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
-               "grade_health": r["gh"]} for r in elig[:top_n]]
+               "grade_health": r["gh"]} for r in shown]
     return {"theme": "value_quality", "body": body,
             "image_html": _rank_card("割安×優良（PBR1倍割れの質）ランキング", "PBR<1かつ財務健全",
                                      head, trs),
@@ -256,17 +309,20 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
             f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
             '表面より割安な"実質バリュー"。\n'
             "#日本株 #割安株 #バリュー株")
-    head = ["#", "@コード", "@銘柄", "実質PER", "表面PER", "PBR", "自己資本比率", "財務grade"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", "実質PER", "表面PER", "PBR", "自己資本比率", "財務grade"]
+    shown = elig[:top_n]
     trs = []
-    for i, r in enumerate(elig[:top_n], 1):
+    for i, r in enumerate(shown, 1):
         trs.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
-            f'<td>{_num(r["net_cash_per"], "倍")}</td><td>{_num(r["per"], "倍")}</td>'
-            f'<td>{_num(r["pbr"], "倍", 2)}</td><td>{_pct(r["equity_ratio"])}</td>'
+            f'<tr>{_row_prefix(i, r)}'
+            f'<td>{_hot(_num(r["net_cash_per"], "倍"), r["net_cash_per"])}</td>'
+            f'<td>{_hot(_num(r["per"], "倍"), r["per"])}</td>'
+            f'<td>{_hot(_num(r["pbr"], "倍", 2), r["pbr"])}</td>'
+            f'<td>{_hot(_pct(r["equity_ratio"]), None if r["equity_ratio"] is None else r["equity_ratio"] * 100)}</td>'
             f'<td>{_grade_chip(r["gh"])}</td></tr>'
         )
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
-               "per": r["per"], "grade_health": r["gh"]} for r in elig[:top_n]]
+               "per": r["per"], "grade_health": r["gh"]} for r in shown]
     return {"theme": "net_cash", "body": body,
             "image_html": _rank_card("ネットキャッシュ潤沢（実質PER）ランキング",
                                      "実質PER=現金控除後の割安度", head, trs,
@@ -285,18 +341,18 @@ def _yen(v):
 # 列種別 → セル描画。r は fetch_rows の1行。
 def _cell(r: dict, key: str, kind: str) -> str:
     if kind == "streak_g":
-        return _streak_cell(r["g_years"], r["censored"], r["g_src"])
+        return _streak_td(r, "g")
     if kind == "streak_nc":
-        return _streak_cell(r["nc_years"], r["censored"], r["nc_src"])
+        return _streak_td(r, "nc")
     v = r.get(key)
     if kind == "pct":
-        return _pct(v)
+        return _hot(_pct(v), None if v is None else v * 100)
     if kind == "num":
-        return _num(v)
+        return _hot(_num(v), v)
     if kind == "x":
-        return _num(v, "倍")
+        return _hot(_num(v, "倍"), v)
     if kind == "x2":
-        return _num(v, "倍", 2)
+        return _hot(_num(v, "倍", 2), v)
     if kind == "grade":
         return _grade_chip(v)
     if kind == "quality":
@@ -304,7 +360,7 @@ def _cell(r: dict, key: str, kind: str) -> str:
     if kind == "yen":
         return _yen(v)
     if kind == "int":
-        return str(int(v)) if v is not None else '<span class="muted">—</span>'
+        return _hot(str(int(v)), v) if v is not None else '<span class="muted">—</span>'
     return '<span class="muted">—</span>'
 
 
@@ -320,18 +376,20 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, colum
     elig.sort(key=sort_key, reverse=reverse)
     n = min(top_n, len(elig))
     body = body_fn(n)
-    head = ["#", "@コード", "@銘柄", *[c[0] for c in columns]]
+    shown = elig[:top_n]
+    # 配当利回りは全テーマ共通で銘柄の直後（columns側の重複定義は除外）
+    cols = [c for c in columns if c[1] != "dy"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", *[c[0] for c in cols]]
     trs = []
-    for i, r in enumerate(elig[:top_n], 1):
-        cells = "".join(f"<td>{_cell(r, key, kind)}</td>" for _, key, kind in columns)
-        trs.append(
-            f'<tr><td>{i}</td><td class="l">{r["code"]}</td>'
-            f'<td class="l">{r["name"]}</td>{cells}</tr>'
-        )
+    for i, r in enumerate(shown, 1):
+        cells = "".join(f"<td>{_cell(r, key, kind)}</td>" for _, key, kind in cols)
+        trs.append(f'<tr>{_row_prefix(i, r)}{cells}</tr>')
     claims = [{"code": r["code"], "name": r["name"], **{k: r.get(k) for k in claim_keys}}
-              for r in elig[:top_n]]
+              for r in shown]
+    has_streak_col = any(kind in ("streak_g", "streak_nc") for _, _, kind in cols)
+    foot = foot_extra + (_ZAI_FOOT if has_streak_col and _has_override(shown) else "")
     return {"theme": theme, "body": body,
-            "image_html": _rank_card(title, subtitle, head, trs, foot_extra),
+            "image_html": _rank_card(title, subtitle, head, trs, foot),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -531,7 +589,7 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
     today = date.today().isoformat()
     sections, toc, shown = [], [], 0
     for name, fn in THEMES.items():
-        post = fn(conn, codes, top_n=10)
+        post = fn(conn, codes, top_n=5)
         g = post["gates"]
         if not g["passed"]:
             continue

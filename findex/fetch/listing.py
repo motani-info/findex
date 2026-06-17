@@ -136,10 +136,25 @@ class YahooListingFetcher(RateLimitedFetcher[YahooListingInfo]):
         return bool(result.listing_date or result.founded_date)
 
 
-def update_listing_yahoo(conn, codes: list[str], *, resume: bool = True) -> dict:
-    """Yahoo!JPプロフィールで真の上場日＋設立日を取得し stocks に格納（yfinance床を置換）。"""
+def update_listing_yahoo(conn, codes: list[str], *, resume: bool = True,
+                         sleep_between_items: float | None = None) -> dict:
+    """Yahoo!JPプロフィールで真の上場日＋設立日を取得し stocks に格納（yfinance床を置換）。
+
+    sleep_between_items を渡すと item 間スリープを上書きする。Yahoo!JP は直近約15分で
+    ~100件のローリング枠を超えると 5xx ソフトBANを返す（実証）。枠を一気に使い切る
+    バーストでなく、枠を下回る一定間隔の連続ドリップ（例: 10秒/件≒60件/15分）で回せば
+    BAN を踏まずに全件を埋められる。
+    """
+    from dataclasses import replace
+
     now = datetime.now().isoformat(timespec="seconds")
-    res = YahooListingFetcher().run(codes, resume=resume)
+    fetcher = YahooListingFetcher()
+    if sleep_between_items is not None:
+        # バーストを作らないよう、バッチ末の追加休止も0にして純粋な一定間隔ドリップにする。
+        fetcher.policy = replace(
+            fetcher.policy, sleep_between_items=sleep_between_items, sleep_between_batches=0.0
+        )
+    res = fetcher.run(codes, resume=resume)
     listing_set = founded_set = corrected = both_null = 0
     for code, info in res.ok.items():
         old = conn.execute("SELECT listing_date FROM stocks WHERE code=?", (code,)).fetchone()

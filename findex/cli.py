@@ -113,7 +113,9 @@ def master_cmd(codes, cohort) -> None:
 @click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
 @click.option("--source", type=click.Choice(["yfinance", "yahoo"]), default="yahoo",
               help="上場日ソース（yahoo=真値・設立日も補完／yfinance=床判定）")
-def listing_cmd(codes, cohort, all_codes, no_resume, source) -> None:
+@click.option("--sleep", "sleep_secs", type=float, default=None,
+              help="item間スリープ秒（Yahooのレート枠を下回る連続ドリップ用。例: 10）")
+def listing_cmd(codes, cohort, all_codes, no_resume, source, sleep_secs) -> None:
     """上場日(listing_date)を取得（打ち切り判定の鍵）。既定=Yahoo!JP真値。"""
     from .db import connect
     from .fetch.listing import update_listing, update_listing_yahoo
@@ -130,7 +132,8 @@ def listing_cmd(codes, cohort, all_codes, no_resume, source) -> None:
         return
     try:
         if source == "yahoo":
-            s = update_listing_yahoo(conn, target, resume=not no_resume)
+            s = update_listing_yahoo(conn, target, resume=not no_resume,
+                                     sleep_between_items=sleep_secs)
             console.print(
                 f"[green]✓[/green] listing(Yahoo): 上場日={s['listing_set']} 設立日={s['founded_set']} "
                 f"旧値訂正={s['corrected_from_old']} 両方不明={s['both_null']} failed={s['failed']}"
