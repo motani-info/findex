@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from ..score.engine import _QUALITY_FACTOR
 from .report import (
     _CSS, _QUALITY_JP, _grade_chip, _pct, _streak_cell, fetch_rows,
 )
@@ -43,6 +44,24 @@ def _sufficient(r: dict) -> bool:
 YIELD_FLOOR_HIGH = 0.03      # 高配当系（"高配当"の名に値する水準）
 YIELD_FLOOR_DIV = 0.02       # 増配・配当系（無配・ほぼ無配の見かけ倒しを排除）
 YIELD_FLOOR_STREAK = 0.015   # 連続/質系（増配アリストクラットを残す＝花王2.5%/小林1.9%は通過）
+
+# high_yield_safe の安全フィルタ（doc 10・P1-2・2026-06-17 FB是正）: 看板「減配しにくい高配当」
+# に反する罠（高利回り×減配常習×配当性向>100%）を除外。GeminiFBのバリューコマース
+# （減配信頼性0.0/配当性向217%）が利回り降順で上位に来た問題への是正。derive層の status は
+# 既に確証を保証するが、テーマ層が「安全性」を実フィルタしていなかった（D4.5較正の思想が未波及）。
+HY_SAFE_MIN_REL = 0.6        # 減配信頼性（過去20年の減配1回以内＝1.0/0.6のみ。0.0=2回以上は除外）
+HY_SAFE_MAX_PAYOUT = 1.0     # 配当性向の健全上限（利益で配当を賄えている＝100%以下）
+
+
+def _hy_safe_eligible(r: dict) -> bool:
+    """high_yield_safe の安全フィルタ（doc 10・P1-2）。高配当の中から「減配しにくい」だけを残す。
+
+    利回りフロア＋配当gradeA/Bに加え、減配信頼性 rel>=0.6（減配1回以内）かつ配当性向が健全域
+    （0<payout<=100%＝利益で配当を賄えている）。rel/payout 未算出は安全性を確証できず除外。
+    """
+    return (_yield_ok(r, YIELD_FLOOR_HIGH) and r["gd"] in ("A", "B")
+            and r["rel"] is not None and r["rel"] >= HY_SAFE_MIN_REL
+            and r["payout_ratio"] is not None and 0 < r["payout_ratio"] <= HY_SAFE_MAX_PAYOUT)
 
 
 def _yield_ok(r: dict, floor: float) -> bool:
@@ -239,59 +258,82 @@ def _gates(body: str, n: int, **extra) -> dict:
 def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     """高配当×安全: 利回り高 かつ 配当gradeA/B かつ 減配信頼性が算出済み（罠高配当を除く）。"""
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_HIGH) and r["gd"] in ("A", "B") and r["rel"] is not None]
+    # 安全フィルタ（doc 10・P1-2）: 減配信頼性 rel>=0.6（減配1回以内）かつ 配当性向が健全域
+    # （利益で賄える＝0<payout<=100%）。看板「減配しにくい」に反する罠（高利回り×減配常習×
+    # 配当性向>100%）を排除。rel/payout が未算出（None）の銘柄も安全性を確証できず除外。
+    elig = [r for r in rows if _sufficient(r) and _hy_safe_eligible(r)]
     elig.sort(key=lambda r: r["dy"], reverse=True)
     n = min(top_n, len(elig))
     body = ('"高利回り=危険"とは限らない。\n'
             f"減配しにくい高配当ランキング💰 トップ{n}\n"
             "利回り×継続性×財務の質で選別。\n"
             "#高配当株 #配当")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "連続非減配", "増配の質", "配当grade"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "配当性向", "連続非減配", "増配の質", "配当grade"]
     shown = elig[:top_n]
     trs = []
     for i, r in enumerate(shown, 1):
         trs.append(
             f'<tr>{_row_prefix(i, r)}'
             f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
-            f'<td>{_num(r["rel"])}</td><td>{_streak_td(r, "nc")}</td>'
+            f'<td>{_num(r["rel"])}</td>'
+            f'<td>{_pct(r["payout_ratio"])}</td><td>{_streak_td(r, "nc")}</td>'
             f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
         )
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
-               "dividend_reliability": r["rel"], "grade_dividend": r["gd"]} for r in shown]
-    foot = "減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）<br>" + (_ZAI_FOOT if _has_override(shown) else "")
+               "dividend_reliability": r["rel"], "payout_ratio": r["payout_ratio"],
+               "grade_dividend": r["gd"]} for r in shown]
+    foot = ("減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）／"
+            "配当性向100%以下＝利益で配当を賄えている<br>") + (_ZAI_FOOT if _has_override(shown) else "")
     return {"theme": "high_yield_safe", "body": body,
             "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
                                      head, trs, foot),
             "claims": claims, "gates": _gates(body, n)}
 
 
+def _yoc_quality_key(r: dict) -> float:
+    """div_growth のソートキー: YoC × 増配の質係数（採点層 _QUALITY_FACTOR と同一）。
+
+    「高YoCだが一過性(cyclical×0.3)」を軟減点し、持続的な増配(sound×1.0)を上位に置く。
+    質未算出(None)は採点層と同じく ×1.0（既定）。
+    """
+    return r["yoc"] * _QUALITY_FACTOR.get(r["quality"], 1.0)
+
+
 def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
-    """増配スピード: 5年増配率(CAGR)上位（配当claimあり）。"""
+    """取得利回り（YoC・5年）上位。"育った利回り"＝5年前の株価に対する現在配当利回り。
+
+    D4.5較正①（doc 10・P1-1）: 生の増配率CAGRは低基底・一過性復配で外れ値化する
+    （イクヨ66倍・日本製鉄=減益下の増配）。YoC=年配当÷5年前株価を主軸に、採点層と同じ
+    持続性ゲート（増配の質 sound×1.0/payout_driven×0.5/cyclical×0.3）をソートキーに掛け、
+    「高YoCだが一過性」を軟減点する（score/engine.py の _QUALITY_FACTOR を共有＝単一実装）。
+    生CAGR順位を廃止。
+    """
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV) and r["dpc5"] is not None and r["gd"] != "D"]
-    elig.sort(key=lambda r: r["dpc5"], reverse=True)
+    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV) and r["yoc"] is not None and r["gd"] != "D"]
+    # YoC × 質係数（採点層と同一）。一過性は ×0.3 まで減点され、よほど高YoCでない限り沈む。
+    elig.sort(key=_yoc_quality_key, reverse=True)
     n = min(top_n, len(elig))
-    body = ('配当は"今の利回り"より"増える速さ"。\n'
-            f"5年増配率(CAGR)ランキング📈 トップ{n}\n"
-            "黙って持つほど利回りが育つ株。\n"
+    body = ('"今の利回り"より、育った利回り。\n'
+            f"取得利回り(YoC)ランキング📈 トップ{n}\n"
+            "5年前に買えば利回りはこう育つ。\n"
             "#増配株 #高配当株")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "増配率5年", "増配率10年", "連続増配", "YoC(5年)", "増配の質", "配当grade"]
+    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "増配率5年", "連続増配", "増配の質", "配当grade"]
     shown = elig[:top_n]
     trs = []
     for i, r in enumerate(shown, 1):
         trs.append(
             f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_hot(_pct(r["dpc5"]), None if r["dpc5"] is None else r["dpc5"] * 100)}</td>'
-            f'<td>{_hot(_pct(r["dpc10"]), None if r["dpc10"] is None else r["dpc10"] * 100)}</td>'
-            f'<td>{_streak_td(r, "g")}</td>'
             f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
+            f'<td>{_hot(_pct(r["dpc5"]), None if r["dpc5"] is None else r["dpc5"] * 100)}</td>'
+            f'<td>{_streak_td(r, "g")}</td>'
             f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
         )
-    claims = [{"code": r["code"], "name": r["name"], "dividend_growth_5y_cagr": r["dpc5"],
+    claims = [{"code": r["code"], "name": r["name"], "yield_on_cost_5y": r["yoc"],
                "grade_dividend": r["gd"]} for r in shown]
-    foot = _ZAI_FOOT if _has_override(shown) else ""
+    foot = ("YoC(5年): 5年前の株価に対する現在配当利回り（増配で利回りが育った度合い）<br>"
+            + (_ZAI_FOOT if _has_override(shown) else ""))
     return {"theme": "div_growth", "body": body,
-            "image_html": _rank_card("増配スピード（5年CAGR）ランキング", "CAGR=年平均成長率",
+            "image_html": _rank_card("取得利回り（YoC・5年）ランキング", "5年前に買っていたら利回りはこう育つ",
                                      head, trs, foot),
             "claims": claims, "gates": _gates(body, n)}
 
@@ -455,8 +497,12 @@ _SPECS: dict[str, dict] = {
         columns=[("配当性向", "payout_ratio", "pct"), ("連続増配", "g_years", "streak_g"),
                  ("増配率5年", "dpc5", "pct"), ("FCFカバ", "fcf_payout_coverage", "x"),
                  ("配当grade", "gd", "grade")],
+        # doc 10・P1-3: 低配当性向「だけ」では増配余力を担保できない（利益が薄い/赤字でも
+        # 性向は低く出る）。稼ぐ現金で配当を賄えている裏付けとして fcf_payout_coverage>0 を要求。
         eligible=lambda r: r["gd"] in ("A", "B") and r["payout_ratio"] is not None
-        and 0 < r["payout_ratio"] < 0.4 and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
+        and 0 < r["payout_ratio"] < 0.4 and r["g_years"] is not None
+        and r["fcf_payout_coverage"] is not None and r["fcf_payout_coverage"] > 0
+        and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["payout_ratio"], reverse=False, claim_keys=["payout_ratio", "gd"]),
     "fcf_coverage": dict(
         title="FCF配当カバレッジ", subtitle="稼ぐ現金で配当を何倍まかなえるか",
