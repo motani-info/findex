@@ -33,6 +33,10 @@ SANITY_MAX_ABS_ROE = 1.0
 SANITY_MAX_PER = 200.0
 SANITY_MAX_PBR = 20.0
 SANITY_MAX_CAGR_5Y = 0.65
+# DOE=配当総額÷自己資本。薄資本（分母崩壊）・特別配当でレンジ外に膨らむ（doc 09 §1.C・P2-1）。
+# 実測 p99=20.5%。0.6(60%)超のみ suspect（ZOZO35.6%等は保持・ユーザー合意 2026-06-17）。
+# DOE は v4 で後追加のため当初のサニティ対象から漏れていた（取りこぼしの是正）。
+SANITY_MAX_DOE = 0.6
 
 
 def _last_dividend_fy(conn, code: str) -> int | None:
@@ -473,7 +477,11 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
 
     # DOE = 年間配当総額÷自己資本（独立算出＝ROE×配当性向の恒等式材料）
     if div_total is not None and equity and equity > 0:
-        out["doe"], status["doe"] = round(div_total / equity, 6), "ok"
+        doe_val = round(div_total / equity, 6)
+        if doe_val > SANITY_MAX_DOE:   # 薄資本/特配で分母崩壊（doc 09 §1.C・P2-1）→ suspect
+            status["doe"] = "suspect"
+        else:
+            out["doe"], status["doe"] = doe_val, "ok"
     else:
         status["doe"] = "missing"
 

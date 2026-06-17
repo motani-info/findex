@@ -79,6 +79,8 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
     # 銘柄名は stocks マスター（全3,734社）から引く。旧実装は load_cohort()(35社) からしか
     # 引いておらず、全銘柄ギャラリーで非コホート銘柄の name が空欄になる局所バグだった（doc 09 §1.A）。
     names = dict(conn.execute("SELECT code, name FROM stocks").fetchall())
+    # sector33（33業種）: CF系テーマ（FCFカバ/ネットキャッシュ）の金融除外に使う（doc 10・P2-3）。
+    sectors = dict(conn.execute("SELECT code, sector33 FROM stocks").fetchall())
 
     # status ゲートを通して露出する生値メトリクス（テーマ拡張の共通入口）
     _GATED = (
@@ -114,7 +116,7 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
         n_scored = json.loads(sc[1]).get("n_scored") if sc and sc[1] else None
 
         out = {
-            "code": code, "name": names.get(code, ""),
+            "code": code, "name": names.get(code, ""), "sector33": sectors.get(code),
             "g_years": rec["consecutive_dividend_growth_years"],
             "nc_years": rec["consecutive_no_cut_years"],
             "censored": bool(rec["streak_is_censored"]),

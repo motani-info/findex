@@ -70,6 +70,18 @@ def _yield_ok(r: dict, floor: float) -> bool:
     return dy is not None and dy >= floor
 
 
+# CF系テーマ（FCFカバ/ネットキャッシュ）から除外する金融業種（doc 10・P2-3・D4.5較正③の業種考慮）。
+# 銀行・証券・保険・その他金融はFCF/ネットキャッシュの概念が事業構造上当てはまらず、CF系の
+# ランキングを構造的に独占・歪曲する（GeminiFB: fcf_coverage が銀行独占）。配当/連続テーマには
+# 引き続き登場する（除外はCF系の2テーマのみ）。
+_FINANCIAL_SECTORS = frozenset({"銀行業", "証券、商品先物取引業", "保険業", "その他金融業"})
+
+
+def _non_financial(r: dict) -> bool:
+    """金融業種でないか（CF系テーマのフィルタ）。sector33 未取得(None)は除外しない＝従来挙動を維持。"""
+    return r.get("sector33") not in _FINANCIAL_SECTORS
+
+
 # 画像カードは固定ダークテーマ（スクショは prefers-color-scheme を当てにできない）
 _CARD_CSS = _CSS + """
 body{background:transparent;padding:0}
@@ -373,7 +385,8 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     rows = fetch_rows(conn, codes)
     # ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。net_cash_per<per ⟺ ネットキャッシュ>0
     # ＝真に現金潤沢（純負債銘柄を「潤沢」と誤ラベルしない・定款の正確性）。
-    elig = [r for r in rows if _sufficient(r) and r["net_cash_per"] is not None and r["per"] is not None
+    elig = [r for r in rows if _sufficient(r) and _non_financial(r)
+            and r["net_cash_per"] is not None and r["per"] is not None
             and r["per"] > 0 and r["net_cash_per"] < r["per"]]
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
@@ -511,7 +524,9 @@ _SPECS: dict[str, dict] = {
                            "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
         columns=[("FCFカバ", "fcf_payout_coverage", "x"), ("配当性向", "payout_ratio", "pct"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["gd"] != "D" and r["fcf_payout_coverage"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
+        # doc 10・P2-3: 金融（銀行/証券/保険/その他金融）はFCFの概念が当てはまらずCF系を独占→除外。
+        eligible=lambda r: r["gd"] != "D" and _non_financial(r)
+        and r["fcf_payout_coverage"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["fcf_payout_coverage"] or -1, claim_keys=["fcf_payout_coverage", "gd"]),
     "high_roe_growth": dict(
         title="高ROE×増配", subtitle="稼ぐ力と増配の両立",
@@ -581,7 +596,10 @@ _SPECS: dict[str, dict] = {
                            "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
         columns=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("ROE", "roe", "pct"),
                  ("営業益率", "operating_margin", "pct"), ("資本grade", "gc", "grade")],
-        eligible=lambda r: r["roic_minus_wacc"] is not None and r["roic_minus_wacc"] > 0,
+        # doc 10・P2-2: ROIC−WACC>0 だけでは分母崩壊系（千代田化工=ROE算出不能）が混じる。
+        # 財務健全性が確証できる（ROE算出済み）銘柄に限定。
+        eligible=lambda r: r["roic_minus_wacc"] is not None and r["roic_minus_wacc"] > 0
+        and r["roe"] is not None,
         sort_key=lambda r: r["roic_minus_wacc"] or -1, claim_keys=["roic_minus_wacc", "gc"]),
     "doe_king": dict(
         title="DOE（株主資本配当率）", subtitle="利益が薄くても株主資本に対し報いる力",

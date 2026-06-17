@@ -1,6 +1,7 @@
 """X投稿テーマの純関数テスト（Phase6 MVP・品質ゲートの回帰防止）。"""
 from findex.post.themes import (
-    _hy_safe_eligible, _SPECS, _streak_body, _yoc_quality_key, weighted_len,
+    _hy_safe_eligible, _non_financial, _SPECS, _streak_body, _yoc_quality_key,
+    weighted_len,
 )
 
 
@@ -9,6 +10,7 @@ def _row(**kw):
     base = {
         "dy": None, "gd": None, "rel": None, "payout_ratio": None,
         "g_years": None, "yoc": None, "fcf_payout_coverage": None,
+        "roe": None, "roic_minus_wacc": None, "sector33": None,
     }
     base.update(kw)
     return base
@@ -71,3 +73,29 @@ def test_growth_room_requires_fcf_coverage():
     assert elig(_row(**base, fcf_payout_coverage=2.0))       # 現金で賄える＝余力あり
     assert not elig(_row(**base, fcf_payout_coverage=None))  # FCF未算出は裏付けなし→除外
     assert not elig(_row(**base, fcf_payout_coverage=-1.0))  # FCFマイナス＝賄えない→除外
+
+
+def test_roic_spread_requires_roe():
+    """roic_spread: ROIC−WACC>0だけでなくROE算出済み（分母崩壊系=千代田化工型を除外）。"""
+    elig = _SPECS["roic_spread"]["eligible"]
+    assert elig(_row(roic_minus_wacc=0.05, roe=0.12))      # 健全
+    assert not elig(_row(roic_minus_wacc=0.05, roe=None))  # ROE算出不能→除外
+    assert not elig(_row(roic_minus_wacc=-0.01, roe=0.12)) # 価値破壊（負）→除外
+
+
+def test_non_financial_excludes_financial_sectors():
+    """CF系テーマ: 銀行/証券/保険/その他金融を除外（FCF・ネットキャッシュの概念が不適）。"""
+    assert not _non_financial(_row(sector33="銀行業"))
+    assert not _non_financial(_row(sector33="証券、商品先物取引業"))
+    assert not _non_financial(_row(sector33="保険業"))
+    assert not _non_financial(_row(sector33="その他金融業"))
+    assert _non_financial(_row(sector33="情報・通信業"))    # 非金融は通過
+    assert _non_financial(_row(sector33=None))               # 未取得は従来挙動（除外しない）
+
+
+def test_fcf_coverage_excludes_financials():
+    """fcf_coverage: 金融除外がeligibleに効く（GeminiFB: 銀行独占の是正）。"""
+    elig = _SPECS["fcf_coverage"]["eligible"]
+    base = dict(gd="A", fcf_payout_coverage=3.0, dy=0.025)
+    assert elig(_row(**base, sector33="機械"))       # 非金融は通過
+    assert not elig(_row(**base, sector33="銀行業"))  # 銀行は除外
