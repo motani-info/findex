@@ -60,7 +60,7 @@ border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .brand{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
 .card table{margin:0}
-.foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.5}
+.foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8}
 /* 順位強調（1〜3位の銘柄名を金銀銅＋太字） */
 .nm{font-weight:800}
 .r1{color:#d4a017}.r2{color:#8b96a6}.r3{color:#c0763a}
@@ -75,9 +75,9 @@ def _streak_body(n: int) -> str:
     """フック本文（≤140字・CJK加重2）。看板テーゼ「増配率でなく続く配当」を1行で。"""
     return (
         f'「増配率」ではなく"続く配当"。\n'
-        f"連続増配・非減配ランキング トップ{n}📈\n"
-        "数字は全て検証済み（status=ok）。\n"
-        "#日本株 #増配株 #高配当"
+        f"連続増配・連続非減配ランキング📈 トップ{n}\n"
+        "長く減らさず増やし続けた銘柄。\n"
+        "#増配株 #高配当株"
     )
 
 
@@ -100,15 +100,17 @@ def _ranking_card_html(rows: list[dict], top_n: int, has_override: bool) -> str:
 <div class="card">
 <div class="brand">findex</div>
 <h1>連続増配・連続非減配ランキング</h1>
-<div class="cap">検証済みデータ（status=ok）／打ち切りは「N年以上」と正直表示／生成 {today}</div>
+<div class="cap">打ち切りは「N年以上」と正直表示／作成日 {today}</div>
 <table><thead><tr>
 <th>#</th><th class="l">コード</th><th class="l">銘柄</th><th>配当利回り</th><th>連続増配</th><th>連続非減配</th>
 <th>減配信頼性</th><th>増配の質</th><th>YoC(5年)</th><th>配当grade</th>
 </tr></thead><tbody>
 {chr(10).join(body)}
 </tbody></table>
-<div class="foot">減配信頼性 1.0=過去20年無減配／増配の質 EPS牽引=健全・性向拡大・一過性。{zai_note}
-　情報提供であり投資助言ではありません。数値はfindexデータベース由来（status=okのみ）。</div>
+<div class="foot">減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）<br>
+増配の質: 利益成長による増配＝健全／配当性向を上げた増配＝性向拡大<br>
+YoC(5年): 5年前に買っていた場合の実質利回り（増配による利回り向上）<br>
+{zai_note}情報提供であり投資助言ではありません。数値はFindex調べ。</div>
 </div>"""
 
 
@@ -164,11 +166,11 @@ def _q_jp(quality):
     return _QUALITY_JP.get(quality, '<span class="muted">—</span>') if quality else '<span class="muted">—</span>'
 
 
-_FOOT = ('情報提供であり投資助言ではありません。数値はfindexデータベース由来（status=okの'
-         '確証データのみ／確証なき項目は「—」）。連続年数の打ち切りは「N年以上」。')
+_FOOT = ('情報提供であり投資助言ではありません。数値はFindex調べ。'
+         '「—」は未算出項目、「N年以上」はデータ取得範囲の上限。')
 
 # ZAi公表値を採用した連続増配年数がある場合の出典脚注（セル内バッジは置かず脚注で一括明示）
-_ZAI_FOOT = '連続増配年数の一部はダイヤモンドZAi集計の公表値を採用（機械計算より長い場合のみ昇格）。'
+_ZAI_FOOT = '※連続増配年数の一部はダイヤモンドZAi公表値を採用。'
 
 _MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
 
@@ -217,11 +219,11 @@ def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list
 <div class="card">
 <div class="brand">findex</div>
 <h1>{title}</h1>
-<div class="cap">検証済みデータ（status=ok）／生成 {today}・{subtitle}</div>
+<div class="cap">{subtitle}／作成日 {today}</div>
 <table><thead><tr>{ths}</tr></thead><tbody>
 {chr(10).join(body_rows)}
 </tbody></table>
-<div class="foot">{foot_extra}{_FOOT}</div>
+<div class="foot">{foot_extra + '<br>' if foot_extra else ''}{_FOOT}</div>
 </div>"""
 
 
@@ -243,7 +245,7 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ('"高利回り=危険"とは限らない。\n'
             f"減配しにくい高配当ランキング💰 トップ{n}\n"
             "利回り×継続性×財務の質で選別。\n"
-            "#日本株 #高配当株 #配当")
+            "#高配当株 #配当")
     head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "連続非減配", "増配の質", "配当grade"]
     shown = elig[:top_n]
     trs = []
@@ -256,7 +258,7 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
         )
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
                "dividend_reliability": r["rel"], "grade_dividend": r["gd"]} for r in shown]
-    foot = "減配信頼性=過去の非減配度。" + (_ZAI_FOOT if _has_override(shown) else "")
+    foot = "減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）<br>" + (_ZAI_FOOT if _has_override(shown) else "")
     return {"theme": "high_yield_safe", "body": body,
             "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
                                      head, trs, foot),
@@ -272,7 +274,7 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ('配当は"今の利回り"より"増える速さ"。\n'
             f"5年増配率(CAGR)ランキング📈 トップ{n}\n"
             "黙って持つほど利回りが育つ株。\n"
-            "#日本株 #増配株 #高配当")
+            "#増配株 #高配当株")
     head = ["#", "@コード", "@銘柄", "配当利回り", "増配率5年", "増配率10年", "連続増配", "YoC(5年)", "増配の質", "配当grade"]
     shown = elig[:top_n]
     trs = []
@@ -304,7 +306,7 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ("PBR1倍割れ=万年割安、とは限らない。\n"
             f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
             "ROEと財務健全性で選別。\n"
-            "#日本株 #割安株 #バリュー株")
+            "#割安株 #バリュー株")
     head = ["#", "@コード", "@銘柄", "配当利回り", "PBR", "PER", "ROE", "自己資本比率", "財務grade", "バリューgrade"]
     shown = elig[:top_n]
     trs = []
@@ -336,7 +338,7 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ('現金を引くと"実質PER"はもっと安い。\n'
             f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
             '表面より割安な"実質バリュー"。\n'
-            "#日本株 #割安株 #バリュー株")
+            "#割安株 #バリュー株")
     head = ["#", "@コード", "@銘柄", "配当利回り", "実質PER", "表面PER", "PBR", "自己資本比率", "財務grade"]
     shown = elig[:top_n]
     trs = []
@@ -428,7 +430,7 @@ _SPECS: dict[str, dict] = {
         title="連続非減配ランキング", subtitle="減配なしで配当を守り続けた年数",
         body_fn=lambda n: ('"増やす"より、まず"減らさない"。\n'
                            f"連続非減配ランキング🛡️ トップ{n}\n"
-                           "不況でも配当を守った銘柄。\n#日本株 #高配当株 #配当"),
+                           "不況でも配当を守った銘柄。\n#高配当株 #配当"),
         columns=[("連続非減配", "nc_years", "streak_nc"), ("連続増配", "g_years", "streak_g"),
                  ("減配信頼性", "rel", "num"), ("増配の質", "quality", "quality"),
                  ("配当grade", "gd", "grade")],
@@ -439,7 +441,7 @@ _SPECS: dict[str, dict] = {
         title="長期増配の王様（10年以上）", subtitle="連続増配10年以上",
         body_fn=lambda n: ('一過性でなく、10年以上"続く"増配。\n'
                            f"長期増配の王様ランキング👑 トップ{n}\n"
-                           "時間が証明した配当力。\n#日本株 #増配株 #高配当"),
+                           "時間が証明した配当力。\n#増配株 #高配当株"),
         columns=[("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
                  ("増配率5年", "dpc5", "pct"), ("YoC(5年)", "yoc", "pct"),
                  ("配当grade", "gd", "grade")],
@@ -449,7 +451,7 @@ _SPECS: dict[str, dict] = {
         title="増配余力（配当性向が低い）", subtitle="配当性向が低い＝増配の伸びしろ",
         body_fn=lambda n: ("配当性向が低い＝まだ増やせる。\n"
                            f"増配余力ランキング💪 トップ{n}\n"
-                           "無理なく増配を続けられる株。\n#日本株 #増配株 #高配当"),
+                           "無理なく増配を続けられる株。\n#増配株 #高配当株"),
         columns=[("配当性向", "payout_ratio", "pct"), ("連続増配", "g_years", "streak_g"),
                  ("増配率5年", "dpc5", "pct"), ("FCFカバ", "fcf_payout_coverage", "x"),
                  ("配当grade", "gd", "grade")],
@@ -460,7 +462,7 @@ _SPECS: dict[str, dict] = {
         title="FCF配当カバレッジ", subtitle="稼ぐ現金で配当を何倍まかなえるか",
         body_fn=lambda n: ('配当は利益でなく"現金"で見る。\n'
                            f"FCF配当カバレッジ🔄 トップ{n}\n"
-                           "稼ぐ現金で配当を何倍払えるか。\n#日本株 #高配当株 #配当"),
+                           "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
         columns=[("FCFカバ", "fcf_payout_coverage", "x"), ("配当性向", "payout_ratio", "pct"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["fcf_payout_coverage"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
@@ -469,7 +471,7 @@ _SPECS: dict[str, dict] = {
         title="高ROE×増配", subtitle="稼ぐ力と増配の両立",
         body_fn=lambda n: ('配当だけでなく"稼ぐ力"も。\n'
                            f"高ROE×増配ランキング💹 トップ{n}\n"
-                           "ROEと増配を両立する優良株。\n#日本株 #増配株 #ROE"),
+                           "ROEと増配を両立する優良株。\n#増配株 #ROE"),
         columns=[("ROE", "roe", "pct"), ("連続増配", "g_years", "streak_g"),
                  ("営業益率", "operating_margin", "pct"), ("財務grade", "gh", "grade"),
                  ("配当grade", "gd", "grade")],
@@ -479,7 +481,7 @@ _SPECS: dict[str, dict] = {
         title="findex 配当総合スコア", subtitle="配当/バリュー/財務/資本の総合評価(v4)",
         body_fn=lambda n: ("配当・割安・財務・資本を総合評価。\n"
                            f"findex総合スコアランキング📊 トップ{n}\n"
-                           "多角指標で選ぶ配当株。\n#日本株 #高配当株 #配当"),
+                           "多角指標で選ぶ配当株。\n#高配当株 #配当"),
         columns=[("総合", "total", "num"), ("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
                  ("財務", "gh", "grade"), ("資本", "gc", "grade"), ("指標数", "n_scored", "int")],
         eligible=lambda r: r["total"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
@@ -488,7 +490,7 @@ _SPECS: dict[str, dict] = {
         title="高利回り（3.5%以上）", subtitle="配当利回り3.5%以上",
         body_fn=lambda n: ("まずは利回りで選ぶなら。\n"
                            f"高配当利回りランキング💰 トップ{n}\n"
-                           "利回り3.5%以上＋継続性も併示。\n#日本株 #高配当株 #配当"),
+                           "利回り3.5%以上＋継続性も併示。\n#高配当株 #配当"),
         columns=[("配当利回り", "dy", "pct"), ("配当性向", "payout_ratio", "pct"),
                  ("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc"),
                  ("配当grade", "gd", "grade")],
@@ -498,7 +500,7 @@ _SPECS: dict[str, dict] = {
         title="割安高配当（PBR1倍以下）", subtitle="PBR1倍以下×高利回り",
         body_fn=lambda n: ('"資産より安い"高配当。\n'
                            f"割安高配当ランキング🔍 トップ{n}\n"
-                           "PBR1倍以下で利回りも高い株。\n#日本株 #割安株 #高配当"),
+                           "PBR1倍以下で利回りも高い株。\n#割安株 #高配当株"),
         columns=[("PBR", "pbr", "x2"), ("配当利回り", "dy", "pct"), ("PER", "per", "x"),
                  ("財務grade", "gh", "grade"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
@@ -508,7 +510,7 @@ _SPECS: dict[str, dict] = {
         title="大型優良配当（時価総額1兆円超）", subtitle="時価総額1兆円超×配当gradeA/B",
         body_fn=lambda n: ("大型で安定、それでも配当が育つ。\n"
                            f"大型優良配当ランキング🏢 トップ{n}\n"
-                           "時価総額1兆円超の安定高配当。\n#日本株 #高配当株 #大型株"),
+                           "時価総額1兆円超の安定高配当。\n#高配当株 #大型株"),
         columns=[("時価総額", "current_market_cap", "yen"), ("配当利回り", "dy", "pct"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
@@ -518,7 +520,7 @@ _SPECS: dict[str, dict] = {
         title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
         body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"
                            f"小型割安配当ランキング💎 トップ{n}\n"
-                           "時価総額1000億未満・PBR1倍以下。\n#日本株 #割安株 #小型株"),
+                           "時価総額1000億未満・PBR1倍以下。\n#割安株 #小型株"),
         columns=[("時価総額", "current_market_cap", "yen"), ("PBR", "pbr", "x2"),
                  ("配当利回り", "dy", "pct"), ("財務grade", "gh", "grade"),
                  ("配当grade", "gd", "grade")],
@@ -530,7 +532,7 @@ _SPECS: dict[str, dict] = {
         title="価値創造（ROIC−WACC）", subtitle="資本コストを超えて稼ぐ企業",
         body_fn=lambda n: ("資本コストを超えて稼げているか。\n"
                            f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
-                           "本当の意味で儲かる会社。\n#日本株 #ROIC #バリュー株"),
+                           "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
         columns=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("ROE", "roe", "pct"),
                  ("営業益率", "operating_margin", "pct"), ("資本grade", "gc", "grade")],
         eligible=lambda r: r["roic_minus_wacc"] is not None and r["roic_minus_wacc"] > 0,
@@ -539,7 +541,7 @@ _SPECS: dict[str, dict] = {
         title="DOE（株主資本配当率）", subtitle="利益が薄くても株主資本に対し報いる力",
         body_fn=lambda n: ("利益が振れても、還元はブレない。\n"
                            f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
-                           "安定還元の本命指標。\n#日本株 #高配当株 #配当"),
+                           "安定還元の本命指標。\n#高配当株 #配当"),
         columns=[("DOE", "doe", "pct"), ("配当利回り", "dy", "pct"),
                  ("自己資本比率", "equity_ratio", "pct"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
@@ -581,6 +583,10 @@ background:var(--th);padding:3px 9px;border-radius:6px}
 color:var(--ink);border-radius:6px;padding:4px 11px}
 .copy:hover{border-color:var(--accent)}
 .copy.done{border-color:var(--accent2);color:var(--accent2)}
+.dl{font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);
+color:var(--ink);border-radius:6px;padding:4px 11px}
+.dl:hover{border-color:var(--accent)}
+.dl.done{border-color:var(--accent2);color:var(--accent2)}
 .hook{background:var(--panel);border:1px solid var(--line);border-radius:10px;
 padding:12px 14px;margin:0 0 14px;font-size:14px;line-height:1.85}
 .hooklen{color:var(--muted);font-size:11px;margin-left:6px}
@@ -593,6 +599,21 @@ document.querySelectorAll('.copy').forEach(function(b){
     navigator.clipboard.writeText(b.dataset.body).then(function(){
       b.classList.add('done'); var t=b.textContent; b.textContent='コピー済み ✓';
       setTimeout(function(){b.textContent=t; b.classList.remove('done');}, 1500);
+    });
+  });
+});
+document.querySelectorAll('.dl').forEach(function(b){
+  b.addEventListener('click', function(){
+    var sec = b.closest('.theme');
+    var card = sec.querySelector('.cardwrap');
+    b.textContent='生成中…';
+    html2canvas(card, {scale:2, backgroundColor:'#1a1a2e'}).then(function(canvas){
+      var a = document.createElement('a');
+      a.download = b.dataset.theme + '.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      b.classList.add('done'); b.textContent='保存済み ✓';
+      setTimeout(function(){b.textContent='画像を保存'; b.classList.remove('done');}, 2000);
     });
   });
 });
@@ -628,6 +649,7 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
             f'<section class="theme" id="{name}">'
             f'<div class="theme-head"><span class="slug">{name}</span>'
             f'<button class="copy" data-body="{_esc_attr(post["body"])}">本文をコピー</button>'
+            f'<button class="dl" data-theme="{name}">画像を保存</button>'
             f'<span class="hooklen">{g["body_weighted_len"]}/140字・該当{g["eligible_count"]}社</span></div>'
             f'<div class="hook">{post["body"].replace(chr(10), "<br>")}</div>'
             f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
@@ -637,11 +659,12 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
         '<!doctype html><html lang="ja"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>findex 投稿テーマ一覧</title>'
-        f'<style>{_GALLERY_CSS}</style></head><body><div class="wrap">'
+        f'<style>{_GALLERY_CSS}</style>'
+        '<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>'
+        '</head><body><div class="wrap">'
         '<h1>findex 投稿テーマ一覧</h1>'
-        f'<p class="meta">{scope_label}／生成 {today}／{shown}テーマ。'
-        '各テーマの「本文をコピー」→カードを画像保存して投稿。'
-        '数値は検証済み（status=ok）・打ち切りは「N年以上」・確証なき項目は「—」。</p>'
+        f'<p class="meta">{scope_label}／作成日 {today}／{shown}テーマ。'
+        '各テーマの「本文をコピー」→「画像を保存」で投稿。数値はFindex調べ。</p>'
         f'<nav class="toc">{"".join(toc)}</nav>'
         f'{"".join(sections)}'
         '</div><script>' + _GALLERY_JS + '</script></body></html>'

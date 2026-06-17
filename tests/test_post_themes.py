@@ -18,5 +18,6 @@ def test_streak_body_within_140():
 def test_streak_body_contains_thesis_and_gate():
     body = _streak_body(10)
     assert "続く配当" in body          # 差別化テーゼ
-    assert "status=ok" in body         # 検証済みの明示
-    assert "#" in body                 # ハッシュタグ
+    assert "status=ok" not in body     # FB是正: 利用者に無意味なメタ表現は本文に出さない
+    assert "#増配株" in body and "#高配当株" in body   # ハッシュタグは2個・株サフィックス統一
+    assert "#日本株" not in body       # 汎用すぎるタグは付けない
