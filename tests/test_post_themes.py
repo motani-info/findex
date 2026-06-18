@@ -99,3 +99,49 @@ def test_fcf_coverage_excludes_financials():
     base = dict(gd="A", fcf_payout_coverage=3.0, dy=0.025)
     assert elig(_row(**base, sector33="機械"))       # 非金融は通過
     assert not elig(_row(**base, sector33="銀行業"))  # 銀行は除外
+
+
+# ── P3-1: 数理不変条件 nc>=g の表示担保（doc 10・override逆転の是正）──────────
+
+def _streak_row(**kw):
+    """連続年数表示テスト用の行（g/nc/censored/g_src を上書き）。"""
+    base = {"g_years": None, "nc_years": None, "censored": False,
+            "g_src": None, "nc_src": None}
+    base.update(kw)
+    return base
+
+
+def test_nc_floor_lifts_when_override_growth_exceeds_computed_no_cut():
+    """連続増配(override) > 連続非減配(自前計算) のとき、非減配を g 年以上（打ち切り）へ。"""
+    from findex.post.report import _nc_display_floor
+    # ZAi公表override で連続増配36年、自前計算の非減配は12年（データ下限）。
+    # 数理上 非減配 >= 増配=36 ゆえ「36年以上」へ引き上げ（不可能な逆転を解消）。
+    yrs, cen = _nc_display_floor(_streak_row(g_years=36, nc_years=12, g_src="override"))
+    assert yrs == 36 and cen is True
+
+
+def test_nc_floor_keeps_computed_when_consistent():
+    """逆転がない（nc>=g）場合は計算値と元の打ち切りフラグをそのまま使う。"""
+    from findex.post.report import _nc_display_floor
+    # 非減配20 >= 増配12 ＝整合。引き上げない。
+    assert _nc_display_floor(_streak_row(g_years=12, nc_years=20, g_src="override")) == (20, False)
+    # g が override でない（自前計算同士）なら逆転は起きない前提＝そのまま。
+    assert _nc_display_floor(_streak_row(g_years=15, nc_years=10, g_src=None)) == (10, False)
+    # 元から打ち切りなら維持。
+    assert _nc_display_floor(_streak_row(g_years=8, nc_years=12, censored=True)) == (12, True)
+
+
+def test_nc_floor_handles_missing_values():
+    """None は安全に素通し（捏造しない）。"""
+    from findex.post.report import _nc_display_floor
+    assert _nc_display_floor(_streak_row(g_years=36, nc_years=None, g_src="override")) == (None, False)
+    assert _nc_display_floor(_streak_row(g_years=None, nc_years=10)) == (10, False)
+
+
+def test_streak_td_nc_renders_n_plus_on_inversion():
+    """表示セル: 逆転時に非減配が『36年以上』とレンダリングされる（report.py合成を経由）。"""
+    from findex.post.themes import _streak_td
+    cell = _streak_td(_streak_row(g_years=36, nc_years=12, g_src="override"), "nc")
+    assert "36年以上" in cell
+    # 増配側（g）は override 確定値ゆえそのまま「36年」（以上は付かない）。
+    assert "年以上" not in _streak_td(_streak_row(g_years=36, nc_years=12, g_src="override"), "g")

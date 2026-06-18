@@ -67,6 +67,21 @@ def _streak_cell(years, censored, source):
     return label
 
 
+def _nc_display_floor(r: dict) -> tuple[int | None, bool]:
+    """連続非減配（nc）の表示値と打ち切りフラグ。数理不変条件 nc>=g を表示で担保（doc 10・P3-1）。
+
+    連続増配（g）は連続非減配（nc）の部分集合＝増配した年は必ず非減配年。よって nc>=g が常に成立。
+    g が ZAi公表override（自前計算より長い確証値）で、自前計算の nc を上回るとき（g_src=override かつ
+    g>nc）、表示上の nc を「g年以上」（打ち切り）へ引き上げる。D2.7=overrideはclaim単位昇格のため
+    g だけが伸び nc が短いまま残り「増配 > 非減配」という不可能な逆転が画面に出る問題を解消する。
+    nc>=g は論理的確実性のみを述べる（捏造しない）。それ以外は計算値と元の打ち切りフラグをそのまま返す。
+    """
+    g, nc, cen = r.get("g_years"), r.get("nc_years"), bool(r.get("censored"))
+    if r.get("g_src") == "override" and g is not None and nc is not None and g > nc:
+        return g, True
+    return nc, cen
+
+
 _QUALITY_JP = {"sound": "EPS牽引", "payout_driven": "性向拡大", "cyclical": "一過性"}
 
 
@@ -160,10 +175,11 @@ def build_report(conn, codes: list[str]) -> str:
         q = _QUALITY_JP.get(r["quality"], '<span class="muted">—</span>') if r["quality"] else '<span class="muted">—</span>'
         dy = "無配" if r["dy_zero"] else _pct(r["dy"], 2)
         rel = f'{r["rel"]:.1f}' if r["rel"] is not None else '<span class="muted">—</span>'
+        nc_yrs, nc_cen = _nc_display_floor(r)
         return (
             f'<tr><td>{i}</td><td class="l">{r["code"]}</td><td class="l">{r["name"]}</td>'
             f'<td>{_streak_cell(r["g_years"], r["censored"], r["g_src"])}</td>'
-            f'<td>{_streak_cell(r["nc_years"], r["censored"], r["nc_src"])}</td>'
+            f'<td>{_streak_cell(nc_yrs, nc_cen, r["nc_src"])}</td>'
             f'<td>{rel}</td><td>{q}</td><td>{_pct(r["yoc"])}</td><td>{dy}</td>'
             f'<td>{_grade_chip(r["gd"])}</td></tr>'
         )

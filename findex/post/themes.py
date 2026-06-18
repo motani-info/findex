@@ -13,7 +13,7 @@ from datetime import date
 
 from ..score.engine import _QUALITY_FACTOR
 from .report import (
-    _CSS, _QUALITY_JP, _grade_chip, _pct, _streak_cell, fetch_rows,
+    _CSS, _QUALITY_JP, _grade_chip, _nc_display_floor, _pct, _streak_cell, fetch_rows,
 )
 
 
@@ -227,10 +227,16 @@ def _dy_td(r: dict) -> str:
 
 
 def _streak_td(r: dict, which: str) -> str:
-    """連続年数セル（ZAi出典バッジは置かず脚注で一括明示）。確定値が10年超なら強調。"""
-    yrs = r["g_years"] if which == "g" else r["nc_years"]
-    cell = _streak_cell(yrs, r["censored"], None)
-    return _hot(cell, yrs) if (yrs is not None and not r["censored"]) else cell
+    """連続年数セル（ZAi出典バッジは置かず脚注で一括明示）。確定値が10年超なら強調。
+
+    連続非減配（nc）は数理不変条件 nc>=g を表示で担保（doc 10・P3-1 / _nc_display_floor）。
+    """
+    if which == "g":
+        yrs, cen = r["g_years"], r["censored"]
+    else:
+        yrs, cen = _nc_display_floor(r)
+    cell = _streak_cell(yrs, cen, None)
+    return _hot(cell, yrs) if (yrs is not None and not cen) else cell
 
 
 def _row_prefix(i: int, r: dict) -> str:
