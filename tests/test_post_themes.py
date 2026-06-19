@@ -1,7 +1,7 @@
 """X投稿テーマの純関数テスト（Phase6 MVP・品質ゲートの回帰防止）。"""
 from findex.post.themes import (
-    _hy_safe_eligible, _is_takoashi, _non_financial, _SPECS, _streak_body,
-    _yoc_quality_key, weighted_len,
+    _hy_safe_eligible, _is_takoashi, _net_cash_eligible, _non_financial, _SPECS,
+    _streak_body, _yoc_quality_key, weighted_len,
 )
 
 
@@ -12,7 +12,8 @@ def _row(**kw):
         "g_years": None, "yoc": None, "fcf_payout_coverage": None,
         "roe": None, "roic_minus_wacc": None, "sector33": None,
         "pbr": None, "current_market_cap": None, "operating_margin": None,
-        "gh": None, "quality": None,
+        "gh": None, "quality": None, "total": None, "net_cash_per": None,
+        "per": None, "equity_ratio": None,
     }
     base.update(kw)
     return base
@@ -134,6 +135,39 @@ def test_raw_yield_themes_exclude_takoashi():
         elig = _SPECS[name]["eligible"]
         assert not elig(_row(**base, **tako)), name   # タコ足は除外
         assert elig(_row(**base, **safe)), name        # 実績ある高payout株は通過
+
+
+# ── doc 14: net_cash 無配排除フロア＋large_cap 総合スコア降順（GeminiFB是正）──────
+
+def test_net_cash_excludes_munhai_keeps_low_yield_value():
+    """net_cash: 無配のキャッシュトラップを排除。低配当でも現金潤沢な割安株は温存（doc14・1.5%フロア）。"""
+    base = dict(net_cash_per=2.0, per=10.0, sector33="情報・通信業")  # 実質PER<表面PER＝真に現金潤沢
+    # 無配(0%)＝キャッシュトラップは除外（イトクロ/キッズスター型）
+    assert not _net_cash_eligible(_row(**base, dy=0.0))
+    # 利回り未算出（stale/missing）も除外（確証なし）
+    assert not _net_cash_eligible(_row(**base, dy=None))
+    # 1.5%未満の超低配当は除外
+    assert not _net_cash_eligible(_row(**base, dy=0.01))
+    # 1.5%以上＝低配当でも現金潤沢な真の割安株は温存（バリュー主旨）
+    assert _net_cash_eligible(_row(**base, dy=0.02))
+    # 純負債（実質PER>=表面PER）は「潤沢」と誤ラベルしない
+    assert not _net_cash_eligible(_row(dy=0.04, net_cash_per=11.0, per=10.0, sector33="機械"))
+    # 金融は概念不適で除外（フロアを満たしても）
+    assert not _net_cash_eligible(_row(dy=0.04, net_cash_per=2.0, per=10.0, sector33="銀行業"))
+
+
+def test_large_cap_sorts_by_total_not_market_cap():
+    """large_cap: 並びは総合スコア降順（旧=時価総額降順の見せ方の嘘を是正）。抽出条件は不変。"""
+    spec = _SPECS["large_cap"]
+    big_low = _row(total=70.0, current_market_cap=14e12, gd="B", dy=0.03)   # 巨大だがスコア低
+    small_high = _row(total=90.0, current_market_cap=1.1e12, gd="A", dy=0.035)  # 小さめだがスコア高
+    # スコアが高い方が上位（時価総額が小さくても勝つ）
+    assert spec["sort_key"](small_high) > spec["sort_key"](big_low)
+    # 抽出条件は据え置き: gradeA/B × 時価総額1兆超 × 利回り3%以上
+    assert spec["eligible"](_row(gd="A", current_market_cap=1.5e12, dy=0.03))
+    assert not spec["eligible"](_row(gd="C", current_market_cap=1.5e12, dy=0.03))   # grade不足
+    assert not spec["eligible"](_row(gd="A", current_market_cap=9e11, dy=0.03))     # 1兆未満
+    assert not spec["eligible"](_row(gd="A", current_market_cap=1.5e12, dy=0.02))   # 利回り3%未満
 
 
 # ── P3-1: 数理不変条件 nc>=g の表示担保（doc 10・override逆転の是正）──────────

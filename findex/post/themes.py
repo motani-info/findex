@@ -39,11 +39,15 @@ def _sufficient(r: dict) -> bool:
 
 
 # 配当利回りフロア（doc 09 §5・2026-06-17 ユーザー判断）: テーマの看板に応じた段階的フロア。
-# 「高配当/増配を謳うテーマに低・無配当が上位に来る」FBへの是正。バリュー/資本効率テーマ
-# （value_quality/net_cash/roic_spread）は利回りが主旨でないため適用しない。
+# 「高配当/増配を謳うテーマに低・無配当が上位に来る」FBへの是正。
+# doc 14・2026-06-19 GeminiFB是正: net_cash は当初フロア免除だったが top10 の 6/10 が無配
+# （キャッシュトラップ＝現金を溜め込むだけで無還元）になり、配当ツールの文脈でミスリード。
+# ユーザー判断で net_cash に軽いフロア(1.5%)を導入し無配を排除（バリュー主旨は温存）。
+# value_quality/roic_spread は利回りを表に出さない資本効率テーマのため引き続き免除。
 YIELD_FLOOR_HIGH = 0.03      # 高配当系（"高配当"の名に値する水準）
 YIELD_FLOOR_DIV = 0.02       # 増配・配当系（無配・ほぼ無配の見かけ倒しを排除）
 YIELD_FLOOR_STREAK = 0.015   # 連続/質系（増配アリストクラットを残す＝花王2.5%/小林1.9%は通過）
+YIELD_FLOOR_VALUE = 0.015    # バリュー系（net_cash）: 無配のキャッシュトラップを排除（doc14）
 
 # high_yield_safe の安全フィルタ（doc 10・P1-2・2026-06-17 FB是正）: 看板「減配しにくい高配当」
 # に反する罠（高利回り×減配常習×配当性向>100%）を除外。GeminiFBのバリューコマース
@@ -412,14 +416,23 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
             "claims": claims, "gates": _gates(body, n)}
 
 
+def _net_cash_eligible(r: dict) -> bool:
+    """ネットキャッシュ潤沢の抽出条件。
+
+    - 非金融（CF/ネットキャッシュの概念が事業構造上当てはまる）。
+    - net_cash_per<per ⟺ ネットキャッシュ>0 ＝真に現金潤沢（純負債銘柄を誤ラベルしない・定款の正確性）。
+      ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。
+    - doc14: 無配のキャッシュトラップ（現金を溜め込むだけで無還元）を排除する軽いフロア(1.5%)。
+    """
+    return (_non_financial(r) and _yield_ok(r, YIELD_FLOOR_VALUE)
+            and r["net_cash_per"] is not None and r["per"] is not None
+            and r["per"] > 0 and r["net_cash_per"] < r["per"])
+
+
 def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     """ネットキャッシュ潤沢: 実質PER(ネットキャッシュ控除)が低い順。表面より割安。"""
     rows = fetch_rows(conn, codes)
-    # ネットキャッシュPER=PER×(1−ネットキャッシュ/時価総額)。net_cash_per<per ⟺ ネットキャッシュ>0
-    # ＝真に現金潤沢（純負債銘柄を「潤沢」と誤ラベルしない・定款の正確性）。
-    elig = [r for r in rows if _sufficient(r) and _non_financial(r)
-            and r["net_cash_per"] is not None and r["per"] is not None
-            and r["per"] > 0 and r["net_cash_per"] < r["per"]]
+    elig = [r for r in rows if _sufficient(r) and _net_cash_eligible(r)]
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
     body = ('現金を引くと"実質PER"はもっと安い。\n'
@@ -606,11 +619,14 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("大型で安定、それでも配当が育つ。\n"
                            f"大型優良配当ランキング🏢 トップ{n}\n"
                            "時価総額1兆円超の安定高配当。\n#高配当株 #大型株"),
-        columns=[("時価総額", "current_market_cap", "yen"), ("配当利回り", "dy", "pct"),
+        # doc14・GeminiFB是正: 抽出は時価総額1兆超のまま、並びは「大型"優良配当"」の看板どおり
+        # 総合スコア降順へ（旧: 時価総額降順＝単なる大企業順でNTT/中外が東京海上の下に沈む見せ方の嘘）。
+        # 連続増配 weight=2.5 等で配当継続性が主軸＝総合スコア順でも高利回り×長期増配が上位に来る。
+        columns=[("総合スコア", "total", "num"), ("時価総額", "current_market_cap", "yen"),
                  ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
         and r["current_market_cap"] >= 1e12 and _yield_ok(r, YIELD_FLOOR_HIGH),
-        sort_key=lambda r: r["current_market_cap"] or -1, claim_keys=["current_market_cap", "gd"]),
+        sort_key=lambda r: r["total"] or -1, claim_keys=["total", "current_market_cap", "gd"]),
     "small_value": dict(
         title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
         body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"
