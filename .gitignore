@@ -22,3 +22,7 @@ docs/html/post_*.png
 
 # 生成物: 投稿ギャラリー（データ由来・再生成可）
 docs/html/posts.html
+
+# 作業ログ（流動・非追跡）: セッション作業メモ DEVLOG.md と取得ジョブの実行ログ。
+# 確定した記録は docs/PROJECT-LOG.md（追跡）へ昇格する。
+logs/
