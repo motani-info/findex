@@ -5,6 +5,32 @@
 
 ---
 
+## doc13 — J-Quants確定無配の取り込み（ghost利回りの根治・Track B）（2026-06-19）
+
+doc12 が Track A（テーマ層）で②③④を是正した後、残した①サンウェルズ9229 の ghost利回り9.7% を
+**取得層**で根治。正本: [13-jquants-confirmed-dividends.md](design/13-jquants-confirmed-dividends.md)。
+
+### 根本原因
+`dividend_annual` は yfinance の実支払い（ex-date）だけで構築。**無配＝ex-dateイベント無し**のため
+yfinance は構造的に無配年の行を立てられず、無配転落後も最新が直近の有配年に固定される。鮮度ゲート
+`DIVIDEND_RECENCY_YEARS=3` も未発火（gap=2）→ `div_yield=直近DPS/暴落株価=9.7%`（status=ok）の幽霊。
+
+### 実装（コミット `fbf4b0b`・fill-absent-無配-only）
+- 既配線の `JQuantsClient.fins_summary` レスポンスにある確定年間配当 `DivAnn`（0.0=無配含む）を
+  従来パーサが捨てていた。新パーサ `parse_fy_dividends`（FY実績のみ・予想/空文字は除外）で年度別抽出。
+- ビルダー `_JQuantsDividendBuilder` / `build_jquants_dividends`: 確定無配(0.0)で**既存行が無い年だけ**
+  source=`jquants` で挿入。既存系列（events/override/haitoukin/manual/ir）は一切上書きしない＝
+  **golden保護を構造で担保**。CLI `findex dividends-jq --cohort|--codes|--all`（resume安全）。
+- derive側は変更不要: 最新DPS=0.0 → 既存 `div_yield: dps==0 → zero_legit`（利回り非表示）に自然追従。
+
+### 全銘柄反映（2026-06-19・ユーザー起動の背景ジョブ）
+- `dividends-jq --all`: ok=3695・**無配補完=1281行/710社**・failed=3（429/timeout）→ `--codes` で再取得し
+  failed=0、3734/3734 完全カバレッジ。→ `derive --all` → `score --all` → `post-gallery --all` → `verify --all`。
+- 検収: **golden 18/18 不整合0**・computed 99.5%・pytest 108 passed。Geminiの**5銘柄
+  （9229/2491/6927/8165/3989）すべて posts.html から消失（0 hits）**を確認＝Track A+B でゴースト根絶。
+
+---
+
 ## doc12 — 生利回り系テーマの罠フィルタ（タコ足/偽ROE/復配ジャンプ・Track A）（2026-06-19）
 
 Gemini が再生成後の posts.html を実市場と突合し「実態と乖離したゴーストデータ4つ」を報告。
