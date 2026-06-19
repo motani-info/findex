@@ -14,6 +14,7 @@ from datetime import datetime
 import yfinance as yf
 
 from .base import FetchPolicy, RateLimitedFetcher, RateLimitError
+from .jquants import JQuantsClient, parse_fy_dividends
 
 SOURCE_PRIORITY = {"manual": 5, "ir": 4, "haitoukin": 3, "jquants": 2, "events": 1}
 
@@ -146,6 +147,66 @@ def build_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
     return {"ok": len(res.ok), "failed": len(res.failed), "no_dividend": builder.no_div,
             "events": builder.n_events, "annual_rows": builder.n_annual, "review_flags": n_review,
             "failures": res.failed}
+
+
+class _JQuantsDividendBuilder(RateLimitedFetcher[dict]):
+    """J-Quants確定配当(DivAnn)から **無配年(0.0)だけ** を dividend_annual に補完（doc13）。
+
+    ghost利回り根治: yfinanceは「無配＝ex-dateイベント無し」で**構造的に無配年を出せない**ため、
+    無配転落しても dividend_annual の最新が直近の有配年（例: サンウェルズFY2024=14）に固定され、
+    暴落株価で割って幽霊利回りになる。J-Quantsは確定無配を DivAnn=0.0 で開示する＝これを取り込む。
+
+    **golden保護のため fill-absent-無配-only**: 既存行がある年は一切触らない（正系列・events・
+    override・haitoukin を上書きしない）。確定無配(0.0)で既存行が無い年だけ source=jquants で挿入。
+    非ゼロの鮮度補完は対象外（yfinanceが有配年は出せるため不要・系列改変リスクを避ける）。
+    resume安全: 1銘柄＝取得→書込→commit を fetch_one で完結（events builder と同型）。
+    """
+
+    name = "dividends_jquants"
+    policy = FetchPolicy(batch_size=50, sleep_between_batches=1.5, sleep_between_items=0.2,
+                         max_retries=4)
+
+    def __init__(self, conn, now):
+        self.conn = conn
+        self.now = now
+        self.client = JQuantsClient()
+        self.n_filled = 0
+        self.n_codes_filled = 0
+
+    def fetch_one(self, code: str) -> dict:
+        divs = parse_fy_dividends(self.client.fins_summary(code))
+        filled = 0
+        try:
+            for fy, dv in sorted(divs.items()):
+                if dv != 0.0:
+                    continue  # Phase1: 確定無配(0.0)のみ。有配年は yfinance events に任せる
+                if self.conn.execute(
+                    "SELECT 1 FROM dividend_annual WHERE code=? AND fiscal_year=?", (code, fy)
+                ).fetchone():
+                    continue  # 既存系列は触らない（fill-absentのみ＝golden保護）
+                self.conn.execute(
+                    "INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, as_of, updated_at) "
+                    "VALUES (?,?,0.0,'jquants','present',NULL,?)",
+                    (code, fy, self.now),
+                )
+                filled += 1
+            self.conn.commit()        # ← commit 後にのみ base.run が checkpoint を刻む
+        except Exception:
+            self.conn.rollback()
+            raise
+        self.n_filled += filled
+        if filled:
+            self.n_codes_filled += 1
+        return {"code": code, "filled": filled}
+
+
+def build_jquants_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
+    """J-Quants確定無配を dividend_annual に補完（doc13・ghost利回り根治）。"""
+    now = datetime.now().isoformat(timespec="seconds")
+    builder = _JQuantsDividendBuilder(conn, now)
+    res = builder.run(codes, resume=resume)
+    return {"ok": len(res.ok), "failed": len(res.failed), "filled": builder.n_filled,
+            "codes_filled": builder.n_codes_filled, "failures": res.failed}
 
 
 def cleanse_haitoukin_seam(conn, codes: list[str]) -> int:

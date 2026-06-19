@@ -208,6 +208,30 @@ def dividends_cmd(codes, cohort, all_codes, no_resume) -> None:
     )
 
 
+@main.command("dividends-jq")
+@subset_options
+@all_option
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def dividends_jq_cmd(codes, cohort, all_codes, no_resume) -> None:
+    """J-Quants確定無配(DivAnn=0.0)を dividend_annual に補完（doc13・ghost利回り根治）。"""
+    from .db import connect
+    from .fetch.dividends import build_jquants_dividends
+
+    target = _resolve_target(codes, cohort, all_codes)
+    if not target:
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください（全銘柄は重い）[/red]")
+        return
+    conn = connect()
+    try:
+        stats = build_jquants_dividends(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(
+        f"[green]✓[/green] dividends-jq: ok={stats['ok']} "
+        f"無配補完={stats['filled']}行/{stats['codes_filled']}社 failed={stats['failed']}"
+    )
+
+
 @main.command("financials")
 @subset_options
 @all_option

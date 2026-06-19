@@ -126,6 +126,30 @@ def parse_fy_records(records: list[dict]) -> list[FinFY]:
     return [out[k] for k in sorted(out)]
 
 
+def parse_fy_dividends(records: list[dict]) -> dict[int, float]:
+    """fins/summary から **FY実績の確定年間配当 DivAnn** を年度別に抽出（doc13）。
+
+    yfinance実支払い（ex-dateイベント）では構造的に表現できない無配年（DivAnn=0.0＝確定無配）を
+    含むのが要点（無配＝ex-date無し→yfinanceに行が立たない→ghost利回りの原因）。
+    予想（FDivAnn/NxFDivAnn）は採らない＝確定実績のみ（捏造しない）。空文字（未開示）は None で除外。
+    会計年度キーは parse_fy_records と同じ「決算期末年（CurFYEn の年）」で整合。
+    """
+    out: dict[int, float] = {}
+    for r in records:
+        if r.get("CurPerType") != "FY":
+            continue
+        if "FinancialStatements" not in (r.get("DocType") or ""):
+            continue
+        end = r.get("CurFYEn") or r.get("CurPerEn") or ""
+        if not end:
+            continue
+        dv = _f(r.get("DivAnn"))
+        if dv is None:
+            continue
+        out[int(end[:4])] = dv
+    return out
+
+
 class FinancialsFetcher(RateLimitedFetcher[list]):
     name = "jquants_fins"
     policy = FetchPolicy(batch_size=50, sleep_between_batches=2.0, sleep_between_items=0.2, max_retries=4)
