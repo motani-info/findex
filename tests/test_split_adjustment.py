@@ -39,3 +39,35 @@ def test_multiple_splits_cumulative():
     assert _split_adjustment_factor(conn, "8227", "2024-03-31") == 3.0
     # as_of=2023-12-31 → 両方とも対象
     assert _split_adjustment_factor(conn, "8227", "2023-12-31") == 6.0
+
+
+def test_payout_ratio_uses_split_adjusted_eps():
+    """分割後基準のDPSと分割前基準のEPSの混在が補正されるか（doc11リグレッション）。"""
+    from pathlib import Path
+
+    from findex.db.database import connect
+    from findex.derive.compute import compute_financial_metrics_for_code
+
+    conn = connect(":memory:")
+    conn.executescript(Path("findex/db/schema.sql").read_text(encoding="utf-8"))
+    # 1:5分割銘柄。EPS=500(分割前)、DPS=40(分割後)。
+    # 補正前: payout=40/500=8%（誤）／補正後: EPS=100、payout=40/100=40%（正）
+    conn.execute(
+        "INSERT INTO stocks (code, name, accounting_standard, updated_at) VALUES ('9999','テスト','jgaap','now')"
+    )
+    conn.execute(
+        "INSERT INTO financial_snapshots (code, fiscal_year, source, net_income, eps, "
+        "total_assets, equity_attributable, shares_outstanding, as_of, collected_at) "
+        "VALUES ('9999', 2025, 'jquants', 5000000000, 500.0, 100000000000, 50000000000, 10000000, '2025-03-31', 'now')"
+    )
+    conn.execute(
+        "INSERT INTO dividend_annual (code, fiscal_year, dps, source, confidence, updated_at) "
+        "VALUES ('9999', 2026, 40.0, 'events', 'present', 'now')"
+    )
+    conn.execute(
+        "INSERT INTO stock_splits VALUES ('9999','2025-12-29',5.0,'yfinance','now')"
+    )
+    conn.commit()
+    out = compute_financial_metrics_for_code(conn, "9999")
+    assert out["payout_ratio"] == round(40.0 / 100.0, 6)  # 0.4 = 40%
+

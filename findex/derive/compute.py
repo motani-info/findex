@@ -410,14 +410,24 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     # net_incomeだけ埋めた薄いorphan行（営業利益・株数を欠く）を掴まないよう jquants 優先。
     core = conn.execute(
         "SELECT fiscal_year, revenue, operating_income, net_income, eps, total_assets, "
-        "equity_attributable, operating_cf, shares_outstanding FROM financial_snapshots "
+        "equity_attributable, operating_cf, shares_outstanding, as_of FROM financial_snapshots "
         "WHERE code=? AND net_income IS NOT NULL "
         "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
         (code,),
     ).fetchone()
     if not core:
         return None
-    (fy, revenue, op_income, net_income, eps, total_assets, equity, op_cf, shares) = core
+    (fy, revenue, op_income, net_income, eps, total_assets, equity, op_cf, shares, as_of) = core
+    # 株式分割補正（doc11）: dividend_annual.dps は分割調整済み（分割後基準）だが、
+    # eps/shares は J-Quants 報告値（分割前基準）。payout=DPS/EPS や DOE=DPS×shares で
+    # 基準が混在し過小算出になるため、eps/shares を分割後基準へ揃える（純益・自己資本は
+    # 総額なので分割の影響を受けず補正不要）。
+    _factor = _split_adjustment_factor(conn, code, as_of or f"{fy}-03-31")
+    if _factor != 1.0:
+        if eps is not None:
+            eps = eps / _factor
+        if shares is not None:
+            shares = shares * _factor
     # 深いBS(有利子負債/利益剰余金/capex)はEDINET最新有報年（アンカーと別年のことがある）に
     # 在る。各フィールド独立に「最新の非NULL値」を採る（最新BSスナップショット）。
     capex = _latest_nonnull(conn, code, "capex")
