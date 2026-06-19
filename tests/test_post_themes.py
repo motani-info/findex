@@ -156,6 +156,31 @@ def test_net_cash_excludes_munhai_keeps_low_yield_value():
     assert not _net_cash_eligible(_row(dy=0.04, net_cash_per=2.0, per=10.0, sector33="銀行業"))
 
 
+def test_cell_plain_kinds_do_not_highlight():
+    """配当性向・PERは「高い＝良い」でないため非強調(pct_plain/x_plain)。10超でもtealにしない。"""
+    from findex.post.themes import _cell
+    # 通常の pct/x は10超で強調（既存挙動）
+    assert "hot" in _cell(_row(payout_ratio=0.36), "payout_ratio", "pct")
+    assert "hot" in _cell(_row(per=13.0), "per", "x")
+    # 非強調版は10超でも光らない（性向36%/PER13倍）
+    assert "hot" not in _cell(_row(payout_ratio=0.36), "payout_ratio", "pct_plain")
+    assert "35.9%" in _cell(_row(payout_ratio=0.359), "payout_ratio", "pct_plain")
+    assert "hot" not in _cell(_row(per=13.0), "per", "x_plain")
+    assert "13.0倍" in _cell(_row(per=13.0), "per", "x_plain")
+
+
+def test_large_cap_8axis_col_widths_match_head():
+    """large_cap 8軸: col_widths は head（#/コード/銘柄/配当利回り＋7列=11）と同数。性向/PERは非強調。"""
+    spec = _SPECS["large_cap"]
+    cols_no_dy = [c for c in spec["columns"] if c[1] != "dy"]
+    head_len = 3 + 1 + len(cols_no_dy)   # #/コード/銘柄 + 配当利回り + 残り列
+    assert head_len == 11
+    assert len(spec["col_widths"]) == head_len
+    kinds = {h: kind for h, _, kind in spec["columns"]}
+    assert kinds["配当性向"] == "pct_plain" and kinds["PER"] == "x_plain"
+    assert kinds["ROE"] == "pct" and kinds["総合スコア"] == "num"   # 高い=良いは強調維持
+
+
 def test_large_cap_sorts_by_total_not_market_cap():
     """large_cap: 並びは総合スコア降順（旧=時価総額降順の見せ方の嘘を是正）。抽出条件は不変。"""
     spec = _SPECS["large_cap"]

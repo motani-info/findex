@@ -112,6 +112,9 @@ border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .brand{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
 .card table{margin:0}
+/* 列幅をデータに最適化する固定レイアウト（col_widths 指定テーマ）。長い銘柄名は枠内で省略 */
+.card table.fixed{table-layout:fixed}
+.card table.fixed td,.card table.fixed th{overflow:hidden;text-overflow:ellipsis}
 .foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8}
 /* 順位強調（1〜3位の銘柄名を金銀銅＋太字） */
 .nm{font-weight:800}
@@ -266,19 +269,27 @@ def _row_prefix(i: int, r: dict) -> str:
 
 
 def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list[str],
-               foot_extra: str = "") -> str:
-    """汎用ランキングカード（ダークテーマ・画像化用）。head_cells と body_rows<tr> を流し込む。"""
+               foot_extra: str = "", col_widths: list[int] | None = None) -> str:
+    """汎用ランキングカード（ダークテーマ・画像化用）。head_cells と body_rows<tr> を流し込む。
+
+    col_widths（任意・head_cells と同数のpx）を渡すと table-layout:fixed で列幅を最適化する
+    （#=最小/コード=固定/銘柄=広め可変/データ列=一定）。未指定は従来どおり内容に応じた自動幅。
+    """
     today = date.today().isoformat()
     ths = "".join(
         f'<th class="l">{h[1:]}</th>' if h.startswith("@") else f"<th>{h}</th>"
         for h in head_cells
     )
+    table_cls, colgroup = "", ""
+    if col_widths:
+        table_cls = ' class="fixed"'
+        colgroup = "<colgroup>" + "".join(f'<col style="width:{w}px">' for w in col_widths) + "</colgroup>"
     return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
 <div class="card">
 <div class="brand">findex</div>
 <h1>{title}</h1>
 <div class="cap">{subtitle}／作成日 {today}</div>
-<table><thead><tr>{ths}</tr></thead><tbody>
+<table{table_cls}>{colgroup}<thead><tr>{ths}</tr></thead><tbody>
 {chr(10).join(body_rows)}
 </tbody></table>
 <div class="foot">{foot_extra + '<br>' if foot_extra else ''}{_FOOT}</div>
@@ -483,6 +494,12 @@ def _cell(r: dict, key: str, kind: str) -> str:
         return _hot(_num(v, "倍"), v)
     if kind == "x2":
         return _hot(_num(v, "倍", 2), v)
+    # 非強調版（_hot は「高い＝注目/良い」を意味するteal強調。配当性向・PERのように高い＝良いでない
+    # 指標に使うと全セルが強調されてノイズ化するため、強調しない素のセルを用意する）。
+    if kind == "pct_plain":
+        return _pct(v)
+    if kind == "x_plain":
+        return _num(v, "倍")
     if kind == "grade":
         return _grade_chip(v)
     if kind == "quality":
@@ -495,11 +512,13 @@ def _cell(r: dict, key: str, kind: str) -> str:
 
 
 def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, columns,
-                   eligible, sort_key, reverse=True, claim_keys, foot_extra=""):
+                   eligible, sort_key, reverse=True, claim_keys, foot_extra="",
+                   col_widths=None):
     """宣言的ランキングテーマの共通実装。columns=[(見出し, key, kind), ...]。
 
     先頭3列（#/コード/銘柄）は自動。eligible=行フィルタ, sort_key=並べ替えキー。
     fetch_rows が status ゲート済み（確証データのみ値を持つ）ので、ここは整形のみ。
+    col_widths（任意・head と同数）を渡すと列幅をデータに最適化（_rank_card 参照）。
     """
     rows = fetch_rows(conn, codes)
     elig = [r for r in rows if _sufficient(r) and eligible(r)]
@@ -519,7 +538,7 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, colum
     has_streak_col = any(kind in ("streak_g", "streak_nc") for _, _, kind in cols)
     foot = foot_extra + (_ZAI_FOOT if has_streak_col and _has_override(shown) else "")
     return {"theme": theme, "body": body,
-            "image_html": _rank_card(title, subtitle, head, trs, foot),
+            "image_html": _rank_card(title, subtitle, head, trs, foot, col_widths=col_widths),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -622,11 +641,18 @@ _SPECS: dict[str, dict] = {
         # doc14・GeminiFB是正: 抽出は時価総額1兆超のまま、並びは「大型"優良配当"」の看板どおり
         # 総合スコア降順へ（旧: 時価総額降順＝単なる大企業順でNTT/中外が東京海上の下に沈む見せ方の嘘）。
         # 連続増配 weight=2.5 等で配当継続性が主軸＝総合スコア順でも高利回り×長期増配が上位に来る。
-        columns=[("総合スコア", "total", "num"), ("時価総額", "current_market_cap", "yen"),
-                 ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
+        # doc14・列拡張: 4列→8軸（稼ぐ力ROE・割安PBR/PER・配当性向を追加し「なぜこの順位か」を1枚で証明）。
+        # 列幅は #最小/コード固定/銘柄広め可変/データ列一定（col_widths）。
+        # 強調(teal)は「高い＝良い」指標だけ: 連続増配/ROE/総合スコア。配当性向・PERは高い＝良いでない
+        # ため非強調(pct_plain/x_plain)。PBR(x2)は1兆超大型では10未満で元々非点灯。
+        columns=[("連続増配", "g_years", "streak_g"), ("配当性向", "payout_ratio", "pct_plain"),
+                 ("PER", "per", "x_plain"), ("PBR", "pbr", "x2"), ("ROE", "roe", "pct"),
+                 ("時価総額", "current_market_cap", "yen"), ("総合スコア", "total", "num")],
+        col_widths=[34, 58, 180, 86, 88, 80, 66, 66, 74, 108, 88],
         eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
         and r["current_market_cap"] >= 1e12 and _yield_ok(r, YIELD_FLOOR_HIGH),
-        sort_key=lambda r: r["total"] or -1, claim_keys=["total", "current_market_cap", "gd"]),
+        sort_key=lambda r: r["total"] or -1,
+        claim_keys=["total", "g_years", "payout_ratio", "per", "pbr", "roe", "current_market_cap"]),
     "small_value": dict(
         title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
         body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"

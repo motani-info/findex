@@ -5,6 +5,27 @@
 
 ---
 
+## doc14 — ソートの誠実性＋net_cash無配フロア＋large_cap8軸化（第2次Geminiレビュー）（2026-06-19）
+
+Gemini が posts.html を実市場で再検証し「数値は嘘でなくても並び順・見せ方がミスリード」と指摘。
+doc12/13（ゴーストデータ根絶）に続く第2次FB。実DB・実コードで全指摘を裏取りし対応。
+正本: [14-sort-honesty-and-net-cash-floor.md](design/14-sort-honesty-and-net-cash-floor.md)。
+
+### 対応（コミット `22280f5`＝①②③／本コミット＝④列モデル）
+- **② large_cap ソート**: 時価総額降順＝単なる大企業順の「見せ方の嘘」を、看板どおり**総合スコア
+  降順**へ。連続増配 weight=2.5 で配当が主軸＝総合順でも高利回り×長期増配が上位（配当の過小評価は実データ上なし）。
+- **① net_cash 無配**: top10の6/10が無配（キャッシュトラップ）→`YIELD_FLOOR_VALUE=1.5%`で無配排除
+  （`_net_cash_eligible`述語化）。doc09でバリュー系を免除した判断を改定。バリュー主旨は温存。
+- **③ div_growth**: doc12の `g_years>=3` で対応済（追加作業なし）。
+- **④ 列モデル**: 6/8/14軸を実カードで比較し**8軸**採用（large_capのみ拡張）。`_rank_card` に
+  `col_widths`＋`table-layout:fixed`/`<colgroup>` を追加（#最小/コード固定/銘柄広め可変/データ列一定）。
+  強調(teal)は「高い＝良い」指標(ROE/総合/長期増配)に限定し、配当性向・PERは非強調(`pct_plain`/`x_plain`)
+  でノイズ解消。デザインは本物の `_CARD_CSS` 準拠。
+
+検収: **pytest 112 passed** / golden **18/18 不整合0** / post-gallery 再生成（large_cap=8軸カード）。
+
+---
+
 ## doc13 — J-Quants確定無配の取り込み（ghost利回りの根治・Track B）（2026-06-19）
 
 doc12 が Track A（テーマ層）で②③④を是正した後、残した①サンウェルズ9229 の ghost利回り9.7% を
