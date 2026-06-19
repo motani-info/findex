@@ -933,6 +933,31 @@ def _grade_claim(status: dict, core: list[str], extra: list[str]) -> str:
     return "C"  # core に insufficient/欠損が混在＝評価不能（投稿しない）
 
 
+_GRADE_ORDER = {"A": 3, "B": 2, "C": 1, "D": 0}
+
+
+def _cap_grade(grade: str, cap: str) -> str:
+    """grade を cap 以下に丸める（A>B>C>D）。grade が既に cap 以下ならそのまま。"""
+    return grade if _GRADE_ORDER[grade] <= _GRADE_ORDER[cap] else cap
+
+
+def _grade_dividend_value_gate(grade: str, reliability) -> str:
+    """配当グレードを reliability の「値」でキャップする（doc11 レビュー②）。
+
+    _grade_claim は「指標が算出できたか」のみ判定するため、20年で2回以上減配した
+    銘柄（reliability=0.0=zero_legit）も core ok 扱いで A になりうる。減配常習・タコ足株を
+    配当推奨の A に出さないよう、信頼性の値に応じてグレード上限を下げる。
+      reliability 1.0（減配0回）= 制限なし / 0.6（1回）= B止まり / 0.0（2回以上）= C止まり。
+    """
+    if reliability is None:
+        return grade
+    if reliability <= 0.0:
+        return _cap_grade(grade, "C")
+    if reliability < 1.0:
+        return _cap_grade(grade, "B")
+    return grade
+
+
 def _identity_ok(doe, roe, payout, status: dict) -> int | None:
     """恒等式 DOE ≈ ROE × payout_ratio のクロスチェック（3指標とも ok のときのみ）。
 
@@ -957,13 +982,16 @@ def build_grades(conn, codes: list[str]) -> dict:
     id_counts = {"ok": 0, "mismatch": 0, "na": 0}
     for code in codes:
         row = conn.execute(
-            "SELECT status_json, doe, roe, payout_ratio FROM computed_metrics WHERE code=?",
+            "SELECT status_json, doe, roe, payout_ratio, dividend_reliability "
+            "FROM computed_metrics WHERE code=?",
             (code,),
         ).fetchone()
         if not row:
             continue
         status = json.loads(row[0]) if row[0] else {}
         grades = {g: _grade_claim(status, s["core"], s["extra"]) for g, s in _GRADE_CLAIMS.items()}
+        # 配当グレードは reliability の「値」で上限をかける（減配常習株を A に出さない）
+        grades["grade_dividend"] = _grade_dividend_value_gate(grades["grade_dividend"], row[4])
         iok = _identity_ok(row[1], row[2], row[3], status)
         conn.execute(
             "UPDATE computed_metrics SET grade_dividend=?, grade_valuation=?, grade_health=?, "

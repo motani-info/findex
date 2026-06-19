@@ -1,5 +1,10 @@
 """claim別グレード＋恒等式チェックの純関数テスト（Phase3-e）。"""
-from findex.derive.compute import _GRADE_CLAIMS, _grade_claim, _identity_ok
+from findex.derive.compute import (
+    _GRADE_CLAIMS,
+    _grade_claim,
+    _grade_dividend_value_gate,
+    _identity_ok,
+)
 
 
 def test_grade_a_all_ok():
@@ -67,3 +72,27 @@ def test_identity_na_when_not_all_ok():
     # 値が None → NULL
     st2 = {"doe": "ok", "roe": "ok", "payout_ratio": "ok"}
     assert _identity_ok(None, 0.1, 0.5, st2) is None
+
+
+def test_dividend_gate_reliable_keeps_a():
+    # reliability=1.0（減配0回）→ A のまま（花王型）
+    assert _grade_dividend_value_gate("A", 1.0) == "A"
+
+
+def test_dividend_gate_one_cut_caps_b():
+    # reliability=0.6（1回減配）→ A は B 止まり
+    assert _grade_dividend_value_gate("A", 0.6) == "B"
+    assert _grade_dividend_value_gate("B", 0.6) == "B"
+    assert _grade_dividend_value_gate("C", 0.6) == "C"  # 既にC以下はそのまま
+
+
+def test_dividend_gate_unreliable_caps_c():
+    # reliability=0.0（2回以上減配＝タコ足/減配常習）→ A/B は C 止まり（バリューコマース型）
+    assert _grade_dividend_value_gate("A", 0.0) == "C"
+    assert _grade_dividend_value_gate("B", 0.0) == "C"
+    assert _grade_dividend_value_gate("D", 0.0) == "D"  # データ無し D は維持
+
+
+def test_dividend_gate_none_reliability_passthrough():
+    # reliability 未算出 → グレードはそのまま（_grade_claim 側の判定に委ねる）
+    assert _grade_dividend_value_gate("A", None) == "A"
