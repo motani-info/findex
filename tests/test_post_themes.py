@@ -169,16 +169,27 @@ def test_cell_plain_kinds_do_not_highlight():
     assert "13.0倍" in _cell(_row(per=13.0), "per", "x_plain")
 
 
-def test_large_cap_8axis_col_widths_match_head():
-    """large_cap 8軸: col_widths は head（#/コード/銘柄/配当利回り＋7列=11）と同数。性向/PERは非強調。"""
+def test_std_cols_builds_8axis_with_total_right():
+    """標準列: テーマ固有＋コア補充＋総合スコア(右端固定)で8軸。重複keyは固有優先・配当性向は非強調。"""
+    from findex.post.themes import _std_cols, _STD_DATA_COLS
+    cols = _std_cols([("PER", "per", "x_plain")])   # large_cap の signature
+    assert cols[-1] == ("総合スコア", "total", "num")          # 総合スコアは右端固定
+    assert len(cols) == _STD_DATA_COLS + 1                     # データ6列＋総合
+    # 配当利回り(行頭)＋データ6＋総合 = 8軸
+    head = 1 + len(cols)
+    assert head == 8
+    kinds = {c[1]: c[2] for c in cols}
+    assert kinds["payout_ratio"] == "pct_plain"   # 配当性向は非強調（高い=良いでない）
+    assert kinds["roe"] == "pct"                   # ROEは強調維持（高い=良い）
+    # 固有keyがコアと重複する場合は固有を優先し二重化しない
+    cols2 = _std_cols([("連続増配", "g_years", "streak_g")])
+    assert [c[1] for c in cols2].count("g_years") == 1
+
+
+def test_large_cap_uses_signature_and_sorts_by_total():
+    """large_cap: signature=PER、total降順、抽出条件は不変。"""
     spec = _SPECS["large_cap"]
-    cols_no_dy = [c for c in spec["columns"] if c[1] != "dy"]
-    head_len = 3 + 1 + len(cols_no_dy)   # #/コード/銘柄 + 配当利回り + 残り列
-    assert head_len == 11
-    assert len(spec["col_widths"]) == head_len
-    kinds = {h: kind for h, _, kind in spec["columns"]}
-    assert kinds["配当性向"] == "pct_plain" and kinds["PER"] == "x_plain"
-    assert kinds["ROE"] == "pct" and kinds["総合スコア"] == "num"   # 高い=良いは強調維持
+    assert ("PER", "per", "x_plain") in spec["signature"]
 
 
 def test_large_cap_sorts_by_total_not_market_cap():

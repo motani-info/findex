@@ -108,13 +108,14 @@ _CARD_CSS = _CSS + """
 body{background:transparent;padding:0}
 .card{max-width:960px;margin:0;background:var(--panel);border:1px solid var(--line);
 border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
-.card h1{font-size:23px;margin:0 0 2px}
+.card h1{font-size:23px;margin:0 0 2px;color:var(--ink)}
+.card.wide{max-width:1120px}
 .brand{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
 .card table{margin:0}
-/* 列幅をデータに最適化する固定レイアウト（col_widths 指定テーマ）。長い銘柄名は枠内で省略 */
+/* 列幅最適化: #/コード/銘柄を固定し残りデータ列は均等。省略は銘柄列(3列目)だけ＝#/コードは切らない */
 .card table.fixed{table-layout:fixed}
-.card table.fixed td,.card table.fixed th{overflow:hidden;text-overflow:ellipsis}
+.card table.fixed td:nth-child(3),.card table.fixed th:nth-child(3){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8}
 /* 順位強調（1〜3位の銘柄名を金銀銅＋太字） */
 .nm{font-weight:800}
@@ -134,39 +135,6 @@ def _streak_body(n: int) -> str:
         "長く減らさず増やし続けた銘柄。\n"
         "#増配株 #高配当株"
     )
-
-
-def _ranking_card_html(rows: list[dict], top_n: int, has_override: bool) -> str:
-    today = date.today().isoformat()
-    shown = rows[:top_n]
-    body = []
-    for i, r in enumerate(shown, 1):
-        q = _q_jp(r["quality"])
-        rel = f'{r["rel"]:.1f}' if r["rel"] is not None else '<span class="muted">—</span>'
-        body.append(
-            f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_streak_td(r, "g")}</td><td>{_streak_td(r, "nc")}</td>'
-            f'<td>{rel}</td><td>{q}</td>'
-            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
-            f'<td>{_grade_chip(r["gd"])}</td></tr>'
-        )
-    zai_note = _ZAI_FOOT if _has_override(shown) else ""
-    return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
-<div class="card">
-<div class="brand">findex</div>
-<h1>連続増配・連続非減配ランキング</h1>
-<div class="cap">打ち切りは「N年以上」と正直表示／作成日 {today}</div>
-<table><thead><tr>
-<th>#</th><th class="l">コード</th><th class="l">銘柄</th><th>配当利回り</th><th>連続増配</th><th>連続非減配</th>
-<th>減配信頼性</th><th>増配の質</th><th>YoC(5年)</th><th>配当grade</th>
-</tr></thead><tbody>
-{chr(10).join(body)}
-</tbody></table>
-<div class="foot">減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）<br>
-増配の質: 利益成長による増配＝健全／配当性向を上げた増配＝性向拡大<br>
-YoC(5年): 5年前に買っていた場合の実質利回り（増配による利回り向上）<br>
-{zai_note}情報提供であり投資助言ではありません。数値はFindex調べ。</div>
-</div>"""
 
 
 def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
@@ -204,10 +172,17 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
         "passed": n > 0 and weighted_len(body) <= 140,
     }
 
+    shown = elig[:top_n]
+    cols = _std_cols([("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
+                      ("増配の質", "quality", "quality")])
+    foot = ("増配の質: 利益成長による増配＝健全／配当性向を上げた増配＝性向拡大<br>"
+            + (_ZAI_FOOT if has_override else ""))
+    image_html = _rank_card("連続増配・連続非減配ランキング", "打ち切りは「N年以上」と正直表示",
+                            _std_head(cols), _render_rows(shown, cols), foot, fixed_layout=True)
     return {
         "theme": "streak",
         "body": body,
-        "image_html": _ranking_card_html(elig, top_n, has_override),
+        "image_html": image_html,
         "claims": claims,
         "gates": gates,
     }
@@ -269,23 +244,27 @@ def _row_prefix(i: int, r: dict) -> str:
 
 
 def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list[str],
-               foot_extra: str = "", col_widths: list[int] | None = None) -> str:
+               foot_extra: str = "", fixed_layout: bool = False) -> str:
     """汎用ランキングカード（ダークテーマ・画像化用）。head_cells と body_rows<tr> を流し込む。
 
-    col_widths（任意・head_cells と同数のpx）を渡すと table-layout:fixed で列幅を最適化する
-    （#=最小/コード=固定/銘柄=広め可変/データ列=一定）。未指定は従来どおり内容に応じた自動幅。
+    fixed_layout=True で列幅を最適化（table-layout:fixed）: #=44 / コード=72 / 銘柄=190 を固定し、
+    残りデータ列は均等配分。長い社名は銘柄列だけ枠内省略（#/コードは切らない）。カードは wide(1120px)。
     """
     today = date.today().isoformat()
     ths = "".join(
         f'<th class="l">{h[1:]}</th>' if h.startswith("@") else f"<th>{h}</th>"
         for h in head_cells
     )
-    table_cls, colgroup = "", ""
-    if col_widths:
+    table_cls, colgroup, card_cls = "", "", ""
+    if fixed_layout:
         table_cls = ' class="fixed"'
-        colgroup = "<colgroup>" + "".join(f'<col style="width:{w}px">' for w in col_widths) + "</colgroup>"
+        card_cls = " wide"
+        # #/コード/銘柄だけ幅を固定、データ列(4列目以降)は <col> で均等配分
+        cols = ['<col style="width:44px">', '<col style="width:72px">', '<col style="width:190px">']
+        cols += ["<col>"] * (len(head_cells) - 3)
+        colgroup = "<colgroup>" + "".join(cols) + "</colgroup>"
     return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
-<div class="card">
+<div class="card{card_cls}">
 <div class="brand">findex</div>
 <h1>{title}</h1>
 <div class="cap">{subtitle}／作成日 {today}</div>
@@ -318,17 +297,9 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
             f"減配しにくい高配当ランキング💰 トップ{n}\n"
             "利回り×継続性×財務の質で選別。\n"
             "#高配当株 #配当")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "減配信頼性", "配当性向", "連続非減配", "増配の質", "配当grade"]
     shown = elig[:top_n]
-    trs = []
-    for i, r in enumerate(shown, 1):
-        trs.append(
-            f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
-            f'<td>{_num(r["rel"])}</td>'
-            f'<td>{_pct(r["payout_ratio"])}</td><td>{_streak_td(r, "nc")}</td>'
-            f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
-        )
+    cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("減配信頼性", "rel", "num"),
+                      ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
                "dividend_reliability": r["rel"], "payout_ratio": r["payout_ratio"],
                "grade_dividend": r["gd"]} for r in shown]
@@ -336,7 +307,7 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
             "配当性向100%以下＝利益で配当を賄えている<br>") + (_ZAI_FOOT if _has_override(shown) else "")
     return {"theme": "high_yield_safe", "body": body,
             "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
-                                     head, trs, foot),
+                                     _std_head(cols), _render_rows(shown, cols), foot, fixed_layout=True),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -372,24 +343,16 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
             f"取得利回り(YoC)ランキング📈 トップ{n}\n"
             "5年前に買えば利回りはこう育つ。\n"
             "#増配株 #高配当株")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "YoC(5年)", "増配率5年", "連続増配", "増配の質", "配当grade"]
     shown = elig[:top_n]
-    trs = []
-    for i, r in enumerate(shown, 1):
-        trs.append(
-            f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_hot(_pct(r["yoc"]), None if r["yoc"] is None else r["yoc"] * 100)}</td>'
-            f'<td>{_hot(_pct(r["dpc5"]), None if r["dpc5"] is None else r["dpc5"] * 100)}</td>'
-            f'<td>{_streak_td(r, "g")}</td>'
-            f'<td>{_q_jp(r["quality"])}</td><td>{_grade_chip(r["gd"])}</td></tr>'
-        )
+    cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("増配率5年", "dpc5", "pct"),
+                      ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "yield_on_cost_5y": r["yoc"],
                "grade_dividend": r["gd"]} for r in shown]
     foot = ("YoC(5年): 5年前の株価に対する現在配当利回り（増配で利回りが育った度合い）<br>"
             + (_ZAI_FOOT if _has_override(shown) else ""))
     return {"theme": "div_growth", "body": body,
             "image_html": _rank_card("取得利回り（YoC・5年）ランキング", "5年前に買っていたら利回りはこう育つ",
-                                     head, trs, foot),
+                                     _std_head(cols), _render_rows(shown, cols), foot, fixed_layout=True),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -408,22 +371,14 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
             f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
             "ROEと財務健全性で選別。\n"
             "#割安株 #バリュー株")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "PBR", "PER", "ROE", "自己資本比率", "財務grade", "バリューgrade"]
     shown = elig[:top_n]
-    trs = []
-    for i, r in enumerate(shown, 1):
-        trs.append(
-            f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_hot(_num(r["pbr"], "倍", 2), r["pbr"])}</td><td>{_hot(_num(r["per"], "倍"), r["per"])}</td>'
-            f'<td>{_hot(_pct(r["roe"]), None if r["roe"] is None else r["roe"] * 100)}</td>'
-            f'<td>{_hot(_pct(r["equity_ratio"]), None if r["equity_ratio"] is None else r["equity_ratio"] * 100)}</td>'
-            f'<td>{_grade_chip(r["gh"])}</td><td>{_grade_chip(r["gv"])}</td></tr>'
-        )
+    cols = _std_cols([("PER", "per", "x_plain"), ("自己資本比率", "equity_ratio", "pct_plain"),
+                      ("財務grade", "gh", "grade")])
     claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
                "grade_health": r["gh"]} for r in shown]
     return {"theme": "value_quality", "body": body,
             "image_html": _rank_card("割安×優良（PBR1倍割れの質）ランキング", "PBR<1かつ財務健全",
-                                     head, trs),
+                                     _std_head(cols), _render_rows(shown, cols), fixed_layout=True),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -450,24 +405,14 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
             f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
             '表面より割安な"実質バリュー"。\n'
             "#割安株 #バリュー株")
-    head = ["#", "@コード", "@銘柄", "配当利回り", "実質PER", "表面PER", "PBR", "自己資本比率", "財務grade"]
     shown = elig[:top_n]
-    trs = []
-    for i, r in enumerate(shown, 1):
-        trs.append(
-            f'<tr>{_row_prefix(i, r)}'
-            f'<td>{_hot(_num(r["net_cash_per"], "倍"), r["net_cash_per"])}</td>'
-            f'<td>{_hot(_num(r["per"], "倍"), r["per"])}</td>'
-            f'<td>{_hot(_num(r["pbr"], "倍", 2), r["pbr"])}</td>'
-            f'<td>{_hot(_pct(r["equity_ratio"]), None if r["equity_ratio"] is None else r["equity_ratio"] * 100)}</td>'
-            f'<td>{_grade_chip(r["gh"])}</td></tr>'
-        )
+    cols = _std_cols([("実質PER", "net_cash_per", "x_plain"), ("表面PER", "per", "x_plain")])
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
                "per": r["per"], "grade_health": r["gh"]} for r in shown]
     return {"theme": "net_cash", "body": body,
             "image_html": _rank_card("ネットキャッシュ潤沢（実質PER）ランキング",
-                                     "実質PER=現金控除後の割安度", head, trs,
-                                     "実質PER=（時価総額−ネットキャッシュ）÷利益。"),
+                                     "実質PER=現金控除後の割安度", _std_head(cols), _render_rows(shown, cols),
+                                     "実質PER=（時価総額−ネットキャッシュ）÷利益。", fixed_layout=True),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -511,14 +456,58 @@ def _cell(r: dict, key: str, kind: str) -> str:
     return '<span class="muted">—</span>'
 
 
-def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, columns,
-                   eligible, sort_key, reverse=True, claim_keys, foot_extra="",
-                   col_widths=None):
-    """宣言的ランキングテーマの共通実装。columns=[(見出し, key, kind), ...]。
+# ── 全テーマ共通の8軸標準（doc15）─────────────────────────────────────
+# 配当利回り（行頭強制）＋ テーマ固有列 ＋ 共通コア（不足分を補充）＋ 総合スコア（右端固定）。
+# 「高い＝良い」でない指標（配当性向）は非強調。core は key 重複時はテーマ固有を優先（補充しない）。
+_CORE_COLS = [
+    ("連続増配", "g_years", "streak_g"),
+    ("配当性向", "payout_ratio", "pct_plain"),
+    ("PBR", "pbr", "x2"),
+    ("ROE", "roe", "pct"),
+    ("時価総額", "current_market_cap", "yen"),
+]
+_TOTAL_COL = ("総合スコア", "total", "num")
+_STD_DATA_COLS = 6   # 配当利回りを除くデータ列数（テーマ固有＋コア）。+総合スコア＋配当利回りで8軸。
 
-    先頭3列（#/コード/銘柄）は自動。eligible=行フィルタ, sort_key=並べ替えキー。
+
+def _std_cols(signature: list[tuple]) -> list[tuple]:
+    """標準8軸の columns を組む: テーマ固有(signature) ＋ コア補充 ＋ 総合スコア(右端)。
+
+    signature は (見出し, key, kind)。dy/total は行頭・右端で固定済みのため signature から除く。
+    コアは signature に無い key を順に、データ列が _STD_DATA_COLS に達するまで補充する。
+    """
+    out = [c for c in signature if c[1] not in ("dy", "total")]
+    seen = {c[1] for c in out} | {"dy", "total"}
+    for c in _CORE_COLS:
+        if len(out) >= _STD_DATA_COLS:
+            break
+        if c[1] not in seen:
+            out.append(c)
+            seen.add(c[1])
+    out.append(_TOTAL_COL)
+    return out
+
+
+def _std_head(cols: list[tuple]) -> list[str]:
+    """先頭 #/コード/銘柄/配当利回り ＋ cols の見出し。"""
+    return ["#", "@コード", "@銘柄", "配当利回り", *[c[0] for c in cols]]
+
+
+def _render_rows(shown: list[dict], cols: list[tuple]) -> list[str]:
+    """行頭(順位/コード/銘柄/配当利回り) ＋ cols のセル列を <tr> 群に整形（全テーマ共通）。"""
+    trs = []
+    for i, r in enumerate(shown, 1):
+        cells = "".join(f"<td>{_cell(r, key, kind)}</td>" for _, key, kind in cols)
+        trs.append(f'<tr>{_row_prefix(i, r)}{cells}</tr>')
+    return trs
+
+
+def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signature,
+                   eligible, sort_key, reverse=True, claim_keys, foot_extra=""):
+    """宣言的ランキングテーマの共通実装。signature=テーマ固有列[(見出し, key, kind), ...]。
+
+    列は _std_cols で「配当利回り＋固有＋コア＋総合スコア(右端)」の標準8軸に統一。
     fetch_rows が status ゲート済み（確証データのみ値を持つ）ので、ここは整形のみ。
-    col_widths（任意・head と同数）を渡すと列幅をデータに最適化（_rank_card 参照）。
     """
     rows = fetch_rows(conn, codes)
     elig = [r for r in rows if _sufficient(r) and eligible(r)]
@@ -526,19 +515,15 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, colum
     n = min(top_n, len(elig))
     body = body_fn(n)
     shown = elig[:top_n]
-    # 配当利回りは全テーマ共通で銘柄の直後（columns側の重複定義は除外）
-    cols = [c for c in columns if c[1] != "dy"]
-    head = ["#", "@コード", "@銘柄", "配当利回り", *[c[0] for c in cols]]
-    trs = []
-    for i, r in enumerate(shown, 1):
-        cells = "".join(f"<td>{_cell(r, key, kind)}</td>" for _, key, kind in cols)
-        trs.append(f'<tr>{_row_prefix(i, r)}{cells}</tr>')
+    cols = _std_cols(signature)
+    head = _std_head(cols)
+    trs = _render_rows(shown, cols)
     claims = [{"code": r["code"], "name": r["name"], **{k: r.get(k) for k in claim_keys}}
               for r in shown]
     has_streak_col = any(kind in ("streak_g", "streak_nc") for _, _, kind in cols)
     foot = foot_extra + (_ZAI_FOOT if has_streak_col and _has_override(shown) else "")
     return {"theme": theme, "body": body,
-            "image_html": _rank_card(title, subtitle, head, trs, foot, col_widths=col_widths),
+            "image_html": _rank_card(title, subtitle, head, trs, foot, fixed_layout=True),
             "claims": claims, "gates": _gates(body, n)}
 
 
@@ -550,9 +535,8 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ('"増やす"より、まず"減らさない"。\n'
                            f"連続非減配ランキング🛡️ トップ{n}\n"
                            "不況でも配当を守った銘柄。\n#高配当株 #配当"),
-        columns=[("連続非減配", "nc_years", "streak_nc"), ("連続増配", "g_years", "streak_g"),
-                 ("減配信頼性", "rel", "num"), ("増配の質", "quality", "quality"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("連続非減配", "nc_years", "streak_nc"), ("減配信頼性", "rel", "num"),
+                   ("増配の質", "quality", "quality")],
         eligible=lambda r: r["gd"] != "D" and r["nc_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: (r["nc_years"] or -1, r["g_years"] or -1),
         claim_keys=["nc_years", "gd"]),
@@ -561,9 +545,8 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ('一過性でなく、10年以上"続く"増配。\n'
                            f"長期増配の王様ランキング👑 トップ{n}\n"
                            "時間が証明した配当力。\n#増配株 #高配当株"),
-        columns=[("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
-                 ("増配率5年", "dpc5", "pct"), ("YoC(5年)", "yoc", "pct"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("連続非減配", "nc_years", "streak_nc"), ("YoC(5年)", "yoc", "pct"),
+                   ("増配率5年", "dpc5", "pct")],
         eligible=lambda r: r["gd"] != "D" and (r["g_years"] or 0) >= 10 and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["g_years"] or -1, claim_keys=["g_years", "gd"]),
     "growth_room": dict(
@@ -571,9 +554,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("配当性向が低い＝まだ増やせる。\n"
                            f"増配余力ランキング💪 トップ{n}\n"
                            "無理なく増配を続けられる株。\n#増配株 #高配当株"),
-        columns=[("配当性向", "payout_ratio", "pct"), ("連続増配", "g_years", "streak_g"),
-                 ("増配率5年", "dpc5", "pct"), ("FCFカバ", "fcf_payout_coverage", "x"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("FCFカバ", "fcf_payout_coverage", "x"), ("増配率5年", "dpc5", "pct")],
         # doc 10・P1-3: 低配当性向「だけ」では増配余力を担保できない（利益が薄い/赤字でも
         # 性向は低く出る）。稼ぐ現金で配当を賄えている裏付けとして fcf_payout_coverage>0 を要求。
         eligible=lambda r: r["gd"] in ("A", "B") and r["payout_ratio"] is not None
@@ -586,8 +567,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ('配当は利益でなく"現金"で見る。\n'
                            f"FCF配当カバレッジ🔄 トップ{n}\n"
                            "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
-        columns=[("FCFカバ", "fcf_payout_coverage", "x"), ("配当性向", "payout_ratio", "pct"),
-                 ("連続増配", "g_years", "streak_g"), ("配当grade", "gd", "grade")],
+        signature=[("FCFカバ", "fcf_payout_coverage", "x")],
         # doc 10・P2-3: 金融（銀行/証券/保険/その他金融）はFCFの概念が当てはまらずCF系を独占→除外。
         eligible=lambda r: r["gd"] != "D" and _non_financial(r)
         and r["fcf_payout_coverage"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
@@ -597,9 +577,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ('配当だけでなく"稼ぐ力"も。\n'
                            f"高ROE×増配ランキング💹 トップ{n}\n"
                            "ROEと増配を両立する優良株。\n#増配株 #ROE"),
-        columns=[("ROE", "roe", "pct"), ("連続増配", "g_years", "streak_g"),
-                 ("営業益率", "operating_margin", "pct"), ("財務grade", "gh", "grade"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("営業益率", "operating_margin", "pct")],
         eligible=lambda r: r["gd"] != "D" and r["roe"] is not None and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["roe"] or -1, claim_keys=["roe", "gd"]),
     "total_score": dict(
@@ -607,8 +585,8 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("配当・割安・財務・資本を総合評価。\n"
                            f"findex総合スコアランキング📊 トップ{n}\n"
                            "多角指標で選ぶ配当株。\n#高配当株 #配当"),
-        columns=[("総合", "total", "num"), ("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
-                 ("財務", "gh", "grade"), ("資本", "gc", "grade"), ("指標数", "n_scored", "int")],
+        signature=[("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
+                   ("財務", "gh", "grade"), ("資本", "gc", "grade")],
         eligible=lambda r: r["total"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["total"] or -1, claim_keys=["total", "gd"]),
     "high_yield": dict(
@@ -616,9 +594,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("まずは利回りで選ぶなら。\n"
                            f"高配当利回りランキング💰 トップ{n}\n"
                            "利回り3.5%以上＋継続性も併示。\n#高配当株 #配当"),
-        columns=[("配当利回り", "dy", "pct"), ("配当性向", "payout_ratio", "pct"),
-                 ("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc")],
         # doc 12: タコ足ゾンビ（利益超の配当×減配常習）を除外。grade C で警告済だが順位上位の
         # ミスリードを防ぐ（バリューコマース/ヘリオステクノ）。
         eligible=lambda r: r["dy"] is not None and r["dy"] >= 0.035 and not _is_takoashi(r),
@@ -628,8 +604,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ('"資産より安い"高配当。\n'
                            f"割安高配当ランキング🔍 トップ{n}\n"
                            "PBR1倍以下で利回りも高い株。\n#割安株 #高配当株"),
-        columns=[("PBR", "pbr", "x2"), ("配当利回り", "dy", "pct"), ("PER", "per", "x"),
-                 ("財務grade", "gh", "grade"), ("配当grade", "gd", "grade")],
+        signature=[("PER", "per", "x_plain")],
         eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
         and _yield_ok(r, YIELD_FLOOR_HIGH) and not _is_takoashi(r),  # doc 12: タコ足除外
         sort_key=lambda r: r["dy"] or -1, claim_keys=["pbr", "dy", "gd"]),
@@ -641,14 +616,8 @@ _SPECS: dict[str, dict] = {
         # doc14・GeminiFB是正: 抽出は時価総額1兆超のまま、並びは「大型"優良配当"」の看板どおり
         # 総合スコア降順へ（旧: 時価総額降順＝単なる大企業順でNTT/中外が東京海上の下に沈む見せ方の嘘）。
         # 連続増配 weight=2.5 等で配当継続性が主軸＝総合スコア順でも高利回り×長期増配が上位に来る。
-        # doc14・列拡張: 4列→8軸（稼ぐ力ROE・割安PBR/PER・配当性向を追加し「なぜこの順位か」を1枚で証明）。
-        # 列幅は #最小/コード固定/銘柄広め可変/データ列一定（col_widths）。
-        # 強調(teal)は「高い＝良い」指標だけ: 連続増配/ROE/総合スコア。配当性向・PERは高い＝良いでない
-        # ため非強調(pct_plain/x_plain)。PBR(x2)は1兆超大型では10未満で元々非点灯。
-        columns=[("連続増配", "g_years", "streak_g"), ("配当性向", "payout_ratio", "pct_plain"),
-                 ("PER", "per", "x_plain"), ("PBR", "pbr", "x2"), ("ROE", "roe", "pct"),
-                 ("時価総額", "current_market_cap", "yen"), ("総合スコア", "total", "num")],
-        col_widths=[34, 58, 180, 86, 88, 80, 66, 66, 74, 108, 88],
+        # doc14/15・標準8軸: テーマ固有(PER) ＋ 共通コア(連続増配/配当性向/PBR/ROE/時価総額) ＋ 総合スコア(右端)。
+        signature=[("PER", "per", "x_plain")],
         eligible=lambda r: r["gd"] in ("A", "B") and r["current_market_cap"] is not None
         and r["current_market_cap"] >= 1e12 and _yield_ok(r, YIELD_FLOOR_HIGH),
         sort_key=lambda r: r["total"] or -1,
@@ -658,9 +627,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"
                            f"小型割安配当ランキング💎 トップ{n}\n"
                            "時価総額1000億未満・PBR1倍以下。\n#割安株 #小型株"),
-        columns=[("時価総額", "current_market_cap", "yen"), ("PBR", "pbr", "x2"),
-                 ("配当利回り", "dy", "pct"), ("財務grade", "gh", "grade"),
-                 ("配当grade", "gd", "grade")],
+        signature=[("PER", "per", "x_plain")],
         eligible=lambda r: r["gd"] != "D" and r["current_market_cap"] is not None
         and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1
         and _yield_ok(r, YIELD_FLOOR_HIGH) and not _is_takoashi(r),  # doc 12: タコ足除外
@@ -670,8 +637,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("資本コストを超えて稼げているか。\n"
                            f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
                            "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
-        columns=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("ROE", "roe", "pct"),
-                 ("営業益率", "operating_margin", "pct"), ("資本grade", "gc", "grade")],
+        signature=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("営業益率", "operating_margin", "pct")],
         # doc 10・P2-2: ROIC−WACC>0 だけでは分母崩壊系（千代田化工=ROE算出不能）が混じる。
         # 財務健全性が確証できる（ROE算出済み）銘柄に限定。
         eligible=lambda r: r["roic_minus_wacc"] is not None and r["roic_minus_wacc"] > 0
@@ -682,8 +648,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n: ("利益が振れても、還元はブレない。\n"
                            f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
                            "安定還元の本命指標。\n#高配当株 #配当"),
-        columns=[("DOE", "doe", "pct"), ("配当利回り", "dy", "pct"),
-                 ("自己資本比率", "equity_ratio", "pct"), ("配当grade", "gd", "grade")],
+        signature=[("DOE", "doe", "pct"), ("自己資本比率", "equity_ratio", "pct_plain")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
 }

@@ -5,6 +5,24 @@
 
 ---
 
+## doc15 — 全テーマ8軸標準化＋総合スコア右端固定＋カード描画バグ是正（2026-06-19）
+
+doc14 で large_cap だけ8軸化した後、ユーザーレビューで「テーマ毎に軸数がバラバラ／総合スコアが無い」
+「#・コードが省略され崩れる／タイトルが暗い」と指摘。全17テーマを統一。正本:
+[15-eight-axis-standard-all-themes.md](design/15-eight-axis-standard-all-themes.md)。
+
+- **テーマ固有＋共通コア**方式（ユーザー決定）。全テーマを8軸（配当利回り＋6＋総合スコア）に統一し
+  **総合スコアを右端固定**。`_std_cols`（固有 signature＋コア補充＋総合）に集約。
+- **描画バグ是正**: 列を `table-layout:fixed`＋colgroup で #=44/コード=72/銘柄=190 固定・残り均等。
+  **省略は銘柄列だけ**（#「10」→「1...」/コード→「コ...」の崩れを是正）。タイトル色 `color:var(--ink)` を明示。
+  強調(teal)は「高い＝良い」指標のみ（配当性向/PER/実質PER/自己資本比率は非強調）。
+- **集約リファクタ**: カスタムビルダー5本を共通ヘルパー（`_std_cols`/`_std_head`/`_render_rows`/
+  `_rank_card(fixed_layout=True)`）へ統合。旧 `_ranking_card_html` 廃止。`_SPECS` を columns→signature 化。
+
+検収: **pytest 113 passed** / golden **18/18 不整合0** / 全17テーマ8軸・総合スコア右端を機械チェック。
+
+---
+
 ## doc14 — ソートの誠実性＋net_cash無配フロア＋large_cap8軸化（第2次Geminiレビュー）（2026-06-19）
 
 Gemini が posts.html を実市場で再検証し「数値は嘘でなくても並び順・見せ方がミスリード」と指摘。
