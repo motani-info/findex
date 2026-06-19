@@ -5,6 +5,30 @@
 
 ---
 
+## doc12 — 生利回り系テーマの罠フィルタ（タコ足/偽ROE/復配ジャンプ・Track A）（2026-06-19）
+
+Gemini が再生成後の posts.html を実市場と突合し「実態と乖離したゴーストデータ4つ」を報告。
+実データ・実コード・実ランキングで裏取りし、4指摘すべて「実在」を確認。doc10 が未カバーだった
+**生利回り系テーマ**（high_yield/low_pbr_yield/small_value/value_quality/div_growth）の罠を是正。
+正本: [12-theme-layer-trap-filters.md](design/12-theme-layer-trap-filters.md)。
+
+### Track A 実装（themes.py・ユーザー承認方針）
+- **③ タコ足ゾンビ**: 共有述語 `_is_takoashi`（payout>100% かつ rel<0.6/None）を
+  high_yield/low_pbr_yield/small_value から除外。payout>100%でも rel高い実績株は温存（単純
+  payout一律除外は健全株を誤殺＝棄却）。→ バリューコマース2491/ヘリオステクノ6927 を除去。
+- **② 偽ROE**: value_quality に `operating_margin>0`。本業赤字×特益ROEの罠（千趣会8165=営業益率
+  −6.2%/4年連続赤字/自己資本4年で半減）を除外。巻き込み1件のみ。
+- **④ 復配ジャンプ**: div_growth に `g_years>=3`。連続増配0年の復配（シェアリング3989）を除外。
+  g_years 分布上 ≥1 と ≥3 は top10 同一＝概念明快な ≥3 採用。
+
+### 残（Track B・別GO待ち）
+①サンウェルズ9229 の ghost利回り9.7%（無配転落の予想配当が dividend_annual に未取得・暴落
+株価で除算）は**取得層**課題。予想配当/当年無配の捕捉が根治。全銘柄fetch＝レート制限鉄則に従う。
+
+検収: pytest **106 passed** / golden **18/18 不整合0** / post-gallery 再生成で 5銘柄の top10 消失を確認。
+
+---
+
 ## doc11 — 株式分割基準ズレの根本治療＋専門家レビュー対応（2026-06-19）
 
 yfinance `close_adj`（分割調整済み）と J-Quants の EPS/BPS/shares（報告値＝分割前基準）の

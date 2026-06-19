@@ -1,7 +1,7 @@
 """X投稿テーマの純関数テスト（Phase6 MVP・品質ゲートの回帰防止）。"""
 from findex.post.themes import (
-    _hy_safe_eligible, _non_financial, _SPECS, _streak_body, _yoc_quality_key,
-    weighted_len,
+    _hy_safe_eligible, _is_takoashi, _non_financial, _SPECS, _streak_body,
+    _yoc_quality_key, weighted_len,
 )
 
 
@@ -11,6 +11,8 @@ def _row(**kw):
         "dy": None, "gd": None, "rel": None, "payout_ratio": None,
         "g_years": None, "yoc": None, "fcf_payout_coverage": None,
         "roe": None, "roic_minus_wacc": None, "sector33": None,
+        "pbr": None, "current_market_cap": None, "operating_margin": None,
+        "gh": None, "quality": None,
     }
     base.update(kw)
     return base
@@ -99,6 +101,39 @@ def test_fcf_coverage_excludes_financials():
     base = dict(gd="A", fcf_payout_coverage=3.0, dy=0.025)
     assert elig(_row(**base, sector33="機械"))       # 非金融は通過
     assert not elig(_row(**base, sector33="銀行業"))  # 銀行は除外
+
+
+# ── doc 12: タコ足ゾンビ除外＋生利回り系の罠是正（GeminiFB是正）──────────────
+
+def test_is_takoashi_predicate():
+    """タコ足ゾンビ＝利益超の配当(payout>100%)×減配常習(rel<0.6/未確証)。実績株は除外しない。"""
+    # 減配常習×タコ足（バリューコマース217%/rel0.0・ヘリオステクノ227%/rel0.0）＝罠
+    assert _is_takoashi(_row(payout_ratio=2.17, rel=0.0))
+    assert _is_takoashi(_row(payout_ratio=1.5, rel=0.0))
+    # rel 未確証（None）も安全性を保証できず罠扱い（厳格側）
+    assert _is_takoashi(_row(payout_ratio=1.5, rel=None))
+    # payout>100% でも rel が高い実績株（アイティメディアgradeA/rel1.0型）は一時的減益＝除外しない
+    assert not _is_takoashi(_row(payout_ratio=1.3, rel=1.0))
+    assert not _is_takoashi(_row(payout_ratio=1.3, rel=0.6))
+    # payout が健全域（<=100%）はそもそもタコ足でない
+    assert not _is_takoashi(_row(payout_ratio=0.5, rel=0.0))
+    # payout 未算出（None）は判定材料なし＝罠としない（捏造しない）
+    assert not _is_takoashi(_row(payout_ratio=None, rel=0.0))
+
+
+def test_raw_yield_themes_exclude_takoashi():
+    """high_yield/low_pbr_yield/small_value: タコ足ゾンビを除外。健全な高payout実績株は残す。"""
+    tako = dict(payout_ratio=2.17, rel=0.0)        # 減配常習タコ足（除外対象）
+    safe = dict(payout_ratio=1.3, rel=1.0)         # 高payoutだが実績あり（残す）
+    cases = {
+        "high_yield": dict(dy=0.10, gd="C"),
+        "low_pbr_yield": dict(dy=0.10, gd="C", pbr=0.8),
+        "small_value": dict(dy=0.10, gd="C", pbr=0.8, current_market_cap=2e10),
+    }
+    for name, base in cases.items():
+        elig = _SPECS[name]["eligible"]
+        assert not elig(_row(**base, **tako)), name   # タコ足は除外
+        assert elig(_row(**base, **safe)), name        # 実績ある高payout株は通過
 
 
 # ── P3-1: 数理不変条件 nc>=g の表示担保（doc 10・override逆転の是正）──────────

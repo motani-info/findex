@@ -70,6 +70,23 @@ def _yield_ok(r: dict, floor: float) -> bool:
     return dy is not None and dy >= floor
 
 
+# タコ足ゾンビ除外（doc 12・2026-06-19 GeminiFB是正）: 利益超の配当（payout>100%）かつ
+# 減配常習（減配信頼性 rel<0.6＝過去20年に2回以上減配）。この組合せは「貯金を切り崩した
+# 一過性の高配当」で翌期大減配の蓋然性が高い＝生利回り系ランキングの罠（バリューコマース
+# 217%/ヘリオステクノ227%が high_yield 上位に居座った問題）。payout>100% でも rel が高い
+# 実績株は一時的減益とみなし除外しない（健全な高性向株 アイティメディアgradeA 等の誤殺を回避）。
+# rel 未確証（None）は安全性を確証できず罠扱い（high_yield_safe と同じ厳格側）。
+TAKOASHI_MIN_PAYOUT = 1.0     # 利益超の配当＝タコ足の必要条件
+TAKOASHI_MAX_REL = 0.6        # rel<0.6（減配常習・未確証）と重なったときのみ罠と判定
+
+
+def _is_takoashi(r: dict) -> bool:
+    """タコ足ゾンビ（利益超の配当×減配常習）か。生利回り系テーマから除外する罠フィルタ。"""
+    po, rel = r.get("payout_ratio"), r.get("rel")
+    return (po is not None and po > TAKOASHI_MIN_PAYOUT
+            and (rel is None or rel < TAKOASHI_MAX_REL))
+
+
 # CF系テーマ（FCFカバ/ネットキャッシュ）から除外する金融業種（doc 10・P2-3・D4.5較正③の業種考慮）。
 # 銀行・証券・保険・その他金融はFCF/ネットキャッシュの概念が事業構造上当てはまらず、CF系の
 # ランキングを構造的に独占・歪曲する（GeminiFB: fcf_coverage が銀行独占）。配当/連続テーマには
@@ -327,7 +344,12 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     生CAGR順位を廃止。
     """
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV) and r["yoc"] is not None and r["gd"] != "D"]
+    # doc 12・2026-06-19 GeminiFB是正: 連続増配0年（無配→復配でYoCがジャンプした株＝
+    # シェアリングテクノロジー）は「増配で育った利回り」の看板と不一致。最低3年の連続増配を
+    # 要求し "コツコツ増配で育った" 銘柄に限定（YoC分布上 g_years 1-2年はほぼ不在＝top圏は不変、
+    # 概念整合のみ強化）。
+    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV)
+            and r["yoc"] is not None and r["gd"] != "D" and (r["g_years"] or 0) >= 3]
     # YoC × 質係数（採点層と同一）。一過性は ×0.3 まで減点され、よほど高YoCでない限り沈む。
     elig.sort(key=_yoc_quality_key, reverse=True)
     n = min(top_n, len(elig))
@@ -359,8 +381,12 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
 def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     """割安×優良: PBR<1 かつ 財務gradeA/B かつ ROE算出済み。質を伴う割安。"""
     rows = fetch_rows(conn, codes)
+    # doc 12・2026-06-19 GeminiFB是正: 「優良」を謳う割安テーマから本業赤字を除外。営業益率>0 を
+    # 要求し、本業赤字なのに特別利益で純益がspike→ROEが見かけ上高い罠（千趣会=営業益率-6.2%/
+    # 4年連続営業赤字/自己資本4年で半減）を弾く。grade_health A/B だけでは ROE の質を担保できない。
     elig = [r for r in rows if _sufficient(r) and r["pbr"] is not None and r["pbr"] < 1
-            and r["gh"] in ("A", "B") and r["roe"] is not None]
+            and r["gh"] in ("A", "B") and r["roe"] is not None
+            and r["operating_margin"] is not None and r["operating_margin"] > 0]
     elig.sort(key=lambda r: r["roe"], reverse=True)
     n = min(top_n, len(elig))
     body = ("PBR1倍割れ=万年割安、とは限らない。\n"
@@ -561,7 +587,9 @@ _SPECS: dict[str, dict] = {
         columns=[("配当利回り", "dy", "pct"), ("配当性向", "payout_ratio", "pct"),
                  ("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc"),
                  ("配当grade", "gd", "grade")],
-        eligible=lambda r: r["dy"] is not None and r["dy"] >= 0.035,
+        # doc 12: タコ足ゾンビ（利益超の配当×減配常習）を除外。grade C で警告済だが順位上位の
+        # ミスリードを防ぐ（バリューコマース/ヘリオステクノ）。
+        eligible=lambda r: r["dy"] is not None and r["dy"] >= 0.035 and not _is_takoashi(r),
         sort_key=lambda r: r["dy"] or -1, claim_keys=["dy", "gd"]),
     "low_pbr_yield": dict(
         title="割安高配当（PBR1倍以下）", subtitle="PBR1倍以下×高利回り",
@@ -571,7 +599,7 @@ _SPECS: dict[str, dict] = {
         columns=[("PBR", "pbr", "x2"), ("配当利回り", "dy", "pct"), ("PER", "per", "x"),
                  ("財務grade", "gh", "grade"), ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
-        and _yield_ok(r, YIELD_FLOOR_HIGH),
+        and _yield_ok(r, YIELD_FLOOR_HIGH) and not _is_takoashi(r),  # doc 12: タコ足除外
         sort_key=lambda r: r["dy"] or -1, claim_keys=["pbr", "dy", "gd"]),
     "large_cap": dict(
         title="大型優良配当（時価総額1兆円超）", subtitle="時価総額1兆円超×配当gradeA/B",
@@ -593,7 +621,7 @@ _SPECS: dict[str, dict] = {
                  ("配当grade", "gd", "grade")],
         eligible=lambda r: r["gd"] != "D" and r["current_market_cap"] is not None
         and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1
-        and _yield_ok(r, YIELD_FLOOR_HIGH),
+        and _yield_ok(r, YIELD_FLOOR_HIGH) and not _is_takoashi(r),  # doc 12: タコ足除外
         sort_key=lambda r: r["dy"] or -1, claim_keys=["current_market_cap", "pbr", "gd"]),
     "roic_spread": dict(
         title="価値創造（ROIC−WACC）", subtitle="資本コストを超えて稼ぐ企業",
