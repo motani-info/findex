@@ -721,6 +721,18 @@ def build_roic(conn, codes: list[str]) -> dict:
     return {"rows": n, "ok": ok}
 
 
+def _split_adjustment_factor(conn, code: str, as_of: str) -> float:
+    """as_of以降に発生した分割の累積比率を返す（doc11）。分割なければ1.0。"""
+    rows = conn.execute(
+        "SELECT ratio FROM stock_splits WHERE code=? AND date>?",
+        (code, as_of),
+    ).fetchall()
+    factor = 1.0
+    for (r,) in rows:
+        factor *= r
+    return factor
+
+
 def _latest_price(conn, code: str):
     """(date, close_adj) 最新の終値。"""
     return conn.execute(
@@ -746,14 +758,23 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     price_date, price = pr
     fin = conn.execute(
         "SELECT eps, bps, shares_outstanding, total_assets, equity_attributable, "
-        "cash_and_equivalents FROM financial_snapshots "
+        "cash_and_equivalents, as_of, fiscal_year FROM financial_snapshots "
         "WHERE code=? AND net_income IS NOT NULL "
         "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
         (code,),
     ).fetchone()
     if not fin:
         return None
-    eps, bps, shares, total_assets, equity, cash = fin
+    eps, bps, shares, total_assets, equity, cash, as_of, fy = fin
+    # 株式分割補正（doc11）: as_of以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する
+    factor = _split_adjustment_factor(conn, code, as_of or f"{fy}-03-31")
+    if factor != 1.0:
+        if eps is not None:
+            eps = eps / factor
+        if bps is not None:
+            bps = bps / factor
+        if shares is not None:
+            shares = shares * factor
     dps = _latest_dps(conn, code)
     stale = _dividend_is_stale(conn, code, int(price_date[:4]))
 

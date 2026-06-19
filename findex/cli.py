@@ -233,6 +233,26 @@ def financials_cmd(codes, cohort, all_codes, no_resume) -> None:
     )
 
 
+@main.command("splits")
+@subset_options
+@all_option
+def splits_cmd(codes, cohort, all_codes) -> None:
+    """株式分割イベントを取得（yfinance .splits → stock_splits）。"""
+    from .db import connect
+    from .fetch.splits import fetch_splits_for_codes
+
+    target = _resolve_target(codes, cohort, all_codes)
+    if not target:
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        n = fetch_splits_for_codes(conn, target)
+    finally:
+        conn.close()
+    console.print(f"[green]✓[/green] splits: {n} 件取得（{len(target)} 銘柄チェック）")
+
+
 @main.command("derive")
 @subset_options
 @all_option

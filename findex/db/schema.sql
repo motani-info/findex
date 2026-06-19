@@ -252,6 +252,15 @@ CREATE TABLE IF NOT EXISTS backtest_metrics (
 
 -- ══ 運用 ════════════════════════════════════════════════
 
+CREATE TABLE IF NOT EXISTS stock_splits (
+    code          TEXT NOT NULL,
+    date          TEXT NOT NULL,      -- 分割効力日 (YYYY-MM-DD)
+    ratio         REAL NOT NULL,      -- 分割比率（例: 15.0 = 1株→15株）
+    source        TEXT NOT NULL DEFAULT 'yfinance',
+    collected_at  TEXT NOT NULL,
+    PRIMARY KEY (code, date)
+);
+
 CREATE TABLE IF NOT EXISTS run_log (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     job        TEXT NOT NULL,
