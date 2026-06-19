@@ -112,10 +112,8 @@ border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .card.wide{max-width:1120px}
 .brand{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
-.card table{margin:0}
-/* 列幅最適化: #/コード/銘柄を固定し残りデータ列は均等。省略は銘柄列(3列目)だけ＝#/コードは切らない */
-.card table.fixed{table-layout:fixed}
-.card table.fixed td:nth-child(3),.card table.fixed th:nth-child(3){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 列幅は内容に合わせた可変(auto)＝各見出しが自然に収まる。長い銘柄名はサーバ側で省略済み（_clip_name）。 */
+.card table{margin:0;table-layout:auto}
 .foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8}
 /* 順位強調（1〜3位の銘柄名を金銀銅＋太字） */
 .nm{font-weight:800}
@@ -214,8 +212,14 @@ def _hot(rendered: str, v, thr: float = 10.0) -> str:
     return f'<span class="hot">{rendered}</span>' if v is not None and v > thr else rendered
 
 
+def _clip_name(name: str, maxlen: int = 16) -> str:
+    """長い銘柄名は末尾を省略（table-layout:auto で銘柄列が暴れないようサーバ側で丸める）。"""
+    return name if len(name) <= maxlen else name[:maxlen - 1] + "…"
+
+
 def _name_td(i: int, name: str) -> str:
-    """順位別に銘柄名を強調（1〜3位は金銀銅＋太字色）。"""
+    """順位別に銘柄名を強調（1〜3位は金銀銅＋太字色）。長い名は省略。"""
+    name = _clip_name(name)
     return f'<td class="l nm r{i}">{_MEDAL[i]} {name}</td>' if i in _MEDAL else f'<td class="l">{name}</td>'
 
 
@@ -247,30 +251,23 @@ def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list
                foot_extra: str = "", fixed_layout: bool = False) -> str:
     """汎用ランキングカード（ダークテーマ・画像化用）。head_cells と body_rows<tr> を流し込む。
 
-    fixed_layout=True で列幅を最適化（table-layout:fixed）: #=44 / コード=72 / 銘柄=190 を固定し、
-    残りデータ列は均等配分。長い社名は銘柄列だけ枠内省略（#/コードは切らない）。カードは wide(1120px)。
+    fixed_layout=True は8軸の広いカード（wide=max1120px）。列幅は table-layout:auto で各見出しに
+    合わせた可変＝長い見出し（自己資本比率・ROIC−WACC 等）も自然に収まる。長い銘柄名は
+    _clip_name でサーバ側省略済みのため列が暴れない。
     """
     today = date.today().isoformat()
     ths = "".join(
         f'<th class="l">{h[1:]}</th>' if h.startswith("@") else f"<th>{h}</th>"
         for h in head_cells
     )
-    table_cls, colgroup, card_cls = "", "", ""
-    if fixed_layout:
-        table_cls = ' class="fixed"'
-        card_cls = " wide"
-        # #/コード/銘柄を固定、右端の総合スコア(見出し5文字＝最長)も少し広めに固定、
-        # 残りデータ列は <col> で均等配分。
-        cols = ['<col style="width:44px">', '<col style="width:72px">', '<col style="width:190px">']
-        cols += ["<col>"] * (len(head_cells) - 4)
-        cols += ['<col style="width:108px">']
-        colgroup = "<colgroup>" + "".join(cols) + "</colgroup>"
+    # 8軸の広いカードは wide(max 1120px)。列幅は table-layout:auto で各見出しに合わせ可変。
+    card_cls = " wide" if fixed_layout else ""
     return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
 <div class="card{card_cls}">
 <div class="brand">findex</div>
 <h1>{title}</h1>
 <div class="cap">{subtitle}／作成日 {today}</div>
-<table{table_cls}>{colgroup}<thead><tr>{ths}</tr></thead><tbody>
+<table><thead><tr>{ths}</tr></thead><tbody>
 {chr(10).join(body_rows)}
 </tbody></table>
 <div class="foot">{foot_extra + '<br>' if foot_extra else ''}{_FOOT}</div>

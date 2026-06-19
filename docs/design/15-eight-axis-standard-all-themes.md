@@ -28,10 +28,11 @@
 
 ## 3. レンダリング（`_rank_card(fixed_layout=True)`）
 
-- `table-layout:fixed`＋`<colgroup>`で **#=44 / コード=72 / 銘柄=190 を固定、残りデータ列は均等配分**。
-  カードは `.card.wide`（max-width 1120px）。
-- **省略は銘柄列(3列目)だけ**（`nth-child(3)` に ellipsis）。#・コードは切らない
-  （doc14 の全セル ellipsis で「10→1...」「コード→コ...」と崩れたバグの是正）。
+- **列幅は `table-layout:auto`（内容可変）**。各見出しが自然に収まる（自己資本比率・ROIC−WACC 等の
+  長い見出しも溢れない）。カードは `.card.wide`（max-width 1120px・width:100%で余白を均し配分）。
+  - 初期は固定幅＋colgroup（#=44/コード=72/銘柄=190・残り均等）にしたが、均等配分では長い見出しが
+    溢れたため auto へ変更。長い銘柄名は **`_clip_name`（16字で末尾「…」）でサーバ側省略**し列の暴れを防ぐ
+    （CSS ellipsis 依存をやめ、#・コードは元から切れない）。
 - タイトル `.card h1{color:var(--ink)}` を明示（暗く沈む問題の是正）。
 - 強調(teal `.hot`)は「高い＝良い」指標のみ（ROE/総合/長期増配/YoC等）。配当性向・PER・実質PER・
   自己資本比率は非強調 `pct_plain`/`x_plain`（doc14 で新設）。
