@@ -1,7 +1,8 @@
 """X投稿テーマの純関数テスト（Phase6 MVP・品質ゲートの回帰防止）。"""
 from findex.post.themes import (
-    _hy_safe_eligible, _is_takoashi, _net_cash_eligible, _non_financial, _SPECS,
-    _streak_body, _yoc_quality_key, weighted_len,
+    BODY_MAX, _body_metric, _hy_safe_eligible, _is_takoashi, _net_cash_eligible,
+    _non_financial, _post_name, _post_name_block, _SPECS, _streak_body, _yoc_quality_key,
+    weighted_len,
 )
 
 
@@ -38,6 +39,54 @@ def test_streak_body_contains_thesis_and_gate():
     assert "status=ok" not in body     # FB是正: 利用者に無意味なメタ表現は本文に出さない
     assert "#増配株" in body and "#高配当株" in body   # ハッシュタグは2個・株サフィックス統一
     assert "#日本株" not in body       # 汎用すぎるタグは付けない
+
+
+# ── doc16: 投稿本文へトップ3社＋看板指標を注入（引きを強める）─────────────────
+
+def test_post_name_normalizes_fullwidth_and_clips():
+    # 全角英数は半角化（読みやすさ・字数節約）、カナはそのまま、長名は末尾省略。
+    assert _post_name("ＺＯＺＯ") == "ZOZO"
+    assert _post_name("三菱ＨＣキャピタル") == "三菱HCキャピタル"
+    assert _post_name("サイボウズ") == "サイボウズ"
+    clipped = _post_name("ジェイエイシーリクルートメント")
+    assert clipped.endswith("…") and len(clipped) == 12
+
+
+def test_body_metric_formats_by_kind():
+    assert _body_metric(0.036044, "pct") == "3.6%"
+    assert _body_metric(0.343099, "pct_signed") == "＋34.3%"
+    assert _body_metric(-0.05, "pct_signed") == "−5.0%"
+    assert _body_metric(36, "year") == "36年"
+    assert _body_metric(2.0123, "x") == "2.0倍"
+    assert _body_metric(70.7, "num") == "70.7"
+    assert _body_metric(None, "pct") == "—"      # 未算出は素直にダッシュ
+
+
+def test_post_name_block_builds_medal_lines():
+    shown = [{"name": "ＺＯＺＯ", "roic_minus_wacc": 0.343},
+             {"name": "サイボウズ", "roic_minus_wacc": 0.343},
+             {"name": "JAC", "roic_minus_wacc": 0.327},
+             {"name": "四位", "roic_minus_wacc": 0.30}]
+    block = _post_name_block(shown, ("roic_minus_wacc", "pct_signed"))
+    assert block == "🥇ZOZO ＋34.3%\n🥈サイボウズ ＋34.3%\n🥉JAC ＋32.7%\n"  # トップ3のみ・末尾改行
+    assert _post_name_block([], ("roic_minus_wacc", "pct_signed")) == ""    # 該当0社は空
+    assert _post_name_block(shown, None) == ""                              # headline無しは空
+
+
+def test_spec_body_fn_injects_names_within_limit():
+    # 全宣言テーマの body_fn が (n, names) を受け、names を本文へ差し込み BODY_MAX 以内。
+    names = "🥇ZOZO ＋34.3%\n🥈サイボウズ ＋34.3%\n🥉JAC ＋32.7%\n"
+    for name, spec in _SPECS.items():
+        body = spec["body_fn"](5, names)
+        assert "🥇ZOZO" in body, name
+        assert weighted_len(body) <= BODY_MAX, (name, weighted_len(body))
+        assert "headline" in spec and spec["headline"], name
+
+
+def test_streak_body_injects_names():
+    body = _streak_body(5, "🥇花王 36年\n🥈SPK 28年\n🥉三菱HCキャピタル 27年\n")
+    assert "🥇花王 36年" in body
+    assert weighted_len(body) <= BODY_MAX
 
 
 # ── P1: テーマ層較正（doc 10・GeminiFB是正）の回帰防止 ──────────────────

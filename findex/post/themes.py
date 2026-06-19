@@ -1,7 +1,7 @@
 """投稿テーマの生成（D5 §2-§3）。テンプレ × データクエリ × 品質ゲート。
 
 MVP（Phase6 段階1）は看板の手前、確実に出せる「連続増配ランキング」1テーマ。
-- 本文＝フック（≤140字・CJK加重2）。数字は本文に詰めず画像へ。
+- 本文＝フック＋トップ3社の社名＋看板指標（doc16・引きを強める）。≤250字（CJK加重2・Xの実上限280に余白）。
 - 画像＝ランキング表（report.py と同じ品質ゲートを通った値だけ）。
 - 出力は draft（claim・通過ゲートを添えて返す）。投稿可否は CLI 側で判断。
 
@@ -9,6 +9,7 @@ MVP（Phase6 段階1）は看板の手前、確実に出せる「連続増配ラ
 """
 from __future__ import annotations
 
+import unicodedata
 from datetime import date
 
 from ..score.engine import _QUALITY_FACTOR
@@ -125,11 +126,12 @@ border-radius:5px;padding:1px 5px}
 """
 
 
-def _streak_body(n: int) -> str:
-    """フック本文（≤140字・CJK加重2）。看板テーゼ「増配率でなく続く配当」を1行で。"""
+def _streak_body(n: int, names: str = "") -> str:
+    """フック本文（≤BODY_MAX・CJK加重2）。看板テーゼ「増配率でなく続く配当」＋トップ3社。"""
     return (
         f'「増配率」ではなく"続く配当"。\n'
         f"連続増配・連続非減配ランキング📈 トップ{n}\n"
+        f"{names}"
         "長く減らさず増やし続けた銘柄。\n"
         "#増配株 #高配当株"
     )
@@ -145,7 +147,8 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
     has_override = any(r["g_src"] == "override" or r["nc_src"] == "override" for r in elig[:top_n])
 
     n = min(top_n, len(elig))
-    body = _streak_body(n)
+    shown = elig[:top_n]
+    body = _streak_body(n, _post_name_block(shown, ("g_years", "year")))
 
     claims = [
         {
@@ -166,11 +169,10 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
         "grade_shown": True,              # claim別グレード併示
         "eligible_count": n,
         "body_weighted_len": weighted_len(body),
-        "body_within_limit": weighted_len(body) <= 140,
-        "passed": n > 0 and weighted_len(body) <= 140,
+        "body_within_limit": weighted_len(body) <= BODY_MAX,
+        "passed": n > 0 and weighted_len(body) <= BODY_MAX,
     }
 
-    shown = elig[:top_n]
     cols = _std_cols([("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
                       ("増配の質", "quality", "quality")])
     foot = ("増配の質: 利益成長による増配＝健全／配当性向を上げた増配＝性向拡大<br>"
@@ -215,6 +217,47 @@ def _hot(rendered: str, v, thr: float = 10.0) -> str:
 def _clip_name(name: str, maxlen: int = 16) -> str:
     """長い銘柄名は末尾を省略（table-layout:auto で銘柄列が暴れないようサーバ側で丸める）。"""
     return name if len(name) <= maxlen else name[:maxlen - 1] + "…"
+
+
+# ── 投稿本文へのトップ3社注入（doc16・"社名＋看板指標"で引きを強める）──────────
+BODY_MAX = 250   # 本文の加重文字数上限。Xの実上限は280（CJK加重2＝日本語140字）。余白を残し250。
+
+
+def _post_name(name: str, maxlen: int = 12) -> str:
+    """投稿本文用の社名整形: 全角英数を半角化（ＺＯＺＯ→ZOZO・読みやすさと字数節約）、長名は省略。"""
+    name = unicodedata.normalize("NFKC", name)
+    return name if len(name) <= maxlen else name[:maxlen - 1] + "…"
+
+
+def _body_metric(v, fmt: str) -> str:
+    """投稿本文用の看板指標を素テキスト整形（HTMLでなく投稿文字列）。"""
+    if v is None:
+        return "—"
+    if fmt == "pct":
+        return f"{v * 100:.1f}%"
+    if fmt == "pct_signed":
+        return f"＋{v * 100:.1f}%" if v >= 0 else f"−{abs(v) * 100:.1f}%"
+    if fmt == "year":
+        return f"{int(v)}年"
+    if fmt == "x":
+        return f"{v:.1f}倍"
+    if fmt == "num":
+        return f"{v:.1f}"
+    return str(v)
+
+
+def _post_name_block(shown: list[dict], headline: tuple | None, top: int = 3) -> str:
+    """投稿本文用: トップ`top`社の「メダル＋半角社名＋看板指標」を改行区切りで返す（末尾改行込み）。
+
+    headline=(key, fmt)。ランキングを決めた指標（sort_key由来）を社名横に出す＝看板と一致。
+    headline=None や該当0社のときは空文字（フックのみの旧体裁にフォールバック）。
+    """
+    if not headline or not shown:
+        return ""
+    key, fmt = headline
+    lines = [f"{_MEDAL[i]}{_post_name(r['name'])} {_body_metric(r.get(key), fmt)}"
+             for i, r in enumerate(shown[:top], 1)]
+    return "\n".join(lines) + "\n"
 
 
 def _name_td(i: int, name: str) -> str:
@@ -278,8 +321,8 @@ def _gates(body: str, n: int, **extra) -> dict:
     wl = weighted_len(body)
     return {
         "status_ok_only": True, "censored_as_n_plus": True, "grade_shown": True,
-        "eligible_count": n, "body_weighted_len": wl, "body_within_limit": wl <= 140,
-        "passed": n > 0 and wl <= 140, **extra,
+        "eligible_count": n, "body_weighted_len": wl, "body_within_limit": wl <= BODY_MAX,
+        "passed": n > 0 and wl <= BODY_MAX, **extra,
     }
 
 
@@ -292,11 +335,12 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     elig = [r for r in rows if _sufficient(r) and _hy_safe_eligible(r)]
     elig.sort(key=lambda r: r["dy"], reverse=True)
     n = min(top_n, len(elig))
+    shown = elig[:top_n]
     body = ('"高利回り=危険"とは限らない。\n'
             f"減配しにくい高配当ランキング💰 トップ{n}\n"
+            f"{_post_name_block(shown, ('dy', 'pct'))}"
             "利回り×継続性×財務の質で選別。\n"
             "#高配当株 #配当")
-    shown = elig[:top_n]
     cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("減配信頼性", "rel", "num"),
                       ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
@@ -338,11 +382,12 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     # YoC × 質係数（採点層と同一）。一過性は ×0.3 まで減点され、よほど高YoCでない限り沈む。
     elig.sort(key=_yoc_quality_key, reverse=True)
     n = min(top_n, len(elig))
+    shown = elig[:top_n]
     body = ('"今の利回り"より、育った利回り。\n'
             f"取得利回り(YoC)ランキング📈 トップ{n}\n"
+            f"{_post_name_block(shown, ('yoc', 'pct'))}"
             "5年前に買えば利回りはこう育つ。\n"
             "#増配株 #高配当株")
-    shown = elig[:top_n]
     cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("増配率5年", "dpc5", "pct"),
                       ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "yield_on_cost_5y": r["yoc"],
@@ -366,11 +411,12 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
             and r["operating_margin"] is not None and r["operating_margin"] > 0]
     elig.sort(key=lambda r: r["roe"], reverse=True)
     n = min(top_n, len(elig))
+    shown = elig[:top_n]
     body = ("PBR1倍割れ=万年割安、とは限らない。\n"
             f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
+            f"{_post_name_block(shown, ('roe', 'pct'))}"
             "ROEと財務健全性で選別。\n"
             "#割安株 #バリュー株")
-    shown = elig[:top_n]
     cols = _std_cols([("PER", "per", "x_plain"), ("自己資本比率", "equity_ratio", "pct_plain"),
                       ("財務grade", "gh", "grade")])
     claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
@@ -400,11 +446,12 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     elig = [r for r in rows if _sufficient(r) and _net_cash_eligible(r)]
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
+    shown = elig[:top_n]
     body = ('現金を引くと"実質PER"はもっと安い。\n'
             f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
+            f"{_post_name_block(shown, ('net_cash_per', 'x'))}"
             '表面より割安な"実質バリュー"。\n'
             "#割安株 #バリュー株")
-    shown = elig[:top_n]
     cols = _std_cols([("実質PER", "net_cash_per", "x_plain"), ("表面PER", "per", "x_plain")])
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
                "per": r["per"], "grade_health": r["gh"]} for r in shown]
@@ -502,18 +549,19 @@ def _render_rows(shown: list[dict], cols: list[tuple]) -> list[str]:
 
 
 def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signature,
-                   eligible, sort_key, reverse=True, claim_keys, foot_extra=""):
+                   eligible, sort_key, reverse=True, claim_keys, foot_extra="", headline=None):
     """宣言的ランキングテーマの共通実装。signature=テーマ固有列[(見出し, key, kind), ...]。
 
     列は _std_cols で「配当利回り＋固有＋コア＋総合スコア(右端)」の標準8軸に統一。
     fetch_rows が status ゲート済み（確証データのみ値を持つ）ので、ここは整形のみ。
+    body_fn(n, names) は フック＋トップ3社ブロック(names)を本文へ組む（doc16）。
     """
     rows = fetch_rows(conn, codes)
     elig = [r for r in rows if _sufficient(r) and eligible(r)]
     elig.sort(key=sort_key, reverse=reverse)
     n = min(top_n, len(elig))
-    body = body_fn(n)
     shown = elig[:top_n]
+    body = body_fn(n, _post_name_block(shown, headline))
     cols = _std_cols(signature)
     head = _std_head(cols)
     trs = _render_rows(shown, cols)
@@ -531,9 +579,11 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signa
 _SPECS: dict[str, dict] = {
     "no_cut": dict(
         title="連続非減配ランキング", subtitle="減配なしで配当を守り続けた年数",
-        body_fn=lambda n: ('"増やす"より、まず"減らさない"。\n'
-                           f"連続非減配ランキング🛡️ トップ{n}\n"
-                           "不況でも配当を守った銘柄。\n#高配当株 #配当"),
+        body_fn=lambda n, names: ('"増やす"より、まず"減らさない"。\n'
+                                  f"連続非減配ランキング🛡️ トップ{n}\n"
+                                  f"{names}"
+                                  "不況でも配当を守った銘柄。\n#高配当株 #配当"),
+        headline=("nc_years", "year"),
         signature=[("連続非減配", "nc_years", "streak_nc"), ("減配信頼性", "rel", "num"),
                    ("増配の質", "quality", "quality")],
         eligible=lambda r: r["gd"] != "D" and r["nc_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
@@ -541,18 +591,22 @@ _SPECS: dict[str, dict] = {
         claim_keys=["nc_years", "gd"]),
     "long_growth": dict(
         title="長期増配の王様（10年以上）", subtitle="連続増配10年以上",
-        body_fn=lambda n: ('一過性でなく、10年以上"続く"増配。\n'
-                           f"長期増配の王様ランキング👑 トップ{n}\n"
-                           "時間が証明した配当力。\n#増配株 #高配当株"),
+        body_fn=lambda n, names: ('一過性でなく、10年以上"続く"増配。\n'
+                                  f"長期増配の王様ランキング👑 トップ{n}\n"
+                                  f"{names}"
+                                  "時間が証明した配当力。\n#増配株 #高配当株"),
+        headline=("g_years", "year"),
         signature=[("連続非減配", "nc_years", "streak_nc"), ("YoC(5年)", "yoc", "pct"),
                    ("増配率5年", "dpc5", "pct")],
         eligible=lambda r: r["gd"] != "D" and (r["g_years"] or 0) >= 10 and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["g_years"] or -1, claim_keys=["g_years", "gd"]),
     "growth_room": dict(
         title="増配余力（配当性向が低い）", subtitle="配当性向が低い＝増配の伸びしろ",
-        body_fn=lambda n: ("配当性向が低い＝まだ増やせる。\n"
-                           f"増配余力ランキング💪 トップ{n}\n"
-                           "無理なく増配を続けられる株。\n#増配株 #高配当株"),
+        body_fn=lambda n, names: ("配当性向が低い＝まだ増やせる。\n"
+                                  f"増配余力ランキング💪 トップ{n}\n"
+                                  f"{names}"
+                                  "無理なく増配を続けられる株。\n#増配株 #高配当株"),
+        headline=("payout_ratio", "pct"),
         signature=[("FCFカバ", "fcf_payout_coverage", "x"), ("増配率5年", "dpc5", "pct")],
         # doc 10・P1-3: 低配当性向「だけ」では増配余力を担保できない（利益が薄い/赤字でも
         # 性向は低く出る）。稼ぐ現金で配当を賄えている裏付けとして fcf_payout_coverage>0 を要求。
@@ -563,9 +617,11 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["payout_ratio"], reverse=False, claim_keys=["payout_ratio", "gd"]),
     "fcf_coverage": dict(
         title="FCF配当カバレッジ", subtitle="稼ぐ現金で配当を何倍まかなえるか",
-        body_fn=lambda n: ('配当は利益でなく"現金"で見る。\n'
-                           f"FCF配当カバレッジ🔄 トップ{n}\n"
-                           "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
+        body_fn=lambda n, names: ('配当は利益でなく"現金"で見る。\n'
+                                  f"FCF配当カバレッジ🔄 トップ{n}\n"
+                                  f"{names}"
+                                  "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
+        headline=("fcf_payout_coverage", "x"),
         signature=[("FCFカバ", "fcf_payout_coverage", "x")],
         # doc 10・P2-3: 金融（銀行/証券/保険/その他金融）はFCFの概念が当てはまらずCF系を独占→除外。
         eligible=lambda r: r["gd"] != "D" and _non_financial(r)
@@ -573,26 +629,32 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["fcf_payout_coverage"] or -1, claim_keys=["fcf_payout_coverage", "gd"]),
     "high_roe_growth": dict(
         title="高ROE×増配", subtitle="稼ぐ力と増配の両立",
-        body_fn=lambda n: ('配当だけでなく"稼ぐ力"も。\n'
-                           f"高ROE×増配ランキング💹 トップ{n}\n"
-                           "ROEと増配を両立する優良株。\n#増配株 #ROE"),
+        body_fn=lambda n, names: ('配当だけでなく"稼ぐ力"も。\n'
+                                  f"高ROE×増配ランキング💹 トップ{n}\n"
+                                  f"{names}"
+                                  "ROEと増配を両立する優良株。\n#増配株 #ROE"),
+        headline=("roe", "pct"),
         signature=[("営業益率", "operating_margin", "pct")],
         eligible=lambda r: r["gd"] != "D" and r["roe"] is not None and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_STREAK),
         sort_key=lambda r: r["roe"] or -1, claim_keys=["roe", "gd"]),
     "total_score": dict(
         title="findex 配当総合スコア", subtitle="配当/バリュー/財務/資本の総合評価(v4)",
-        body_fn=lambda n: ("配当・割安・財務・資本を総合評価。\n"
-                           f"findex総合スコアランキング📊 トップ{n}\n"
-                           "多角指標で選ぶ配当株。\n#高配当株 #配当"),
+        body_fn=lambda n, names: ("配当・割安・財務・資本を総合評価。\n"
+                                  f"findex総合スコアランキング📊 トップ{n}\n"
+                                  f"{names}"
+                                  "多角指標で選ぶ配当株。\n#高配当株 #配当"),
+        headline=("total", "num"),
         signature=[("配当", "gd", "grade"), ("バリュー", "gv", "grade"),
                    ("財務", "gh", "grade"), ("資本", "gc", "grade")],
         eligible=lambda r: r["total"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["total"] or -1, claim_keys=["total", "gd"]),
     "high_yield": dict(
         title="高利回り（3.5%以上）", subtitle="配当利回り3.5%以上",
-        body_fn=lambda n: ("まずは利回りで選ぶなら。\n"
-                           f"高配当利回りランキング💰 トップ{n}\n"
-                           "利回り3.5%以上＋継続性も併示。\n#高配当株 #配当"),
+        body_fn=lambda n, names: ("まずは利回りで選ぶなら。\n"
+                                  f"高配当利回りランキング💰 トップ{n}\n"
+                                  f"{names}"
+                                  "利回り3.5%以上＋継続性も併示。\n#高配当株 #配当"),
+        headline=("dy", "pct"),
         signature=[("減配信頼性", "rel", "num"), ("連続非減配", "nc_years", "streak_nc")],
         # doc 12: タコ足ゾンビ（利益超の配当×減配常習）を除外。grade C で警告済だが順位上位の
         # ミスリードを防ぐ（バリューコマース/ヘリオステクノ）。
@@ -600,18 +662,23 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["dy"] or -1, claim_keys=["dy", "gd"]),
     "low_pbr_yield": dict(
         title="割安高配当（PBR1倍以下）", subtitle="PBR1倍以下×高利回り",
-        body_fn=lambda n: ('"資産より安い"高配当。\n'
-                           f"割安高配当ランキング🔍 トップ{n}\n"
-                           "PBR1倍以下で利回りも高い株。\n#割安株 #高配当株"),
+        body_fn=lambda n, names: ('"資産より安い"高配当。\n'
+                                  f"割安高配当ランキング🔍 トップ{n}\n"
+                                  f"{names}"
+                                  "PBR1倍以下で利回りも高い株。\n#割安株 #高配当株"),
+        headline=("dy", "pct"),
         signature=[("PER", "per", "x_plain")],
         eligible=lambda r: r["gd"] != "D" and r["pbr"] is not None and 0 < r["pbr"] <= 1
         and _yield_ok(r, YIELD_FLOOR_HIGH) and not _is_takoashi(r),  # doc 12: タコ足除外
         sort_key=lambda r: r["dy"] or -1, claim_keys=["pbr", "dy", "gd"]),
     "large_cap": dict(
         title="大型優良配当（時価総額1兆円超）", subtitle="時価総額1兆円超×配当gradeA/B",
-        body_fn=lambda n: ("大型で安定、それでも配当が育つ。\n"
-                           f"大型優良配当ランキング🏢 トップ{n}\n"
-                           "時価総額1兆円超の安定高配当。\n#高配当株 #大型株"),
+        body_fn=lambda n, names: ("大型で安定、それでも配当が育つ。\n"
+                                  f"大型優良配当ランキング🏢 トップ{n}\n"
+                                  f"{names}"
+                                  "時価総額1兆円超の安定高配当。\n#高配当株 #大型株"),
+        # 並びは総合スコア降順だが、看板「配当」の引きとして社名横は利回りを添える（doc16）。
+        headline=("dy", "pct"),
         # doc14・GeminiFB是正: 抽出は時価総額1兆超のまま、並びは「大型"優良配当"」の看板どおり
         # 総合スコア降順へ（旧: 時価総額降順＝単なる大企業順でNTT/中外が東京海上の下に沈む見せ方の嘘）。
         # 連続増配 weight=2.5 等で配当継続性が主軸＝総合スコア順でも高利回り×長期増配が上位に来る。
@@ -623,9 +690,11 @@ _SPECS: dict[str, dict] = {
         claim_keys=["total", "g_years", "payout_ratio", "per", "pbr", "roe", "current_market_cap"]),
     "small_value": dict(
         title="小型割安配当（時価総額1000億円未満）", subtitle="小型×PBR1倍以下×配当",
-        body_fn=lambda n: ("見落とされがちな小型の割安配当。\n"
-                           f"小型割安配当ランキング💎 トップ{n}\n"
-                           "時価総額1000億未満・PBR1倍以下。\n#割安株 #小型株"),
+        body_fn=lambda n, names: ("見落とされがちな小型の割安配当。\n"
+                                  f"小型割安配当ランキング💎 トップ{n}\n"
+                                  f"{names}"
+                                  "時価総額1000億未満・PBR1倍以下。\n#割安株 #小型株"),
+        headline=("dy", "pct"),
         signature=[("PER", "per", "x_plain")],
         eligible=lambda r: r["gd"] != "D" and r["current_market_cap"] is not None
         and r["current_market_cap"] < 1e11 and r["pbr"] is not None and 0 < r["pbr"] <= 1
@@ -633,9 +702,11 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["dy"] or -1, claim_keys=["current_market_cap", "pbr", "gd"]),
     "roic_spread": dict(
         title="価値創造（ROIC−WACC）", subtitle="資本コストを超えて稼ぐ企業",
-        body_fn=lambda n: ("資本コストを超えて稼げているか。\n"
-                           f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
-                           "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
+        body_fn=lambda n, names: ("資本コストを超えて稼げているか。\n"
+                                  f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
+                                  f"{names}"
+                                  "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
+        headline=("roic_minus_wacc", "pct_signed"),
         signature=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("営業益率", "operating_margin", "pct")],
         # doc 10・P2-2: ROIC−WACC>0 だけでは分母崩壊系（千代田化工=ROE算出不能）が混じる。
         # 財務健全性が確証できる（ROE算出済み）銘柄に限定。
@@ -644,9 +715,11 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["roic_minus_wacc"] or -1, claim_keys=["roic_minus_wacc", "gc"]),
     "doe_king": dict(
         title="DOE（株主資本配当率）", subtitle="利益が薄くても株主資本に対し報いる力",
-        body_fn=lambda n: ("利益が振れても、還元はブレない。\n"
-                           f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
-                           "安定還元の本命指標。\n#高配当株 #配当"),
+        body_fn=lambda n, names: ("利益が振れても、還元はブレない。\n"
+                                  f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
+                                  f"{names}"
+                                  "安定還元の本命指標。\n#高配当株 #配当"),
+        headline=("doe", "pct"),
         signature=[("DOE", "doe", "pct"), ("自己資本比率", "equity_ratio", "pct_plain")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
@@ -754,7 +827,7 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
             f'<div class="theme-head"><span class="slug">{name}</span>'
             f'<button class="copy" data-body="{_esc_attr(post["body"])}">本文をコピー</button>'
             f'<button class="dl" data-theme="{name}">画像を保存</button>'
-            f'<span class="hooklen">{g["body_weighted_len"]}/140字・該当{g["eligible_count"]}社</span></div>'
+            f'<span class="hooklen">{g["body_weighted_len"]}/{BODY_MAX}字・該当{g["eligible_count"]}社</span></div>'
             f'<div class="hook">{post["body"].replace(chr(10), "<br>")}</div>'
             f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
             f'</section>'
