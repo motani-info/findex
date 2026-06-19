@@ -259,9 +259,11 @@ def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list
     if fixed_layout:
         table_cls = ' class="fixed"'
         card_cls = " wide"
-        # #/コード/銘柄だけ幅を固定、データ列(4列目以降)は <col> で均等配分
+        # #/コード/銘柄を固定、右端の総合スコア(見出し5文字＝最長)も少し広めに固定、
+        # 残りデータ列は <col> で均等配分。
         cols = ['<col style="width:44px">', '<col style="width:72px">', '<col style="width:190px">']
-        cols += ["<col>"] * (len(head_cells) - 3)
+        cols += ["<col>"] * (len(head_cells) - 4)
+        cols += ['<col style="width:108px">']
         colgroup = "<colgroup>" + "".join(cols) + "</colgroup>"
     return f"""<!doctype html><meta charset="utf-8"><style>{_CARD_CSS}</style>
 <div class="card{card_cls}">
