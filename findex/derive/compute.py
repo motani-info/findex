@@ -173,8 +173,15 @@ def count_dividend_cuts(vals: list[float]) -> int:
     return cuts
 
 
-def _classify_quality(eps_now, eps_then, dps_mult) -> str:
-    """増配の質（D4.5）: DPS倍率=EPS倍率×配当性向変化。sound/payout_driven/cyclical。"""
+def _classify_quality(eps_now, eps_then, dps_mult, cuts_20y: int = 0) -> str:
+    """増配の質（D4.5）: DPS倍率=EPS倍率×配当性向変化。sound/payout_driven/cyclical。
+
+    減配履歴が多い（過去20年で2回以上）銘柄は、直近EPSが伸びていても持続的な増配とは
+    言えず市況連動（cyclical）とみなす（doc11 レビュー③: 東洋証券型の市況株が sound に
+    誤分類されるのを防ぐ）。
+    """
+    if cuts_20y >= 2:
+        return "cyclical"  # 減配常習＝EPSスパイクでも持続性なし
     if eps_now is None or eps_then is None or eps_then <= 0 or eps_now <= 0:
         return "cyclical"  # 赤字/算出不能=一過性扱い（安全側）
     eps_mult = eps_now / eps_then
@@ -225,7 +232,7 @@ def compute_dividend_metrics_for_code(conn, code: str) -> dict | None:
     # 増配の質（EPS5年比較が前提。EPS履歴不足なら判定しない＝insufficient）
     eps_now, eps_then, eps_ok = _latest_eps_pair(conn, code, 5)
     if dps_mult and eps_ok:
-        quality = _classify_quality(eps_now, eps_then, dps_mult)
+        quality = _classify_quality(eps_now, eps_then, dps_mult, cuts_20y)
         status["dividend_quality"] = "ok"
     else:
         quality = None

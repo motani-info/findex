@@ -28,3 +28,10 @@ def test_quality_sound_payout_cyclical():
     assert _classify_quality(90, 100, 1.6) == "cyclical"        # EPS減
     assert _classify_quality(-5, 100, 1.6) == "cyclical"        # 赤字
     assert _classify_quality(100, None, 1.6) == "cyclical"      # 算出不能
+
+
+def test_quality_cyclical_when_many_cuts():
+    # 減配2回以上は EPS が伸びていても市況株扱い（doc11 ③: 東洋証券型）
+    assert _classify_quality(150, 100, 1.6, cuts_20y=2) == "cyclical"  # 本来soundだが減配2回
+    assert _classify_quality(150, 100, 1.6, cuts_20y=5) == "cyclical"  # 東洋証券型
+    assert _classify_quality(150, 100, 1.6, cuts_20y=1) == "sound"     # 減配1回まではsound可
