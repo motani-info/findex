@@ -63,14 +63,23 @@ def test_body_metric_formats_by_kind():
 
 
 def test_post_name_block_builds_medal_lines():
-    shown = [{"name": "ＺＯＺＯ", "roic_minus_wacc": 0.343},
-             {"name": "サイボウズ", "roic_minus_wacc": 0.343},
-             {"name": "JAC", "roic_minus_wacc": 0.327},
-             {"name": "四位", "roic_minus_wacc": 0.30}]
-    block = _post_name_block(shown, ("roic_minus_wacc", "pct_signed"))
-    assert block == "🥇ZOZO ＋34.3%\n🥈サイボウズ ＋34.3%\n🥉JAC ＋32.7%\n"  # トップ3のみ・末尾改行
-    assert _post_name_block([], ("roic_minus_wacc", "pct_signed")) == ""    # 該当0社は空
-    assert _post_name_block(shown, None) == ""                              # headline無しは空
+    # POSTルール: 配当利回りを必ず併記。看板が利回り以外なら「配当X% ラベルY」（DOE例）。
+    shown = [{"name": "ユー・エス・エス", "dy": 0.0301, "doe": 0.136},
+             {"name": "日本たばこ産業", "dy": 0.052, "doe": 0.114},
+             {"name": "アステラス製薬", "dy": 0.036, "doe": 0.093},
+             {"name": "四位", "dy": 0.02, "doe": 0.08}]
+    block = _post_name_block(shown, ("doe", "pct"))
+    assert block == ("🥇ユー・エス・エス 配当3.0% DOE13.6%\n"
+                     "🥈日本たばこ産業 配当5.2% DOE11.4%\n"
+                     "🥉アステラス製薬 配当3.6% DOE9.3%\n")          # トップ3のみ・末尾改行
+    # 看板が利回りそのもの（key=="dy"）なら重複させず「配当X%」のみ
+    hy = _post_name_block([{"name": "テスト", "dy": 0.071}], ("dy", "pct"))
+    assert hy == "🥇テスト 配当7.1%\n"
+    # 利回り未確証は「配当—」と正直に出す（確証なき数字は出さない＝ダッシュ）
+    nodash = _post_name_block([{"name": "無配", "dy": None, "doe": 0.1}], ("doe", "pct"))
+    assert nodash == "🥇無配 配当— DOE10.0%\n"
+    assert _post_name_block([], ("doe", "pct")) == ""    # 該当0社は空
+    assert _post_name_block(shown, None) == ""           # headline無しは空
 
 
 def test_spec_body_fn_injects_names_within_limit():

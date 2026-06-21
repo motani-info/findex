@@ -264,17 +264,35 @@ def _body_metric(v, fmt: str) -> str:
     return str(v)
 
 
-def _post_name_block(shown: list[dict], headline: tuple | None, top: int = 3) -> str:
-    """投稿本文用: トップ`top`社の「メダル＋半角社名＋看板指標」を改行区切りで返す（末尾改行込み）。
+# 看板指標キー → 投稿本文での短ラベル（社名横に「配当X% ラベルY」と併記。看板と一致）。
+_HEADLINE_LABEL = {
+    "nc_years": "非減配", "g_years": "増配", "payout_ratio": "性向",
+    "fcf_payout_coverage": "FCFカバ", "roe": "ROE", "total": "総合",
+    "roic_minus_wacc": "ROIC−WACC", "doe": "DOE", "eps_growth_5y": "EPS成長",
+    "yoc": "YoC", "net_cash_per": "実質PER",
+}
 
-    headline=(key, fmt)。ランキングを決めた指標（sort_key由来）を社名横に出す＝看板と一致。
+
+def _post_name_block(shown: list[dict], headline: tuple | None, top: int = 3) -> str:
+    """投稿本文用: トップ`top`社の「メダル＋半角社名＋配当利回り＋看板指標」を改行区切りで返す。
+
+    POSTルール（全テーマ共通）: **配当利回りは必ず併記する**（「配当X%」を社名横に出す）。
+    headline=(key, fmt) はランキングを決めた指標（sort_key由来）＝看板と一致。看板が配当利回り
+    そのもの（key=="dy"）のときは重複させず「配当X%」のみ。それ以外は「配当X% ラベルY」。
     headline=None や該当0社のときは空文字（フックのみの旧体裁にフォールバック）。
     """
     if not headline or not shown:
         return ""
     key, fmt = headline
-    lines = [f"{_MEDAL[i]}{_post_name(r['name'])} {_body_metric(r.get(key), fmt)}"
-             for i, r in enumerate(shown[:top], 1)]
+    lines = []
+    for i, r in enumerate(shown[:top], 1):
+        dy = f"配当{_body_metric(r.get('dy'), 'pct')}"
+        if key == "dy":
+            metric = dy                                    # 看板＝利回り。重複させない
+        else:
+            label = _HEADLINE_LABEL.get(key, "")
+            metric = f"{dy} {label}{_body_metric(r.get(key), fmt)}"
+        lines.append(f"{_MEDAL[i]}{_post_name(r['name'])} {metric}")
     return "\n".join(lines) + "\n"
 
 
