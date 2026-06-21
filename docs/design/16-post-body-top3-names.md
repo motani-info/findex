@@ -68,3 +68,39 @@
   全 `_SPECS` body_fn が names 注入＆BODY_MAX 以内/`_streak_body` names 注入）。
 - `verify --all` golden **18/18 不整合0**。
 - `post-gallery --all`: 17テーマ再生成、全本文にトップ3社＋看板指標を確認（最大188/250字・全ゲート通過）。
+
+## 6. 追補（2026-06-21）: 配当利回りの必須併記（POSTルール）
+
+> 起点: ユーザー指示「全体のPOST文章のルールとして必ず配当利回りは書く」。
+> 例: DOEテーマでも `🥇ユー・エス・エス 配当3.0% DOE13.6%` のように利回りを併記する。
+
+### ルール（全テーマ共通・恒久）
+
+**投稿本文のトップ3社行には、配当利回りを必ず併記する。** findex の看板は配当株スクリーニングであり、
+どのテーマ（DOE・ROIC−WACC・EPS成長など利回り以外が看板の軸でも）でも読者が最初に知りたいのは
+「で、利回りは何%か」。看板指標だけだと利回りが画像を開くまで分からず引きが弱い。
+
+### 形式
+
+- 社名横は **`配当X%` を常時先頭に併記** ＋ 看板指標（§4の headline）を短ラベル付きで続ける。
+  - 例（看板＝DOE）: `🥇ユー・エス・エス 配当3.0% DOE13.6%`
+- **看板が配当利回りそのもの**（key=="dy" の high_yield / low_pbr_yield / small_value / large_cap /
+  high_yield_safe）は重複させず **`配当X%` のみ**。
+- **利回り未確証（dy=None）は `配当—`** と正直に表示（定款「確証なき数字は出さない」＝裸の0や捏造をしない）。
+
+### 実装（findex/post/themes.py）
+
+- `_post_name_block` を改修: 各社行を `{メダル}{社名} 配当{dy}% {ラベル}{看板値}` で組む（key=="dy" は `配当{dy}%` のみ）。
+- `_HEADLINE_LABEL`（新規 dict）: 看板キー→短ラベル。
+  `DOE / YoC / ROE / 実質PER(net_cash_per) / EPS成長(eps_growth_5y) / 非減配(nc_years) / 増配(g_years) /`
+  `性向(payout_ratio) / FCFカバ(fcf_payout_coverage) / 総合(total) / ROIC−WACC(roic_minus_wacc)`。
+- タラレバ3本（future_dividend / road_to_3man / dividend_doubling）は `_post_name_block` 非経由（本文は
+  TOP1社の前提付き試算の独自の語り）＝対象外。画像は base_theme のランキング表を流用するため利回り列は元々載る。
+
+### 検証
+
+- pytest **119 passed**（`test_post_name_block_builds_medal_lines` を新フォーマット＝DOE併記例へ更新。
+  key=="dy" 重複なし／dy=None→`配当—` のケースを追加）。
+- 全17テーマ本文 **≤250字**（最長 roic_spread 244／配当併記で各行+約9加重字だが余白内）。
+- `post-gallery --cohort`=20テーマ通過／`verify --all` golden **18/18 不整合0**。
+- コミット `ae66a35`。関連: [[12-theme-layer-trap-filters]]（同日の武田型トラップ拡張）。
