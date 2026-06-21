@@ -206,7 +206,7 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
         "body": body,
         "image_html": image_html,
         "claims": claims,
-        "tarareba": _tarareba_for(shown),
+        "tarareba": _tarareba_for(shown, "streak"),
         "gates": gates,
     }
 
@@ -396,10 +396,11 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
                "grade_dividend": r["gd"]} for r in shown]
     foot = ("減配信頼性: 過去の配当を減らさなかった度合い（1.0＝約20年減配なし）／"
             "配当性向100%以下＝利益で配当を賄えている<br>") + (_ZAI_FOOT if _has_override(shown) else "")
-    return {"theme": "high_yield_safe", "body": body,
+    theme = "high_yield_safe"
+    return {"theme": theme, "body": body,
             "image_html": _rank_card("高配当×安全 ランキング", "減配信頼性1.0=過去20年無減配",
                                      _std_head(cols), _render_rows(shown, cols), foot, fixed_layout=True),
-            "claims": claims, "tarareba": _tarareba_for(shown), "gates": _gates(body, n)}
+            "claims": claims, "tarareba": _tarareba_for(shown, theme), "gates": _gates(body, n)}
 
 
 def _yoc_quality_key(r: dict) -> float:
@@ -441,10 +442,11 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
                "grade_dividend": r["gd"]} for r in shown]
     foot = ("YoC(5年): 5年前の株価に対する現在配当利回り（増配で利回りが育った度合い）<br>"
             + (_ZAI_FOOT if _has_override(shown) else ""))
-    return {"theme": "div_growth", "body": body,
+    theme = "div_growth"
+    return {"theme": theme, "body": body,
             "image_html": _rank_card("取得利回り（YoC・5年）ランキング", "5年前に買っていたら利回りはこう育つ",
                                      _std_head(cols), _render_rows(shown, cols), foot, fixed_layout=True),
-            "claims": claims, "tarareba": _tarareba_for(shown), "gates": _gates(body, n)}
+            "claims": claims, "tarareba": _tarareba_for(shown, theme), "gates": _gates(body, n)}
 
 
 def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
@@ -467,10 +469,11 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
                       ("財務grade", "gh", "grade")])
     claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
                "grade_health": r["gh"]} for r in shown]
-    return {"theme": "value_quality", "body": body,
+    theme = "value_quality"
+    return {"theme": theme, "body": body,
             "image_html": _rank_card("割安×優良（PBR1倍割れの質）ランキング", "PBR<1かつ財務健全",
                                      _std_head(cols), _render_rows(shown, cols), fixed_layout=True),
-            "claims": claims, "tarareba": _tarareba_for(shown), "gates": _gates(body, n)}
+            "claims": claims, "tarareba": _tarareba_for(shown, theme), "gates": _gates(body, n)}
 
 
 def _net_cash_eligible(r: dict) -> bool:
@@ -500,11 +503,12 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     cols = _std_cols([("実質PER", "net_cash_per", "x_plain"), ("表面PER", "per", "x_plain")])
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
                "per": r["per"], "grade_health": r["gh"]} for r in shown]
-    return {"theme": "net_cash", "body": body,
+    theme = "net_cash"
+    return {"theme": theme, "body": body,
             "image_html": _rank_card("ネットキャッシュ潤沢（実質PER）ランキング",
                                      "実質PER=現金控除後の割安度", _std_head(cols), _render_rows(shown, cols),
                                      "実質PER=（時価総額−ネットキャッシュ）÷利益。", fixed_layout=True),
-            "claims": claims, "tarareba": _tarareba_for(shown), "gates": _gates(body, n)}
+            "claims": claims, "tarareba": _tarareba_for(shown, theme), "gates": _gates(body, n)}
 
 
 def _yen(v):
@@ -679,7 +683,7 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signa
     foot = foot_extra + (_ZAI_FOOT if has_streak_col and _has_override(shown) else "")
     return {"theme": theme, "body": body,
             "image_html": _rank_card(title, subtitle, head, trs, foot, fixed_layout=True),
-            "claims": claims, "tarareba": _tarareba_for(shown), "gates": _gates(body, n)}
+            "claims": claims, "tarareba": _tarareba_for(shown, theme), "gates": _gates(body, n)}
 
 
 # ── 宣言的テーマ定義（label, builder） ───────────────────────────────
@@ -869,7 +873,32 @@ def _spot_eligible(r: dict) -> bool:
             and not _is_takoashi(r) and _yield_ok(r, YIELD_FLOOR_DIV))
 
 
-def _lead_future(r, c):
+# 締めの一文＝テーマ固有の「なぜこの試算が信じられるか」の根拠（看板の論理）。全角度で共有。
+# 「増配力が続けば」の汎用煽りを廃し、テーマの選別理由で試算の現実味を裏づける。
+_TARAREBA_THESIS = {
+    "streak": "増配を続けた実績が裏づけ。",
+    "no_cut": "減らさない安定感が裏づけ。",
+    "long_growth": "10年超の増配実績が裏づけ。",
+    "growth_room": "低い配当性向＝増配余地。",
+    "fcf_coverage": "潤沢な現金が増配を支える。",
+    "high_roe_growth": "高いROEが増配を生む。",
+    "total_score": "総合力の高さが裏づけ。",
+    "high_yield": "高い利回りを今のうちに。",
+    "low_pbr_yield": "割安×高利回りの妙味。",
+    "large_cap": "大型の安定感が裏づけ。",
+    "small_value": "小型割安の伸びしろ。",
+    "doe_king": "資本に報いるDOEが裏づけ。",
+    "nisa_growth": "EPS成長が増配の源泉。",
+    "div_growth": "育ったYoCの実績が裏づけ。",
+    "value_quality": "質を伴う割安が裏づけ。",
+    "net_cash": "潤沢な現金が下支え。",
+    "high_yield_safe": "減配しない安全性が裏づけ。",
+    "roic_spread": "資本コスト超の稼ぐ力。",
+}
+_TARAREBA_THESIS_DEFAULT = "配当を伸ばす実績が裏づけ。"
+
+
+def _lead_future(r, c, th):
     """タラレバ①将来の配当: 現在/10年後/20年後の年配当（標準シナリオの前提付き試算）。"""
     grow = c["div"][("base", 20)] / c["init"]
     return ("100万円の配当、10年後・20年後はいくら？🔮\n\n"
@@ -877,10 +906,10 @@ def _lead_future(r, c):
             f"現在の利回り：{_body_metric(c['dy'], 'pct')}（年{_body_metric(c['init'], 'yen')}）\n\n"
             f"🌱10年後：年{_body_metric(c['div'][('base', 10)], 'yen')}\n"
             f"🌳20年後：年{_body_metric(c['div'][('base', 20)], 'yen')}\n\n"
-            f"増配力が続く試算なら配当は約{grow:.1f}倍に。\n#高配当株 #増配株")
+            f"試算では約{grow:.1f}倍に。{th}\n#高配当株 #増配株")
 
 
-def _lead_3man(r, c):
+def _lead_3man(r, c, th):
     """タラレバ②月3万円の元手: 今すぐ vs 10年待ちで必要な元手（前提付き試算）。"""
     need_now = TARAREBA_3MAN_ANNUAL / c["dy"]
     need10 = TARAREBA_3MAN_ANNUAL / c["yoc"][("base", 10)]
@@ -890,10 +919,10 @@ def _lead_3man(r, c):
             f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
             f"🛑今すぐなら：{_body_metric(need_now, 'yen_man')}が必要\n"
             f"🚀10年待てるなら：{_body_metric(need10, 'yen_man')}でOK！\n\n"
-            f"増配力が続く試算なら元手は約{cut}割圧縮。\n#高配当株")
+            f"試算では元手が約{cut}割減。{th}\n#高配当株")
 
 
-def _lead_payback(r, c):
+def _lead_payback(r, c, th):
     """タラレバ③配当で元本回収: 受取配当の累計が元本100万円に達する年数（前提付き試算）。"""
     pb = c["payback"]["base"]
     return ("配当だけで、投資元本100万円を回収できる？⏳\n\n"
@@ -901,7 +930,7 @@ def _lead_payback(r, c):
             f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
             "💰受け取る配当の累計が…\n"
             f"🎯約{pb}年で元本100万円に到達（試算）\n\n"
-            "増配力が続くほど回収は前倒し。配当で実質タダ株を狙う。\n#高配当株 #配当")
+            f"{th}配当で実質タダ株を狙う。\n#高配当株 #配当")
 
 
 # (ラベル, lead, 角度内の最良選定キー, 降順か)。各角度で「テーマTOP5内の最良銘柄」を主役にする。
@@ -912,8 +941,9 @@ _TARAREBA_ANGLES = [
 ]
 
 
-def _tarareba_for(shown: list[dict]) -> list[dict]:
+def _tarareba_for(shown: list[dict], theme: str) -> list[dict]:
     """テーマの画像内TOP5から、3角度それぞれの最良銘柄を主役にタラレバ本文を作る。
+    締めはテーマ固有の根拠（_TARAREBA_THESIS）＝看板の論理で試算の現実味を裏づける。
     試算可能な銘柄が表内に無ければ空（＝そのテーマはタラレバなし・文章1のみ）。
     各 dict は {label, body}。body は確定claimでなく前提付き試算（"試算"明示）。"""
     cand = []
@@ -924,10 +954,11 @@ def _tarareba_for(shown: list[dict]) -> list[dict]:
                 cand.append((r, calc))
     if not cand:
         return []
+    th = _TARAREBA_THESIS.get(theme, _TARAREBA_THESIS_DEFAULT)
     out = []
     for label, lead, key, rev in _TARAREBA_ANGLES:
         r, calc = sorted(cand, key=lambda rc: key(rc[0], rc[1]), reverse=rev)[0]
-        out.append({"label": label, "body": lead(r, calc)})
+        out.append({"label": label, "body": lead(r, calc, th)})
     return out
 
 
@@ -968,16 +999,29 @@ color:var(--ink);border-radius:6px;padding:4px 11px}
 padding:12px 14px;margin:0 0 4px;font-size:14px;line-height:1.85}
 .hooklen{color:var(--muted);font-size:11px;margin-left:6px}
 .hooklen.over{color:#e06c75;font-weight:700}
-.cardwrap{overflow-x:auto;margin-top:10px}
-/* テーマ内の複数文章案（文章1=説明／文章2〜=タラレバ各角度）。画像は共通。*/
-.pblock{margin:0 0 14px}
+.cardwrap{overflow-x:auto;margin-top:12px}
+/* テーマ内の複数文章案（説明／タラレバ各角度）をタブ切替＝縦長を解消。画像は共通。*/
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.tab{font-size:12px;cursor:pointer;border:1px solid var(--line);background:var(--panel);
+color:var(--muted);border-radius:999px;padding:5px 13px}
+.tab:hover{border-color:var(--accent);color:var(--ink)}
+.tab.active{background:var(--accent2);color:var(--bg);border-color:var(--accent2);font-weight:700}
 .post-head{display:flex;align-items:center;gap:9px;margin:0 0 6px;flex-wrap:wrap}
-.ptag{font-size:12px;font-weight:700;color:var(--ink);background:var(--th);
-padding:3px 10px;border-radius:6px}
-.ptag.tara{color:var(--bg);background:var(--accent2)}
+.panel{display:none}
+.panel.active{display:block}
 """
 
 _GALLERY_JS = """
+document.querySelectorAll('.tabs').forEach(function(tabs){
+  var sec = tabs.closest('.theme');
+  tabs.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var i = tab.dataset.i;
+      tabs.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active', t.dataset.i===i);});
+      sec.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('active', p.dataset.i===i);});
+    });
+  });
+});
 document.querySelectorAll('.copy').forEach(function(b){
   b.addEventListener('click', function(){
     navigator.clipboard.writeText(b.dataset.body).then(function(){
@@ -1019,20 +1063,21 @@ def _card_only(image_html: str) -> str:
     return image_html[i:] if i >= 0 else image_html
 
 
-def _post_block(kind: str, body: str, label: str) -> str:
-    """1つの投稿文（説明 or タラレバ各角度）を、見出し＋コピー＋字数バッジ＋本文で組む。
-    同じテーマで複数の文章案を並べ、ユーザーが選んで投稿する（画像は共通）。"""
-    tag = f"{kind}：{label}" if label else kind
-    cls = "ptag tara" if kind == "タラレバ" else "ptag"
+def _post_tab(idx: int, label: str, body: str, active: bool) -> tuple[str, str]:
+    """1文章案を「タブボタン」と「パネル(コピー＋字数＋本文)」の対で返す。
+    同じテーマで複数案をタブ切替（縦長を解消）。画像はパネル外で共通表示。"""
+    a = " active" if active else ""
     within = "" if post_len(body) <= BODY_MAX else " over"
-    return (
-        '<div class="pblock">'
-        f'<div class="post-head"><span class="{cls}">{tag}</span>'
+    tab = f'<button class="tab{a}" data-i="{idx}">{label}</button>'
+    panel = (
+        f'<div class="panel{a}" data-i="{idx}">'
+        '<div class="post-head">'
         f'<button class="copy" data-body="{_esc_attr(body)}">本文をコピー</button>'
         f'<span class="hooklen{within}">{post_len(body)}/{BODY_MAX}字</span></div>'
         f'<div class="hook">{body.replace(chr(10), "<br>")}</div>'
         '</div>'
     )
+    return tab, panel
 
 
 def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict:
@@ -1049,16 +1094,20 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
             continue
         shown += 1
         toc.append(f'<a href="#{name}">{name}</a>')
-        # 文章1（説明）＋ 文章2〜（タラレバ各角度）。同じ画像を共有する。各文章に個別のコピー＋字数バッジ。
-        blocks = [_post_block("説明", post["body"], "")]
-        for t in post.get("tarareba", []):
-            blocks.append(_post_block("タラレバ", t["body"], t["label"]))
+        # 文章1（説明）＋ 文章2〜（タラレバ各角度）をタブで切替（縦長解消）。画像は全案で共通。
+        items = [("説明", post["body"])] + [(t["label"], t["body"]) for t in post.get("tarareba", [])]
+        tabs, panels = [], []
+        for i, (label, body) in enumerate(items):
+            tb, pn = _post_tab(i, label, body, i == 0)
+            tabs.append(tb)
+            panels.append(pn)
         sections.append(
             f'<section class="theme" id="{name}">'
             f'<div class="theme-head"><span class="slug">{name}</span>'
             f'<button class="dl" data-theme="{name}">画像を保存</button>'
-            f'<span class="hooklen">該当{g["eligible_count"]}社・本文{len(blocks)}案</span></div>'
-            f'{"".join(blocks)}'
+            f'<span class="hooklen">該当{g["eligible_count"]}社・本文{len(items)}案</span></div>'
+            f'<div class="tabs">{"".join(tabs)}</div>'
+            f'<div class="panels">{"".join(panels)}</div>'
             f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
             f'</section>'
         )
