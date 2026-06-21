@@ -134,6 +134,10 @@ border-radius:16px;padding:26px 30px 22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .card.wide{max-width:1120px}
 .brand{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--accent2);text-transform:uppercase}
 .cap{color:var(--muted);font-size:12px;margin:.2em 0 1em}
+/* タラレバ画像の主役試算バナー（本文の試算と画像を一致させる＝主張の根拠を画像にも載せる）。*/
+.tnote{margin:.2em 0 1em;padding:10px 14px;border-radius:10px;
+background:rgba(45,212,191,.10);border:1px solid var(--accent2);
+color:var(--ink);font-size:15px;font-weight:700;line-height:1.5}
 /* 列幅は内容に合わせた可変(auto)＝各見出しが自然に収まる。長い銘柄名はサーバ側で省略済み（_clip_name）。 */
 .card table{margin:0;table-layout:auto}
 .foot{margin-top:12px;font-size:11px;color:var(--muted);line-height:1.8}
@@ -893,13 +897,17 @@ def _build_tarareba(conn, codes, *, theme, base_theme, lead_fn, rank_key, revers
                 "gates": _gates("", 0, simulation=True)}
     cand.sort(key=lambda rc: rank_key(rc[0], rc[1]), reverse=reverse)
     r, calc = cand[0]
-    body = lead_fn(r, calc)
+    body, note = lead_fn(r, calc)
+    # 主役の試算を画像カードにもバナーとして注入＝本文の主張(回収年数/将来配当)を画像でも裏付け、
+    # 「試算」を明示（本文⇔画像の整合・タラレバ画像はランキング表流用ゆえ主役の結論が欠ける弱点を補う）。
+    image_html = base["image_html"].replace(
+        "<table>", f'<div class="tnote">🎯 {note}</div>\n<table>', 1)
     claims = [{"code": r["code"], "name": r["name"], "div_yield": calc["dy"],
                "dividend_growth_5y_cagr": calc["g"], "eps_growth_5y": calc["e"],
                "payout_ratio": calc["payout"], "image_theme": base_theme,
                "projection_yen": {f"{m}_{h}y": round(calc["div"][(m, h)])
                                   for m in _SCN for h in (10, 20)}}]
-    return {"theme": theme, "body": body, "image_html": base["image_html"],
+    return {"theme": theme, "body": body, "image_html": image_html,
             "claims": claims, "gates": _gates(body, 1, simulation=True)}
 
 
@@ -907,12 +915,15 @@ def build_future_dividend(conn, codes, top_n=10):
     """将来の配当金: 標準20年後の年配当が最大のTOP1社を語る。画像=長期増配ランキング。"""
     def lead(r, c):
         grow = c["div"][("base", 20)] / c["init"]   # 20年で配当が何倍に育つか（標準シナリオ）
-        return ("100万円の配当、10年後・20年後はいくら？🔮\n\n"
+        body = ("100万円の配当、10年後・20年後はいくら？🔮\n\n"
                 f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
                 f"現在の利回り：{_body_metric(c['dy'], 'pct')}（年{_body_metric(c['init'], 'yen')}）\n\n"
                 f"🌱10年後：年{_body_metric(c['div'][('base', 10)], 'yen')}\n"
                 f"🌳20年後：年{_body_metric(c['div'][('base', 20)], 'yen')}\n\n"
                 f"「増配力」が続けば、配当は約{grow:.1f}倍に育つ計算。\n#高配当株 #増配株")
+        note = (f"{_post_name(r['name'])}：20年後の年配当 約{_body_metric(c['div'][('base', 20)], 'yen')}"
+                f"（現在の約{grow:.1f}倍）の試算・標準シナリオ")
+        return body, note
 
     return _build_tarareba(conn, codes, theme="future_dividend", base_theme="long_growth",
                            lead_fn=lead, rank_key=lambda r, c: c["div"][("base", 20)])
@@ -924,12 +935,15 @@ def build_road_to_3man(conn, codes, top_n=10):
         need_now = TARAREBA_3MAN_ANNUAL / c["dy"]
         need10 = TARAREBA_3MAN_ANNUAL / c["yoc"][("base", 10)]
         cut = round((1 - need10 / need_now) * 10)   # 必要な元手を何割減らせるか（標準シナリオ）
-        return ("配当だけで「月3万円」欲しい。\n必要な元手はいくら？💰\n\n"
+        body = ("配当だけで「月3万円」欲しい。\n必要な元手はいくら？💰\n\n"
                 f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
                 f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
                 f"🛑今すぐなら：{_body_metric(need_now, 'yen_man')}が必要\n"
                 f"🚀10年待てるなら：{_body_metric(need10, 'yen_man')}でOK！\n\n"
                 f"圧倒的な「増配力」で、必要な元手は約{cut}割も圧縮。\n#高配当株")
+        note = (f"{_post_name(r['name'])}：月3万円に必要な元手 今{_body_metric(need_now, 'yen_man')}→"
+                f"10年後{_body_metric(need10, 'yen_man')}（約{cut}割減）の試算・標準シナリオ")
+        return body, note
 
     return _build_tarareba(conn, codes, theme="road_to_3man", base_theme="high_yield",
                            lead_fn=lead, rank_key=lambda r, c: c["yoc"][("base", 10)])
@@ -939,12 +953,15 @@ def build_dividend_doubling(conn, codes, top_n=10):
     """配当で元本回収: 標準シナリオの回収年数が最短のTOP1社を語る。画像=減配しにくい高配当ランキング。"""
     def lead(r, c):
         pb = c["payback"]["base"]
-        return ("配当だけで、投資元本100万円を回収できる？⏳\n\n"
+        body = ("配当だけで、投資元本100万円を回収できる？⏳\n\n"
                 f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
                 f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
                 f"💰受け取る配当の累計が…\n"
                 f"🎯約{pb}年で元本100万円に到達！\n\n"
                 "現在の「増配力」が続くほど回収は前倒し。配当で“実質タダ株”を狙う発想。\n#高配当株 #配当")
+        note = (f"{_post_name(r['name'])}：受取配当の累計が約{pb}年で元本100万円に到達する試算"
+                "・標準シナリオ")
+        return body, note
 
     return _build_tarareba(conn, codes, theme="dividend_doubling", base_theme="high_yield_safe",
                            lead_fn=lead, rank_key=lambda r, c: c["payback"]["base"] or 9999,
