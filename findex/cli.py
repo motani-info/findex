@@ -696,5 +696,78 @@ def post_cmd(theme, codes, cohort, top, publish) -> None:
     console.print("[green]✓ 投稿完了[/green]" if ok else "[red]✗ 投稿失敗[/red]")
 
 
+@main.command("publish-hub")
+@subset_options
+@all_option
+@click.option("--out-dir", type=click.Path(), default=None,
+              help="生成先ディレクトリ（既定: ~/.findex/hub）")
+@click.option("--push", is_flag=True, help="生成後に公開リポへ commit & push")
+@click.option("--repo-dir", type=click.Path(), default=None,
+              help="公開リポのローカルクローン（--push 時。既定: ~/.findex/findex-hub）")
+def publish_hub_cmd(codes, cohort, all_codes, out_dir, push, repo_dir) -> None:
+    """¥0 GitHub Pages 投稿ハブを生成（index.html＋全テーマPNG）。--push で公開リポへ反映。
+
+    携帯でカードを開く→「𝕏に投稿」で本文入りX→画像を保存して添付→投稿。
+    純静的サイトなので PC off でも常時公開（別の公開リポ＝本リポはPRIVATEのため）。
+    """
+    import shutil
+    import subprocess
+    from datetime import date as _date
+    from pathlib import Path
+
+    from .db import connect
+    from .post.image import render_html_to_png
+    from .post.themes import THEMES, build_gallery_html
+
+    target = _resolve_target(codes, cohort, all_codes)
+    if not target:
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
+        return
+
+    out = Path(out_dir) if out_dir else (config.FINDEX_HOME / "hub")
+    out.mkdir(parents=True, exist_ok=True)
+    scope = "全銘柄" if all_codes else ("cohort" if cohort else f"{len(target)}社")
+
+    conn = connect()
+    try:
+        res = build_gallery_html(conn, target,
+                                 scope_label=f"対象 {scope}（{len(target)}社）",
+                                 img_refs=True)
+        # ハブHTML（img_refs）には品質ゲート通過テーマだけが載る。同じ判定で各PNGをレンダリング。
+        rendered = 0
+        for name, fn in THEMES.items():
+            post = fn(conn, target, top_n=5)
+            if not post["gates"]["passed"]:
+                continue
+            render_html_to_png(post["image_html"], out / f"post_{name}.png")
+            rendered += 1
+    finally:
+        conn.close()
+
+    (out / "index.html").write_text(res["html"], encoding="utf-8")
+    console.print(f"[green]✓[/green] publish-hub: {res['themes']}テーマ・PNG {rendered}枚 → {out}")
+    console.print(f"[dim]プレビュー: open {out / 'index.html'}[/dim]")
+
+    if not push:
+        console.print("[yellow]生成のみ[/yellow] — 確認後 [bold]--push[/bold] で公開リポへ反映します。")
+        return
+
+    repo = Path(repo_dir) if repo_dir else (config.FINDEX_HOME / "findex-hub")
+    if not (repo / ".git").exists():
+        console.print(f"[red]公開リポが見つかりません: {repo}[/red]")
+        console.print("[dim]先に作成してください: "
+                      "gh repo create motani-info/findex-hub --public "
+                      f"--clone {repo}（Settings>Pages を main / root に設定）[/dim]")
+        return
+    for f in out.glob("*"):
+        if f.is_file():
+            shutil.copy2(f, repo / f.name)
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(["git", "-C", str(repo), "commit", "-m",
+                    f"publish hub {_date.today().isoformat()}"], check=False)
+    subprocess.run(["git", "-C", str(repo), "push"], check=True)
+    console.print("[green]✓ 公開リポへ push 完了[/green]")
+
+
 if __name__ == "__main__":
     main()

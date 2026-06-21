@@ -9,8 +9,10 @@ MVP（Phase6 段階1）は看板の手前、確実に出せる「連続増配ラ
 """
 from __future__ import annotations
 
+import json
 import unicodedata
 from datetime import date
+from urllib.parse import quote
 
 from ..score.engine import _QUALITY_FACTOR
 from .report import (
@@ -1018,6 +1020,28 @@ color:var(--muted);border-radius:999px;padding:5px 13px}
 .post-head{display:flex;align-items:center;gap:9px;margin:0 0 6px;flex-wrap:wrap}
 .panel{display:none}
 .panel.active{display:block}
+/* X(Intent)投稿ボタン・本文プリフィル。画像はXの仕様で添付不可＝手動保存して添付。*/
+.xbtn{display:inline-block;background:#1d9bf0;color:#fff;text-decoration:none;border:none;
+border-radius:999px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.xbtn:hover{opacity:.88}
+/* 保存用の事前レンダリングPNG（モバイル長押し→写真に保存）。*/
+.save-img{max-width:100%;width:520px;border-radius:12px;border:1px solid var(--line);
+margin-top:12px;display:block}
+.imgcap{font-size:11px;color:var(--muted);margin:4px 0 2px}
+a.dl{text-decoration:none;display:inline-block}
+/* 「今のおすすめ1本」枠（クライアントJSが時間帯スロットで提示）。*/
+.nowpick{background:var(--panel);border:1px solid var(--accent2);border-radius:12px;
+padding:15px 17px;margin:14px 0 6px}
+.nowpick h2{font-size:16px;margin:0 0 4px;color:var(--accent2);display:flex;
+align-items:center;gap:8px;flex-wrap:wrap}
+.nowpick .np-meta{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.nowpick .np-body{background:var(--bg);border:1px solid var(--line);border-radius:9px;
+padding:10px 12px;font-size:14px;line-height:1.85;margin:8px 0}
+.nowpick .np-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.nowpick .np-open{font-size:12px;color:var(--accent2);text-decoration:none;border:1px solid var(--line);
+border-radius:999px;padding:6px 13px}
+.nowpick .np-open:hover{border-color:var(--accent)}
+.np-slots{font-size:12px;color:var(--muted);margin-top:9px}
 """
 
 _GALLERY_JS = """
@@ -1039,7 +1063,11 @@ document.querySelectorAll('.copy').forEach(function(b){
     });
   });
 });
-document.querySelectorAll('.dl').forEach(function(b){
+"""
+
+# ライブHTMLカードを html2canvas でPNG化して保存（PC向け・post-gallery 既定モード）。
+_DL_HTML2CANVAS_JS = """
+document.querySelectorAll('button.dl').forEach(function(b){
   b.addEventListener('click', function(){
     var sec = b.closest('.theme');
     var card = sec.querySelector('.cardwrap');
@@ -1054,6 +1082,43 @@ document.querySelectorAll('.dl').forEach(function(b){
     });
   });
 });
+"""
+
+# 「今のおすすめ1本」: 1日3スロット（日替わりジッター）で時間帯ごとに決定的に1本提示。
+# サーバ/cron不要＝純クライアント。POSTS（全テーマ×本文案）と #now-pick が在るときだけ動く。
+_SLOT_JS = """
+(function(){
+  var box = document.getElementById('now-pick');
+  if(!box || typeof POSTS === 'undefined' || !POSTS.length) return;
+  var BASE = [[8,0],[12,30],[20,0]];   // 基準時刻（時,分・JST想定の端末ローカル時刻）
+  var JITTER = 40;                     // ±分のばらつき
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  var now = new Date();
+  var seed = now.getFullYear()*10000+(now.getMonth()+1)*100+now.getDate();
+  var slotMin = BASE.map(function(b,si){
+    var jit = Math.round((rng(seed*10+si+1)()-0.5)*2*JITTER);
+    return b[0]*60+b[1]+jit;
+  });
+  var nowMin = now.getHours()*60+now.getMinutes();
+  var idx = 0;
+  for(var i=0;i<slotMin.length;i++){ if(nowMin>=slotMin[i]) idx=i; }
+  if(nowMin < slotMin[0]) idx = slotMin.length-1;   // 早朝＝前夜スロット扱い
+  var pick = POSTS[Math.floor(rng(seed*100+idx*7+3)()*POSTS.length)];
+  function hhmm(m){m=((m%1440)+1440)%1440;var h=Math.floor(m/60),mm=m%60;
+    return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm;}
+  var intent='https://x.com/intent/post?text='+encodeURIComponent(pick.body);
+  box.innerHTML =
+    '<h2>🔥 今のおすすめ <span style="font-size:12px;color:var(--muted);font-weight:400">'
+      +pick.t+' / '+pick.label+'</span></h2>'
+    +'<div class="np-meta">本日のスロット '+slotMin.map(hhmm).join(' ・ ')
+      +'（毎日±'+JITTER+'分でばらつき）</div>'
+    +'<div class="np-body">'+pick.body.replace(/\\n/g,'<br>')+'</div>'
+    +'<div class="np-actions">'
+    +'<a class="xbtn" href="'+intent+'" target="_blank" rel="noopener">𝕏に投稿</a>'
+    +'<a class="np-open" href="#'+pick.t+'">この投稿の画像を見る ↓</a>'
+    +'</div>';
+})();
 """
 
 
@@ -1072,8 +1137,13 @@ def _card_only(image_html: str) -> str:
     return image_html[i:] if i >= 0 else image_html
 
 
+def _intent_url(body: str) -> str:
+    """X の Web Intent URL（本文プリフィル）。画像はIntent仕様で添付不可＝本文のみ。"""
+    return "https://x.com/intent/post?text=" + quote(body, safe="")
+
+
 def _post_tab(idx: int, label: str, body: str, active: bool) -> tuple[str, str]:
-    """1文章案を「タブボタン」と「パネル(コピー＋字数＋本文)」の対で返す。
+    """1文章案を「タブボタン」と「パネル(Xに投稿＋コピー＋字数＋本文)」の対で返す。
     同じテーマで複数案をタブ切替（縦長を解消）。画像はパネル外で共通表示。"""
     a = " active" if active else ""
     within = "" if post_len(body) <= BODY_MAX else " over"
@@ -1081,6 +1151,7 @@ def _post_tab(idx: int, label: str, body: str, active: bool) -> tuple[str, str]:
     panel = (
         f'<div class="panel{a}" data-i="{idx}">'
         '<div class="post-head">'
+        f'<a class="xbtn" href="{_intent_url(body)}" target="_blank" rel="noopener">𝕏に投稿</a>'
         f'<button class="copy" data-body="{_esc_attr(body)}">本文をコピー</button>'
         f'<span class="hooklen{within}">{post_len(body)}/{BODY_MAX}字</span></div>'
         f'<div class="hook">{body.replace(chr(10), "<br>")}</div>'
@@ -1089,13 +1160,18 @@ def _post_tab(idx: int, label: str, body: str, active: bool) -> tuple[str, str]:
     return tab, panel
 
 
-def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict:
-    """全テーマを1ページに並べた投稿ギャラリーHTMLを生成（本文コピー＋カード保存）。
+def build_gallery_html(conn, codes: list[str], *, scope_label: str = "",
+                       img_refs: bool = False) -> dict:
+    """全テーマを1ページに並べた投稿ギャラリーHTMLを生成（本文コピー＋画像保存）。
 
     品質ゲート不通過のテーマは載せない（誤発信しない＝沈黙は許容）。
+
+    img_refs=False（既定・post-gallery）: ライブHTMLカードを html2canvas でPNG化（PC向け）。
+    img_refs=True（publish-hub）: 事前レンダリング済み post_<theme>.png を <img> 参照
+        （モバイル長押し→写真に保存）＋「今のおすすめ1本」スロットJSを差し込む。
     """
     today = date.today().isoformat()
-    sections, toc, shown = [], [], 0
+    sections, toc, posts_js, shown = [], [], [], 0
     for name, fn in THEMES.items():
         post = fn(conn, codes, top_n=5)
         g = post["gates"]
@@ -1110,28 +1186,53 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
             tb, pn = _post_tab(i, label, body, i == 0)
             tabs.append(tb)
             panels.append(pn)
+            posts_js.append({"t": name, "i": i, "label": label, "body": body})
+        if img_refs:
+            # 事前レンダリングPNGを参照（保存用）。html2canvas 不要。
+            save = (f'<a class="dl" href="post_{name}.png" download="{name}.png">画像を保存</a>')
+            visual = (f'<p class="imgcap">↓ 画像を長押し（PCは「画像を保存」）して写真に保存し、'
+                      f'X作成画面で添付</p>'
+                      f'<img class="save-img" src="post_{name}.png" alt="{name}" loading="lazy">')
+        else:
+            save = f'<button class="dl" data-theme="{name}">画像を保存</button>'
+            visual = f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
         sections.append(
             f'<section class="theme" id="{name}">'
             f'<div class="theme-head"><span class="slug">{name}</span>'
-            f'<button class="dl" data-theme="{name}">画像を保存</button>'
+            f'{save}'
             f'<span class="hooklen">該当{g["eligible_count"]}社・本文{len(items)}案</span></div>'
             f'<div class="tabs">{"".join(tabs)}</div>'
             f'<div class="panels">{"".join(panels)}</div>'
-            f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
+            f'{visual}'
             f'</section>'
         )
+
+    if img_refs:
+        head_extra = ""
+        nowpick = '<div class="nowpick" id="now-pick"></div>'
+        guide = ('各テーマの「𝕏に投稿」で本文入りのXが開きます（画像はXの仕様で自動添付できないため、'
+                 '「画像を保存」して作成画面で添付）。数値はFindex調べ。')
+        script = ('<script>var POSTS=' + json.dumps(posts_js, ensure_ascii=False) + ';'
+                  + _GALLERY_JS + _SLOT_JS + '</script>')
+    else:
+        head_extra = ('<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/'
+                      'dist/html2canvas.min.js"></script>')
+        nowpick = ""
+        guide = '各テーマの「本文をコピー」→「画像を保存」で投稿。数値はFindex調べ。'
+        script = '<script>' + _GALLERY_JS + _DL_HTML2CANVAS_JS + '</script>'
+
     html = (
         '<!doctype html><html lang="ja"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
         '<title>findex 投稿テーマ一覧</title>'
         f'<style>{_GALLERY_CSS}</style>'
-        '<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>'
+        f'{head_extra}'
         '</head><body><div class="wrap">'
         '<h1>findex 投稿テーマ一覧</h1>'
-        f'<p class="meta">{scope_label}／作成日 {today}／{shown}テーマ。'
-        '各テーマの「本文をコピー」→「画像を保存」で投稿。数値はFindex調べ。</p>'
+        f'<p class="meta">{scope_label}／作成日 {today}／{shown}テーマ。{guide}</p>'
+        f'{nowpick}'
         f'<nav class="toc">{"".join(toc)}</nav>'
         f'{"".join(sections)}'
-        '</div><script>' + _GALLERY_JS + '</script></body></html>'
+        '</div>' + script + '</body></html>'
     )
     return {"html": html, "themes": shown}
