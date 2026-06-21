@@ -195,6 +195,23 @@ def test_is_takoashi_overpay_arm():
     assert _is_takoashi(_row(payout_ratio=2.93, rel=0.0, eps_growth_5y=None))
 
 
+def test_tarareba_uses_single_top_eligible_hero():
+    """4文面の主役統一（ユーザー決定2026-06-21）: タラレバ3角度は同一銘柄＝ランキング最上位の
+    試算可能銘柄。最上位が試算不能（EPS成長None/連続増配<3年）なら次順位へ繰り下げる。"""
+    from findex.post.themes import _tarareba_for
+    common = dict(gd="A", dpc5=0.10, eps_growth_5y=0.08, payout_ratio=0.30, dy=0.04, n_scored=10)
+    # 1位は連続増配2年（試算不能）→ 繰り下げ。2位が試算可能＝3角度すべて2位が主役。
+    rank1 = _row(code="1111", name="一位だが対象外", g_years=2, **common)
+    rank2 = _row(code="2222", name="二位で適格", g_years=10, **common)
+    rank3 = _row(code="3333", name="三位で適格", g_years=8, **common)
+    out = _tarareba_for([rank1, rank2, rank3], "streak")
+    assert len(out) == 3                                  # 3角度
+    heroes = {__import__("re").search(r"銘柄：([^（]+)", o["body"]).group(1) for o in out}
+    assert heroes == {"二位で適格"}                        # 全角度が同一・繰り下げ後の最上位
+    # TOP5内に試算可能銘柄が無ければ空（文章1のみ）
+    assert _tarareba_for([rank1], "streak") == []
+
+
 def test_lead_future_headline_varies_by_stock():
     """タラレバ①の締めは銘柄ごとに変わること（回帰: 旧実装は配当の"倍"が標準シナリオの
     増配率上限10%でどの銘柄も 1.1^20≒6.7倍 に潰れ、定数化＝テンプレに見えた）。

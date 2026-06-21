@@ -943,33 +943,32 @@ def _lead_payback(r, c, th):
             f"{th}配当で実質タダ株を狙う。\n#高配当株 #配当")
 
 
-# (ラベル, lead, 角度内の最良選定キー, 降順か)。各角度で「テーマTOP5内の最良銘柄」を主役にする。
+# (ラベル, lead)。3角度すべて同一の主役（テーマ最上位の試算可能銘柄）で組む。
 _TARAREBA_ANGLES = [
-    ("将来の配当", _lead_future, lambda r, c: c["div"][("base", 20)], True),
-    ("月3万円の元手", _lead_3man, lambda r, c: c["yoc"][("base", 10)], True),
-    ("配当で元本回収", _lead_payback, lambda r, c: c["payback"]["base"] or 9999, False),
+    ("将来の配当", _lead_future),
+    ("月3万円の元手", _lead_3man),
+    ("配当で元本回収", _lead_payback),
 ]
 
 
 def _tarareba_for(shown: list[dict], theme: str) -> list[dict]:
-    """テーマの画像内TOP5から、3角度それぞれの最良銘柄を主役にタラレバ本文を作る。
-    締めはテーマ固有の根拠（_TARAREBA_THESIS）＝看板の論理で試算の現実味を裏づける。
-    試算可能な銘柄が表内に無ければ空（＝そのテーマはタラレバなし・文章1のみ）。
+    """テーマ画像内TOP5の「ランキング最上位の試算可能銘柄」1社を、3角度すべての主役にする
+    （説明の🥇と極力一致させる方針・ユーザー決定2026-06-21）。最上位が試算不能（連続増配3年
+    未満/タコ足/試算入力欠損）なら次順位へ繰り下げ。TOP5内に試算可能銘柄が無ければ空
+    （＝そのテーマはタラレバなし・文章1のみ）。締めはテーマ固有の根拠（_TARAREBA_THESIS）。
     各 dict は {label, body}。body は確定claimでなく前提付き試算（"試算"明示）。"""
-    cand = []
-    for r in shown[:5]:
+    hero = None
+    for r in shown[:5]:                      # shown はランキング順＝最初に通った銘柄が最上位
         if _spot_eligible(r):
             calc = _tarareba_calc(r)
             if calc is not None:
-                cand.append((r, calc))
-    if not cand:
+                hero = (r, calc)
+                break
+    if hero is None:
         return []
+    r, calc = hero
     th = _TARAREBA_THESIS.get(theme, _TARAREBA_THESIS_DEFAULT)
-    out = []
-    for label, lead, key, rev in _TARAREBA_ANGLES:
-        r, calc = sorted(cand, key=lambda rc: key(rc[0], rc[1]), reverse=rev)[0]
-        out.append({"label": label, "body": lead(r, calc, th)})
-    return out
+    return [{"label": label, "body": lead(r, calc, th)} for label, lead in _TARAREBA_ANGLES]
 
 
 # テーマ名 → ビルダー
