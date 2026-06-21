@@ -208,11 +208,11 @@ def test_lead_future_headline_varies_by_stock():
     ca, cb = _tarareba_calc(a), _tarareba_calc(b)
     assert ca is not None and cb is not None
     fa, fb = _lead_future(a, ca, th), _lead_future(b, cb, th)
-    assert "買値利回りが約" in fa and "倍に" not in fa  # "倍"の定数表現を廃止
+    assert "実質利回りが約" in fa and "倍に" not in fa  # "倍"の定数表現を廃止
     # 締めの数値が銘柄で変わる（旧バグなら両方 6.7倍で一致してしまう）
     import re
-    ya = re.search(r"買値利回りが約([0-9.]+)%に", fa).group(1)
-    yb = re.search(r"買値利回りが約([0-9.]+)%に", fb).group(1)
+    ya = re.search(r"実質利回りが約([0-9.]+)%に", fa).group(1)
+    yb = re.search(r"実質利回りが約([0-9.]+)%に", fb).group(1)
     assert ya != yb
     assert post_len(fa) <= BODY_MAX and post_len(fb) <= BODY_MAX
 
