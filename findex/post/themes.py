@@ -169,7 +169,7 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
 
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = _streak_body(n, _post_name_block(shown, ("g_years", "year")))
+    body = _lead_break(_streak_body(n, _post_name_block(shown, ("g_years", "year"))))
 
     claims = [
         {
@@ -285,6 +285,13 @@ _HEADLINE_LABEL = {
 }
 
 
+def _lead_break(body: str) -> str:
+    """説明本文の先頭フック行の後に空行を入れて読みやすくする（メダル列〜締め文の空行は
+    _post_name_block 側で付与）。フックが1行のみの本文はそのまま返す。"""
+    head, sep, rest = body.partition("\n")
+    return f"{head}\n\n{rest}" if sep else body
+
+
 def _post_name_block(shown: list[dict], headline: tuple | None, top: int = 3) -> str:
     """投稿本文用: トップ`top`社の「メダル＋半角社名＋配当利回り＋看板指標」を改行区切りで返す。
 
@@ -305,7 +312,7 @@ def _post_name_block(shown: list[dict], headline: tuple | None, top: int = 3) ->
             label = _HEADLINE_LABEL.get(key, "")
             metric = f"{dy} {label}{_body_metric(r.get(key), fmt)}"
         lines.append(f"{_MEDAL[i]}{_post_name(r['name'])} {metric}")
-    return "\n".join(lines) + "\n"
+    return "\n".join(lines) + "\n\n"   # 末尾は空行＝メダル列と締め文の間を空けて読みやすく
 
 
 def _name_td(i: int, name: str) -> str:
@@ -384,11 +391,11 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     elig.sort(key=lambda r: r["dy"], reverse=True)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = ('"高利回り=危険"とは限らない。\n'
-            f"減配しにくい高配当ランキング💰 トップ{n}\n"
-            f"{_post_name_block(shown, ('dy', 'pct'))}"
-            "利回り×継続性×財務の質で選別。\n"
-            "#高配当株 #配当")
+    body = _lead_break('"高利回り=危険"とは限らない。\n'
+                       f"減配しにくい高配当ランキング💰 トップ{n}\n"
+                       f"{_post_name_block(shown, ('dy', 'pct'))}"
+                       "利回り×継続性×財務の質で選別。\n"
+                       "#高配当株 #配当")
     cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("減配信頼性", "rel", "num"),
                       ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "div_yield": r["dy"],
@@ -432,10 +439,10 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     elig.sort(key=_yoc_quality_key, reverse=True)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = ('"今の利回り"より、育った利回り。\n'
-            f"取得利回り(YoC)ランキング📈 トップ{n}\n"
-            f"{_post_name_block(shown, ('yoc', 'pct'))}"
-            "#増配株 #高配当株")
+    body = _lead_break('"今の利回り"より、育った利回り。\n'
+                       f"取得利回り(YoC)ランキング📈 トップ{n}\n"
+                       f"{_post_name_block(shown, ('yoc', 'pct'))}"
+                       "#増配株 #高配当株")
     cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("増配率5年", "dpc5", "pct"),
                       ("増配の質", "quality", "quality")])
     claims = [{"code": r["code"], "name": r["name"], "yield_on_cost_5y": r["yoc"],
@@ -461,10 +468,10 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     elig.sort(key=lambda r: r["roe"], reverse=True)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = ("PBR1倍割れ=万年割安、とは限らない。\n"
-            f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
-            f"{_post_name_block(shown, ('roe', 'pct'))}"
-            "#割安株 #バリュー株")
+    body = _lead_break("PBR1倍割れ=万年割安、とは限らない。\n"
+                       f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
+                       f"{_post_name_block(shown, ('roe', 'pct'))}"
+                       "#割安株 #バリュー株")
     cols = _std_cols([("PER", "per", "x_plain"), ("自己資本比率", "equity_ratio", "pct_plain"),
                       ("財務grade", "gh", "grade")])
     claims = [{"code": r["code"], "name": r["name"], "pbr": r["pbr"], "roe": r["roe"],
@@ -496,10 +503,10 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = ('現金を引くと"実質PER"はもっと安い。\n'
-            f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
-            f"{_post_name_block(shown, ('net_cash_per', 'x'))}"
-            "#割安株 #バリュー株")
+    body = _lead_break('現金を引くと"実質PER"はもっと安い。\n'
+                       f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
+                       f"{_post_name_block(shown, ('net_cash_per', 'x'))}"
+                       "#割安株 #バリュー株")
     cols = _std_cols([("実質PER", "net_cash_per", "x_plain"), ("表面PER", "per", "x_plain")])
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
                "per": r["per"], "grade_health": r["gh"]} for r in shown]
@@ -673,7 +680,7 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signa
     elig.sort(key=sort_key, reverse=reverse)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
-    body = body_fn(n, _post_name_block(shown, headline))
+    body = _lead_break(body_fn(n, _post_name_block(shown, headline)))
     cols = _std_cols(signature)
     head = _std_head(cols)
     trs = _render_rows(shown, cols)

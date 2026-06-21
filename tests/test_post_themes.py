@@ -71,13 +71,13 @@ def test_post_name_block_builds_medal_lines():
     block = _post_name_block(shown, ("doe", "pct"))
     assert block == ("🥇ユー・エス・エス 配当3.0% DOE13.6%\n"
                      "🥈日本たばこ産業 配当5.2% DOE11.4%\n"
-                     "🥉アステラス製薬 配当3.6% DOE9.3%\n")          # トップ3のみ・末尾改行
+                     "🥉アステラス製薬 配当3.6% DOE9.3%\n\n")        # トップ3のみ・末尾空行（締め文と分離）
     # 看板が利回りそのもの（key=="dy"）なら重複させず「配当X%」のみ
     hy = _post_name_block([{"name": "テスト", "dy": 0.071}], ("dy", "pct"))
-    assert hy == "🥇テスト 配当7.1%\n"
+    assert hy == "🥇テスト 配当7.1%\n\n"
     # 利回り未確証は「配当—」と正直に出す（確証なき数字は出さない＝ダッシュ）
     nodash = _post_name_block([{"name": "無配", "dy": None, "doe": 0.1}], ("doe", "pct"))
-    assert nodash == "🥇無配 配当— DOE10.0%\n"
+    assert nodash == "🥇無配 配当— DOE10.0%\n\n"
     assert _post_name_block([], ("doe", "pct")) == ""    # 該当0社は空
     assert _post_name_block(shown, None) == ""           # headline無しは空
 
