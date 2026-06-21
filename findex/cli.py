@@ -726,6 +726,9 @@ def publish_hub_cmd(codes, cohort, all_codes, out_dir, push, repo_dir) -> None:
 
     out = Path(out_dir) if out_dir else (config.FINDEX_HOME / "hub")
     out.mkdir(parents=True, exist_ok=True)
+    # 前回実行の stale PNG（対象/スコープ変更でゲート落ちしたテーマ）を持ち越さない。
+    for old in out.glob("post_*.png"):
+        old.unlink()
     scope = "全銘柄" if all_codes else ("cohort" if cohort else f"{len(target)}社")
 
     conn = connect()
