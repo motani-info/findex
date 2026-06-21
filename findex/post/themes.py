@@ -202,6 +202,7 @@ _FOOT = ('情報提供であり投資助言ではありません。数値はFind
 # ZAi公表値を採用した連続増配年数がある場合の出典脚注（セル内バッジは置かず脚注で一括明示）
 _ZAI_FOOT = '※連続増配年数の一部はダイヤモンドZAi公表値を採用。'
 
+
 _MEDAL = {1: "🥇", 2: "🥈", 3: "🥉"}
 
 
@@ -243,6 +244,10 @@ def _body_metric(v, fmt: str) -> str:
         return f"{v:.1f}倍"
     if fmt == "num":
         return f"{v:.1f}"
+    if fmt == "yen":          # 実額（円・カンマ区切り）。タラレバの看板（10年後配当）。
+        return f"{round(v):,}円"
+    if fmt == "yen_man":      # 万円（必要資金）。
+        return f"{round(v / 1e4):,}万円"
     return str(v)
 
 
@@ -502,6 +507,69 @@ def _cell(r: dict, key: str, kind: str) -> str:
     return '<span class="muted">—</span>'
 
 
+# ── タラレバ（前提付き配当シミュレーション・doc17）──────────────────────────
+# 「予測」ではなく「前提付き試算」。確定claimとは別カテゴリ（看板・免責で明示）。
+# 正直性の防波堤（GeminiFB＋定款）: 増配は配当性向 cap(70%) で頭打ち＝利益を超えて配当は
+# 増やせない。性向が cap に達したら以降の増配率は利益成長率(eps_growth_5y)へ減速する。
+# 入力(dy/dpc5/eps_growth_5y/payout)は status=ok のものだけ（fetch_rowsゲート）。どれか
+# 欠けたら試算不能＝注入フィールドを None にして当該テーマの対象外にする（確証なき数字は出さない）。
+TARAREBA_INVEST = 1_000_000   # 試算の投資額（100万円）
+TARAREBA_PAYOUT_CAP = 0.70    # 配当性向の上限（これを超える増配は利益成長率に減速）
+TARAREBA_3MAN_ANNUAL = 360_000  # 「月3万円」＝年36万円
+_PAYBACK_HORIZON = 80         # 元本回収年数の探索上限（超過は回収不能＝None）
+
+# 長期増配率の3シナリオ（doc17改・「迫力 vs 信頼」を単一の盛った数字でなく"幅"で誠実に見せる）。
+# 慎重=逓減（2段階DDM・終端4%）／標準=年10%で頭打ち／強気=直近5年の増配率を維持。
+# いずれも配当性向 cap(70%) 超は利益成長率(e)に減速（利益を超えた配当は作らない＝Geminiの防波堤）。
+_SCN = ("fade", "base", "bull")
+_SCN_JP = {"fade": "慎重（逓減）", "base": "標準（上限10%）", "bull": "強気（増配率維持）"}
+_SCN_CEILING = 0.10           # 標準シナリオの増配率上限
+_SCN_FADE_START = 0.15        # 慎重シナリオの初期増配率上限
+_SCN_FADE_TERM = 0.04         # 慎重シナリオの終端増配率
+_SCN_FADE_SPAN = 15           # 慎重シナリオが終端に達するまでの年数
+
+
+def _scn_growth(mode: str, step: int, g: float) -> float:
+    """シナリオ mode の step 年目（0始まり）の素の増配率（配当性向キャップ適用前）。"""
+    if mode == "bull":
+        return g                                      # 直近5年の増配率を維持
+    if mode == "base":
+        return min(g, _SCN_CEILING)                   # 年10%で頭打ち
+    start = min(g, _SCN_FADE_START)                   # 慎重: 初期→終端へ線形逓減
+    return max(_SCN_FADE_TERM,
+               start - (start - _SCN_FADE_TERM) * min(step, _SCN_FADE_SPAN) / _SCN_FADE_SPAN)
+
+
+def _tarareba_calc(r: dict):
+    """1銘柄の前提付き配当試算（doc17改）。3シナリオ×{10年,20年}の年配当/YoCと、シナリオ別の
+    元本回収年数（受取累計が投資額に達する年）を返す。入力(dy/dpc5/eps_growth_5y/payout)に
+    確証(status=ok)が無ければ None（＝対象外。確証なき数字は出さない）。値は確定claimでなく試算。
+    """
+    dy, g, e, p0 = r.get("dy"), r.get("dpc5"), r.get("eps_growth_5y"), r.get("payout_ratio")
+    if None in (dy, g, e, p0) or dy <= 0 or p0 <= 0:
+        return None
+    div0 = TARAREBA_INVEST * dy
+    out = {"dy": dy, "g": g, "e": e, "payout": p0, "init": div0,
+           "div": {}, "yoc": {}, "payback": {}}
+    for mode in _SCN:
+        annual, payout, cum, pb = div0, p0, 0.0, None
+        for step in range(0, _PAYBACK_HORIZON + 1):
+            if step in (10, 20):                       # step==N で「N回増配後の配当」＝Div_N
+                out["div"][(mode, step)] = annual
+                out["yoc"][(mode, step)] = annual / TARAREBA_INVEST
+            cum += annual                              # step年目(0始まり)の受取を累計
+            if pb is None and cum >= TARAREBA_INVEST:
+                pb = step + 1                          # 1年目=step0
+            base = _scn_growth(mode, step, g)
+            # 性向が cap 未満なら base、達したら利益成長 e に減速（利益超の配当を作らない）。
+            gr = base if payout < TARAREBA_PAYOUT_CAP else min(base, e)
+            if payout < TARAREBA_PAYOUT_CAP and (1 + e) != 0:
+                payout = min(TARAREBA_PAYOUT_CAP, payout * (1 + base) / (1 + e))
+            annual *= (1 + gr)
+        out["payback"][mode] = pb
+    return out
+
+
 # ── 全テーマ共通の8軸標準（doc15）─────────────────────────────────────
 # 配当利回り（行頭強制）＋ テーマ固有列 ＋ 共通コア（不足分を補充）＋ 総合スコア（右端固定）。
 # 「高い＝良い」でない指標（配当性向）は非強調。core は key 重複時はテーマ固有を優先（補充しない）。
@@ -723,12 +791,127 @@ _SPECS: dict[str, dict] = {
         signature=[("DOE", "doe", "pct"), ("自己資本比率", "equity_ratio", "pct_plain")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
+    # ── 新軸: EPS成長（切り口C・新NISAガチホ）─────────────────────────────
+    "nisa_growth": dict(
+        title="NISA永久ホールド（EPS成長）", subtitle="5年EPS成長率＝将来の増配の源泉",
+        body_fn=lambda n, names: ("利回りより、利益(EPS)が伸びる株。\n"
+                                  f"NISA永久ホールド・EPS成長ランキング🌱 トップ{n}\n"
+                                  f"{names}"
+                                  "増配の源泉=利益成長で選ぶ。\n#新NISA #増配株"),
+        headline=("eps_growth_5y", "pct"),
+        signature=[("5年EPS成長", "eps_growth_5y", "pct")],
+        # 「成長で選ぶ」看板の正直性: 低基底からの利益リバウンド（一過性）を排除。本業黒字
+        # （営業益率>0）かつ売上も伸びている（増収）＝真の成長株に限定。増配実績(g_years)も要求。
+        eligible=lambda r: r["gd"] != "D" and r["eps_growth_5y"] is not None
+        and r["operating_margin"] is not None and r["operating_margin"] > 0
+        and r["revenue_growth_5y_cagr"] is not None and r["revenue_growth_5y_cagr"] > 0
+        and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
+        sort_key=lambda r: r["eps_growth_5y"] or -1,
+        claim_keys=["eps_growth_5y", "revenue_growth_5y_cagr", "g_years", "gd"]),
 }
 
 
 def _make_theme(name: str):
     spec = _SPECS[name]
     return lambda conn, codes, top_n=10: _ranking_theme(conn, codes, top_n, theme=name, **spec)
+
+
+# ── タラレバ投稿（本文＝TOP1社の前提付き試算の語り／画像＝既存テーマのランキング表）──────
+# ユーザー方針(2026-06-21): タラレバはランキングでなく「TOP1社」を一点突破で語る。画像は専用
+# 帯カードでなく"今まで通りのテーマ別ランキング表"を流用（例: road_to_3man→高配当株TOP5）。
+# 本文の試算は確定claimでなく前提付き（"シナリオなら"の語で条件付きを明示）。3シナリオの内訳と
+# 試算ロジックは _tarareba_calc（慎重=逓減/標準=上限10%/強気=維持・性向70%超はEPS成長へ減速）。
+def _spot_eligible(r: dict) -> bool:
+    """タラレバ主役の入口: 配当claimあり・薄データ除外・タコ足除外・利回りフロア・
+    コツコツ増配(連続増配≥3年＝無配復配のYoCジャンプを除外)。試算入力の確証は _tarareba_calc が担保。"""
+    return (_sufficient(r) and r["gd"] != "D" and (r["g_years"] or 0) >= 3
+            and not _is_takoashi(r) and _yield_ok(r, YIELD_FLOOR_DIV))
+
+
+def _build_tarareba(conn, codes, *, theme, base_theme, lead_fn, rank_key, reverse=True) -> dict:
+    """タラレバ投稿を組む。本文＝主役TOP1社の前提付き試算の語り、画像＝base_theme のランキング表。
+
+    主役は画像と整合させるため base_theme の表に載る TOP5 から選ぶ（その中で rank_key 最良の銘柄
+    ＝本文の🥇が必ず画像の表内に現れる）。主役と base_theme の両方が成立しないと gates 不通過。
+    base_theme は THEMES のキー（例 high_yield）。simulation:True。
+    """
+    base = THEMES[base_theme](conn, codes, top_n=5)
+    if not base["gates"]["passed"]:
+        return {"theme": theme, "body": "", "image_html": "", "claims": [],
+                "gates": _gates("", 0, simulation=True)}
+    # 主役候補は base_theme 表内(TOP5)の銘柄に限定＝本文と画像の整合を保証。試算入力の確証は
+    # _tarareba_calc が、コツコツ増配等の前提は _spot_eligible が担保する。
+    base_codes = [c["code"] for c in base["claims"]]
+    cand = []
+    for r in fetch_rows(conn, base_codes):
+        if not _spot_eligible(r):
+            continue
+        calc = _tarareba_calc(r)
+        if calc is not None:
+            cand.append((r, calc))
+    if not cand:
+        return {"theme": theme, "body": "", "image_html": "", "claims": [],
+                "gates": _gates("", 0, simulation=True)}
+    cand.sort(key=lambda rc: rank_key(rc[0], rc[1]), reverse=reverse)
+    r, calc = cand[0]
+    body = lead_fn(r, calc)
+    claims = [{"code": r["code"], "name": r["name"], "div_yield": calc["dy"],
+               "dividend_growth_5y_cagr": calc["g"], "eps_growth_5y": calc["e"],
+               "payout_ratio": calc["payout"], "image_theme": base_theme,
+               "projection_yen": {f"{m}_{h}y": round(calc["div"][(m, h)])
+                                  for m in _SCN for h in (10, 20)}}]
+    return {"theme": theme, "body": body, "image_html": base["image_html"],
+            "claims": claims, "gates": _gates(body, 1, simulation=True)}
+
+
+def build_future_dividend(conn, codes, top_n=10):
+    """将来の配当金: 標準20年後の年配当が最大のTOP1社を語る。画像=長期増配ランキング。"""
+    def lead(r, c):
+        grow = c["div"][("base", 20)] / c["init"]   # 20年で配当が何倍に育つか（標準シナリオ）
+        return ("100万円の配当、10年後・20年後はいくら？🔮\n\n"
+                f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
+                f"現在の利回り：{_body_metric(c['dy'], 'pct')}（年{_body_metric(c['init'], 'yen')}）\n\n"
+                f"🌱10年後：年{_body_metric(c['div'][('base', 10)], 'yen')}\n"
+                f"🌳20年後：年{_body_metric(c['div'][('base', 20)], 'yen')}\n\n"
+                f"「増配力」が続けば、配当は約{grow:.1f}倍に育つ計算。"
+                "増配株は寝かせるほど効く複利。\n#高配当株 #増配株")
+
+    return _build_tarareba(conn, codes, theme="future_dividend", base_theme="long_growth",
+                           lead_fn=lead, rank_key=lambda r, c: c["div"][("base", 20)])
+
+
+def build_road_to_3man(conn, codes, top_n=10):
+    """配当で月3万円: 標準10年後YoC最大（必要資金が最小）のTOP1社を語る。画像=高配当株ランキング。"""
+    def lead(r, c):
+        need_now = TARAREBA_3MAN_ANNUAL / c["dy"]
+        need10 = TARAREBA_3MAN_ANNUAL / c["yoc"][("base", 10)]
+        cut = round((1 - need10 / need_now) * 10)   # 必要な元手を何割減らせるか（標準シナリオ）
+        return ("配当だけで「月3万円」欲しい。\n必要な元手はいくら？💰\n\n"
+                f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
+                f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
+                f"🛑今すぐなら：{_body_metric(need_now, 'yen_man')}が必要\n"
+                f"🚀10年待てるなら：{_body_metric(need10, 'yen_man')}でOK！\n\n"
+                f"圧倒的な「増配力」で、必要な元手は約{cut}割も圧縮。"
+                "これぞ放置の複利マジック。\n#高配当株")
+
+    return _build_tarareba(conn, codes, theme="road_to_3man", base_theme="high_yield",
+                           lead_fn=lead, rank_key=lambda r, c: c["yoc"][("base", 10)])
+
+
+def build_dividend_doubling(conn, codes, top_n=10):
+    """配当で元本回収: 標準シナリオの回収年数が最短のTOP1社を語る。画像=減配しにくい高配当ランキング。"""
+    def lead(r, c):
+        pb = c["payback"]["base"]
+        return ("配当だけで、投資元本100万円を回収できる？⏳\n\n"
+                f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
+                f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
+                f"💰受け取る配当の累計が…\n"
+                f"🎯約{pb}年で元本100万円に到達！\n\n"
+                "現在の「増配力」が続くほど回収は前倒し。配当で“実質タダ株”を狙う発想。\n#高配当株 #配当")
+
+    return _build_tarareba(conn, codes, theme="dividend_doubling", base_theme="high_yield_safe",
+                           lead_fn=lead, rank_key=lambda r, c: c["payback"]["base"] or 9999,
+                           reverse=False)
 
 
 # テーマ名 → ビルダー
@@ -739,6 +922,9 @@ THEMES = {
     "value_quality": build_value_quality,
     "net_cash": build_net_cash,
     **{name: _make_theme(name) for name in _SPECS},
+    "future_dividend": build_future_dividend,
+    "road_to_3man": build_road_to_3man,
+    "dividend_doubling": build_dividend_doubling,
 }
 
 
@@ -803,8 +989,12 @@ def _esc_attr(s: str) -> str:
 
 
 def _card_only(image_html: str) -> str:
-    """テーマの image_html（独立doc）から <div class="card">…</div> 本体だけ取り出す。"""
-    i = image_html.find('<div class="card">')
+    """テーマの image_html（独立doc）から <div class="card …">…</div> 本体だけ取り出す。
+
+    card の class は "card" / "card wide" / "card spot" の別がある（前方一致で剥がす）。
+    ギャラリーは _GALLERY_CSS に _CARD_CSS を含むので、先頭の doctype/style は不要。
+    """
+    i = image_html.find('<div class="card')
     return image_html[i:] if i >= 0 else image_html
 
 
