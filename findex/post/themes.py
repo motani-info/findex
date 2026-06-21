@@ -19,11 +19,19 @@ from .report import (
 
 
 def weighted_len(s: str) -> int:
-    """Xの加重文字数（多くのCJK文字は2、ラテン等は1）。URLは別途23字固定だが本文では概算。"""
+    """Xの加重文字数（多くのCJK文字は2、ラテン等は1）。URLは別途23字固定だが本文では概算。
+    参考値（監査用）。投稿可否の判定基準は post_len（実文字数）＝BODY_MAX を使う。"""
     n = 0
     for ch in s:
         n += 2 if ord(ch) > 0x1100 and not ch.isascii() else 1
     return n
+
+
+def post_len(s: str) -> int:
+    """投稿本文の実文字数（改行含む。Xも改行を1字計上）。140字制限の判定基準。
+    実文字数≤140 なら最悪（全角のみ）でも weighted≤280＝Xの無料枠上限に収まり必ず投稿可能
+    （ASCII/数字混在ならさらに余裕）＝実文字140は安全側の制約（ユーザー運用ルール）。"""
+    return len(s)
 
 
 # 薄データ閾値（doc 09 §2-4）: 採点指標数 n_scored がこれ未満の銘柄は動的分母が薄く、
@@ -181,9 +189,10 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
         "source_cited": has_override,     # override由来は出典バッジ
         "grade_shown": True,              # claim別グレード併示
         "eligible_count": n,
+        "body_len": post_len(body),
         "body_weighted_len": weighted_len(body),
-        "body_within_limit": weighted_len(body) <= BODY_MAX,
-        "passed": n > 0 and weighted_len(body) <= BODY_MAX,
+        "body_within_limit": post_len(body) <= BODY_MAX,
+        "passed": n > 0 and post_len(body) <= BODY_MAX,
     }
 
     cols = _std_cols([("連続増配", "g_years", "streak_g"), ("連続非減配", "nc_years", "streak_nc"),
@@ -234,7 +243,8 @@ def _clip_name(name: str, maxlen: int = 16) -> str:
 
 
 # ── 投稿本文へのトップ3社注入（doc16・"社名＋看板指標"で引きを強める）──────────
-BODY_MAX = 250   # 本文の加重文字数上限。Xの実上限は280（CJK加重2＝日本語140字）。余白を残し250。
+BODY_MAX = 140   # 本文の実文字数上限（改行含む・post_lenで判定）。ユーザー運用ルール=140字以上は
+                 # 投稿不可。実文字140以内なら最悪(全角のみ)でもX加重280以内＝必ず投稿可能。
 
 
 def _post_name(name: str, maxlen: int = 12) -> str:
@@ -265,11 +275,12 @@ def _body_metric(v, fmt: str) -> str:
 
 
 # 看板指標キー → 投稿本文での短ラベル（社名横に「配当X% ラベルY」と併記。看板と一致）。
+# ラベル未定義のキーは値のみ表示（ラベルが長くテーマ名に既出なら冗長＝roic_minus_wacc は
+# テーマ名「価値創造(ROIC−WACC)」に既出のため値のみ。140字制限への配慮も兼ねる）。
 _HEADLINE_LABEL = {
     "nc_years": "非減配", "g_years": "増配", "payout_ratio": "性向",
     "fcf_payout_coverage": "FCFカバ", "roe": "ROE", "total": "総合",
-    "roic_minus_wacc": "ROIC−WACC", "doe": "DOE", "eps_growth_5y": "EPS成長",
-    "yoc": "YoC", "net_cash_per": "実質PER",
+    "doe": "DOE", "eps_growth_5y": "EPS成長", "yoc": "YoC", "net_cash_per": "実質PER",
 }
 
 
@@ -354,11 +365,11 @@ def _rank_card(title: str, subtitle: str, head_cells: list[str], body_rows: list
 
 
 def _gates(body: str, n: int, **extra) -> dict:
-    wl = weighted_len(body)
+    bl = post_len(body)
     return {
         "status_ok_only": True, "censored_as_n_plus": True, "grade_shown": True,
-        "eligible_count": n, "body_weighted_len": wl, "body_within_limit": wl <= BODY_MAX,
-        "passed": n > 0 and wl <= BODY_MAX, **extra,
+        "eligible_count": n, "body_len": bl, "body_weighted_len": weighted_len(body),
+        "body_within_limit": bl <= BODY_MAX, "passed": n > 0 and bl <= BODY_MAX, **extra,
     }
 
 
@@ -422,7 +433,6 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ('"今の利回り"より、育った利回り。\n'
             f"取得利回り(YoC)ランキング📈 トップ{n}\n"
             f"{_post_name_block(shown, ('yoc', 'pct'))}"
-            "5年前に買えば利回りはこう育つ。\n"
             "#増配株 #高配当株")
     cols = _std_cols([("YoC(5年)", "yoc", "pct"), ("増配率5年", "dpc5", "pct"),
                       ("増配の質", "quality", "quality")])
@@ -451,7 +461,6 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ("PBR1倍割れ=万年割安、とは限らない。\n"
             f'"質を伴う割安"株ランキング🔍 トップ{n}\n'
             f"{_post_name_block(shown, ('roe', 'pct'))}"
-            "ROEと財務健全性で選別。\n"
             "#割安株 #バリュー株")
     cols = _std_cols([("PER", "per", "x_plain"), ("自己資本比率", "equity_ratio", "pct_plain"),
                       ("財務grade", "gh", "grade")])
@@ -486,7 +495,6 @@ def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     body = ('現金を引くと"実質PER"はもっと安い。\n'
             f"ネットキャッシュ潤沢ランキング💴 トップ{n}\n"
             f"{_post_name_block(shown, ('net_cash_per', 'x'))}"
-            '表面より割安な"実質バリュー"。\n'
             "#割安株 #バリュー株")
     cols = _std_cols([("実質PER", "net_cash_per", "x_plain"), ("表面PER", "per", "x_plain")])
     claims = [{"code": r["code"], "name": r["name"], "net_cash_per": r["net_cash_per"],
@@ -719,7 +727,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n, names: ('配当は利益でなく"現金"で見る。\n'
                                   f"FCF配当カバレッジ🔄 トップ{n}\n"
                                   f"{names}"
-                                  "稼ぐ現金で配当を何倍払えるか。\n#高配当株 #配当"),
+                                  "#高配当株 #配当"),
         headline=("fcf_payout_coverage", "x"),
         signature=[("FCFカバ", "fcf_payout_coverage", "x")],
         # doc 10・P2-3: 金融（銀行/証券/保険/その他金融）はFCFの概念が当てはまらずCF系を独占→除外。
@@ -804,7 +812,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n, names: ("資本コストを超えて稼げているか。\n"
                                   f"価値創造(ROIC−WACC)ランキング🚀 トップ{n}\n"
                                   f"{names}"
-                                  "本当の意味で儲かる会社。\n#ROIC #バリュー株"),
+                                  "#ROIC #バリュー株"),
         headline=("roic_minus_wacc", "pct_signed"),
         signature=[("ROIC−WACC", "roic_minus_wacc", "pct"), ("営業益率", "operating_margin", "pct")],
         # doc 10・P2-2: ROIC−WACC>0 だけでは分母崩壊系（千代田化工=ROE算出不能）が混じる。
@@ -817,7 +825,7 @@ _SPECS: dict[str, dict] = {
         body_fn=lambda n, names: ("利益が振れても、還元はブレない。\n"
                                   f"DOE(株主資本配当率)ランキング💴 トップ{n}\n"
                                   f"{names}"
-                                  "安定還元の本命指標。\n#高配当株 #配当"),
+                                  "#高配当株 #配当"),
         headline=("doe", "pct"),
         signature=[("DOE", "doe", "pct"), ("自己資本比率", "equity_ratio", "pct_plain")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
@@ -826,9 +834,9 @@ _SPECS: dict[str, dict] = {
     "nisa_growth": dict(
         title="NISA永久ホールド（EPS成長）", subtitle="5年EPS成長率＝将来の増配の源泉",
         body_fn=lambda n, names: ("利回りより、利益(EPS)が伸びる株。\n"
-                                  f"NISA永久ホールド・EPS成長ランキング🌱 トップ{n}\n"
+                                  f"NISA・EPS成長ランキング🌱 トップ{n}\n"
                                   f"{names}"
-                                  "増配の源泉=利益成長で選ぶ。\n#新NISA #増配株"),
+                                  "#新NISA #増配株"),
         headline=("eps_growth_5y", "pct"),
         signature=[("5年EPS成長", "eps_growth_5y", "pct")],
         # 「成長で選ぶ」看板の正直性: 低基底からの利益リバウンド（一過性）を排除。本業黒字
@@ -904,8 +912,7 @@ def build_future_dividend(conn, codes, top_n=10):
                 f"現在の利回り：{_body_metric(c['dy'], 'pct')}（年{_body_metric(c['init'], 'yen')}）\n\n"
                 f"🌱10年後：年{_body_metric(c['div'][('base', 10)], 'yen')}\n"
                 f"🌳20年後：年{_body_metric(c['div'][('base', 20)], 'yen')}\n\n"
-                f"「増配力」が続けば、配当は約{grow:.1f}倍に育つ計算。"
-                "増配株は寝かせるほど効く複利。\n#高配当株 #増配株")
+                f"「増配力」が続けば、配当は約{grow:.1f}倍に育つ計算。\n#高配当株 #増配株")
 
     return _build_tarareba(conn, codes, theme="future_dividend", base_theme="long_growth",
                            lead_fn=lead, rank_key=lambda r, c: c["div"][("base", 20)])
@@ -922,8 +929,7 @@ def build_road_to_3man(conn, codes, top_n=10):
                 f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
                 f"🛑今すぐなら：{_body_metric(need_now, 'yen_man')}が必要\n"
                 f"🚀10年待てるなら：{_body_metric(need10, 'yen_man')}でOK！\n\n"
-                f"圧倒的な「増配力」で、必要な元手は約{cut}割も圧縮。"
-                "これぞ放置の複利マジック。\n#高配当株")
+                f"圧倒的な「増配力」で、必要な元手は約{cut}割も圧縮。\n#高配当株")
 
     return _build_tarareba(conn, codes, theme="road_to_3man", base_theme="high_yield",
                            lead_fn=lead, rank_key=lambda r, c: c["yoc"][("base", 10)])
@@ -1048,7 +1054,7 @@ def build_gallery_html(conn, codes: list[str], *, scope_label: str = "") -> dict
             f'<div class="theme-head"><span class="slug">{name}</span>'
             f'<button class="copy" data-body="{_esc_attr(post["body"])}">本文をコピー</button>'
             f'<button class="dl" data-theme="{name}">画像を保存</button>'
-            f'<span class="hooklen">{g["body_weighted_len"]}/{BODY_MAX}字・該当{g["eligible_count"]}社</span></div>'
+            f'<span class="hooklen">{g["body_len"]}/{BODY_MAX}字・該当{g["eligible_count"]}社</span></div>'
             f'<div class="hook">{post["body"].replace(chr(10), "<br>")}</div>'
             f'<div class="cardwrap">{_card_only(post["image_html"])}</div>'
             f'</section>'

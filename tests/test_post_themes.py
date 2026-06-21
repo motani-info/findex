@@ -2,7 +2,7 @@
 from findex.post.themes import (
     BODY_MAX, _body_metric, _hy_safe_eligible, _is_takoashi, _net_cash_eligible,
     _non_financial, _post_name, _post_name_block, _SPECS, _streak_body, _yoc_quality_key,
-    weighted_len,
+    post_len, weighted_len,
 )
 
 
@@ -27,10 +27,10 @@ def test_weighted_len_cjk_is_2():
 
 
 def test_streak_body_within_140():
-    # フック本文は加重140字以内（Xバッジ無しアカウント制約）。
+    # フック本文は実140字以内（ユーザー運用ルール=140字以上は投稿不可。post_lenで判定）。
     # 2桁トップN（最長想定）でも超えないこと＝看板を伸ばす改変への歯止め。
     for n in (5, 10, 20, 99):
-        assert weighted_len(_streak_body(n)) <= 140, n
+        assert post_len(_streak_body(n)) <= BODY_MAX, n
 
 
 def test_streak_body_contains_thesis_and_gate():
@@ -83,19 +83,20 @@ def test_post_name_block_builds_medal_lines():
 
 
 def test_spec_body_fn_injects_names_within_limit():
-    # 全宣言テーマの body_fn が (n, names) を受け、names を本文へ差し込み BODY_MAX 以内。
-    names = "🥇ZOZO ＋34.3%\n🥈サイボウズ ＋34.3%\n🥉JAC ＋32.7%\n"
+    # 全宣言テーマの body_fn が (n, names) を受け、names を本文へ差し込み BODY_MAX(実140字)以内。
+    # names は配当併記の実フォーマットを模した代表ブロック（実生成の最長は post-gallery 側で担保）。
+    names = "🥇三菱HCキャピタル 配当3.5% 27年\n🥈ＳＰＫ 配当2.9% 28年\n🥉花王 配当2.5% 36年\n"
     for name, spec in _SPECS.items():
         body = spec["body_fn"](5, names)
-        assert "🥇ZOZO" in body, name
-        assert weighted_len(body) <= BODY_MAX, (name, weighted_len(body))
+        assert "🥇三菱HCキャピタル" in body, name
+        assert post_len(body) <= BODY_MAX, (name, post_len(body))
         assert "headline" in spec and spec["headline"], name
 
 
 def test_streak_body_injects_names():
-    body = _streak_body(5, "🥇花王 36年\n🥈SPK 28年\n🥉三菱HCキャピタル 27年\n")
-    assert "🥇花王 36年" in body
-    assert weighted_len(body) <= BODY_MAX
+    body = _streak_body(5, "🥇花王 配当2.5% 36年\n🥈SPK 配当2.9% 28年\n🥉三菱HCキャピタル 配当3.5% 27年\n")
+    assert "🥇花王 配当2.5% 36年" in body
+    assert post_len(body) <= BODY_MAX
 
 
 # ── P1: テーマ層較正（doc 10・GeminiFB是正）の回帰防止 ──────────────────
