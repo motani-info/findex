@@ -83,13 +83,26 @@ def _yield_ok(r: dict, floor: float) -> bool:
 # rel 未確証（None）は安全性を確証できず罠扱い（high_yield_safe と同じ厳格側）。
 TAKOASHI_MIN_PAYOUT = 1.0     # 利益超の配当＝タコ足の必要条件
 TAKOASHI_MAX_REL = 0.6        # rel<0.6（減配常習・未確証）と重なったときのみ罠と判定
+# doc12拡張（武田型）: 利益の2倍超の配当 × 減益。無減配(rel高)でも持続不能の疑いが濃く
+# 「高配当株」の看板に反する（武田薬品 性向293%/EPS5 −27%/無減配 が high_yield #1 に居座る問題）。
+# rel 無関係で弾く第2arm。全3,715社で較正: 高配当(dy≥3.5%)中 payout>200%×EPS5<0=18社・全員
+# 高PER(利益depressed)で典型的武田型。全銘柄TOP10からの誤殺は実質0社（2026-06-21・実分布確認）。
+# 定款の線引き: EPS5=None（確証なし）は弾かない＝「確証なき除外もしない」。
+TAKOASHI_OVERPAY_PAYOUT = 2.0  # 利益の2倍超の配当＝無減配でも持続不能の疑い
 
 
 def _is_takoashi(r: dict) -> bool:
-    """タコ足ゾンビ（利益超の配当×減配常習）か。生利回り系テーマから除外する罠フィルタ。"""
-    po, rel = r.get("payout_ratio"), r.get("rel")
-    return (po is not None and po > TAKOASHI_MIN_PAYOUT
-            and (rel is None or rel < TAKOASHI_MAX_REL))
+    """タコ足ゾンビか。生利回り系テーマから除外する罠フィルタ。
+    arm1: 利益超の配当 × 減配常習/未確証（rel低）。
+    arm2: 利益2倍超の配当 × 減益（武田型・rel無関係）。"""
+    po, rel, eps = r.get("payout_ratio"), r.get("rel"), r.get("eps_growth_5y")
+    if po is None:
+        return False
+    if po > TAKOASHI_MIN_PAYOUT and (rel is None or rel < TAKOASHI_MAX_REL):
+        return True
+    if po > TAKOASHI_OVERPAY_PAYOUT and eps is not None and eps < 0:
+        return True
+    return False
 
 
 # CF系テーマ（FCFカバ/ネットキャッシュ）から除外する金融業種（doc 10・P2-3・D4.5較正③の業種考慮）。

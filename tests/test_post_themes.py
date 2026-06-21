@@ -171,6 +171,20 @@ def test_is_takoashi_predicate():
     assert not _is_takoashi(_row(payout_ratio=None, rel=0.0))
 
 
+def test_is_takoashi_overpay_arm():
+    """doc12拡張（武田型）: 利益2倍超の配当×減益は、無減配(rel高)でも罠＝rel無関係で弾く。"""
+    # 武田型: 性向293%×EPS5 −27%×無減配(rel1.0) ＝ arm1は素通りだが arm2で罠
+    assert _is_takoashi(_row(payout_ratio=2.93, rel=1.0, eps_growth_5y=-0.27))
+    # 健全な高性向（性向130%×増益）は罠でない（po<2.0 かつ eps>0）
+    assert not _is_takoashi(_row(payout_ratio=1.3, rel=1.0, eps_growth_5y=0.05))
+    # 利益2倍超でも増益なら arm2 は発火しない（rel高で arm1 も発火せず）＝残す
+    assert not _is_takoashi(_row(payout_ratio=2.5, rel=1.0, eps_growth_5y=0.05))
+    # EPS5=None（確証なし）は arm2 で弾かない＝確証なき除外もしない。rel高なら残る
+    assert not _is_takoashi(_row(payout_ratio=2.93, rel=1.0, eps_growth_5y=None))
+    # ただし EPS5=None でも rel低/未確証なら arm1 で従来通り罠
+    assert _is_takoashi(_row(payout_ratio=2.93, rel=0.0, eps_growth_5y=None))
+
+
 def test_raw_yield_themes_exclude_takoashi():
     """high_yield/low_pbr_yield/small_value: タコ足ゾンビを除外。健全な高payout実績株は残す。"""
     tako = dict(payout_ratio=2.17, rel=0.0)        # 減配常習タコ足（除外対象）
