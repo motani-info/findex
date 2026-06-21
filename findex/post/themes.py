@@ -899,14 +899,16 @@ _TARAREBA_THESIS_DEFAULT = "配当を伸ばす実績が裏づけ。"
 
 
 def _lead_future(r, c, th):
-    """タラレバ①将来の配当: 現在/10年後/20年後の年配当（標準シナリオの前提付き試算）。"""
-    grow = c["div"][("base", 20)] / c["init"]
+    """タラレバ①将来の配当: 現在/10年後/20年後の年配当（標準シナリオの前提付き試算）。
+    締めは銘柄ごとに変わる「買値利回り(YoC)20年後」。配当の"倍"は標準シナリオの増配率上限(10%)で
+    どの銘柄もほぼ一定値に潰れる（1.1^20≒6.7倍）ため、現在利回りで差が出る YoC を主役にする。"""
+    yoc20 = c["yoc"][("base", 20)]
     return ("100万円の配当、10年後・20年後はいくら？🔮\n\n"
             f"銘柄：{_post_name(r['name'])}（{r['code']}）\n"
-            f"現在の利回り：{_body_metric(c['dy'], 'pct')}（年{_body_metric(c['init'], 'yen')}）\n\n"
+            f"現在の利回り：{_body_metric(c['dy'], 'pct')}\n\n"
             f"🌱10年後：年{_body_metric(c['div'][('base', 10)], 'yen')}\n"
             f"🌳20年後：年{_body_metric(c['div'][('base', 20)], 'yen')}\n\n"
-            f"試算では約{grow:.1f}倍に。{th}\n#高配当株 #増配株")
+            f"試算では買値利回りが約{_body_metric(yoc20, 'pct')}に。{th}\n#高配当株 #増配株")
 
 
 def _lead_3man(r, c, th):

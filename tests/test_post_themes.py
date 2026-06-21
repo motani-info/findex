@@ -195,6 +195,28 @@ def test_is_takoashi_overpay_arm():
     assert _is_takoashi(_row(payout_ratio=2.93, rel=0.0, eps_growth_5y=None))
 
 
+def test_lead_future_headline_varies_by_stock():
+    """タラレバ①の締めは銘柄ごとに変わること（回帰: 旧実装は配当の"倍"が標準シナリオの
+    増配率上限10%でどの銘柄も 1.1^20≒6.7倍 に潰れ、定数化＝テンプレに見えた）。
+    買値利回り(YoC)20年後は現在利回りに比例して銘柄差が出る。"""
+    from findex.post.themes import _lead_future, _tarareba_calc
+    th = "テスト根拠。"
+    # 増配率/EPS/性向は同一、現在利回りだけ違う2銘柄 → YoC締めは異なる文字列になる。
+    common = dict(dpc5=0.12, eps_growth_5y=0.10, payout_ratio=0.30)
+    a = _row(code="1111", name="A社", dy=0.03, **common)
+    b = _row(code="2222", name="B社", dy=0.05, **common)
+    ca, cb = _tarareba_calc(a), _tarareba_calc(b)
+    assert ca is not None and cb is not None
+    fa, fb = _lead_future(a, ca, th), _lead_future(b, cb, th)
+    assert "買値利回りが約" in fa and "倍に" not in fa  # "倍"の定数表現を廃止
+    # 締めの数値が銘柄で変わる（旧バグなら両方 6.7倍で一致してしまう）
+    import re
+    ya = re.search(r"買値利回りが約([0-9.]+)%に", fa).group(1)
+    yb = re.search(r"買値利回りが約([0-9.]+)%に", fb).group(1)
+    assert ya != yb
+    assert post_len(fa) <= BODY_MAX and post_len(fb) <= BODY_MAX
+
+
 def test_raw_yield_themes_exclude_takoashi():
     """high_yield/low_pbr_yield/small_value: タコ足ゾンビを除外。健全な高payout実績株は残す。"""
     tako = dict(payout_ratio=2.17, rel=0.0)        # 減配常習タコ足（除外対象）
