@@ -44,12 +44,20 @@ def test_streak_body_contains_thesis_and_gate():
 # ── doc16: 投稿本文へトップ3社＋看板指標を注入（引きを強める）─────────────────
 
 def test_post_name_normalizes_fullwidth_and_clips():
-    # 全角英数は半角化（読みやすさ・字数節約）、カナはそのまま、長名は末尾省略。
+    # 全角英数は半角化（読みやすさ・字数節約）、カナはそのまま、長名(>16字)は末尾省略。
     assert _post_name("ＺＯＺＯ") == "ZOZO"
     assert _post_name("三菱ＨＣキャピタル") == "三菱HCキャピタル"
     assert _post_name("サイボウズ") == "サイボウズ"
-    clipped = _post_name("ジェイエイシーリクルートメント")
-    assert clipped.endswith("…") and len(clipped) == 12
+    clipped = _post_name("あ" * 20)
+    assert clipped.endswith("…") and len(clipped) == 13
+
+
+def test_post_name_and_clip_name_identical():
+    # 投稿本文と画像カードの社名表記は必ず一致（「画像と文章が合わない」防止＝単一実装）。
+    from findex.post.themes import _clip_name
+    for nm in ("ＳＰＫ", "ＺＯＺＯ", "アサヒグループホールディングス",
+               "ジェイエイシーリクルートメント", "ＡＮＹＣＯＬＯＲ"):
+        assert _post_name(nm) == _clip_name(nm)
 
 
 def test_body_metric_formats_by_kind():
