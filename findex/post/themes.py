@@ -851,8 +851,8 @@ _SPECS: dict[str, dict] = {
     # ── 新軸: EPS成長（切り口C・新NISAガチホ）─────────────────────────────
     "nisa_growth": dict(
         title="NISA永久ホールド（EPS成長）", subtitle="5年EPS成長率＝将来の増配の源泉",
-        body_fn=lambda n, names: ("利回りより、利益(EPS)が伸びる株。\n"
-                                  f"NISA・EPS成長ランキング🌱 トップ{n}\n"
+        body_fn=lambda n, names: ("利回りより、伸びる利益(EPS)。\n"
+                                  f"NISA成長株ランキング🌱 トップ{n}\n"
                                   f"{names}"
                                   "#新NISA #増配株"),
         headline=("eps_growth_5y", "pct"),
