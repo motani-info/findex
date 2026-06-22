@@ -150,6 +150,42 @@ def parse_fy_dividends(records: list[dict]) -> dict[int, float]:
     return out
 
 
+def _keep_latest(m: dict[int, tuple[float, str]], fy: int, dps: float, disc: str) -> None:
+    """同一FYは最新開示(DiscDate)を残す（再開示・訂正で予想は更新される）。"""
+    if fy not in m or disc > m[fy][1]:
+        m[fy] = (dps, disc)
+
+
+def parse_forecast_dividend(records: list[dict]) -> tuple[int, float, str | None] | None:
+    """fins/summary から **会社予想の前向き年間配当** を1本返す。(forecast_fy, dps, as_of) or None。
+
+    実績(DivAnn)とは別物。市場標準の「予想配当利回り」へ div_yield を合わせるための予想値:
+      - 当期(未確定FY)の会社予想 = その開示の FDivAnn、対象FY=year(CurFYEn)。
+      - 本決算開示(CurPerType=FY)の NxFDivAnn = 翌期予想、対象FY=year(CurFYEn)+1。
+    同一FYに複数開示があれば最新開示(DiscDate)を採用し、最も前向き(最大FY)の予想を返す。
+    予想0.0（会社予想=無配）も確定された予想として保持。空文字（未開示）は None で除外。
+    """
+    best: dict[int, tuple[float, str]] = {}  # fy -> (dps, disc_date)
+    for r in records:
+        disc = r.get("DiscDate") or r.get("DisclosedDate") or ""
+        end = r.get("CurFYEn") or r.get("CurPerEn") or ""
+        if not end:
+            continue
+        cur_fy = int(end[:4])
+        f = _f(r.get("FDivAnn"))               # 当期予想（四半期/本決算いずれの開示にも載る）
+        if f is not None:
+            _keep_latest(best, cur_fy, f, disc)
+        if r.get("CurPerType") == "FY":        # 本決算開示に載る翌期予想
+            nf = _f(r.get("NxFDivAnn"))
+            if nf is not None:
+                _keep_latest(best, cur_fy + 1, nf, disc)
+    if not best:
+        return None
+    fy = max(best)
+    dps, disc = best[fy]
+    return fy, dps, (disc or None)
+
+
 class FinancialsFetcher(RateLimitedFetcher[list]):
     name = "jquants_fins"
     policy = FetchPolicy(batch_size=50, sleep_between_batches=2.0, sleep_between_items=0.2, max_retries=4)

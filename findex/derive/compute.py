@@ -379,6 +379,33 @@ def _latest_dps(conn, code: str) -> float | None:
     return r[0] if r else None
 
 
+def _forecast_dps(conn, code: str) -> tuple[float, int, str | None] | None:
+    """会社予想の前向きDPS（(dps, forecast_fy, as_of)）。実績より古い予想は採らない。
+
+    div_yield を市場標準の「予想配当利回り」へ合わせるための予想値。判定は実績系列を基準にする
+    （カレンダー非依存・J-Quantsの開示遅延に頑健）: 予想対象FY >= 直近実績FY のときだけ採用。
+      - 予想FY > 実績FY: 当期/翌期の最新ガイダンス（実績未確定の年）→採用。
+      - 予想FY == 実績FY: 実績が特配等で膨れていても会社予想（通常配当）を優先＝市場の予想利回りに一致。
+      - 予想FY < 実績FY: 実績の方が新しい＝予想は陳腐化→採らない。
+    廃配・休配（_dividend_is_stale）の最終判定は呼び出し側に委ねる（古い予想でゴースト利回りを復活させない）。
+    """
+    row = conn.execute(
+        "SELECT forecast_dps, forecast_fy, as_of FROM dividend_forecast WHERE code=?", (code,)
+    ).fetchone()
+    if not row:
+        return None
+    dps, fy, as_of = row
+    last_actual = _last_dividend_fy(conn, code)
+    if last_actual is not None and fy < last_actual:
+        return None
+    # 株式分割補正（doc11）: J-Quans予想DPSは開示時点(as_of)の株数基準。as_of以降の分割で
+    # close_adj（分割調整済み株価）と基準がズレる（実績dividend_annualはyfinanceが調整済み）。
+    # EPS/BPSと同じく as_of 以降の分割比率で割り、最新の株価基準に揃える（未補正だと利回りがN倍に跳ねる）。
+    if as_of:
+        dps = dps / _split_adjustment_factor(conn, code, as_of)
+    return dps, fy, as_of
+
+
 _FIN_COLS = [
     "equity_ratio", "debt_to_equity", "roe", "operating_margin",
     "eps_growth_5y", "revenue_growth_5y_cagr", "roic_minus_wacc",
@@ -794,6 +821,14 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
             shares = shares * factor
     dps = _latest_dps(conn, code)
     stale = _dividend_is_stale(conn, code, int(price_date[:4]))
+    # 配当利回りは市場標準＝予想配当利回り。会社予想（前向き）があれば実績より優先（doc: 予想配当切替）。
+    # 廃配・休配（stale）銘柄は古い予想で利回りを復活させない＝stale時は予想を使わず実績判定のまま。
+    # 実績/予想の別は source_json に残す（claim来歴の明示）。
+    div_source = "actual"
+    fc = _forecast_dps(conn, code)
+    if fc is not None and not stale:
+        dps, _fc_fy, _fc_asof = fc
+        div_source = "forecast"
 
     out: dict = {c: None for c in _PRICE_COLS}
     status: dict[str, str] = {}
@@ -865,6 +900,7 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
         status["net_cash_per"] = "insufficient" if out["per"] is None else "missing"
 
     out["_status"] = status
+    out["_source"] = {"div_yield": div_source}   # forecast=会社予想 / actual=実績（claim来歴）
     out["_price_date"] = price_date
     return out
 
@@ -875,17 +911,19 @@ def build_price_metrics(conn, codes: list[str]) -> dict:
     ok_counts: dict[str, int] = {c: 0 for c in _PRICE_COLS}
     set_clause = ",".join(f"{c}=excluded.{c}" for c in _PRICE_COLS)
     insert_sql = (
-        f"INSERT INTO computed_metrics (code,{','.join(_PRICE_COLS)},status_json,price_computed_at) "
-        f"VALUES (?,{','.join('?' * len(_PRICE_COLS))},?,?) "
+        f"INSERT INTO computed_metrics (code,{','.join(_PRICE_COLS)},status_json,source_json,price_computed_at) "
+        f"VALUES (?,{','.join('?' * len(_PRICE_COLS))},?,?,?) "
         f"ON CONFLICT(code) DO UPDATE SET {set_clause},"
-        f"status_json=excluded.status_json,price_computed_at=excluded.price_computed_at"
+        f"status_json=excluded.status_json,source_json=excluded.source_json,"
+        f"price_computed_at=excluded.price_computed_at"
     )
     for code in codes:
         d = compute_price_metrics_for_code(conn, code)
         if not d:
             continue
         status_json = _merge_json(conn, code, "status_json", d.pop("_status"))
-        conn.execute(insert_sql, (code, *[d[c] for c in _PRICE_COLS], status_json, now))
+        source_json = _merge_json(conn, code, "source_json", d.pop("_source"))
+        conn.execute(insert_sql, (code, *[d[c] for c in _PRICE_COLS], status_json, source_json, now))
         for c in _PRICE_COLS:
             if d[c] is not None:
                 ok_counts[c] += 1

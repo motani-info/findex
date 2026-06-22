@@ -61,6 +61,19 @@ CREATE TABLE IF NOT EXISTS dividend_annual (
 );
 CREATE INDEX IF NOT EXISTS idx_div_annual_code ON dividend_annual (code, fiscal_year);
 
+-- dividend_forecast — 会社予想の年間配当（前向き1本／銘柄）。実績(dividend_annual)とは混ぜない。
+-- 用途は div_yield を市場標準の「予想配当利回り」に合わせること“だけ”。ストリーク・YoC・配当CAGR
+-- は実績(dividend_annual)のみで計算し、ここは一切参照しない（確証主義＝実績と予想のclaim分離）。
+-- 源泉は J-Quants の会社予想（当期 FDivAnn／本決算開示の翌期 NxFDivAnn）。as_of=開示日で出典を明示。
+CREATE TABLE IF NOT EXISTS dividend_forecast (
+    code         TEXT PRIMARY KEY,
+    forecast_fy  INTEGER NOT NULL,              -- 予想対象の会計年度（決算期末年）
+    forecast_dps REAL NOT NULL,                 -- 会社予想 年間1株配当
+    source       TEXT NOT NULL,                 -- jquants_forecast
+    as_of        TEXT,                          -- 開示日（会社予想の基準時点）
+    updated_at   TEXT NOT NULL
+);
+
 -- financial_snapshots — 年度別財務（J-Quants + EDINET。履歴保持）（D3 §6）
 CREATE TABLE IF NOT EXISTS financial_snapshots (
     code        TEXT NOT NULL,

@@ -14,7 +14,7 @@ from datetime import datetime
 import yfinance as yf
 
 from .base import FetchPolicy, RateLimitedFetcher, RateLimitError
-from .jquants import JQuantsClient, parse_fy_dividends
+from .jquants import JQuantsClient, parse_forecast_dividend, parse_fy_dividends
 
 SOURCE_PRIORITY = {"manual": 5, "ir": 4, "haitoukin": 3, "jquants": 2, "events": 1}
 
@@ -172,9 +172,12 @@ class _JQuantsDividendBuilder(RateLimitedFetcher[dict]):
         self.client = JQuantsClient()
         self.n_filled = 0
         self.n_codes_filled = 0
+        self.n_forecasts = 0
 
     def fetch_one(self, code: str) -> dict:
-        divs = parse_fy_dividends(self.client.fins_summary(code))
+        records = self.client.fins_summary(code)
+        divs = parse_fy_dividends(records)
+        forecast = parse_forecast_dividend(records)   # 同一レスポンスから会社予想も抽出（追加取得なし）
         filled = 0
         try:
             for fy, dv in sorted(divs.items()):
@@ -190,6 +193,16 @@ class _JQuantsDividendBuilder(RateLimitedFetcher[dict]):
                     (code, fy, self.now),
                 )
                 filled += 1
+            if forecast is not None:
+                f_fy, f_dps, f_asof = forecast
+                self.conn.execute(
+                    "INSERT INTO dividend_forecast (code, forecast_fy, forecast_dps, source, as_of, updated_at) "
+                    "VALUES (?,?,?,'jquants_forecast',?,?) "
+                    "ON CONFLICT(code) DO UPDATE SET forecast_fy=excluded.forecast_fy, "
+                    "forecast_dps=excluded.forecast_dps, source=excluded.source, "
+                    "as_of=excluded.as_of, updated_at=excluded.updated_at",
+                    (code, f_fy, f_dps, f_asof, self.now),
+                )
             self.conn.commit()        # ← commit 後にのみ base.run が checkpoint を刻む
         except Exception:
             self.conn.rollback()
@@ -197,7 +210,9 @@ class _JQuantsDividendBuilder(RateLimitedFetcher[dict]):
         self.n_filled += filled
         if filled:
             self.n_codes_filled += 1
-        return {"code": code, "filled": filled}
+        if forecast is not None:
+            self.n_forecasts += 1
+        return {"code": code, "filled": filled, "forecast": forecast is not None}
 
 
 def build_jquants_dividends(conn, codes: list[str], *, resume: bool = True) -> dict:
@@ -206,7 +221,8 @@ def build_jquants_dividends(conn, codes: list[str], *, resume: bool = True) -> d
     builder = _JQuantsDividendBuilder(conn, now)
     res = builder.run(codes, resume=resume)
     return {"ok": len(res.ok), "failed": len(res.failed), "filled": builder.n_filled,
-            "codes_filled": builder.n_codes_filled, "failures": res.failed}
+            "codes_filled": builder.n_codes_filled, "forecasts": builder.n_forecasts,
+            "failures": res.failed}
 
 
 def cleanse_haitoukin_seam(conn, codes: list[str]) -> int:

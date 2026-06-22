@@ -222,6 +222,7 @@ def _q_jp(quality):
 
 
 _FOOT = ('情報提供であり投資助言ではありません。数値はFindex調べ。'
+         '配当利回りは会社予想を優先（予想配当利回り・出典 J-Quants、会社予想がなければ直近実績）。'
          '「—」は未算出項目、「N年以上」はデータ取得範囲の上限。')
 
 # ZAi公表値を採用した連続増配年数がある場合の出典脚注（セル内バッジは置かず脚注で一括明示）
@@ -656,8 +657,8 @@ def _std_cols(signature: list[tuple]) -> list[tuple]:
 
 
 def _std_head(cols: list[tuple]) -> list[str]:
-    """先頭 #/コード/銘柄/配当利回り ＋ cols の見出し。"""
-    return ["#", "@コード", "@銘柄", "配当利回り", *[c[0] for c in cols]]
+    """先頭 #/コード/銘柄/予想配当利回り ＋ cols の見出し。"""
+    return ["#", "@コード", "@銘柄", "予想配当利回り", *[c[0] for c in cols]]
 
 
 def _render_rows(shown: list[dict], cols: list[tuple]) -> list[str]:
