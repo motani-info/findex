@@ -5,6 +5,107 @@
 
 ---
 
+## 予想配当利回りへの切替＋全銘柄公開（2026-06-22）
+
+ユーザー指摘（7463アドヴァングループ=11.0% 等が実態と乖離・Yahoo予想4.51%）を起点に、配当利回りを
+**実績ベース → 予想配当利回り（会社予想）ベース**へ切替（対応A）。市場標準に揃え、特配込み実績で生じる
+ゴースト高利回りを根治。正本: [logs/DEVLOG.md] のRESUME節（2026-06-22）。
+
+### 根因と対応
+- **根因**: `derive/compute.py` `_latest_dps` が最新確定年度の**実績**年間配当を一律採用→特配込み実績÷株価で
+  ゴースト高利回り（7463はFY2026=100円に期末特配80込み）。市場標準の予想利回りを持たなかった。
+- **源泉=既取得の J-Quants `FDivAnn`/`NxFDivAnn`**（`fins/summary` 内＝新規ネットワーク負荷ゼロ）。
+- `db/schema.sql`: `dividend_forecast`（実績`dividend_annual`と分離＝claim混同しない）新設・`init_db`冪等。
+- `fetch/jquants.py` `parse_forecast_dividend()` ＋ `fetch/dividends.py` が同一レスポンスから forecast も upsert。
+- `derive/compute.py` `_forecast_dps()`＝予想FY≥直近実績FYで採用（カレンダー非依存・開示遅延に頑健）。
+  **stale でない限り** div_yield 分子を予想優先。`source_json.div_yield=forecast/actual` を永続化。
+- `post/themes.py`: 共通ヘッダ「配当利回り」→「予想配当利回り」、`_FOOT`に出典明記。
+
+### 🔴 突合で発見した2件目のバグ＝予想DPSの株式分割補正漏れ（修正済）
+J-Quants予想DPSは開示時点(as_of)の株数基準。as_of以降の分割で `close_adj` と基準がズレ利回りがN倍に跳ねる
+（3443川田 11.87%→3.96%、2602日清オイリオ 10.02%→3.34%（Yahoo一致）等）。`_forecast_dps` で
+EPS/BPS と同じく `_split_adjustment_factor(code, as_of)` で割って是正（doc11 と同型の根治）。
+
+### 全件反映・検収・公開
+- **全3,734件 予想再取得 完了**（監視下1回・#1711で429に当たるも RateLimitedFetcher 完走）→ forecast 3,624件
+  （97.1%）投入 → `derive --all`。検証ツール `scripts/yahoo_highdiv_compare.py`（Yahoo高配当671件突合・読取専用）。
+- **突合結果（補正後）**: Yahoo664件と照合し |乖離| 中央0.22pt/平均0.41pt/最大4.32pt（補正前 最大8.59pt）。
+  多数がYahoo±0.3pt以内。2914JT=3.98%（完全一致）・5138Rebase予想無配=0%（正しく高配当から除外）。
+- **残差の性質（不具合でない/別軸）**: ①−乖離＝この環境のJ-Quants予想as_ofが2026年初頭打ちで Yahoo(6月)の改定未反映＝
+  **鮮度差**（本番J-Quants環境で解消）。②+乖離で分割記録なし（2296伊藤ハム等）＝**yfinanceの分割データ欠落の疑い**
+  （柱1の別軸＝分割カバレッジ・follow-up）。
+- **社名表記の統一**: 本文`_post_name`と画像`_clip_name`が別実装で食違っていた（"SPK"↔"ＳＰＫ"等）→`_clip_name`を
+  唯一実装にNFKC半角化＋maxlen13で統一・`_post_name`は委譲。全テーマで body↔image トップ3社名一致。
+- **nisa_growth 復活**: 本文142→137字に圧縮し BODY_MAX 内へ。**全18テーマ掲載**。
+- 検収: **pytest 122 passed** / verify --cohort golden **18/18** カバレッジ100% / 公開更新（gh-pages）。
+- コミット `e832312`（予想切替）/`8e36738`（社名統一）/`98af3b7`（nisa復活）＝**全て main push済み**。
+- **本番runbook**: 当環境のJ-Quantsは開示が~2026年初で頭打ち（FY2027予想未取得）→最新開示が取れる本番環境でのみ
+  再取得→中止ゲート（FY2027が主流か）→derive→突合（乖離縮小が反映の証拠）→publish。詳細はDEVLOG。
+
+---
+
+## 柱3（X発信）解凍 — ¥0 GitHub Pages 投稿ハブ公開（2026-06-21〜22）
+
+長く凍結していた**柱3を解凍し、findex の初の本番アウトプットを公開**。X API無料枠廃止（2026年・従量$0.015/投稿）と
+Web Intentの画像添付不可という仕様制約から、ユーザーは**自動投稿を諦め最後のタップだけ手動**の¥0方式を選択。
+
+- **公開URL（LIVE）: https://motani-info.github.io/findex/** （全銘柄3,734ユニバースの全テーマ）。
+- **方式**: findex リポを public 化し、生成物のみ `gh-pages` ブランチで配信（main にPNGを載せない）。
+- **実装**: `post/themes.py` に `_intent_url()`（Web Intent本文プリフィル「𝕏に投稿」ボタン）/事前レンダPNG参照モード
+  （モバイル長押し保存・html2canvas不要）/`_SLOT_JS`（クライアントで1日3スロット 8:00/12:30/20:00・日替り±40分ジッターから
+  決定的に「今のおすすめ1本」を提示）。`cli.py` に `publish-hub` コマンド。
+- **再公開は1コマンド**: `bash scripts/publish_hub.sh`（生成→一時worktreeでgh-pagesへ反映→push）。stale PNG 持ち越しバグも修正。
+- **セキュリティ整理（public化対応）**: 秘密情報は履歴/コードとも混入なしを確認（履歴rewrite不要）。`.git/config`の平文トークン除去・
+  `gh auth git-credential` 認証へ。`.claude/launch.json` の他PJ絶対パス除去。
+- 検収: Playwright で now-pick描画・スロットジッター・X intent本文一致・img全枚ロードを確認。pytest 121 passed。
+- コミット `468864f`（ハブ機能）/`7d79239`（セキュリティ）/`3cec854`（stale修正）/`79bc8b0`（再公開スクリプト）＝**全て push済み**。
+- 残（ユーザー判断・保留）: push通知チャネル（今はブックマーク/iOSアラーム運用）/gh tokenの任意ローテーション。
+
+---
+
+## doc17 — タラレバ（前提付き配当試算）＋EPS成長テーマ拡充（2026-06-21）
+
+ユーザー「posts.htmlのパターンを増やし充実させたい」を起点に、Gemini新テーマ提案を
+**「`computed_metrics` から確証付きで出せるフィールドか」**（定款=確証なき数字は出さない）で取捨選択。
+正本: [17-tarareba-projection-posts.md](design/17-tarareba-projection-posts.md)。
+
+- **採用**: ①**nisa_growth**（EPS成長・低基底リバウンドを営業益率>0＋増収＋増配実績で排除）②**タラレバ3角度**
+  （将来の配当／月3万円の元手／配当で元本回収）。専用タラレバ3テーマは廃止し**全テーマへ統合**（1テーマ＝説明＋3タラレバ＋共通画像）。
+  却下=データ不在（自社株買い/粗利/海外売上比率等）、保留=導出層作業要（beta/CFマージン）。
+- **タラレバの正直性**: 前提付き試算として明示。`_tarareba_calc`の標準シナリオ値を本文に、`simulation:True`＋免責で確定claimと別カテゴリ。
+  主役は各テーマ画像内TOP5から選定（🥇が必ず画像に載る＝本文⇔画像整合）。画像上部に試算バナーを注入。
+- **ギャラリーのタブUX化**: 1テーマの説明＋タラレバ3角度をタブ切替（縦長解消）。締めは`_TARAREBA_THESIS`でテーマ固有の論理へ。
+- **投稿本文の上限を「実文字数140字」へ再修正**（最重要・X投稿可能性）: doc16で加重250に上げていたのを撤回。
+  `post_len(s)=len(s)`・`BODY_MAX=140`。実140字以内なら最悪（全角のみ）でもX加重280に収まり必ず投稿可能。
+- **配当利回りの必須併記（POSTルール）**: 全テーマ本文で社名横に「配当X%」を常時併記＋看板指標を短ラベル付き。
+  未確証は「配当—」と正直表示。doc16 §6 に明文化（将来テーマ追加時の漏れ防止）。
+- **武田型トラップ拡張**: `_is_takoashi` に第2arm（`payout>2.0倍 × eps_growth_5y<0`）追加。利益の2倍超配当×減益＝
+  無減配でも持続不能の疑い。全3,715社較正で誤殺ほぼ0を確認（武田#1は35社コホート特有現象）。
+- 検収: **pytest 122 passed** / golden **18/18** / 全テーマ本文 ≤140字。コミット `32b5f61`〜`98af3b7`（全て push済み）。
+
+---
+
+## doc10 — テーマ層較正 P1〜P3（v4較正の思想を投稿テーマ層へ波及）（2026-06-19）
+
+外部レビュー（Gemini）が posts.html 全テーマで「重大バグ多数」と報告。実コード・設計書と照合した結論＝
+**根本原因は「レイヤのズレ」**。採点/derive層は v4較正（D4.5）＋スケール是正（doc09）で失敗モードを潰し済みだが、
+**投稿テーマ層（themes.py）に v4較正の思想が未波及**で、採点層では解決済みの欠陥がランキング層に持ち越されていた。
+新種バグではなく既知の失敗モードの取りこぼし。正本: [10-theme-layer-calibration.md](design/10-theme-layer-calibration.md)。
+
+- **P1-1 div_growth を YoC置換**: 廃止済みの生CAGRでランキングしていた設計違反を是正。YoC単純降順だと一過性
+  （低基底回復）が先頭に出るため、ソートキーを **YoC×質係数**（sound×1.0/payout_driven×0.5/cyclical×0.3・`score/engine.py`と共有）へ。
+- **P1-2 high_yield_safe に安全フィルタ**: `rel≥0.6` ＋ `0<payout≤1.0`。バリューコマース型（減配信頼性0.0/配当性向217%）を排除。配当性向列を追加。
+- **P1-3 growth_room に `fcf_payout_coverage>0`**: 低性向だけでなく現金で配当を賄える裏付けを要求。
+- **P2-1 compute.py に `SANITY_MAX_DOE=0.6` サニティゲート**（derive層・doc09の単一ゲート原則）: DOE>60%の7社（4436ミンカブ
+  =自己資本比率3.2%等）を suspect 化。ZOZO35.6%は保持。ユーザー合意0.6。
+- **P2-2 roic_spread に `roe is not None` 要件**（千代田化工 ROE=— 型を除外）。
+- **P2-3 金融除外**: `fetch_rows` に `stocks.sector33` 追加＋`_non_financial` で fcf_coverage・net_cash から銀行/証券/保険等を除外（銀行独占解消）。
+- **P3-1 数理不変条件 nc≥g を表示で担保**: 連続増配(g)はZAi公表override・非減配(nc)は自前計算（履歴≈12年）で「増配36>非減配12」の
+  不可能な逆転が画面に出ていた→g_src=override かつ g>nc のとき nc を「g年以上」（打ち切り）へ引き上げ（捏造でない論理的確実性）。
+- 検収: **pytest 94 passed** / verify --all golden **18/18 不整合0**。コミット `b7dd135`(P1)/`c23c5d1`(P2)/`2b319ef`(P3-1)/`b09f895`(doc10)。
+
+---
+
 ## doc16 — 投稿本文へトップ3社＋看板指標を注入（引きを強める）（2026-06-20）
 
 ユーザーが posts.html を実運用で手直しして投稿する際「本文に企業名が無いと引きが弱い」と判断。
