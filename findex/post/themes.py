@@ -904,6 +904,27 @@ _SPECS: dict[str, dict] = {
         sort_key=lambda r: r["drawdown_from_high"] or -1,
         foot_extra="※「売られすぎ」=52週高値からの下落率。下落15〜45%・黒字(ROE>0)・配当grade≠Dで絞った機械的スクリーニング（業績悪化の正当な下落＝罠を完全には除けません）。",
         claim_keys=["drawdown_from_high", "price_return_1y", "dy", "gd"]),
+    # ── 売られすぎ「大型」版（無印は下落率降順で小型株が上位に来る→誰もが知る大型に限定）──────
+    # 無印 oversold に時価総額1兆円超フロア（large_cap テーマと同じ大型定義）を足しただけ。
+    # 顔ぶれが知名度の高い大型株に揃う（第一三共/SUBARU/JFE/トヨタ/INPEX/ZOZO/エーザイ等）。
+    "oversold_large": dict(
+        title="売られすぎ大型高配当", subtitle="時価総額1兆円超×52週高値から15〜45%下げた黒字高配当",
+        body_fn=lambda n, names: ('大型でも、"売られすぎ"は来る。\n'
+                                  f"売られすぎ大型高配当ランキング📉 トップ{n}\n"
+                                  f"{names}"
+                                  "高値から下げた1兆円超の高配当。\n#高配当株 #大型株"),
+        headline=("dy", "pct"),                 # 無印と同様、本文看板は配当利回りのみ（下落率は画像列）
+        signature=[("52週高値比", "drawdown_from_high", "pct_down"),
+                   ("1年騰落", "price_return_1y", "pct_signed")],
+        # 無印 oversold の3点（下落15〜45%バンド/ROE>0黒字/gd!=D・非タコ足・利回り3%）に
+        # ④時価総額1兆円超（大型）を追加。知らない小型株を排し誰もが知る銘柄に絞る。
+        eligible=lambda r: r["gd"] != "D" and r["drawdown_from_high"] is not None
+        and 0.15 <= r["drawdown_from_high"] <= 0.45 and r["roe"] is not None and r["roe"] > 0
+        and not _is_takoashi(r) and _yield_ok(r, YIELD_FLOOR_HIGH)
+        and r["current_market_cap"] is not None and r["current_market_cap"] >= 1e12,
+        sort_key=lambda r: r["drawdown_from_high"] or -1,
+        foot_extra="※「売られすぎ」=52週高値からの下落率。時価総額1兆円超・下落15〜45%・黒字(ROE>0)・配当grade≠Dで絞った機械的スクリーニング（業績悪化の正当な下落＝罠を完全には除けません）。",
+        claim_keys=["drawdown_from_high", "price_return_1y", "dy", "current_market_cap", "gd"]),
 }
 
 
@@ -942,6 +963,7 @@ _TARAREBA_THESIS = {
     "doe_king": "資本に報いるDOEが裏づけ。",
     "nisa_growth": "EPS成長が増配の源泉。",
     "oversold": "下げ局面でこその高い利回り。",
+    "oversold_large": "大型の安定感×下げ局面の利回り。",
     "div_growth": "育ったYoCの実績が裏づけ。",
     "value_quality": "質を伴う割安が裏づけ。",
     "net_cash": "潤沢な現金が下支え。",

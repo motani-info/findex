@@ -174,6 +174,21 @@ def test_oversold_excludes_traps():
     assert not elig(_row(**base, drawdown_from_high=None))
 
 
+def test_oversold_large_adds_market_cap_floor():
+    """oversold_large: 無印の健全条件に時価総額1兆円超（大型）を追加し小型株を排除。"""
+    elig = _SPECS["oversold_large"]["eligible"]
+    base = dict(gd="B", dy=0.04, payout_ratio=0.4, roe=0.10, drawdown_from_high=0.30)
+    # 大型（1兆円超）×健全に売られすぎ → 通過
+    assert elig(_row(**base, current_market_cap=1.5e12))
+    # 健全だが小型（1兆円未満）→ 除外（無印 oversold には残るが大型版からは外す）
+    assert not elig(_row(**base, current_market_cap=5e11))
+    # 時価総額未算出は出さない
+    assert not elig(_row(**base, current_market_cap=None))
+    # 大型でも赤字（ROE≤0）の罠は除外（無印と同じ健全条件は維持）
+    assert not elig(_row(gd="B", dy=0.04, payout_ratio=0.4, roe=-0.05,
+                         drawdown_from_high=0.30, current_market_cap=2e12))
+
+
 def test_non_financial_excludes_financial_sectors():
     """CF系テーマ: 銀行/証券/保険/その他金融を除外（FCF・ネットキャッシュの概念が不適）。"""
     assert not _non_financial(_row(sector33="銀行業"))
