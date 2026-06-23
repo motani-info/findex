@@ -32,11 +32,13 @@ class SplitsFetcher(RateLimitedFetcher[dict]):
         splits = yf.Ticker(f"{code}.T").splits
         now = datetime.now().isoformat(timespec="seconds")
         rows = []
-        for dt, ratio in splits.items():
-            r = float(ratio)
-            if r <= 0:
-                continue  # データ異常のみ除外（逆分割 ratio<1.0 は算入する）
-            rows.append((code, dt.strftime("%Y-%m-%d"), r, "yfinance", now))
+        # yfinance は分割データ無しで None / 空Series を返し得る＝「分割なし」の正常結果（失敗でない）。
+        if splits is not None and len(splits) > 0:
+            for dt, ratio in splits.items():
+                r = float(ratio)
+                if r <= 0:
+                    continue  # データ異常のみ除外（逆分割 ratio<1.0 は算入する）
+                rows.append((code, dt.strftime("%Y-%m-%d"), r, "yfinance", now))
         # code 単位で洗替（削除→挿入）＝再実行で逆分割の取りこぼしや古い誤記録も是正できる冪等更新。
         self.conn.execute("DELETE FROM stock_splits WHERE code=?", (code,))
         if rows:
