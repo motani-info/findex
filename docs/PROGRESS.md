@@ -226,12 +226,7 @@ master(3734) → listing --all(全Yahoo・数時間) → prices(2000遡及+N225)
 ### 6.3 次の一手（残タスク・優先順）
 セッション再開時の起点。詳細手順は各設計書／`docs/PROJECT-LOG.md`／`logs/DEVLOG.md` を参照。
 
-1. **【柱1・追跡】Yahoo全銘柄多軸突合の整理が完了→対策フェーズへ** — 検証ツール3本（読み取り専用）: 配当=`scripts/yahoo_highdiv_compare.py`／断面取得=`scripts/yahoo_ranking_snapshot.py`（5軸全件→`logs/yahoo_ranking_snapshot_*.csv`）／**多軸トリアージ=`scripts/yahoo_ranking_triage.py`**（軸を{データ:PBR/時価総額/利回り}と{基準差:PER/ROE}に分け、符号・係数パターンで根因を機械分類→`logs/yahoo_ranking_triage_*.{csv,md}`）。**全3,905銘柄を分類済**。軸別整合度=時価総額94%・PBR/利回り80%/78%が±15%内（findexの裏取り）、PER/ROEは基準差で乖離大＝健全（基準差のみ1557件）。対策の優先順:
-   - ① **株数/分割の多軸一致 17件**（🟥確実なバグ・最優先）→ 権威ソースで株数/分割を裏取りし `findex splits`/抽出を補正。
-   - ② **PBR/自己資本(BPS) 448件**のうち極端例（4222児玉化学=自己資本過小）→ EDINET/J-Quants の equity 抽出を点検。残りは鮮度/四半期差で許容。
-   - ③ **時価総額の株数基準 78件**（自己株/浮動の系統差）→ 一括方針を決める。
-   - ④ 予想配当の分割欠落＋多軸混在292件 → 個別確認。
-   ※PER/ROEの大乖離は予想EPS vs 確報・ROE定義差＝即バグでない（PERは配当同様「予想化」の改善余地）。
+1. **【柱1・対策フェーズ】Yahoo多軸突合の是正タスク → 正本=[`docs/yahoo-crosscheck-remediation.md`](yahoo-crosscheck-remediation.md)** — 検証ツール3本（読み取り専用）: `scripts/yahoo_highdiv_compare.py`（配当）/`scripts/yahoo_ranking_snapshot.py`（5軸断面）/`scripts/yahoo_ranking_triage.py`（軸を{データ:PBR/時価総額/利回り}と{基準差:PER/ROE}に分け符号・係数で根因分類→`logs/yahoo_ranking_triage_*.{csv,md}`）。**全3,905銘柄 分類済**。軸別整合=時価総額94%・PBR80%・利回り78%が±15%内（findexの裏取り）。是正タスク（詳細は是正台帳）: **T1 株数/分割の多軸一致17件（🟥最優先・確実）**／T2 PBR自己資本の極端42件（4222等）／T3 配当findex過大66件（split漏れ/ghost）／T4 時価総額の株数基準78件（自己株/価格日差）／T5 多軸混在292件（個別）。健全=基準差のみ1557＋整合843＝対応不要。※各タスクは「数件で裏取り→一括補正→再突合で確認」、1軸の見かけで一括修正しない（4222を多軸で正診した教訓）。
 2. **【柱1/柱2・本番依存】本番J-Quants環境での予想更新（FY2027反映）** — 当開発環境は開示が2026年初で頭打ち＝ここで再取得しても無意味。最新開示が取れる本番でのみ runbook（再取得→FY2027中止ゲート→derive→突合で乖離縮小確認→publish_hub）を実行。−乖離の鮮度差が解消する。
 3. **【柱2・大物】全銘柄backtest → v5重み較正** — 現状は配線+方向性のみ。統計的有意性には ①財務多年backfill（現状5年）②全銘柄（統計力）③廃止株収集（生存バイアス・#4）が前提＝段階作業。
 4. **【柱1・ブロッカー】廃止株収集（生存バイアス排除）** — 無料データに廃止株なし＝有料tier前提で現状ブロック。解消すれば #3 の前提が揃う。
