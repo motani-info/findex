@@ -260,10 +260,11 @@ def financials_cmd(codes, cohort, all_codes, no_resume) -> None:
 @main.command("splits")
 @subset_options
 @all_option
-def splits_cmd(codes, cohort, all_codes) -> None:
-    """株式分割イベントを取得（yfinance .splits → stock_splits）。"""
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def splits_cmd(codes, cohort, all_codes, no_resume) -> None:
+    """株式分割イベントを取得（yfinance .splits → stock_splits・逆分割含む）。"""
     from .db import connect
-    from .fetch.splits import fetch_splits_for_codes
+    from .fetch.splits import build_splits
 
     target = _resolve_target(codes, cohort, all_codes)
     if not target:
@@ -271,10 +272,11 @@ def splits_cmd(codes, cohort, all_codes) -> None:
         return
     conn = connect()
     try:
-        n = fetch_splits_for_codes(conn, target)
+        stats = build_splits(conn, target, resume=not no_resume)
     finally:
         conn.close()
-    console.print(f"[green]✓[/green] splits: {n} 件取得（{len(target)} 銘柄チェック）")
+    console.print(f"[green]✓[/green] splits: {stats['splits_rows']} 件 "
+                  f"（{stats['fetch_summary']}）")
 
 
 @main.command("derive")
