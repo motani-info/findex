@@ -909,10 +909,11 @@ _SPECS: dict[str, dict] = {
     # 顔ぶれが知名度の高い大型株に揃う（第一三共/SUBARU/JFE/トヨタ/INPEX/ZOZO/エーザイ等）。
     "oversold_large": dict(
         title="売られすぎ大型高配当", subtitle="時価総額1兆円超×52週高値から15〜45%下げた黒字高配当",
-        body_fn=lambda n, names: ('大型でも、"売られすぎ"は来る。\n'
-                                  f"売られすぎ大型高配当ランキング📉 トップ{n}\n"
+        body_fn=lambda n, names: ('流石に売られすぎ！\n'
+                                  'AI・半導体株の上昇の裏で優良大型株が下落中📉\n'
+                                  f"今が狙い目、大型高配当ランキングトップ{n}\n"
                                   f"{names}"
-                                  "高値から下げた1兆円超の高配当。\n#高配当株 #大型株"),
+                                  "今が絶好の仕込み時💪\n#高配当株 #大型株"),
         headline=("dy", "pct"),                 # 無印と同様、本文看板は配当利回りのみ（下落率は画像列）
         signature=[("52週高値比", "drawdown_from_high", "pct_down"),
                    ("1年騰落", "price_return_1y", "pct_signed")],
