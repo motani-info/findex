@@ -268,6 +268,8 @@ def _body_metric(v, fmt: str) -> str:
         return f"{v * 100:.1f}%"
     if fmt == "pct_signed":
         return f"＋{v * 100:.1f}%" if v >= 0 else f"−{abs(v) * 100:.1f}%"
+    if fmt == "pct_down":         # 下落率（正値を「−X%」表示）。売られすぎの看板。
+        return f"−{v * 100:.1f}%"
     if fmt == "year":
         return f"{int(v)}年"
     if fmt == "x":
@@ -288,6 +290,7 @@ _HEADLINE_LABEL = {
     "nc_years": "非減配", "g_years": "増配", "payout_ratio": "性向",
     "fcf_payout_coverage": "FCFカバ", "roe": "ROE", "total": "総合",
     "doe": "DOE", "eps_growth_5y": "EPS成長", "yoc": "YoC", "net_cash_per": "実質PER",
+    "drawdown_from_high": "高値比",
 }
 
 
@@ -541,6 +544,15 @@ def _cell(r: dict, key: str, kind: str) -> str:
     v = r.get(key)
     if kind == "pct":
         return _hot(_pct(v), None if v is None else v * 100)
+    if kind == "pct_down":
+        # 下落率（正値を「−X%」として表示）。売られすぎテーマの看板。下落の大きさは"良い"色
+        # （teal hot）でなく警告寄りで出す。
+        return '<span class="muted">—</span>' if v is None else f'<span class="np">−{v * 100:.1f}%</span>'
+    if kind == "pct_signed":
+        # 符号付き騰落率（負＝下落）。
+        if v is None:
+            return '<span class="muted">—</span>'
+        return f"＋{v * 100:.1f}%" if v >= 0 else f'<span class="np">−{abs(v) * 100:.1f}%</span>'
     if kind == "num":
         return _hot(_num(v), v)
     if kind == "x":
@@ -865,6 +877,30 @@ _SPECS: dict[str, dict] = {
         and r["g_years"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["eps_growth_5y"] or -1,
         claim_keys=["eps_growth_5y", "revenue_growth_5y_cagr", "g_years", "gd"]),
+    # ── 新軸: 売られすぎ高配当（直近の株価下落×高配当）─────────────────────────
+    # 核＝「52週高値からの下落率」(drawdown_from_high)。price_history のみ由来＝新規取得なし・
+    # point-in-time（後日走らせれば別の結果＝ユーザー要件「その時その時の情報」）。
+    "oversold": dict(
+        title="売られすぎ高配当", subtitle="52週高値から15〜45%下げた黒字×高配当株（押し目候補）",
+        body_fn=lambda n, names: ('"売られすぎ"を、配当ごと拾う。\n'
+                                  f"売られすぎ高配当ランキング📉 トップ{n}\n"
+                                  f"{names}"
+                                  "高値から下げた黒字高配当。\n#高配当株 #押し目買い"),
+        headline=("drawdown_from_high", "pct_down"),
+        signature=[("52週高値比", "drawdown_from_high", "pct_down"),
+                   ("1年騰落", "price_return_1y", "pct_signed")],
+        # 「価格が下げた」だけを拾うと罠を踏む（定款: naive実装は罠を踏む）。全ユニバース実測で naive
+        # に下落率降順だと −80%級の崩壊/分割アーティファクト・赤字の万年安値（バリュートラップ）が
+        # 上位を占めた。これを次の3点で是正し「健全な売られすぎ」に限定する:
+        #   ① 下落率を 15〜45% にバンド化（暴落/構造変化/データ異常を上限で除外。動画TOP10も最大39%）
+        #   ② ROE>0（黒字）を要求＝赤字で下げ続ける罠を除外（"押し目"は稼げる会社の一時的な下げ）
+        #   ③ 配当claim確か(gd!=D)・タコ足でない・利回り3%フロア
+        eligible=lambda r: r["gd"] != "D" and r["drawdown_from_high"] is not None
+        and 0.15 <= r["drawdown_from_high"] <= 0.45 and r["roe"] is not None and r["roe"] > 0
+        and not _is_takoashi(r) and _yield_ok(r, YIELD_FLOOR_HIGH),
+        sort_key=lambda r: r["drawdown_from_high"] or -1,
+        foot_extra="※「売られすぎ」=52週高値からの下落率。下落15〜45%・黒字(ROE>0)・配当grade≠Dで絞った機械的スクリーニング（業績悪化の正当な下落＝罠を完全には除けません）。",
+        claim_keys=["drawdown_from_high", "price_return_1y", "dy", "gd"]),
 }
 
 
@@ -902,6 +938,7 @@ _TARAREBA_THESIS = {
     "small_value": "小型割安の伸びしろ。",
     "doe_king": "資本に報いるDOEが裏づけ。",
     "nisa_growth": "EPS成長が増配の源泉。",
+    "oversold": "下げ局面でこその高い利回り。",
     "div_growth": "育ったYoCの実績が裏づけ。",
     "value_quality": "質を伴う割安が裏づけ。",
     "net_cash": "潤沢な現金が下支え。",

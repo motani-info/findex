@@ -283,13 +283,14 @@ def splits_cmd(codes, cohort, all_codes, no_resume) -> None:
 @subset_options
 @all_option
 @click.option("--what", default="all",
-              help="導出対象（all/streaks/dividends/financials/prices/beta/roic/grades）")
+              help="導出対象（all/streaks/dividends/financials/prices/drawdown/beta/roic/grades）")
 def derive_cmd(codes, cohort, all_codes, what) -> None:
     """導出層: 前段テーブル→computed_metrics（Phase3）。"""
     from .db import connect
     from .derive.compute import (
         build_beta,
         build_dividend_metrics,
+        build_drawdown_metrics,
         build_financial_metrics,
         build_grades,
         build_price_metrics,
@@ -328,6 +329,14 @@ def derive_cmd(codes, cohort, all_codes, what) -> None:
                 f"[green]✓[/green] prices: rows={p['rows']} "
                 f"PER={oc['per']} PBR={oc['pbr']} 時価総額={oc['current_market_cap']} "
                 f"配当利回り={oc['div_yield']} ミックス={oc['mix_coefficient']} ネットキャッシュPER={oc['net_cash_per']}"
+            )
+        if what in ("all", "prices", "drawdown"):
+            dd = build_drawdown_metrics(conn, target)
+            oc = dd["ok_counts"]
+            console.print(
+                f"[green]✓[/green] drawdown: rows={dd['rows']} "
+                f"52週高値={oc['price_high_52w']} 下落率={oc['drawdown_from_high']} "
+                f"1年騰落={oc['price_return_1y']} 6ヶ月騰落={oc['price_return_6m']}"
             )
         if what in ("all", "beta"):
             b = build_beta(conn, target)

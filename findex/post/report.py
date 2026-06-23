@@ -105,6 +105,7 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
         "roe", "equity_ratio", "operating_margin", "payout_ratio", "doe",
         "debt_to_equity", "eps_growth_5y", "revenue_growth_5y_cagr",
         "roic_minus_wacc", "fcf_payout_coverage", "retained_earnings_div_ratio", "annual_div",
+        "drawdown_from_high", "price_return_1y", "price_return_6m", "price_high_52w",
     )
     _RAW = (
         "consecutive_dividend_growth_years", "consecutive_no_cut_years", "streak_is_censored",

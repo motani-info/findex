@@ -139,6 +139,10 @@ CREATE TABLE IF NOT EXISTS computed_metrics (
     -- 価格由来（日次）
     per REAL, pbr REAL, current_market_cap REAL, div_yield REAL,
     mix_coefficient REAL, net_cash_per REAL,
+    -- 売られすぎ（直近の株価下落・日次。price_history のみ由来＝新規取得なし）
+    price_high_52w REAL,                        -- 直近52週の高値（調整後終値）
+    drawdown_from_high REAL,                    -- 52週高値からの下落率（0〜1。大=売られすぎ）
+    price_return_1y REAL, price_return_6m REAL, -- 1年/6ヶ月騰落率（負=下落）
     -- 財務由来（四半期）
     equity_ratio REAL, debt_to_equity REAL, roe REAL, operating_margin REAL,
     eps_growth_5y REAL, revenue_growth_5y_cagr REAL,

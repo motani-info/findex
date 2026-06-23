@@ -46,6 +46,11 @@ def _migrate_add_columns(conn) -> None:
     """既存テーブルに後から増えた列を冪等に追加する（新規DBはスキーマで作成済）。"""
     wanted = {
         "financial_snapshots": [("disclosed_date", "TEXT")],   # 分割補正の基準日（doc11是正）
+        # 売られすぎ指標（price_history 由来・新規取得なし）。後追加のため既存DBへ冪等に列追加。
+        "computed_metrics": [
+            ("price_high_52w", "REAL"), ("drawdown_from_high", "REAL"),
+            ("price_return_1y", "REAL"), ("price_return_6m", "REAL"),
+        ],
     }
     for table, cols in wanted.items():
         existing = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}

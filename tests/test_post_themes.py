@@ -153,6 +153,27 @@ def test_roic_spread_requires_roe():
     assert not elig(_row(roic_minus_wacc=-0.01, roe=0.12)) # 価値破壊（負）→除外
 
 
+def test_oversold_excludes_traps():
+    """oversold（売られすぎ高配当）: naiveに下落率降順だと崩壊株/赤字トラップを拾う。
+    下落15〜45%バンド・黒字(ROE>0)・gd≠D・利回り3%・非タコ足で『健全な売られすぎ』に限定。"""
+    elig = _SPECS["oversold"]["eligible"]
+    base = dict(gd="B", dy=0.04, payout_ratio=0.4, roe=0.10)
+    # 健全に売られすぎ（高値比30%下落・黒字・配当確か）は通過
+    assert elig(_row(**base, drawdown_from_high=0.30))
+    # 暴落/構造変化/データ異常（高値比45%超）は罠の温床→上限で除外（例: GMO −82%）
+    assert not elig(_row(**base, drawdown_from_high=0.80))
+    # 下落が浅い（15%未満）は「売られすぎ」と言えない→除外
+    assert not elig(_row(**base, drawdown_from_high=0.10))
+    # 赤字（ROE≤0）の万年安値＝バリュートラップは除外（"押し目"は稼げる会社の一時的な下げ）
+    assert not elig(_row(gd="B", dy=0.04, payout_ratio=0.4, roe=-0.05, drawdown_from_high=0.30))
+    assert not elig(_row(gd="B", dy=0.04, payout_ratio=0.4, roe=None, drawdown_from_high=0.30))
+    # 配当claim無し(gd=D)・利回りフロア未満は除外
+    assert not elig(_row(gd="D", dy=0.04, payout_ratio=0.4, roe=0.10, drawdown_from_high=0.30))
+    assert not elig(_row(gd="B", dy=0.02, payout_ratio=0.4, roe=0.10, drawdown_from_high=0.30))
+    # 下落率未算出（履歴不足）は出さない
+    assert not elig(_row(**base, drawdown_from_high=None))
+
+
 def test_non_financial_excludes_financial_sectors():
     """CF系テーマ: 銀行/証券/保険/その他金融を除外（FCF・ネットキャッシュの概念が不適）。"""
     assert not _non_financial(_row(sector33="銀行業"))
