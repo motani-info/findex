@@ -25,8 +25,10 @@ def fetch_splits_for_codes(conn, codes: list[str], sleep: float = 0.1) -> int:
             if splits.empty:
                 continue
             for dt, ratio in splits.items():
-                if ratio < 1.0:
-                    continue  # 逆分割・データ異常は除外（doc11: 正方向分割のみ対象）
+                if ratio <= 0:
+                    continue  # データ異常のみ除外
+                # 逆分割（株式併合・ratio<1.0）も算入する（doc11是正）。除外すると株数/1株指標が
+                # 併合前基準で残り、PER/PBR/時価総額が桁違いに過大化する（例: 1491中外鉱業20:1併合）。
                 split_date = dt.strftime("%Y-%m-%d")
                 conn.execute(
                     "INSERT OR REPLACE INTO stock_splits (code, date, ratio, source, collected_at) "

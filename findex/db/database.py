@@ -32,6 +32,7 @@ def init_db(db_path: Path | None = None) -> None:
     conn = connect(db_path)
     try:
         conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+        _migrate_add_columns(conn)            # 既存DBへの冪等な列追加（CREATE IF NOT EXISTSでは増えない）
         conn.execute(
             "INSERT OR IGNORE INTO schema_version (version, applied_at) VALUES (?, ?)",
             (SCHEMA_VERSION, datetime.now().isoformat(timespec="seconds")),
@@ -39,6 +40,18 @@ def init_db(db_path: Path | None = None) -> None:
         conn.commit()
     finally:
         conn.close()
+
+
+def _migrate_add_columns(conn) -> None:
+    """既存テーブルに後から増えた列を冪等に追加する（新規DBはスキーマで作成済）。"""
+    wanted = {
+        "financial_snapshots": [("disclosed_date", "TEXT")],   # 分割補正の基準日（doc11是正）
+    }
+    for table, cols in wanted.items():
+        existing = {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
+        for name, typ in cols:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {typ}")
 
 
 def backup_db(db_path: Path | None = None) -> Path | None:

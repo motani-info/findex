@@ -106,7 +106,8 @@ CREATE TABLE IF NOT EXISTS financial_snapshots (
     -- 来歴メタ（§1）
     source      TEXT NOT NULL,
     confidence  TEXT,
-    as_of       TEXT,
+    as_of       TEXT,                           -- 決算期末（CurFYEn）
+    disclosed_date TEXT,                         -- 開示日（J-Quants DisclosedDate）＝分割補正の基準日（doc11是正・期末でなく開示日を使う）
     collected_at TEXT NOT NULL,
     PRIMARY KEY (code, fiscal_year)
 );

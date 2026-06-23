@@ -78,14 +78,14 @@ class _FinancialsBuilder(RateLimitedFetcher[dict]):
 
             rows: dict[int, dict] = {}
 
-            def _blank(src: str, as_of) -> dict:
+            def _blank(src: str, as_of, disclosed=None) -> dict:
                 r = {c: None for c in self.value_cols}
-                r["_source"], r["_as_of"] = src, as_of
+                r["_source"], r["_as_of"], r["_disclosed"] = src, as_of, disclosed
                 return r
 
             # J-Quants 基礎財務（年次・確報）
             for fin in fy_list:
-                r = _blank("jquants", fin.period_end)
+                r = _blank("jquants", fin.period_end, fin.disclosed_date)
                 for c in self.base_cols:
                     r[c] = fin.base.get(c)
                 rows[fin.fiscal_year] = r
@@ -116,7 +116,7 @@ class _FinancialsBuilder(RateLimitedFetcher[dict]):
 
             for fy, r in sorted(rows.items()):
                 values = [code, fy, *[r.get(c) for c in self.value_cols],
-                          r["_source"], "present", r["_as_of"], self.now]
+                          r["_source"], "present", r["_as_of"], r.get("_disclosed"), self.now]
                 self.conn.execute(self.insert_sql, values)
                 self.n_rows += 1
             self.conn.commit()        # ← ここまで終えてから base.run が checkpoint を刻む
@@ -143,10 +143,12 @@ def build_financials(conn, codes: list[str], *, resume: bool = True) -> dict:
     base_cols = list(JQ_BASE_MAP.keys())
     deep_cols = list(DEEP_FIELDS)
     value_cols = base_cols + deep_cols
-    all_cols = ["code", "fiscal_year", *value_cols, "source", "confidence", "as_of", "collected_at"]
+    all_cols = ["code", "fiscal_year", *value_cols, "source", "confidence", "as_of",
+                "disclosed_date", "collected_at"]
     placeholders = ",".join("?" * len(all_cols))
     set_clause = ",".join(
-        f"{c}=excluded.{c}" for c in (*value_cols, "source", "confidence", "as_of", "collected_at")
+        f"{c}=excluded.{c}" for c in (*value_cols, "source", "confidence", "as_of",
+                                      "disclosed_date", "collected_at")
     )
     insert_sql = (
         f"INSERT INTO financial_snapshots ({','.join(all_cols)}) VALUES ({placeholders}) "

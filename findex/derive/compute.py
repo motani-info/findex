@@ -444,19 +444,21 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     # net_incomeだけ埋めた薄いorphan行（営業利益・株数を欠く）を掴まないよう jquants 優先。
     core = conn.execute(
         "SELECT fiscal_year, revenue, operating_income, net_income, eps, total_assets, "
-        "equity_attributable, operating_cf, shares_outstanding, as_of FROM financial_snapshots "
+        "equity_attributable, operating_cf, shares_outstanding, as_of, disclosed_date "
+        "FROM financial_snapshots "
         "WHERE code=? AND net_income IS NOT NULL "
         "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
         (code,),
     ).fetchone()
     if not core:
         return None
-    (fy, revenue, op_income, net_income, eps, total_assets, equity, op_cf, shares, as_of) = core
-    # 株式分割補正（doc11）: dividend_annual.dps は分割調整済み（分割後基準）だが、
-    # eps/shares は J-Quants 報告値（分割前基準）。payout=DPS/EPS や DOE=DPS×shares で
+    (fy, revenue, op_income, net_income, eps, total_assets, equity, op_cf, shares,
+     as_of, disclosed) = core
+    # 株式分割補正（doc11是正）: dividend_annual.dps は分割調整済み（分割後基準）だが、
+    # eps/shares は J-Quants 報告値（開示日基準）。payout=DPS/EPS や DOE=DPS×shares で
     # 基準が混在し過小算出になるため、eps/shares を分割後基準へ揃える（純益・自己資本は
-    # 総額なので分割の影響を受けず補正不要）。
-    _factor = _split_adjustment_factor(conn, code, as_of or f"{fy}-03-31")
+    # 総額なので分割の影響を受けず補正不要）。基準日は開示日（無ければ期末）。
+    _factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
     if _factor != 1.0:
         if eps is not None:
             eps = eps / _factor
@@ -765,16 +767,39 @@ def build_roic(conn, codes: list[str]) -> dict:
     return {"rows": n, "ok": ok}
 
 
-def _split_adjustment_factor(conn, code: str, as_of: str) -> float:
-    """as_of以降に発生した分割の累積比率を返す（doc11）。分割なければ1.0。"""
+def _split_adjustment_factor(conn, code: str, ref_date: str) -> float:
+    """ref_date より後に発生した分割の累積比率（doc11是正）。分割なければ1.0。
+
+    ref_date は財務値の基準時点＝**開示日(disclosed_date)が望ましい**（決算期末ではない）。
+    報告EPS/BPS/株数は開示日基準なので、開示後の分割だけ補正対象になる（期末〜開示の間の
+    分割を二重補正しない）。逆分割(ratio<1.0=株式併合)も算入する。
+    yfinanceが同一分割を隣接日で重複計上するケース（例: 8341 3:1が2日連続）は1回に畳む。
+    """
     rows = conn.execute(
-        "SELECT ratio FROM stock_splits WHERE code=? AND date>?",
-        (code, as_of),
+        "SELECT date, ratio FROM stock_splits WHERE code=? AND date>? ORDER BY date",
+        (code, ref_date),
     ).fetchall()
     factor = 1.0
-    for (r,) in rows:
+    prev_date = prev_ratio = None
+    for d, r in rows:
+        if (prev_ratio is not None and r == prev_ratio
+                and _days_between(prev_date, d) <= 7):
+            prev_date = d                      # 同一比率の近接重複＝yfinanceの二重計上→畳む
+            continue
         factor *= r
+        prev_date, prev_ratio = d, r
     return factor
+
+
+def _days_between(d0: str, d1: str) -> int:
+    """'YYYY-MM-DD' 同士の日数差（絶対値）。パース不能は大きな値（別イベント扱い）。"""
+    from datetime import date
+    try:
+        a = date.fromisoformat(d0[:10])
+        b = date.fromisoformat(d1[:10])
+        return abs((b - a).days)
+    except Exception:
+        return 9999
 
 
 def _latest_price(conn, code: str):
@@ -802,16 +827,17 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     price_date, price = pr
     fin = conn.execute(
         "SELECT eps, bps, shares_outstanding, total_assets, equity_attributable, "
-        "cash_and_equivalents, as_of, fiscal_year FROM financial_snapshots "
+        "cash_and_equivalents, as_of, fiscal_year, disclosed_date FROM financial_snapshots "
         "WHERE code=? AND net_income IS NOT NULL "
         "ORDER BY (source LIKE '%jquants%') DESC, fiscal_year DESC LIMIT 1",
         (code,),
     ).fetchone()
     if not fin:
         return None
-    eps, bps, shares, total_assets, equity, cash, as_of, fy = fin
-    # 株式分割補正（doc11）: as_of以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する
-    factor = _split_adjustment_factor(conn, code, as_of or f"{fy}-03-31")
+    eps, bps, shares, total_assets, equity, cash, as_of, fy, disclosed = fin
+    # 株式分割補正（doc11是正）: 開示日以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する。
+    # 基準日は開示日（disclosed_date）＝期末〜開示の間の分割を二重補正しない。無ければ期末。
+    factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
     if factor != 1.0:
         if eps is not None:
             eps = eps / factor

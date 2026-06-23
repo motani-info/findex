@@ -100,6 +100,7 @@ class FinFY:
     period_end: str
     accounting_standard: str | None
     base: dict[str, float | None] = field(default_factory=dict)
+    disclosed_date: str | None = None    # 開示日（DisclosedDate）＝分割補正の基準日（doc11是正）
 
 
 def parse_fy_records(records: list[dict]) -> list[FinFY]:
@@ -122,7 +123,13 @@ def parse_fy_records(records: list[dict]) -> list[FinFY]:
             continue
         fy = int(end[:4])
         std = _doctype_standard(r.get("DocType", ""))
-        out[fy] = FinFY(fiscal_year=fy, period_end=end, accounting_standard=std, base=base)
+        disc = r.get("DisclosedDate") or r.get("DiscDate") or None
+        cand = FinFY(fiscal_year=fy, period_end=end, accounting_standard=std,
+                     base=base, disclosed_date=disc)
+        # 同一FYに複数開示（訂正等）があれば最新開示(DisclosedDate)を採る。開示日不明は従来どおり後勝ち。
+        prev = out.get(fy)
+        if prev is None or not (prev.disclosed_date and disc and disc < prev.disclosed_date):
+            out[fy] = cand
     return [out[k] for k in sorted(out)]
 
 
