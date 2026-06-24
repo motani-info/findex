@@ -5,6 +5,99 @@
 
 ---
 
+## 流動性フロア（doc19）— 薄商い小型株の発信事故を柱3で足切り（2026-06-24）
+
+ユーザー指摘「100億円以下の株は流動性が低い。スコアリングに影響しているか」を起点に調査・是正。
+正本: [19-liquidity-floor-theme-layer.md](design/19-liquidity-floor-theme-layer.md)。
+
+- **調査結論**: 柱2採点（`score/engine.py`）は時価総額を**点数に使っていない**（中立）。唯一の用途は
+  `select_rules` の large_cap分類スイッチ（1兆円で代替指標へ入替）のみで、出来高/売買代金等の流動性指標は
+  DB・スコアに不在。よって薄商い小型株が利回り等で上位に来ても止める仕組みが無く投稿候補になっていた。
+- **実データ証拠**: 全3,673社中 時価総額<100億=1,252社（34.1%）。生利回りテーマ現状トップ10は**4/10が
+  100億未満・1位がトーシンHD=13億円**＝「気配が薄く実際には買えない株」を高配当首位に発信する事故。
+- **決定（案1: テーマ層フロア）**: 柱2スコアは**中立のまま**（小型株も同じルールで採点）。柱3発信層のみ
+  足切り。`post/themes.py` に `MIN_MARKET_CAP=1e10`（100億）＋`_liquid(r)` を追加し、既存 `_sufficient(r)`
+  と同じ全テーマ共通7地点（宣言的=`_ranking_theme`／手書きビルダ）に併置。`current_market_cap` 未取得(None)は
+  **除外しない**＝確証なき除外もしない（定款・タコ足/業種と同扱い）。
+- **効果**: 生利回り eligible 850→637（213社除外）。`small_value`(<1000億)は100億〜1000億に縮むだけで主旨温存。
+- **限界・将来**: 時価総額は流動性の近似。より厳密には売買代金（price_history volume×終値の中央値）フロアが理想で
+  新規取得なしにderive可（保留候補）。
+- 検収: **pytest 142 passed** / `test_liquid_floor` 追加。コミット `b7807b1`（push済み）。
+
+---
+
+## 配当方針マスター（doc18）— EDINET開示の配当方針をマスター化（2026-06-24）
+
+ユーザー要望「配当方針をマスターデータに」（配当性向=既存導出値とは別物。会社が有報で開示する基本方針テキスト）。
+形式=生テキスト(A)＋構造化シグナル(B)。正本: [18-dividend-policy-master.md](design/18-dividend-policy-master.md)。
+
+- **データ源**: EDINET有報 `jpcrp_cor:DividendPolicyTextBlock`（IFRS/JGAAP 同一要素ID）。財務取得で既にDL済みの
+  同一CSVを再利用＝**新規ネットワーク負荷ゼロ**（鉄則適合）。
+- **schema.sql**: `dividend_policy` 新設（A=`policy_text` verbatim／B=`progressive_flag`/`stable_flag`/
+  `payout_target_pct`/`doe_target_pct`/`total_payout_target_pct`＋`signals_status`JSON）。`init_db` 冪等。
+- **edinet.py**: `extract_dividend_policy`（当年ctx優先・verbatim）＋`parse_policy_signals`（**確証主義の核心**＝
+  目標マーカーと共起時のみ採り、実績マーカー近傍/曖昧/不在は missing。全角正規化）。`financials.py` で同一
+  トランザクションに upsert。
+- **★スケール検証で罠が顕在化→是正**（定款「小サンプル成功≠スケール安全／naive実装は罠」の実例）: cohort 35社では
+  出ず、全3,734社で**Bの偽陽性**が発生。①DOE値のpayout混入 ②方針語と共起する実績・確定値（…ました/…決定）を
+  目標と誤認 ③上限「配当性向100%以下/以内」を目標と誤認。**A(生テキスト)は無傷・Bのみ**。`policy_text` を verbatim
+  保持していたため**新規フェッチ無しの再パース（`findex policy-reparse`）で全件是正**。パーサ強化=実績マーカーを
+  確定形に限定／上限除外／配当性向と数値の間に別指標語があれば不採用（block_between）。回帰テストに3型固定。
+- **取得（--all 完了）**: 3734/3734 処理（policy_text 3525社 verbatim・残=政策ブロック不在=missing）。429競合期の
+  failed は resume で全回収（failed=0）。B分布健全（payout目標 n=1002・中央値35%／DOE n=345・中央値3.0%／
+  総還元 n=185・中央値50%／累進flag 216社）。
+- 検収: golden 18/18 不整合0 / **pytest 148 passed**。コミット `ab8dd81`（push済み）。
+- **次の一手（任意）**: 「累進配当」216社の柱2/柱3テーマ化（Xに強い切り口）は別タスク。
+
+---
+
+## T1是正 — 株数/分割の多軸一致を権威ある発行済株数で根治（2026-06-24）
+
+Yahoo突合（`docs/yahoo-crosscheck-remediation.md` T1節が正本）で残っていた「株数/分割の基準ズレ」を全件展開＋
+根本対応。mcap/PER/PBR が壊れる最大の柱1リスクを🟥→🟩へ。
+
+- **Phase2 全件展開（監視下・鉄則準拠）**: `splits --all` resume完走（分割保有1800→2230）→
+  `backfill_disclosed_date.py`（J-Quants軽量・分割保有のみ）で `disclosed_date` 18→4,654行→`derive --all`→
+  triage で **T1 17→7件**→`verify --cohort` golden18/18・不整合0。
+- **🔴二次バグ根治（`2c0314b`）**: `fetch/splits.py` の無条件洗替（DELETE→INSERT）が、全件スキャン中の
+  yfinance一過性空応答で**実在分割を消す**事故（1961/1980/2003/2146UT等が分割喪失→T1新規出現）。空/None応答では
+  既存行に触れずスキップに修正・回帰テスト2件追加。埋め戻し（`scripts/refetch_splitless.py`＝split0件コードのみ
+  ゼロリスク再取得）で被害復活（**UT 0.76→11.45**＝doc11期待一致）。
+- **★share_count 採用でT1根治（`7526ea0`）**: 株数を「報告財務×分割補正」で導出する方式は重複split/期末直前分割/
+  増減資で壊れYahooとMAX3.5x乖離（残存7件）。日付ベース分割畳み込みは実在の連続分割（6574=10:1×2）を壊すため不可。
+  → **yfinance/Yahooが直接持つ現在発行済株数を真値に採用**。`share_count` テーブル新設＋`SharesFetcher`
+  （`RateLimitedFetcher`経由・空は上書きせずスキップ）＋`findex shares`。derive は権威株数があれば
+  `factor_eff=権威株数/報告株数` でEPS/BPSを現在基準へ換算し `mcap=price×権威株数`、無ければ従来の分割factor
+  （doc11・開示日基準）へフォールバック＝**過去PIT/backtestは従来通り**。
+- **効果**: 8022ミズノ mcap 906→2593億(Yahoo2679)・pbr 0.56→1.6(1.47)、2726パルG mcap 5090→2388億(2628)・
+  pbr 6.74→3.16(2.96)。
+- 検収: golden 18/18 / **pytest 149 passed**。コミット `2c0314b`/`3133e94`/`7526ea0`（全て push済み）。
+
+---
+
+## 売られすぎ高配当（oversold）＋ドローダウン指標＋全社データ最新化（2026-06-23〜24）
+
+外部動画「売られすぎ高配当TOP10」を findex で再現できるか検証→実装。突合で findex は利回り/PER/PBR/ROE/
+自己資本比率/連続増配をよく再現したが、**唯一欠けていたのが「売られすぎ」の核＝直近の株価下落そのもの**だった。
+
+- **追加した導出指標（price_history のみ由来＝新規フェッチなし・point-in-time）**: `drawdown_from_high`（52週高値
+  からの下落率）・`price_return_1y`/`price_return_6m`・`price_high_52w`。schema.sql に4列＋冪等ALTER、
+  `compute.py` に算出、CLI `findex derive --what drawdown`、`report.py` の `_GATED` に露出。短履歴は insufficient。
+- **新テーマ `oversold`**: 全3734社で naive な下落率降順は−82%級の崩壊/分割アーティファクト/赤字の万年安値
+  （バリュートラップ）を拾った（定款「naive実装は罠」）→ ①下落15〜45%バンド ②ROE>0 ③gd!=D・非タコ足・利回り3%
+  で「健全な売られすぎ」に是正。動画10社は是正後も8社残存（罠だけ消えた）。
+- **`oversold_large` 追加**（ユーザーFB「知らない株ばかり」）: 健全条件＋時価総額1兆円超。第一三共/SUBARU/JFE/
+  トヨタ/INPEX 等に揃い知名度問題を解消。
+- **見送り（定款判断）**: DOE導入/累進配当/配当性向目標/株主優待は定性テキスト＝確証ある数字でないため捏造しない。
+- **公開＋全社最新化**: `prices --all --no-resume`（resume無効化が最新化の必須）監視下1回・ok=3734/failed=0で
+  全体06-16→06-23へ。再derive→score→`publish_hub.sh --all` で **20テーマ**を https://motani-info.github.io/findex/
+  に反映。ハブ脱落バグ（全ユニバースは社名が長く2指標併記が140字超でゲート落ち）を**本文看板を配当利回りのみ**に
+  変更して是正。
+- **環境制約**: 最新化できたのは価格(yfinance)のみ。配当/財務/会社予想はJ-Quantsが2026年初頭打ち＝本番待ち。
+- 検収: **pytest 139 passed** / golden 18/18。コミット `21f6b5d`/`a506aa3`（push済み）。
+
+---
+
 ## 予想配当利回りへの切替＋全銘柄公開（2026-06-22）
 
 ユーザー指摘（7463アドヴァングループ=11.0% 等が実態と乖離・Yahoo予想4.51%）を起点に、配当利回りを
