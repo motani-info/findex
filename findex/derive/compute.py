@@ -787,6 +787,19 @@ _SHARES_FACTOR_OVERRIDE: dict[str, float] = {
 }
 
 
+# 【BPS=自己資本/株数を優先する明示集合・T2是正 2026-06-24】
+# J-Quants /fins/summary の報告 BPS が equity/shares と大きく乖離する銘柄のうち、
+# **黒字×単純資本構成で equity/shares が Yahoo の book value と一致を裏取り**したもの。
+# 報告 BPS のパース defect（壊れた1株純資産）を、検証済みの自己資本÷株数で置換する。
+# ★ユニバース全体には適用しない: 乖離>25%の153件中92件はfindexのBPSが正しくYahoo一致
+#   （`Eq`=純資産合計に優先株/少数株主が含まれる良性乖離）＝全件置換は良データを壊す。
+# 値は data 変化時に要再確認（優先株を後発で持てば eq/sh が過大化＝この集合から外す）。
+_BPS_FROM_EQUITY: frozenset[str] = frozenset({
+    "2978", "3370", "3646", "3896", "3912", "4390",
+    "5892", "6343", "6890", "8473", "9519", "9723",
+})
+
+
 def _shares_factor(conn, code: str, ref_date: str) -> float:
     """shares/eps/bps を現在株数基準へ揃える係数。通常は日付ベースの split factor。
     報告株数の分割基準が yfinance split 日と乖離する個別銘柄(期末直前分割/事後反映済)は
@@ -866,6 +879,10 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     if not fin:
         return None
     eps, bps, shares, total_assets, equity, cash, as_of, fy, disclosed = fin
+    # 報告BPSのパースdefectを自己資本÷株数で置換（T2是正・明示集合のみ）。raw値で置換すれば
+    # 後段の分割補正(÷factor)が一貫適用され PBR=時価総額/自己資本 になる（株数は検証済み）。
+    if code in _BPS_FROM_EQUITY and equity and equity > 0 and shares and shares > 0:
+        bps = equity / shares
     # 株式分割補正（doc11是正）: 開示日以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する。
     # 基準日は開示日（disclosed_date）＝期末〜開示の間の分割を二重補正しない。無ければ期末。
     # 注: 報告株数(J-Quants issued)はYahoo発行済とほぼ完全一致＝真値。yfinance sharesOutstanding を

@@ -109,6 +109,54 @@ def test_payout_ratio_uses_split_adjusted_eps():
     assert out["payout_ratio"] == round(40.0 / 100.0, 6)  # 0.4 = 40%
 
 
+def test_bps_from_equity_override_uses_equity_over_reported_bps():
+    """T2是正: 明示集合の銘柄は壊れた報告BPSでなく自己資本÷株数でPBRを出す。
+    PBR=時価総額/自己資本（株数は検証済み）になり、報告BPSのdefectを無効化する。"""
+    from pathlib import Path
+
+    from findex.db.database import connect
+    from findex.derive.compute import _BPS_FROM_EQUITY, compute_price_metrics_for_code
+
+    code = next(iter(_BPS_FROM_EQUITY))  # 集合の代表1銘柄
+    conn = connect(":memory:")
+    conn.executescript(Path("findex/db/schema.sql").read_text(encoding="utf-8"))
+    conn.execute(
+        "INSERT INTO stocks (code, name, accounting_standard, updated_at) VALUES (?,'テスト','jgaap','now')",
+        (code,),
+    )
+    # 報告BPS=100(壊れ)、equity=2000M/shares=10M → 真のBPS=200。価格=400。
+    # 報告BPS基準: PBR=400/100=4.0（誤）／自己資本基準: PBR=400/200=2.0（正）
+    conn.execute(
+        "INSERT INTO financial_snapshots (code, fiscal_year, source, net_income, eps, bps, "
+        "total_assets, equity_attributable, shares_outstanding, as_of, collected_at) "
+        "VALUES (?, 2025, 'jquants', 200000000, 50.0, 100.0, 5000000000, 2000000000, 10000000, '2025-03-31', 'now')",
+        (code,),
+    )
+    conn.execute(
+        "INSERT INTO price_history (code, date, close_adj, source) VALUES (?, '2025-06-20', 400.0, 'yfinance')",
+        (code,),
+    )
+    conn.commit()
+    out = compute_price_metrics_for_code(conn, code)
+    assert out["pbr"] == 2.0  # 自己資本÷株数=200基準（報告BPS100でなく）
+
+    # 集合外の銘柄(9999)は報告BPSをそのまま使う（回帰なし）。
+    conn.execute(
+        "INSERT INTO stocks (code, name, accounting_standard, updated_at) VALUES ('9999','他','jgaap','now')"
+    )
+    conn.execute(
+        "INSERT INTO financial_snapshots (code, fiscal_year, source, net_income, eps, bps, "
+        "total_assets, equity_attributable, shares_outstanding, as_of, collected_at) "
+        "VALUES ('9999', 2025, 'jquants', 200000000, 50.0, 100.0, 5000000000, 2000000000, 10000000, '2025-03-31', 'now')"
+    )
+    conn.execute(
+        "INSERT INTO price_history (code, date, close_adj, source) VALUES ('9999', '2025-06-20', 400.0, 'yfinance')"
+    )
+    conn.commit()
+    out9999 = compute_price_metrics_for_code(conn, "9999")
+    assert out9999["pbr"] == 4.0  # 報告BPS=100基準のまま
+
+
 def test_empty_yfinance_response_does_not_wipe_existing(monkeypatch):
     """一過性の空応答で既存分割を洗替（DELETE）しない回帰テスト（柱1のデータ喪失事故）。"""
     import pandas as pd
