@@ -458,7 +458,8 @@ def compute_financial_metrics_for_code(conn, code: str) -> dict | None:
     # eps/shares は J-Quants 報告値（開示日基準）。payout=DPS/EPS や DOE=DPS×shares で
     # 基準が混在し過小算出になるため、eps/shares を分割後基準へ揃える（純益・自己資本は
     # 総額なので分割の影響を受けず補正不要）。基準日は開示日（無ければ期末）。
-    _factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
+    # 報告株数の分割基準が乖離する個別銘柄は明示overrideを優先（_shares_factor）。
+    _factor = _shares_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
     if _factor != 1.0:
         if eps is not None:
             eps = eps / _factor
@@ -767,13 +768,43 @@ def build_roic(conn, codes: list[str]) -> dict:
     return {"rows": n, "ok": ok}
 
 
+# 同一比率の近接split＝yfinanceの二重計上(ex-date/効力日のズレ)を畳む窓（日数）。
+_DUP_SPLIT_WINDOW_DAYS = 14
+
+# 【shares系統限定の明示override・T1是正 2026-06-24】
+# J-Quants報告株数(shares_outstanding/eps/bps)の「分割基準日」は銘柄で不一致＝期末基準の社と
+# 開示基準の社が混在する（doc11の開示日ヒューリスティックでは弁別不能）。下記は yfinance権威
+# 株数(get_shares_full・Yahoo発行済と一致を裏取り)で確認した、報告株数を現在株数へ揃える明示係数。
+# ★shares/eps/bpsのみに適用。予想DPS系統(_forecast_dps)はこの社では別基準で正しいので触れない。
+# 値は data 変化時に要再確認（split再取得で日付ベース係数が変わっても override が優先＝堅牢）。
+_SHARES_FACTOR_OVERRIDE: dict[str, float] = {
+    # 5535ミガロ: 報告58.85M≒yf現在64.3M＝補正不要。日付ロジックが拾う2025-05-29×2は報告株数に
+    #            既に反映済み(yf裏取り)＝過剰適用→1.0で打ち消す（PER 21→10.3・mcap一致）。
+    "5535": 1.0,
+    # 8022ミズノ: 報告26.58M(期末3日前2025-03-28の×3が未反映の分割前値)→×3で現在79.7M(yf一致)。
+    #            開示前splitなので日付ロジックは拾わない＝明示適用（mcap 90.6B→267.8B・Yahoo一致）。
+    "8022": 3.0,
+}
+
+
+def _shares_factor(conn, code: str, ref_date: str) -> float:
+    """shares/eps/bps を現在株数基準へ揃える係数。通常は日付ベースの split factor。
+    報告株数の分割基準が yfinance split 日と乖離する個別銘柄(期末直前分割/事後反映済)は
+    yf権威株数で裏取りした明示 override を優先する（DPS系統には適用しない）。"""
+    if code in _SHARES_FACTOR_OVERRIDE:
+        return _SHARES_FACTOR_OVERRIDE[code]
+    return _split_adjustment_factor(conn, code, ref_date)
+
+
 def _split_adjustment_factor(conn, code: str, ref_date: str) -> float:
     """ref_date より後に発生した分割の累積比率（doc11是正）。分割なければ1.0。
 
     ref_date は財務値の基準時点＝**開示日(disclosed_date)が望ましい**（決算期末ではない）。
     報告EPS/BPS/株数は開示日基準なので、開示後の分割だけ補正対象になる（期末〜開示の間の
     分割を二重補正しない）。逆分割(ratio<1.0=株式併合)も算入する。
-    yfinanceが同一分割を隣接日で重複計上するケース（例: 8341 3:1が2日連続）は1回に畳む。
+    yfinanceが同一分割を隣接日(ex-date/効力日のズレ)で重複計上するケース（例: 8341 3:1が
+    2日連続・2726 2:1が12日差）は1回に畳む。窓=14日: 確認済み重複の最大が2726の12日、実在の
+    連続分割(6574=10:1×2)は28日差なので安全に弁別できる（[14,28)の本物の同一比率ペアは無し）。
     """
     rows = conn.execute(
         "SELECT date, ratio FROM stock_splits WHERE code=? AND date>? ORDER BY date",
@@ -783,7 +814,7 @@ def _split_adjustment_factor(conn, code: str, ref_date: str) -> float:
     prev_date = prev_ratio = None
     for d, r in rows:
         if (prev_ratio is not None and r == prev_ratio
-                and _days_between(prev_date, d) <= 7):
+                and _days_between(prev_date, d) <= _DUP_SPLIT_WINDOW_DAYS):
             prev_date = d                      # 同一比率の近接重複＝yfinanceの二重計上→畳む
             continue
         factor *= r
@@ -840,8 +871,8 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     # 注: 報告株数(J-Quants issued)はYahoo発行済とほぼ完全一致＝真値。yfinance sharesOutstanding を
     # 真値に採用する案(Option1)は優先株混入(伊藤園)/金庫株控除(キヤノン)/浮動株基準でブレ、中間層の
     # 精度を落としたため不採用（share_count は将来の検算用に保持）。残るT1端(重複split/期末直前分割)は
-    # split factor側のピンポイント是正で扱う。
-    factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
+    # split factor側のピンポイント是正で扱う（報告株数の基準乖離は _shares_factor の明示override）。
+    factor = _shares_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
     if factor != 1.0:
         if eps is not None:
             eps = eps / factor

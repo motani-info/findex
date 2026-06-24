@@ -41,6 +41,43 @@ def test_multiple_splits_cumulative():
     assert _split_adjustment_factor(conn, "8227", "2023-12-31") == 6.0
 
 
+def test_duplicate_split_folded_within_window():
+    """同一比率の近接split(yfinance二重計上=ex-date/効力日ズレ)は1回に畳む。
+    2726型: 2:1が12日差で重複→factor 4でなく2（T1是正 2026-06-24）。"""
+    conn = _mem_db()
+    conn.execute("INSERT INTO stock_splits VALUES ('2726','2025-08-28',2.0,'yfinance','now')")
+    conn.execute("INSERT INTO stock_splits VALUES ('2726','2025-09-09',2.0,'yfinance','now')")
+    # disclosed=2025-04-08 以降の2件は重複→×2（×4でない）
+    assert _split_adjustment_factor(conn, "2726", "2025-04-08") == 2.0
+
+
+def test_genuine_consecutive_splits_not_folded():
+    """実在の連続分割(6574=10:1×2・28日差)は畳まない＝×100を保つ（窓14日で弁別）。"""
+    conn = _mem_db()
+    conn.execute("INSERT INTO stock_splits VALUES ('6574','2025-07-31',10.0,'yfinance','now')")
+    conn.execute("INSERT INTO stock_splits VALUES ('6574','2025-08-28',10.0,'yfinance','now')")
+    assert _split_adjustment_factor(conn, "6574", "2025-05-15") == 100.0
+
+
+def test_shares_factor_override_applies_only_to_shares():
+    """報告株数の分割基準乖離を明示overrideで是正（T1残・8022/5535型）。
+    _shares_factor は override を優先するが、_split_adjustment_factor(DPS系統)は不変。"""
+    from findex.derive.compute import _SHARES_FACTOR_OVERRIDE, _shares_factor
+
+    conn = _mem_db()
+    # 8022: 開示前(期末3日前)の×3が報告株数に未反映＝日付ロジックは1.0だが override=3.0。
+    conn.execute("INSERT INTO stock_splits VALUES ('8022','2025-03-28',3.0,'yfinance','now')")
+    assert _split_adjustment_factor(conn, "8022", "2025-05-13") == 1.0  # DPS系統(開示前split無視)
+    assert _shares_factor(conn, "8022", "2025-05-13") == 3.0            # shares系統=override
+    # 5535: 報告株数に反映済みの×2を日付ロジックが過剰適用→override=1.0で打ち消す。
+    conn.execute("INSERT INTO stock_splits VALUES ('5535','2025-05-29',2.0,'yfinance','now')")
+    assert _split_adjustment_factor(conn, "5535", "2025-05-12") == 2.0  # DPS系統は×2のまま(正)
+    assert _shares_factor(conn, "5535", "2025-05-12") == 1.0            # shares系統=override
+    # overrideに無い銘柄は日付ロジックに委譲（回帰なし）。
+    assert _shares_factor(conn, "9999", "2025-03-31") == 1.0
+    assert set(_SHARES_FACTOR_OVERRIDE) == {"5535", "8022"}
+
+
 def test_payout_ratio_uses_split_adjusted_eps():
     """分割後基準のDPSと分割前基準のEPSの混在が補正されるか（doc11リグレッション）。"""
     from pathlib import Path
