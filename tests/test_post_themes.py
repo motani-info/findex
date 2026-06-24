@@ -1,8 +1,8 @@
 """X投稿テーマの純関数テスト（Phase6 MVP・品質ゲートの回帰防止）。"""
 from findex.post.themes import (
-    BODY_MAX, _body_metric, _hy_safe_eligible, _is_takoashi, _net_cash_eligible,
-    _non_financial, _post_name, _post_name_block, _SPECS, _streak_body, _yoc_quality_key,
-    post_len, weighted_len,
+    BODY_MAX, MIN_MARKET_CAP, _body_metric, _hy_safe_eligible, _is_takoashi, _liquid,
+    _net_cash_eligible, _non_financial, _post_name, _post_name_block, _SPECS, _streak_body,
+    _yoc_quality_key, post_len, weighted_len,
 )
 
 
@@ -18,6 +18,14 @@ def _row(**kw):
     }
     base.update(kw)
     return base
+
+
+def test_liquid_floor():
+    # 流動性フロア（doc19）: 時価総額100億円未満は薄商い懸念で全テーマ対象外。
+    assert _liquid(_row(current_market_cap=2e10))           # 200億＝通過
+    assert _liquid(_row(current_market_cap=MIN_MARKET_CAP))  # 100億ちょうど＝通過（境界含む）
+    assert not _liquid(_row(current_market_cap=5e9))         # 50億＝薄商いで除外
+    assert _liquid(_row(current_market_cap=None))            # 未取得は除外しない（確証なき除外なし）
 
 
 def test_weighted_len_cjk_is_2():

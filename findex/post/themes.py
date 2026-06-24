@@ -49,6 +49,22 @@ def _sufficient(r: dict) -> bool:
     return ns is not None and ns >= MIN_N_SCORED
 
 
+# 流動性フロア（doc 19・2026-06-24 ユーザー判断）: 時価総額が小さい銘柄は売買が薄く、ランキング
+# 上位に出しても「気配が薄くて実際には買えない株」を発信する事故になる。時価総額を流動性の
+# proxy とし、100億円未満を全テーマの投稿候補から除外する＝発信層（柱3）のみの足切りで、
+# 採点エンジン（柱2）の総合スコアは時価総額中立のまま（小型株も同じルールで採点）を保つ。
+# 注: 時価総額は流動性の近似。より厳密には売買代金(price_history volume×終値)だが、まずは
+# 素直な proxy で発信事故を止める（売買代金フロアは将来の精緻化候補）。
+MIN_MARKET_CAP = 1e10  # 100億円
+
+
+def _liquid(r: dict) -> bool:
+    """流動性フロア。時価総額が閾値未満（薄商い懸念）なら全テーマで対象外。
+    current_market_cap 未取得(None)は除外しない＝確証なき除外もしない（定款・タコ足/業種と同じ扱い）。"""
+    mc = r.get("current_market_cap")
+    return mc is None or mc >= MIN_MARKET_CAP
+
+
 # 配当利回りフロア（doc 09 §5・2026-06-17 ユーザー判断）: テーマの看板に応じた段階的フロア。
 # 「高配当/増配を謳うテーマに低・無配当が上位に来る」FBへの是正。
 # doc 14・2026-06-19 GeminiFB是正: net_cash は当初フロア免除だったが top10 の 6/10 が無配
@@ -164,7 +180,7 @@ def build_streak_ranking(conn, codes: list[str], top_n: int = 10) -> dict:
     """連続増配ランキング投稿（本文＋画像HTML＋claim＋ゲート）を組み立てる。"""
     rows = fetch_rows(conn, codes)
     # ゲート: 配当claimがある(grade≠D)かつ連続増配年数が算出済みの銘柄のみ
-    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_STREAK)
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and _yield_ok(r, YIELD_FLOOR_STREAK)
             and r["gd"] != "D" and r["g_years"] is not None]
     elig.sort(key=lambda r: (r["g_years"] or -1, r["nc_years"] or -1), reverse=True)
     has_override = any(r["g_src"] == "override" or r["nc_src"] == "override" for r in elig[:top_n])
@@ -396,7 +412,7 @@ def build_high_yield_safe(conn, codes: list[str], top_n: int = 10) -> dict:
     # 安全フィルタ（doc 10・P1-2）: 減配信頼性 rel>=0.6（減配1回以内）かつ 配当性向が健全域
     # （利益で賄える＝0<payout<=100%）。看板「減配しにくい」に反する罠（高利回り×減配常習×
     # 配当性向>100%）を排除。rel/payout が未算出（None）の銘柄も安全性を確証できず除外。
-    elig = [r for r in rows if _sufficient(r) and _hy_safe_eligible(r)]
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and _hy_safe_eligible(r)]
     elig.sort(key=lambda r: r["dy"], reverse=True)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
@@ -442,7 +458,7 @@ def build_div_growth(conn, codes: list[str], top_n: int = 10) -> dict:
     # シェアリングテクノロジー）は「増配で育った利回り」の看板と不一致。最低3年の連続増配を
     # 要求し "コツコツ増配で育った" 銘柄に限定（YoC分布上 g_years 1-2年はほぼ不在＝top圏は不変、
     # 概念整合のみ強化）。
-    elig = [r for r in rows if _sufficient(r) and _yield_ok(r, YIELD_FLOOR_DIV)
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and _yield_ok(r, YIELD_FLOOR_DIV)
             and r["yoc"] is not None and r["gd"] != "D" and (r["g_years"] or 0) >= 3]
     # YoC × 質係数（採点層と同一）。一過性は ×0.3 まで減点され、よほど高YoCでない限り沈む。
     elig.sort(key=_yoc_quality_key, reverse=True)
@@ -471,7 +487,7 @@ def build_value_quality(conn, codes: list[str], top_n: int = 10) -> dict:
     # doc 12・2026-06-19 GeminiFB是正: 「優良」を謳う割安テーマから本業赤字を除外。営業益率>0 を
     # 要求し、本業赤字なのに特別利益で純益がspike→ROEが見かけ上高い罠（千趣会=営業益率-6.2%/
     # 4年連続営業赤字/自己資本4年で半減）を弾く。grade_health A/B だけでは ROE の質を担保できない。
-    elig = [r for r in rows if _sufficient(r) and r["pbr"] is not None and r["pbr"] < 1
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and r["pbr"] is not None and r["pbr"] < 1
             and r["gh"] in ("A", "B") and r["roe"] is not None
             and r["operating_margin"] is not None and r["operating_margin"] > 0]
     elig.sort(key=lambda r: r["roe"], reverse=True)
@@ -508,7 +524,7 @@ def _net_cash_eligible(r: dict) -> bool:
 def build_net_cash(conn, codes: list[str], top_n: int = 10) -> dict:
     """ネットキャッシュ潤沢: 実質PER(ネットキャッシュ控除)が低い順。表面より割安。"""
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if _sufficient(r) and _net_cash_eligible(r)]
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and _net_cash_eligible(r)]
     elig.sort(key=lambda r: r["net_cash_per"])  # 実質PERが低い順＝最も割安な現金潤沢株
     n = min(top_n, len(elig))
     shown = elig[:top_n]
@@ -694,7 +710,7 @@ def _ranking_theme(conn, codes, top_n, *, theme, title, subtitle, body_fn, signa
     body_fn(n, names) は フック＋トップ3社ブロック(names)を本文へ組む（doc16）。
     """
     rows = fetch_rows(conn, codes)
-    elig = [r for r in rows if _sufficient(r) and eligible(r)]
+    elig = [r for r in rows if _sufficient(r) and _liquid(r) and eligible(r)]
     elig.sort(key=sort_key, reverse=reverse)
     n = min(top_n, len(elig))
     shown = elig[:top_n]
@@ -943,7 +959,7 @@ def _make_theme(name: str):
 def _spot_eligible(r: dict) -> bool:
     """タラレバ主役の入口: 配当claimあり・薄データ除外・タコ足除外・利回りフロア・
     コツコツ増配(連続増配≥3年＝無配復配のYoCジャンプを除外)。試算入力の確証は _tarareba_calc が担保。"""
-    return (_sufficient(r) and r["gd"] != "D" and (r["g_years"] or 0) >= 3
+    return (_sufficient(r) and _liquid(r) and r["gd"] != "D" and (r["g_years"] or 0) >= 3
             and not _is_takoashi(r) and _yield_ok(r, YIELD_FLOOR_DIV))
 
 
