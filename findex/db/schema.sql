@@ -74,6 +74,28 @@ CREATE TABLE IF NOT EXISTS dividend_forecast (
     updated_at   TEXT NOT NULL
 );
 
+-- dividend_policy — 配当方針マスター（会社が有報で開示する基本方針。doc18）
+-- 配当性向(computed_metrics.payout_ratio=DPS/EPS・導出値)とは別物。これは会社の意思表明テキスト。
+-- A=policy_text（verbatim 原文・捏造の余地なし）／B=構造化シグナル（保守的・status付き）。
+-- 源泉は EDINET有報の jpcrp_cor:DividendPolicyTextBlock（IFRS/JGAAP 同一要素ID・既DL書類を再利用＝新規フェッチなし）。
+-- B の目標%は「目標文脈と共起時のみ ok・実績値は採らない・曖昧/不在は missing」（実績は payout_ratio が持つ）。
+CREATE TABLE IF NOT EXISTS dividend_policy (
+    code         TEXT NOT NULL,
+    fiscal_year  INTEGER NOT NULL,               -- 開示有報の会計年度（決算期末年）
+    policy_text  TEXT,                            -- A: 配当政策の verbatim 原文
+    progressive_flag        INTEGER,             -- B: 累進配当（リテラル「累進配当」検出）0/1
+    stable_flag             INTEGER,             -- B: 安定配当/安定的還元（リテラル検出）0/1
+    payout_target_pct       REAL,                -- B: 配当性向「目標」%（実績は採らない）
+    doe_target_pct          REAL,                -- B: DOE/株主資本配当率「目標」%
+    total_payout_target_pct REAL,                -- B: 総還元性向「目標」%
+    signals_status TEXT,                          -- B各シグナルの status（JSON: ok/missing）
+    source       TEXT NOT NULL,                   -- edinet
+    disclosed_date TEXT,                          -- 開示日
+    as_of        TEXT,                            -- 決算期末
+    collected_at TEXT NOT NULL,
+    PRIMARY KEY (code, fiscal_year)
+);
+
 -- financial_snapshots — 年度別財務（J-Quants + EDINET。履歴保持）（D3 §6）
 CREATE TABLE IF NOT EXISTS financial_snapshots (
     code        TEXT NOT NULL,

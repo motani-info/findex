@@ -8,11 +8,29 @@
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from .base import FetchPolicy, RateLimitedFetcher
 from .edinet import DEEP_FIELDS, EdinetFetcher
 from .jquants import FinancialsFetcher
+
+# 配当方針（doc18）の構造化シグナル列（policy_signals dict のキー順）
+_POLICY_SIGNAL_COLS = ["progressive_flag", "stable_flag", "payout_target_pct",
+                       "doe_target_pct", "total_payout_target_pct"]
+_POLICY_INSERT_SQL = (
+    "INSERT INTO dividend_policy "
+    "(code, fiscal_year, policy_text, progressive_flag, stable_flag, payout_target_pct, "
+    " doe_target_pct, total_payout_target_pct, signals_status, source, disclosed_date, "
+    " as_of, collected_at) "
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) "
+    "ON CONFLICT(code, fiscal_year) DO UPDATE SET "
+    "policy_text=excluded.policy_text, progressive_flag=excluded.progressive_flag, "
+    "stable_flag=excluded.stable_flag, payout_target_pct=excluded.payout_target_pct, "
+    "doe_target_pct=excluded.doe_target_pct, total_payout_target_pct=excluded.total_payout_target_pct, "
+    "signals_status=excluded.signals_status, source=excluded.source, "
+    "disclosed_date=excluded.disclosed_date, as_of=excluded.as_of, collected_at=excluded.collected_at"
+)
 
 
 def _load_code_meta(conn, codes: list[str]) -> dict[str, dict]:
@@ -51,7 +69,7 @@ class _FinancialsBuilder(RateLimitedFetcher[dict]):
         self.jqf = FinancialsFetcher()
         self.edf = EdinetFetcher(c2e, c2m)
         self.n_rows = self.n_deep = self.n_summary = self.std_set = 0
-        self.jq_ok = self.ed_ok = 0
+        self.jq_ok = self.ed_ok = self.n_policy = 0
 
     def is_rate_limit(self, exc: Exception) -> bool:
         # 両ソースのレート判定を統合（EdinetScanError含む）。尽きれば failed＝done を刻まない。
@@ -119,6 +137,20 @@ class _FinancialsBuilder(RateLimitedFetcher[dict]):
                           r["_source"], "present", r["_as_of"], r.get("_disclosed"), self.now]
                 self.conn.execute(self.insert_sql, values)
                 self.n_rows += 1
+
+            # 配当方針（doc18）: 同一書類を再利用＝新規フェッチなし。原文が在る年度のみ記録。
+            if erec and deep_fy and erec.policy_text:
+                sig = erec.policy_signals or {}
+                # EDINET経路は開示日を持たない。同年度のJ-Quants開示日があれば流用（無ければNULL）。
+                disclosed = rows.get(deep_fy, {}).get("_disclosed")
+                self.conn.execute(_POLICY_INSERT_SQL, [
+                    code, deep_fy, erec.policy_text,
+                    *[sig.get(c) for c in _POLICY_SIGNAL_COLS],
+                    json.dumps(sig.get("signals_status", {}), ensure_ascii=False),
+                    "edinet", disclosed, erec.period_end, self.now,
+                ])
+                self.n_policy += 1
+
             self.conn.commit()        # ← ここまで終えてから base.run が checkpoint を刻む
         except Exception:
             self.conn.rollback()      # 部分書込を次銘柄の commit に混ぜない
@@ -163,7 +195,35 @@ def build_financials(conn, codes: list[str], *, resume: bool = True) -> dict:
         "snapshot_rows": builder.n_rows,
         "rows_with_deep": builder.n_deep,
         "rows_from_summary": builder.n_summary,
+        "policy_rows": builder.n_policy,
         "accounting_standard_set": builder.std_set,
         "failed": len(res.failed),
         "fetch_summary": res.summary,
     }
+
+
+def reparse_dividend_policy(conn) -> dict:
+    """保存済み policy_text から B シグナルを引き直す（新規フェッチなし・doc18）。
+
+    A（生テキスト）は不変のまま、パーサ改良を全銘柄へ適用するための純DB処理。
+    確証主義: パーサを是正したら必ず全件を再パースして偽陽性を一掃する。
+    """
+    from .edinet import parse_policy_signals
+
+    now = datetime.now().isoformat(timespec="seconds")
+    rows = conn.execute(
+        "SELECT code, fiscal_year, policy_text FROM dividend_policy"
+    ).fetchall()
+    n = changed = 0
+    for code, fy, text in rows:
+        sig = parse_policy_signals(text)
+        conn.execute(
+            "UPDATE dividend_policy SET progressive_flag=?, stable_flag=?, "
+            "payout_target_pct=?, doe_target_pct=?, total_payout_target_pct=?, "
+            "signals_status=?, collected_at=? WHERE code=? AND fiscal_year=?",
+            [sig.get(c) for c in _POLICY_SIGNAL_COLS]
+            + [json.dumps(sig.get("signals_status", {}), ensure_ascii=False), now, code, fy],
+        )
+        n += 1
+    conn.commit()
+    return {"reparsed": n}

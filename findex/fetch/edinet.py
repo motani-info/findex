@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 import time
 import zipfile
 from dataclasses import dataclass, field
@@ -69,6 +70,8 @@ class EdinetRecord:
     values: dict[str, float | None] = field(default_factory=dict)
     status: dict[str, str] = field(default_factory=dict)  # field→ok/missing/insufficient/censored
     summary: dict[int, dict] = field(default_factory=dict)  # {fiscal_year: {field: val}} 5年史
+    policy_text: str | None = None          # 配当政策 verbatim 原文（doc18 A）
+    policy_signals: dict = field(default_factory=dict)  # 構造化シグナル＋status（doc18 B）
 
 
 def _filing_windows(fy_end_month: int) -> list[tuple[date, date]]:
@@ -276,6 +279,132 @@ def extract_summary(records: list[dict], std: str | None, current_fy: int | None
     return out
 
 
+# ── 配当方針（doc18）：A=生テキスト抽出 ／ B=保守的シグナル抽出 ────────────────
+# 配当政策テキストブロックは jpcrp（企業内容開示）の統一タグ＝IFRS/JGAAP 同一要素ID。
+POLICY_ELEMENT = "jpcrp_cor:DividendPolicyTextBlock"
+
+# 全角→半角（数字・小数点・パーセント）。政策文は全角混在のため正規化してから解析。
+_ZEN2HAN = str.maketrans("０１２３４５６７８９．％", "0123456789.%")
+
+# 目標文脈マーカー（この近傍にあって初めて「目標%」として採る）。
+_TARGET_MARKERS = ("目標", "目指", "方針", "維持", "以上", "程度", "水準", "目処", "めど",
+                   "を基本", "とする", "下限", "目安", "念頭")
+# 実績/決定文脈マーカー（この近傍があれば実績・確定値＝採らない。実績は payout_ratio が持つ）。
+# ★スケール検証で判明（doc18）: 「（配当性向：X%）といたしました／実施することを決定」「X%となります」等、
+#   方針語と共起しつつ実は実績/確定値という罠が全銘柄で多発。決定・実績の語を広く実績側に倒す。
+# ★裸の「実施し/実施する/となる」は将来の実施意図（=方針）にも当たり過剰除外になるため不可。
+#   確定・実績を示す語形（…ました／…決定）に限定する。
+_RESULT_MARKERS = ("となりました", "となっており", "となった", "となりまし", "となります",
+                   "といたしました", "といたします", "いたしました",
+                   "実施しました", "実施いたしました", "実施することを決定",
+                   "することを決定", "を決定いた", "実績は", "となる見込", "計上",
+                   "予定であり", "予定です")
+# 上限マーカー（「X%以下/以内」＝上限であって目標ではない。確証主義: 目標フィールドに入れない）。
+_CAP_MARKERS = ("以下", "以内", "を上限", "上限")
+
+# 各シグナルのキーワード（複数表記をフォールバック鎖で許容）。
+_PAYOUT_KW = ("連結配当性向", "配当性向")
+_DOE_KW = ("ＤＯＥ", "DOE", "株主資本配当率", "純資産配当率", "株主資本配当比率", "自己資本配当率")
+_TOTAL_KW = ("総還元性向", "総配分性向", "株主還元性向")
+# payout 探索時、配当性向キーワードと数値の間に別指標語があれば、その数値は別指標のもの
+# （例「配当性向を加味しDOE2.5%」の2.5はDOE値）＝採らない。スケール検証で判明した混入の根治。
+_PAYOUT_BLOCKERS = _DOE_KW + _TOTAL_KW
+
+_PCT_RE = re.compile(r"(\d{1,3}(?:\.\d+)?)\s*%")
+
+
+def extract_dividend_policy(records: list[dict]) -> str | None:
+    """配当政策テキストブロックを verbatim 取得（doc18 A）。
+
+    複数コンテキストが在りうる。当年(CurrentYearDuration)を最優先、無ければ最長の非空値。
+    捏造の余地なし＝原文をそのまま返す（無ければ None）。
+    """
+    best: str | None = None
+    for r in records:
+        if r.get("要素ID") != POLICY_ELEMENT:
+            continue
+        v = (r.get("値") or "").strip()
+        if not v or v in ("-", "－"):
+            continue
+        if r.get("コンテキストID", "") == "CurrentYearDuration":
+            return v
+        if best is None or len(v) > len(best):
+            best = v
+    return best
+
+
+def _find_target_pct(text: str, keywords: tuple[str, ...],
+                     block_between: tuple[str, ...] = ()) -> float | None:
+    """keyword 近傍の「目標%」だけを採る（実績/上限/別指標なら採らない）。
+
+    確証主義（doc18 §3 B）: 政策文の配当性向%は多くが**実績値**。目標マーカーと共起し、
+    かつ実績・上限マーカーが近傍に無く、keyword と数値の間に別指標語が無い場合のみ
+    float を返す。曖昧・不在は None（捏造しない）。block_between はスケール検証で判明した
+    別指標値の混入（「配当性向…DOE2.5%」）を断つためのガード。
+    """
+    for kw in keywords:
+        start = 0
+        while True:
+            i = text.find(kw, start)
+            if i < 0:
+                break
+            start = i + len(kw)
+            seg = text[i:i + len(kw) + 30]   # keyword 直後30字以内に % があるか
+            m = _PCT_RE.search(seg)
+            if not m:
+                continue
+            num_abs_start, num_abs_end = i + m.start(), i + m.end()
+            gap = text[i + len(kw):num_abs_start]
+            if any(b in gap for b in block_between):
+                continue   # 配当性向と数値の間に別指標語＝この数値は別指標のもの
+            tail = text[num_abs_end:num_abs_end + 8]
+            if any(cap in tail for cap in _CAP_MARKERS):
+                continue   # 「X%以下/以内」＝上限であって目標ではない
+            window = text[max(0, i - 18):min(len(text), num_abs_end + 22)]
+            if any(r in window for r in _RESULT_MARKERS):
+                continue   # 実績/決定文脈 → 採らない
+            if any(t in window for t in _TARGET_MARKERS):
+                return float(m.group(1))
+    return None
+
+
+def parse_policy_signals(text: str | None) -> dict:
+    """配当政策テキストから保守的に構造化シグナルを起こす（doc18 B）。
+
+    返り値: {progressive_flag, stable_flag, payout_target_pct, doe_target_pct,
+            total_payout_target_pct, signals_status:{各キー: ok/missing}}。
+    原文が無ければ全 missing。明示シグナルだけ ok・他は missing を死守する。
+    """
+    keys = ("progressive_flag", "stable_flag", "payout_target_pct",
+            "doe_target_pct", "total_payout_target_pct")
+    out: dict = {k: None for k in keys}
+    out["signals_status"] = {k: "missing" for k in keys}
+    if not text:
+        return out
+    norm = text.translate(_ZEN2HAN)
+
+    # 累進/安定はリテラル検出（言い換えからの推測昇格はしない＝初版は保守）。
+    if "累進配当" in norm:
+        out["progressive_flag"], out["signals_status"]["progressive_flag"] = 1, "ok"
+    if "安定的" in norm or "安定した" in norm or "安定配当" in norm:
+        out["stable_flag"], out["signals_status"]["stable_flag"] = 1, "ok"
+
+    for key, kws, blockers in (
+        ("payout_target_pct", _PAYOUT_KW, _PAYOUT_BLOCKERS),
+        ("doe_target_pct", _DOE_KW, ()),
+        ("total_payout_target_pct", _TOTAL_KW, ()),
+    ):
+        # 配当性向の検索で総還元性向を拾わないよう、payout は総還元語を一旦伏せる。
+        haystack = norm
+        if key == "payout_target_pct":
+            for t in _TOTAL_KW:
+                haystack = haystack.replace(t, "○" * len(t))
+        val = _find_target_pct(haystack, kws, block_between=blockers)
+        if val is not None:
+            out[key], out["signals_status"][key] = val, "ok"
+    return out
+
+
 class EdinetFetcher(RateLimitedFetcher[EdinetRecord]):
     name = "edinet_xbrl"
     policy = FetchPolicy(batch_size=20, sleep_between_batches=3.0, sleep_between_items=0.3, max_retries=4)
@@ -308,4 +437,6 @@ class EdinetFetcher(RateLimitedFetcher[EdinetRecord]):
             rec.fiscal_year = int(period_end[:4])
         rec.values, rec.status = extract_fields(records, rec.accounting_standard)
         rec.summary = extract_summary(records, rec.accounting_standard, rec.fiscal_year)
+        rec.policy_text = extract_dividend_policy(records)          # doc18 A（同一書類を再利用）
+        rec.policy_signals = parse_policy_signals(rec.policy_text)  # doc18 B（保守的・status付き）
         return rec

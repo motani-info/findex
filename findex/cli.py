@@ -253,8 +253,22 @@ def financials_cmd(codes, cohort, all_codes, no_resume) -> None:
     console.print(
         f"[green]✓[/green] financials: J-Quants[{stats['jq']}] EDINET[{stats['edinet']}] "
         f"行={stats['snapshot_rows']} 深いBS付={stats['rows_with_deep']} "
-        f"会計基準設定={stats['accounting_standard_set']}"
+        f"配当方針={stats['policy_rows']} 会計基準設定={stats['accounting_standard_set']}"
     )
+
+
+@main.command("policy-reparse")
+def policy_reparse_cmd() -> None:
+    """保存済み policy_text から配当方針シグナルを引き直す（doc18・新規フェッチなし）。"""
+    from .db import connect
+    from .fetch.financials import reparse_dividend_policy
+
+    conn = connect()
+    try:
+        stats = reparse_dividend_policy(conn)
+    finally:
+        conn.close()
+    console.print(f"[green]✓[/green] policy-reparse: {stats['reparsed']}行 再パース")
 
 
 @main.command("splits")
