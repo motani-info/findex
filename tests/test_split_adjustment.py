@@ -72,6 +72,36 @@ def test_payout_ratio_uses_split_adjusted_eps():
     assert out["payout_ratio"] == round(40.0 / 100.0, 6)  # 0.4 = 40%
 
 
+def test_authoritative_shares_overrides_reported_for_price_metrics():
+    """share_count（権威ある現在発行済株数）があれば現在断面のmcap/PER/PBRはそれを真値に使う（T1是正・Option1）。"""
+    from pathlib import Path
+
+    from findex.db.database import connect
+    from findex.derive.compute import compute_price_metrics_for_code
+
+    conn = connect(":memory:")
+    conn.executescript(Path("findex/db/schema.sql").read_text(encoding="utf-8"))
+    # 報告株数10M・EPS100・BPS1000・価格500。権威株数=20M（報告の2倍＝期末直前分割で報告が分割前のままの型）。
+    conn.execute("INSERT INTO stocks (code, name, accounting_standard, updated_at) VALUES ('9999','テスト','jgaap','now')")
+    conn.execute("INSERT INTO price_history (code, date, close_adj, source) VALUES ('9999','2025-06-01',500.0,'yf')")
+    conn.execute(
+        "INSERT INTO financial_snapshots (code, fiscal_year, source, net_income, eps, bps, "
+        "shares_outstanding, equity_attributable, as_of, disclosed_date, collected_at) "
+        "VALUES ('9999', 2025, 'jquants', 1000000000, 100.0, 1000.0, 10000000, 10000000000, '2025-03-31', '2025-05-13', 'now')"
+    )
+    conn.commit()
+    # 権威株数なし → 報告株数ベース: per=500/100=5, pbr=500/1000=0.5, mcap=500*10M=5e9
+    base = compute_price_metrics_for_code(conn, "9999")
+    assert base["per"] == 5.0 and base["pbr"] == 0.5 and base["current_market_cap"] == 5e9
+    # 権威株数20M投入 → factor_eff=2: per=10, pbr=1.0, mcap=500*20M=1e10
+    conn.execute("INSERT INTO share_count (code, shares, source, as_of, collected_at) VALUES ('9999',20000000,'yfinance','2025-06-01','now')")
+    conn.commit()
+    out = compute_price_metrics_for_code(conn, "9999")
+    assert out["per"] == 10.0
+    assert out["pbr"] == 1.0
+    assert out["current_market_cap"] == 1e10
+
+
 def test_empty_yfinance_response_does_not_wipe_existing(monkeypatch):
     """一過性の空応答で既存分割を洗替（DELETE）しない回帰テスト（柱1のデータ喪失事故）。"""
     import pandas as pd

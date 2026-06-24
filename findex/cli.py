@@ -293,6 +293,28 @@ def splits_cmd(codes, cohort, all_codes, no_resume) -> None:
                   f"（{stats['fetch_summary']}）")
 
 
+@main.command("shares")
+@subset_options
+@all_option
+@click.option("--no-resume", is_flag=True, help="チェックポイントを無視して最初から")
+def shares_cmd(codes, cohort, all_codes, no_resume) -> None:
+    """現在発行済株数を取得（yfinance fast_info.shares → share_count・mcap/PER/PBRの真値）。"""
+    from .db import connect
+    from .fetch.shares import build_shares
+
+    target = _resolve_target(codes, cohort, all_codes)
+    if not target:
+        console.print("[red]--codes / --cohort / --all のいずれかを指定してください[/red]")
+        return
+    conn = connect()
+    try:
+        stats = build_shares(conn, target, resume=not no_resume)
+    finally:
+        conn.close()
+    console.print(f"[green]✓[/green] shares: {stats['shares_rows']} 件 "
+                  f"（{stats['fetch_summary']}）")
+
+
 @main.command("derive")
 @subset_options
 @all_option

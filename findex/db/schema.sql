@@ -301,6 +301,18 @@ CREATE TABLE IF NOT EXISTS stock_splits (
     PRIMARY KEY (code, date)
 );
 
+-- share_count — 権威ある「現在発行済株数」（yfinance sharesOutstanding）。
+-- findexは報告財務×分割補正で株数を導出するが、重複split/期末直前分割/増減資で壊れる
+-- （T1是正で判明）。現在断面のmcap/PER/PBRはこの真値を採用し、分割の日付演算に依存しない。
+-- 過去PIT/backtestは時点別の権威株数が無いため従来の分割factorを使う（用途を分離）。
+CREATE TABLE IF NOT EXISTS share_count (
+    code          TEXT PRIMARY KEY,
+    shares        INTEGER NOT NULL,   -- 現在発行済株数
+    source        TEXT NOT NULL DEFAULT 'yfinance',
+    as_of         TEXT,               -- 取得日 (YYYY-MM-DD)
+    collected_at  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS run_log (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     job        TEXT NOT NULL,
