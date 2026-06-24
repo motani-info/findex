@@ -31,22 +31,28 @@ class SplitsFetcher(RateLimitedFetcher[dict]):
     def fetch_one(self, code: str) -> dict:
         splits = yf.Ticker(f"{code}.T").splits
         now = datetime.now().isoformat(timespec="seconds")
+        # yfinance は分割データ無しで None / 空Series を返し得るが、これは「分割なし」と
+        # 「一過性の空応答（レート制限/瞬断）」を区別できない。全件スキャン中の散発的な空応答で
+        # 洗替（DELETE→INSERT）が走ると、実在する分割を持つ銘柄の既存行を消し去り doc11補正が
+        # 無効化される（過去事故）。分割は歴史的に追記のみ＝消えることはないので、
+        # 空応答では既存行に一切触れずスキップする（誤記録の是正はデータありの応答時のみ）。
+        if splits is None or len(splits) == 0:
+            return {"rows": 0, "skipped_empty": True}
         rows = []
-        # yfinance は分割データ無しで None / 空Series を返し得る＝「分割なし」の正常結果（失敗でない）。
-        if splits is not None and len(splits) > 0:
-            for dt, ratio in splits.items():
-                r = float(ratio)
-                if r <= 0:
-                    continue  # データ異常のみ除外（逆分割 ratio<1.0 は算入する）
-                rows.append((code, dt.strftime("%Y-%m-%d"), r, "yfinance", now))
-        # code 単位で洗替（削除→挿入）＝再実行で逆分割の取りこぼしや古い誤記録も是正できる冪等更新。
+        for dt, ratio in splits.items():
+            r = float(ratio)
+            if r <= 0:
+                continue  # データ異常のみ除外（逆分割 ratio<1.0 は算入する）
+            rows.append((code, dt.strftime("%Y-%m-%d"), r, "yfinance", now))
+        if not rows:
+            return {"rows": 0, "skipped_empty": True}
+        # 実データ取得時のみ code 単位で洗替（削除→挿入）＝逆分割の取りこぼしや古い誤記録を是正。
         self.conn.execute("DELETE FROM stock_splits WHERE code=?", (code,))
-        if rows:
-            self.conn.executemany(
-                "INSERT INTO stock_splits (code, date, ratio, source, collected_at) "
-                "VALUES (?,?,?,?,?)",
-                rows,
-            )
+        self.conn.executemany(
+            "INSERT INTO stock_splits (code, date, ratio, source, collected_at) "
+            "VALUES (?,?,?,?,?)",
+            rows,
+        )
         self.conn.commit()
         return {"rows": len(rows)}
 

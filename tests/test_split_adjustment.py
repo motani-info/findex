@@ -71,3 +71,50 @@ def test_payout_ratio_uses_split_adjusted_eps():
     out = compute_financial_metrics_for_code(conn, "9999")
     assert out["payout_ratio"] == round(40.0 / 100.0, 6)  # 0.4 = 40%
 
+
+def test_empty_yfinance_response_does_not_wipe_existing(monkeypatch):
+    """一過性の空応答で既存分割を洗替（DELETE）しない回帰テスト（柱1のデータ喪失事故）。"""
+    import pandas as pd
+
+    from findex.fetch import splits as splits_mod
+
+    conn = _mem_db()
+    conn.execute("INSERT INTO stock_splits VALUES ('2146','2025-12-29',15.0,'yfinance','now')")
+    conn.commit()
+    fetcher = splits_mod.SplitsFetcher(conn)
+
+    # yfinance が None / 空Series を返すケース＝「分割なし」と一過性空応答を区別できない。
+    for empty in (None, pd.Series(dtype=float)):
+        monkeypatch.setattr(
+            splits_mod.yf, "Ticker",
+            lambda *_a, _e=empty, **_k: type("T", (), {"splits": _e})(),
+        )
+        res = fetcher.fetch_one("2146")
+        assert res == {"rows": 0, "skipped_empty": True}
+        # 既存の分割行は温存される（消えていない）。
+        n = conn.execute("SELECT COUNT(*) FROM stock_splits WHERE code='2146'").fetchone()[0]
+        assert n == 1
+
+
+def test_real_yfinance_response_replaces_existing(monkeypatch):
+    """実データ応答時のみ code 単位で洗替されるか。"""
+    import pandas as pd
+
+    from findex.fetch import splits as splits_mod
+
+    conn = _mem_db()
+    conn.execute("INSERT INTO stock_splits VALUES ('2146','2099-01-01',999.0,'yfinance','old')")
+    conn.commit()
+    fetcher = splits_mod.SplitsFetcher(conn)
+
+    s = pd.Series({pd.Timestamp("2025-12-29"): 15.0, pd.Timestamp("2013-06-26"): 200.0})
+    monkeypatch.setattr(
+        splits_mod.yf, "Ticker",
+        lambda *_a, **_k: type("T", (), {"splits": s})(),
+    )
+    res = fetcher.fetch_one("2146")
+    assert res["rows"] == 2
+    # 古い誤記録(999.0)は洗替で消え、実データ2件に置き換わる。
+    rows = conn.execute("SELECT ratio FROM stock_splits WHERE code='2146' ORDER BY ratio").fetchall()
+    assert [r[0] for r in rows] == [15.0, 200.0]
+
