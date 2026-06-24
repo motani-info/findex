@@ -97,6 +97,24 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
     # sector33（33業種）: CF系テーマ（FCFカバ/ネットキャッシュ）の金融除外に使う（doc 10・P2-3）。
     sectors = dict(conn.execute("SELECT code, sector33 FROM stocks").fetchall())
 
+    # 配当方針マスター（doc18）: 会社が有報で明言した「方針」＝導出値の payout_ratio とは別物。
+    # 最新 fiscal_year を採用（昇順ループの後勝ち）。B シグナルは parse 時に確証ありのみ値を持つ
+    # （missing は NULL）ので、非NULL＝確証ありとしてそのまま露出する。目標%は「%数値」で格納
+    # されているため、div_yield/payout_ratio 等（小数）と単位を揃えるべく /100 して小数化し、
+    # 既存の "pct" 描画（×100）と整合させる。
+    policy: dict[str, dict] = {}
+    for prow in conn.execute(
+        "SELECT code, progressive_flag, stable_flag, payout_target_pct, "
+        "doe_target_pct, total_payout_target_pct FROM dividend_policy ORDER BY fiscal_year"
+    ):
+        policy[prow[0]] = {
+            "progressive": bool(prow[1]) if prow[1] is not None else None,
+            "stable": bool(prow[2]) if prow[2] is not None else None,
+            "payout_target": prow[3] / 100 if prow[3] is not None else None,
+            "doe_target": prow[4] / 100 if prow[4] is not None else None,
+            "total_payout_target": prow[5] / 100 if prow[5] is not None else None,
+        }
+
     # status ゲートを通して露出する生値メトリクス（テーマ拡張の共通入口）
     _GATED = (
         "div_yield", "yield_on_cost_5y", "yield_on_cost_10y", "dividend_reliability",
@@ -148,6 +166,13 @@ def fetch_rows(conn, codes: list[str]) -> list[dict]:
         # status=ok/zero_legit のときだけ生値を載せる（確証なき数字は出さない）
         for f in _GATED:
             out[f] = _val(rec, status, f)
+        # 配当方針（doc18・確証ありシグナルのみ非NULL）。未取得社は全 None（下流は「—」/対象外）。
+        pol = policy.get(code, {})
+        out["progressive"] = pol.get("progressive")
+        out["stable"] = pol.get("stable")
+        out["payout_target"] = pol.get("payout_target")
+        out["doe_target"] = pol.get("doe_target")
+        out["total_payout_target"] = pol.get("total_payout_target")
         # 既存テーマ互換の短い別名
         out["yoc"] = out["yield_on_cost_5y"]
         out["yoc10"] = out["yield_on_cost_10y"]

@@ -4,8 +4,13 @@
 > findex は **配当性向（payout_ratio）は既に導出済**（`computed_metrics.payout_ratio` = DPS/EPS・
 > [[04-indicator-system]]）。本書が扱うのは別物の **配当方針**（会社が開示する配当の基本方針テキスト）。
 >
-> **★ステータス: 実装＋全銘柄(--all)取得＋スケール是正 完了（2026-06-24）。A=全件・B=偽陽性一掃済み。**
-> 取得: 全3734社処理（policy_text 3525社 verbatim・残は政策ブロック不在＝missing）。golden 18/18 不整合0。pytest 148 passed。
+> **★ステータス: 実装＋全銘柄(--all)取得＋スケール是正＋柱3テーマ化 完了（2026-06-24）。A=全件・B=偽陽性一掃済み。**
+> 取得: 全3734社処理（policy_text 3525社 verbatim・残は政策ブロック不在＝missing）。golden 18/18 不整合0。pytest 149 passed。
+> **柱3反映（§6実装済）**: `fetch_rows` に方針シグナル(progressive/stable/payout_target/doe_target/total_payout_target)を
+> 露出（目標%は%数値格納→/100で小数化し既存pct描画と単位統一）。新テーマ **`progressive`（累進配当宣言の高配当株）**
+> ＝会社が有報で「減配せず維持か増配」を明言した社(progressive_flag)×gd≠D×利回り3%・利回り降順。固有列に
+> 「配当性向目標」を出しコアの実績「配当性向」と対比。eligible 126社規模・本文115字でゲート通過。回帰テスト
+> `tests/test_post_themes.py::test_progressive_requires_declared_policy`。
 > 監査ハイライト: 4452花王=payout目標 missing が正／5947リンナイ=40%目標が正／9532大阪ガス=実績配当性向28.5%・
 > 実績純資産配当率2.3%・DOE目標3.0% 混在文から **DOE目標だけ** を正しく採取。
 >

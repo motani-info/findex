@@ -161,6 +161,18 @@ def test_roic_spread_requires_roe():
     assert not elig(_row(roic_minus_wacc=-0.01, roe=0.12)) # 価値破壊（負）→除外
 
 
+def test_progressive_requires_declared_policy():
+    """progressive（累進配当宣言・doc18）: 会社が方針で明言(progressive)した社のみ。
+    観測上の非減配だけでは入らない＝意思表明が裏付け。配当claim確か(gd≠D)・高配当(3%)も要求。"""
+    elig = _SPECS["progressive"]["eligible"]
+    base = dict(gd="B", dy=0.04)
+    assert elig(_row(**base, progressive=True))         # 累進と明言×高配当×配当claim確か→通過
+    assert not elig(_row(**base, progressive=None))     # 方針データ無し→対象外（捏造しない）
+    assert not elig(_row(**base, progressive=False))    # 累進と明言していない→対象外
+    assert not elig(_row(gd="D", dy=0.04, progressive=True))   # 配当claim無し(gd=D)→除外
+    assert not elig(_row(gd="B", dy=0.02, progressive=True))   # 利回り3%未満＝"高配当"に非該当→除外
+
+
 def test_oversold_excludes_traps():
     """oversold（売られすぎ高配当）: naiveに下落率降順だと崩壊株/赤字トラップを拾う。
     下落15〜45%バンド・黒字(ROE>0)・gd≠D・利回り3%・非タコ足で『健全な売られすぎ』に限定。"""

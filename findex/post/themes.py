@@ -876,6 +876,26 @@ _SPECS: dict[str, dict] = {
         signature=[("DOE", "doe", "pct"), ("自己資本比率", "equity_ratio", "pct_plain")],
         eligible=lambda r: r["gd"] != "D" and r["doe"] is not None and _yield_ok(r, YIELD_FLOOR_DIV),
         sort_key=lambda r: r["doe"] or -1, claim_keys=["doe", "gd"]),
+    # ── 新軸: 累進配当宣言（配当方針マスター doc18 由来）─────────────────────────
+    # 核＝会社が有報の配当方針で「累進配当（減配せず維持または増配）」を**明言**している社
+    # （progressive_flag）。観測上の連続非減配（no_cut）より強い＝会社の意思表明が裏付け。
+    # 固有列に doc18 の「配当性向目標」を出し、コアの実績「配当性向」と対比させる（目標 vs 実績）。
+    "progressive": dict(
+        title="累進配当宣言の高配当株", subtitle="「減配せず維持か増配」を会社が明言した高配当株",
+        body_fn=lambda n, names: ('"減らさない"を、会社が約束。\n'
+                                  f"累進配当宣言ランキング🛡️ トップ{n}\n"
+                                  f"{names}"
+                                  "累進配当を掲げた高配当株。\n#高配当株 #累進配当"),
+        headline=("dy", "pct"),
+        signature=[("配当性向目標", "payout_target", "pct"),
+                   ("連続非減配", "nc_years", "streak_nc")],
+        # 抽出は「累進と明言（progressive）×配当claim確か(gd!=D)×"高配当"の名に値する利回り(3%)」。
+        # 方針は意思表明であり保証ではない（foot で明示・[[00-charter-and-data-integrity]]）。
+        eligible=lambda r: bool(r.get("progressive")) and r["gd"] != "D"
+        and _yield_ok(r, YIELD_FLOOR_HIGH),
+        sort_key=lambda r: r["dy"] or -1,
+        foot_extra="※「累進配当」=会社が有価証券報告書の配当方針で『減配せず維持または増配』を明言（EDINET DividendPolicyTextBlock由来）。方針は意思表明であり将来配当の保証ではありません。「配当性向目標」も会社開示の目標値で実績(配当性向)とは別物。",
+        claim_keys=["dy", "nc_years", "payout_target", "gd"]),
     # ── 新軸: EPS成長（切り口C・新NISAガチホ）─────────────────────────────
     "nisa_growth": dict(
         title="NISA永久ホールド（EPS成長）", subtitle="5年EPS成長率＝将来の増配の源泉",
@@ -978,6 +998,7 @@ _TARAREBA_THESIS = {
     "large_cap": "大型の安定感が裏づけ。",
     "small_value": "小型割安の伸びしろ。",
     "doe_king": "資本に報いるDOEが裏づけ。",
+    "progressive": "減配しない方針の明言が裏づけ。",
     "nisa_growth": "EPS成長が増配の源泉。",
     "oversold": "下げ局面でこその高い利回り。",
     "oversold_large": "大型の安定感×下げ局面の利回り。",
