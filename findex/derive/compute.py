@@ -835,30 +835,20 @@ def compute_price_metrics_for_code(conn, code: str) -> dict | None:
     if not fin:
         return None
     eps, bps, shares, total_assets, equity, cash, as_of, fy, disclosed = fin
-    # 株数基準の是正（T1是正・Option1）: 現在断面は権威ある現在発行済株数（share_count・yfinance）を
-    # 真値に使う。報告株数×分割factorによる導出は重複split/期末直前分割/増減資で壊れる（Yahoo発行済と
-    # 最大3.5x乖離した）。権威株数があれば採用し、EPS/BPSは「報告株数→権威株数」の比で現在基準へ換算
-    # （splitも増減資も一括吸収）。権威株数が無い銘柄のみ従来の分割factor（開示日基準・doc11）へフォールバック。
-    auth = conn.execute("SELECT shares FROM share_count WHERE code=?", (code,)).fetchone()
-    auth_shares = auth[0] if auth and auth[0] and auth[0] > 0 else None
-    if auth_shares and shares and shares > 0:
-        factor = auth_shares / shares
+    # 株式分割補正（doc11是正）: 開示日以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する。
+    # 基準日は開示日（disclosed_date）＝期末〜開示の間の分割を二重補正しない。無ければ期末。
+    # 注: 報告株数(J-Quants issued)はYahoo発行済とほぼ完全一致＝真値。yfinance sharesOutstanding を
+    # 真値に採用する案(Option1)は優先株混入(伊藤園)/金庫株控除(キヤノン)/浮動株基準でブレ、中間層の
+    # 精度を落としたため不採用（share_count は将来の検算用に保持）。残るT1端(重複split/期末直前分割)は
+    # split factor側のピンポイント是正で扱う。
+    factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
+    if factor != 1.0:
         if eps is not None:
             eps = eps / factor
         if bps is not None:
             bps = bps / factor
-        shares = auth_shares
-    else:
-        # 株式分割補正（doc11是正）: 開示日以降の分割でEPS/BPS/sharesの基準がclose_adjと乖離する。
-        # 基準日は開示日（disclosed_date）＝期末〜開示の間の分割を二重補正しない。無ければ期末。
-        factor = _split_adjustment_factor(conn, code, disclosed or as_of or f"{fy}-03-31")
-        if factor != 1.0:
-            if eps is not None:
-                eps = eps / factor
-            if bps is not None:
-                bps = bps / factor
-            if shares is not None:
-                shares = shares * factor
+        if shares is not None:
+            shares = shares * factor
     dps = _latest_dps(conn, code)
     stale = _dividend_is_stale(conn, code, int(price_date[:4]))
     # 配当利回りは市場標準＝予想配当利回り。会社予想（前向き）があれば実績より優先（doc: 予想配当切替）。
